@@ -109,12 +109,19 @@ class Command(BaseCommand):
                 },
             )
 
-    def _seed_catalog(self):
+    def _clear_catalog(self):
+        """Wipe у правильному порядку: Product.category = PROTECT."""
+        ProductAttribute.objects.all().delete()
+        ProductImage.objects.all().delete()
         Product.objects.all().delete()
         ProductFamily.objects.all().delete()
         Category.objects.all().delete()
+        AttributeValue.objects.all().delete()
         Attribute.objects.all().delete()
         AttributeGroup.objects.all().delete()
+
+    def _seed_catalog(self):
+        self._clear_catalog()
 
         # Порядок як у E-com/Home.dc.html (Elbor двічі).
         cats_data = [
