@@ -73,9 +73,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-LANGUAGE_CODE = 'uk'
+LANGUAGE_CODE = 'ua'
 LANGUAGES = [
-    ('uk', 'Українська'),
+    ('ua', 'Українська'),
     ('ru', 'Русский'),
 ]
 LOCALE_PATHS = [BASE_DIR / 'locale']

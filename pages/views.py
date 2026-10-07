@@ -22,12 +22,12 @@ INFO_PAGES = {
 INFO_NAV = ('about', 'delivery', 'offer', 'privacy')
 
 LANG_ALIASES = {
-    'UA': 'uk',
+    'UA': 'ua',
     'RU': 'ru',
-    'ua': 'uk',
+    'ua': 'ua',
     'ru': 'ru',
-    'UK': 'uk',
-    'uk': 'uk',
+    'UK': 'ua',
+    'uk': 'ua',
 }
 
 
@@ -65,8 +65,8 @@ def _save_contact(form):
 
 class SetLangView(View):
     def post(self, request):
-        raw = (request.POST.get('lang') or 'uk').strip()
-        code = LANG_ALIASES.get(raw, LANG_ALIASES.get(raw.upper(), 'uk'))
+        raw = (request.POST.get('lang') or 'ua').strip()
+        code = LANG_ALIASES.get(raw, LANG_ALIASES.get(raw.upper(), 'ua'))
         if code not in dict(settings.LANGUAGES):
             code = settings.LANGUAGE_CODE
 
@@ -77,13 +77,13 @@ class SetLangView(View):
         except Exception:
             translated = None
         if not translated or translated == next_url:
-            # Fallback: swap /uk|/ru prefix manually.
+            # Fallback: swap /ua|/uk|/ru prefix manually.
             from urllib.parse import urlsplit, urlunsplit
             import re
 
             parts = urlsplit(next_url)
             path = parts.path or '/'
-            path = re.sub(r'^/(uk|ru)(?=/|$)', f'/{code}', path)
+            path = re.sub(r'^/(ua|uk|ru)(?=/|$)', f'/{code}', path)
             if not path.startswith(f'/{code}'):
                 path = f'/{code}{path if path.startswith("/") else "/" + path}'
             translated = urlunsplit(('', '', path, parts.query, parts.fragment))

@@ -42,7 +42,7 @@ def tr(text):
         return text
     if not isinstance(text, str):
         return text
-    lang = (get_language() or 'uk')[:2]
+    lang = (get_language() or 'ua')[:2]
     if lang != 'ru':
         return text
     mapped = RU_MAP.get(text)
@@ -59,7 +59,7 @@ tr_lazy = lazy(tr, str)
 
 
 def site_lang_code():
-    lang = (get_language() or 'uk')[:2]
+    lang = (get_language() or 'ua')[:2]
     return 'RU' if lang == 'ru' else 'UA'
 
 
@@ -69,7 +69,7 @@ def plural_goods(n):
     except (TypeError, ValueError):
         n = 0
     a, b = n % 10, n % 100
-    lang = (get_language() or 'uk')[:2]
+    lang = (get_language() or 'ua')[:2]
     if lang == 'ru':
         if a == 1 and b != 11:
             return 'товар'
@@ -89,7 +89,7 @@ def plural_positions(n):
     except (TypeError, ValueError):
         n = 0
     a, b = n % 10, n % 100
-    lang = (get_language() or 'uk')[:2]
+    lang = (get_language() or 'ua')[:2]
     if lang == 'ru':
         if a == 1 and b != 11:
             return 'позиция'

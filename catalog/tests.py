@@ -80,7 +80,7 @@ class PluralGoodsTests(TestCase):
     def test_plural_42_towary(self):
         from django.utils import translation
 
-        with translation.override('uk'):
+        with translation.override('ua'):
             self.assertEqual(plural_goods(1), 'товар')
             self.assertEqual(plural_goods(2), 'товари')
             self.assertEqual(plural_goods(42), 'товари')
@@ -115,7 +115,7 @@ class SeedDemoTests(TestCase):
 
         from django.utils import translation
 
-        with translation.override('uk'):
+        with translation.override('ua'):
             response = self.client.get(reverse('catalog:catalog'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['count_label'], '42 товари')

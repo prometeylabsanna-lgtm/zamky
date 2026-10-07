@@ -28,7 +28,7 @@ class CheckoutTests(TestCase):
     def test_plural_positions(self):
         from django.utils import translation
 
-        with translation.override('uk'):
+        with translation.override('ua'):
             self.assertEqual(plural_positions(1), 'позиція')
             self.assertEqual(plural_positions(2), 'позиції')
             self.assertEqual(plural_positions(3), 'позиції')

@@ -11,7 +11,7 @@ class HeaderShellTests(TestCase):
         translation.deactivate_all()
 
     def test_header_renders_inventory(self):
-        with translation.override('uk'):
+        with translation.override('ua'):
             response = self.client.get(reverse('pages:info'))
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
@@ -30,7 +30,7 @@ class HeaderShellTests(TestCase):
         self.assertIn('Замки. Всі права захищено', body)
 
     def test_lang_cookie_and_prefix(self):
-        response = self.client.post('/lang/', {'lang': 'ru', 'next': '/uk/info/'})
+        response = self.client.post('/lang/', {'lang': 'ru', 'next': '/ua/info/'})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.client.cookies['zamky_lang'].value, 'ru')
         self.assertTrue(response.url.startswith('/ru/'))
@@ -38,6 +38,9 @@ class HeaderShellTests(TestCase):
         self.assertContains(page, '>RU<')
         self.assertContains(page, 'Наши контакты')
         self.assertContains(page, 'Все права защищены')
+        back = self.client.post('/lang/', {'lang': 'ua', 'next': '/ru/catalog/'})
+        self.assertEqual(back.status_code, 302)
+        self.assertTrue(back.url.startswith('/ua/'))
 
 
 @override_settings(ALLOWED_HOSTS=['*'])
@@ -45,7 +48,7 @@ class ContactRequestTests(TestCase):
     def setUp(self):
         self.client = Client()
         translation.deactivate_all()
-        with translation.override('uk'):
+        with translation.override('ua'):
             self.url = reverse('pages:contact')
             self.page_url = reverse('pages:info')
 

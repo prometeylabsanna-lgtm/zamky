@@ -88,7 +88,7 @@
   }
 
   function catalogUrl() {
-    var pref = (location.pathname.match(/^\/(uk|ru)(?=\/|$)/) || [])[0] || '/uk';
+    var pref = (location.pathname.match(/^\/(ua|ru)(?=\/|$)/) || [])[0] || '/ua';
     return pref + '/catalog/';
   }
 

@@ -28,7 +28,7 @@
       e.preventDefault();
       openDrawer();
       if (window.htmx) {
-        var pref = (location.pathname.match(/^\/(uk|ru)(?=\/|$)/) || [])[0] || '/uk';
+        var pref = (location.pathname.match(/^\/(ua|ru)(?=\/|$)/) || [])[0] || '/ua';
         htmx.ajax('GET', pref + '/cart/drawer/', {
           target: '#cart-drawer-body',
           swap: 'innerHTML',
