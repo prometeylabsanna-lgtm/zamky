@@ -4,8 +4,8 @@
   class="wishlist-btn {% if in_wishlist %}is-active{% endif %}"
   hx-post="{% url 'cart:wishlist' product_id %}"
   hx-swap="outerHTML"
-  hx-swap-oob="true">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if in_wishlist %}#ffc400{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"></path></svg>
-  {% if in_wishlist %}В обраному{% else %}В обране{% endif %}
+  data-wishlist-btn>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if in_wishlist %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"></path></svg>
+  <span>{% if in_wishlist %}В обраному{% else %}В обране{% endif %}</span>
 </button>
 <span id="wishlist-count" hx-swap-oob="true" class="visually-hidden">{{ wishlist_count }}</span>

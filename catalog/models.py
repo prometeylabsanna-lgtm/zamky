@@ -49,9 +49,31 @@ class Category(models.Model):
         return reverse('catalog:category', kwargs={'slug': self.slug})
 
 
+class AttributeGroup(models.Model):
+    name = models.CharField('Назва', max_length=120)
+    slug = models.SlugField('Slug', max_length=140, unique=True)
+    sort_order = models.PositiveIntegerField('Порядок', default=0)
+
+    class Meta:
+        verbose_name = 'Група характеристик'
+        verbose_name_plural = 'Групи характеристик'
+        ordering = ['sort_order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
 class Attribute(models.Model):
     name = models.CharField('Назва', max_length=120)
     slug = models.SlugField('Slug', max_length=140, unique=True)
+    group = models.ForeignKey(
+        AttributeGroup,
+        verbose_name='Група',
+        null=True,
+        blank=True,
+        related_name='attributes',
+        on_delete=models.SET_NULL,
+    )
     filterable = models.BooleanField('У фільтрах', default=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
@@ -85,12 +107,36 @@ class AttributeValue(models.Model):
         return f'{self.attribute.name}: {self.value}'
 
 
+class ProductFamily(models.Model):
+    name = models.CharField('Назва', max_length=200)
+    slug = models.SlugField('Slug', max_length=220, unique=True)
+    brand = models.CharField('Бренд', max_length=100, blank=True)
+    description = models.TextField('Опис', blank=True)
+    short_description = models.TextField('Короткий опис', blank=True)
+
+    class Meta:
+        verbose_name = 'Сімʼя товарів'
+        verbose_name_plural = 'Сімʼї товарів'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Product(models.Model):
     category = models.ForeignKey(
         Category,
         related_name='products',
         on_delete=models.PROTECT,
         verbose_name='Категорія',
+    )
+    family = models.ForeignKey(
+        ProductFamily,
+        verbose_name='Сімʼя',
+        null=True,
+        blank=True,
+        related_name='variants',
+        on_delete=models.SET_NULL,
     )
     name = models.CharField('Назва', max_length=300)
     slug = models.SlugField('Slug', max_length=320, unique=True)
@@ -108,6 +154,13 @@ class Product(models.Model):
     is_hit = models.BooleanField('Хіт продажу', default=False)
     is_new = models.BooleanField('Новинка', default=False)
     brand = models.CharField('Бренд', max_length=100, blank=True)
+    color_code = models.CharField('Код кольору', max_length=8, blank=True)
+    color_label = models.CharField('Колір', max_length=64, blank=True)
+    finish = models.CharField('Оздоблення', max_length=120, blank=True)
+    cover = models.CharField('Покриття', max_length=120, blank=True)
+    size_mm = models.PositiveIntegerField('Довжина, мм', null=True, blank=True)
+    size_a = models.PositiveIntegerField('Розмір A', null=True, blank=True)
+    size_b = models.PositiveIntegerField('Розмір B', null=True, blank=True)
     short_description = models.TextField('Короткий опис', blank=True)
     description = models.TextField('Опис', blank=True)
     attributes = models.ManyToManyField(
@@ -158,6 +211,14 @@ class Product(models.Model):
         }[self.stock_status]
 
     @property
+    def stock_note(self):
+        if self.stock_status == 'out':
+            return 'Повідомимо про надходження'
+        if self.stock_status == 'low':
+            return f'Залишилось {self.stock} шт.'
+        return 'Відправимо сьогодні'
+
+    @property
     def primary_image(self):
         img = self.images.order_by('sort_order', 'id').first()
         return img
@@ -165,13 +226,29 @@ class Product(models.Model):
     @property
     def discount_percent(self):
         if self.old_price and self.old_price > self.price:
-            return int(((self.old_price - self.price) / self.old_price) * 100)
+            return int(round((1 - float(self.price) / float(self.old_price)) * 100))
         return 0
+
+    @property
+    def size_label(self):
+        if self.size_a and self.size_b:
+            return f'{self.size_a}×{self.size_b}'
+        return ''
 
     def format_price(self, value=None):
         v = value if value is not None else self.price
         n = int(Decimal(v))
         return f'{n:,}'.replace(',', ' ') + ' ₴'
+
+    @property
+    def price_display(self):
+        return self.format_price()
+
+    @property
+    def old_price_display(self):
+        if self.old_price:
+            return self.format_price(self.old_price)
+        return ''
 
 
 class ProductAttribute(models.Model):

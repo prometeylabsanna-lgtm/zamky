@@ -130,3 +130,37 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.sku} × {self.quantity}'
+
+
+class QuickOrder(models.Model):
+    class Status(models.TextChoices):
+        NEW = 'new', 'Нове'
+        DONE = 'done', 'Опрацьовано'
+        CANCELLED = 'cancelled', 'Скасовано'
+
+    product = models.ForeignKey(
+        'catalog.Product',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='quick_orders',
+        verbose_name='Товар',
+    )
+    name = models.CharField('Імʼя', max_length=100, blank=True)
+    phone = models.CharField('Телефон', max_length=32)
+    quantity = models.PositiveIntegerField('Кількість', default=1)
+    status = models.CharField(
+        'Статус',
+        max_length=20,
+        choices=Status.choices,
+        default=Status.NEW,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Швидке замовлення'
+        verbose_name_plural = 'Швидкі замовлення'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.phone} · {self.product_id or "—"}'

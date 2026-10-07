@@ -114,7 +114,7 @@
   });
 
   var gallery = qs('[data-gallery]');
-  if (gallery) {
+  if (gallery && !qs('[data-pdp]')) {
     var track = qs('[data-gallery-track]', gallery);
     var slides = qsa('.gallery__slide', gallery);
     var thumbs = qsa('[data-thumb]', document);

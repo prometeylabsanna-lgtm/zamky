@@ -1,14 +1,17 @@
+import re
 import uuid
 
-from django.shortcuts import redirect, render
+from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import DetailView, FormView
 
 from cart.services import CartService
+from catalog.models import Product
 
 from .forms import CheckoutForm
-from .models import DeliveryDistrict, Order
+from .models import DeliveryDistrict, Order, QuickOrder
 from .services import CheckoutError, DELIVERY_PRICES, create_order_from_cart
 
 
@@ -106,3 +109,38 @@ class OrderSuccessView(DetailView):
     context_object_name = 'order'
     slug_field = 'number'
     slug_url_kwarg = 'number'
+
+
+class QuickOrderView(View):
+    phone_re = re.compile(r'^[\d\s\-\+\(\)]{9,20}$')
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk, is_active=True)
+        raw = (request.POST.get('phone') or '').strip()
+        digits = re.sub(r'\D', '', raw)
+        if digits.startswith('380') and len(digits) >= 12:
+            phone = '+' + digits
+        elif len(digits) == 9:
+            phone = '+380' + digits
+        elif len(digits) == 10 and digits.startswith('0'):
+            phone = '+38' + digits
+        else:
+            phone = raw if raw.startswith('+') else ('+380' + digits if digits else '')
+        if not digits or len(digits) < 9 or not self.phone_re.match(phone or raw):
+            context = {'error': 'Вкажіть коректний телефон', 'product': product}
+            if request.headers.get('HX-Request') == 'true':
+                return render(request, 'orders/partials/quick_order_form.html', context)
+            return HttpResponseBadRequest(context['error'])
+        try:
+            qty = max(1, int(request.POST.get('quantity', 1)))
+        except (TypeError, ValueError):
+            qty = 1
+        QuickOrder.objects.create(
+            product=product,
+            phone=phone,
+            name=(request.POST.get('name') or '').strip(),
+            quantity=qty,
+        )
+        if request.headers.get('HX-Request') == 'true':
+            return render(request, 'orders/partials/quick_order_done.html', {'product': product})
+        return redirect(product.get_absolute_url())

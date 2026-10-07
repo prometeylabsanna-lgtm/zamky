@@ -1,0 +1,34 @@
+{% load static %}
+<section class="pdp-gallery">
+  <div class="pdp-gallery__main" data-gallery data-gallery-root>
+    <div class="pdp-gallery__track" data-gallery-track>
+      {% for img in product.images.all %}
+      <div class="pdp-gallery__slide">
+        <img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}" data-gallery-img>
+      </div>
+      {% empty %}
+      <div class="pdp-gallery__slide">
+        <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name }}" data-gallery-img>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="pdp-gallery__badge badge badge--{{ product.stock_status }}" data-stock-badge>
+      <span class="badge__dot"></span>
+      <span data-stock-badge-text>{{ product.stock_label }}</span>
+    </div>
+    <button type="button" class="pdp-gallery__nav pdp-gallery__nav--prev" data-gallery-prev aria-label="Попереднє фото">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+    </button>
+    <button type="button" class="pdp-gallery__nav pdp-gallery__nav--next" data-gallery-next aria-label="Наступне фото">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    </button>
+    <div class="pdp-gallery__counter" data-gallery-counter>1 / {{ product.images.count|default:1 }}</div>
+  </div>
+  <div class="pdp-thumbs" data-thumbs>
+    {% for img in product.images.all %}
+    <button type="button" class="pdp-thumbs__btn{% if forloop.first %} is-active{% endif %}" data-thumb aria-label="Фото {{ forloop.counter }}">
+      <img src="{{ img.image.url }}" alt="">
+    </button>
+    {% endfor %}
+  </div>
+</section>

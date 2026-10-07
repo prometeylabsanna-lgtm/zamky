@@ -1,3 +1,4 @@
+import json
 from decimal import Decimal, InvalidOperation
 
 from django.db.models import Max, Min, Prefetch, Q
@@ -175,30 +176,161 @@ class ProductDetailView(DetailView):
     context_object_name = 'product'
     slug_url_kwarg = 'slug'
 
+    ACCORDIONS = [
+        {
+            'id': 'd',
+            'icon': 'truck',
+            'title': 'Доставка',
+            'hint': 'від 1 дня',
+            'rows': [
+                ('Нова Пошта, відділення', '1–2 дні · за тарифами'),
+                ('Кур’єр по Києву', 'в день замовлення'),
+                ('Самовивіз з магазину', 'безкоштовно'),
+            ],
+        },
+        {
+            'id': 'p',
+            'icon': 'card',
+            'title': 'Оплата',
+            'hint': 'карткою або при отриманні',
+            'rows': [
+                ('Карткою онлайн', 'Visa, Mastercard'),
+                ('Apple Pay / Google Pay', 'миттєво'),
+                ('Накладений платіж', 'при отриманні'),
+                ('Безготівковий розрахунок', 'для юросіб'),
+            ],
+        },
+        {
+            'id': 'w',
+            'icon': 'shield',
+            'title': 'Гарантія',
+            'hint': '12 місяців',
+            'rows': [
+                ('Гарантія виробника', '12 місяців'),
+                ('Обмін та повернення', '14 днів'),
+                ('Сервісна заміна ключів', 'за кодовою карткою'),
+            ],
+        },
+    ]
+
     def get_queryset(self):
-        return Product.objects.filter(is_active=True).prefetch_related(
+        return Product.objects.filter(is_active=True).select_related('family', 'category').prefetch_related(
             Prefetch('images', queryset=ProductImage.objects.order_by('sort_order', 'id')),
-            'attributes__attribute',
-            'category',
+            Prefetch(
+                'attributes',
+                queryset=AttributeValue.objects.select_related('attribute', 'attribute__group'),
+            ),
         )
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         product = self.object
-        related = (
-            Product.objects.filter(is_active=True, category=product.category)
-            .exclude(pk=product.pk)
-            .prefetch_related('images')[:8]
-        )
         wishlist = WishlistService(self.request)
-        attrs = {}
-        for av in product.attributes.select_related('attribute'):
-            attrs.setdefault(av.attribute.slug, []).append(av)
+        variants = []
+        colors = []
+        sizes = []
+        if product.family_id:
+            family_qs = (
+                Product.objects.filter(is_active=True, family=product.family)
+                .prefetch_related(
+                    Prefetch('images', queryset=ProductImage.objects.order_by('sort_order', 'id'))
+                )
+                .order_by('size_mm', 'color_code')
+            )
+            seen_colors = {}
+            seen_sizes = {}
+            for v in family_qs:
+                imgs = [
+                    {
+                        'src': img.image.url,
+                        'alt': img.alt or v.name,
+                    }
+                    for img in v.images.all()
+                ]
+                variants.append(
+                    {
+                        'id': v.pk,
+                        'sku': v.sku,
+                        'slug': v.slug,
+                        'url': v.get_absolute_url(),
+                        'name': v.name,
+                        'price': int(v.price),
+                        'old_price': int(v.old_price) if v.old_price else None,
+                        'discount': v.discount_percent,
+                        'stock': v.stock,
+                        'status': v.stock_status,
+                        'badge': v.stock_label,
+                        'stock_note': v.stock_note,
+                        'color': v.color_code,
+                        'color_label': v.color_label,
+                        'size': v.size_mm,
+                        'size_a': v.size_a,
+                        'size_b': v.size_b,
+                        'size_label': v.size_label,
+                        'cover': v.cover,
+                        'images': imgs,
+                        'add_url': f'/cart/add/{v.pk}/',
+                        'quick_url': f'/orders/quick/{v.pk}/',
+                        'wishlist_url': f'/cart/wishlist/{v.pk}/',
+                    }
+                )
+                if v.color_code and v.color_code not in seen_colors:
+                    primary = v.images.first()
+                    seen_colors[v.color_code] = {
+                        'code': v.color_code,
+                        'label': v.color_label,
+                        'img': primary.image.url if primary else '',
+                    }
+                if v.size_mm and v.size_mm not in seen_sizes:
+                    seen_sizes[v.size_mm] = {
+                        'len': v.size_mm,
+                        'a': v.size_a,
+                        'b': v.size_b,
+                        'label': v.size_label,
+                    }
+            color_order = {'G': 0, 'N': 1, 'B': 2}
+            colors = sorted(
+                seen_colors.values(),
+                key=lambda x: color_order.get(x['code'], 99),
+            )
+            sizes = sorted(seen_sizes.values(), key=lambda x: x['len'])
+
+        spec_groups = self._spec_groups(product)
+        description_parts = []
+        desc = product.description or (product.family.description if product.family_id else '')
+        if desc:
+            description_parts = [p.strip() for p in desc.split('\n\n') if p.strip()]
+
         ctx.update(
             {
-                'related': related,
                 'in_wishlist': wishlist.contains(product.pk),
-                'attr_map': attrs,
+                'spec_groups': spec_groups,
+                'description_parts': description_parts,
+                'accordions': self.ACCORDIONS,
+                'variant_colors': colors,
+                'variant_sizes': sizes,
+                'variants_json': json.dumps(variants, ensure_ascii=False),
+                'current_color': product.color_code,
+                'current_size': product.size_mm,
             }
         )
         return ctx
+
+    def _spec_groups(self, product):
+        rows_by_group = {}
+        for av in product.attributes.all():
+            attr = av.attribute
+            if attr.group_id and attr.group.slug == 'filters':
+                continue
+            group = attr.group
+            key = group.pk if group else 0
+            title = group.name if group else 'Інше'
+            order = group.sort_order if group else 999
+            bucket = rows_by_group.setdefault(key, {'title': title, 'order': order, 'rows': []})
+            bucket['rows'].append({'k': attr.name, 'v': av.value, 'order': attr.sort_order})
+        groups = sorted(rows_by_group.values(), key=lambda g: g['order'])
+        for g in groups:
+            g['rows'] = sorted(g['rows'], key=lambda r: r['order'])
+            for i, row in enumerate(g['rows']):
+                row['zebra'] = i % 2 == 1
+        return groups

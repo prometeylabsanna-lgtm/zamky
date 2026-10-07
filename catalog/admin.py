@@ -3,10 +3,12 @@ from unfold.admin import ModelAdmin, TabularInline
 
 from .models import (
     Attribute,
+    AttributeGroup,
     AttributeValue,
     Category,
     Product,
     ProductAttribute,
+    ProductFamily,
     ProductImage,
 )
 
@@ -30,6 +32,23 @@ class ProductAttributeInline(TabularInline):
     tab = True
 
 
+class ProductVariantInline(TabularInline):
+    model = Product
+    fk_name = 'family'
+    extra = 0
+    fields = (
+        'sku',
+        'color_code',
+        'color_label',
+        'size_mm',
+        'price',
+        'stock',
+        'is_active',
+    )
+    show_change_link = True
+    tab = True
+
+
 @admin.register(Category)
 class CategoryAdmin(ModelAdmin):
     list_display = ('name', 'slug', 'parent', 'sort_order', 'is_active')
@@ -38,11 +57,20 @@ class CategoryAdmin(ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Attribute)
-class AttributeAdmin(ModelAdmin):
-    list_display = ('name', 'slug', 'filterable', 'sort_order')
+@admin.register(AttributeGroup)
+class AttributeGroupAdmin(ModelAdmin):
+    list_display = ('name', 'slug', 'sort_order')
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(Attribute)
+class AttributeAdmin(ModelAdmin):
+    list_display = ('name', 'slug', 'group', 'filterable', 'sort_order')
+    list_filter = ('filterable', 'group')
+    search_fields = ('name', 'slug')
+    prepopulated_fields = {'slug': ('name',)}
+    autocomplete_fields = ('group',)
     inlines = [AttributeValueInline]
 
 
@@ -54,11 +82,22 @@ class AttributeValueAdmin(ModelAdmin):
     autocomplete_fields = ('attribute',)
 
 
+@admin.register(ProductFamily)
+class ProductFamilyAdmin(ModelAdmin):
+    list_display = ('name', 'slug', 'brand')
+    search_fields = ('name', 'slug', 'brand')
+    prepopulated_fields = {'slug': ('name',)}
+    inlines = [ProductVariantInline]
+
+
 @admin.register(Product)
 class ProductAdmin(ModelAdmin):
     list_display = (
         'name',
         'sku',
+        'family',
+        'color_label',
+        'size_mm',
         'category',
         'price',
         'stock',
@@ -66,9 +105,10 @@ class ProductAdmin(ModelAdmin):
         'is_hit',
         'is_new',
     )
-    list_filter = ('is_active', 'is_hit', 'is_new', 'category', 'brand')
-    search_fields = ('name', 'sku', 'brand')
+    list_filter = ('is_active', 'is_hit', 'is_new', 'category', 'brand', 'family', 'color_code')
+    search_fields = ('name', 'sku', 'brand', 'color_label')
     prepopulated_fields = {'slug': ('name',)}
+    autocomplete_fields = ('category', 'family')
     inlines = [ProductImageInline, ProductAttributeInline]
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
 

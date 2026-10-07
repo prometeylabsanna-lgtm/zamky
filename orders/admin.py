@@ -1,7 +1,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
-from .models import DeliveryDistrict, Order, OrderItem
+from .models import DeliveryDistrict, Order, OrderItem, QuickOrder
 
 
 class OrderItemInline(TabularInline):
@@ -18,6 +18,14 @@ class DeliveryDistrictAdmin(ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('name', 'slug', 'short')
     prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(QuickOrder)
+class QuickOrderAdmin(ModelAdmin):
+    list_display = ('phone', 'name', 'product', 'quantity', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('phone', 'name', 'product__sku', 'product__name')
+    autocomplete_fields = ('product',)
 
 
 @admin.register(Order)
