@@ -15,7 +15,7 @@ from .models import ContactRequest
 INFO_PAGES = {
     'about': {'name': 'Про нас'},
     'delivery': {'name': 'Доставка і оплата'},
-    'offer': {'name': 'Договір оферти'},
+    'offer': {'name': 'Публічна оферта'},
     'privacy': {'name': 'Політика конфіденційності'},
 }
 

@@ -68,15 +68,15 @@
   .site-footer__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+
+  .site-footer .logo {
+    grid-column: auto;
+  }
 }
 
 @media (min-width: 1100px) {
   .site-footer__grid {
-    grid-template-columns: minmax(0, 327fr) minmax(0, 370fr) minmax(0, 340fr) minmax(0, 217fr) auto;
-    gap: 0;
-  }
-
-  .site-footer .logo {
-    grid-column: auto;
+    grid-template-columns: minmax(0, 280fr) minmax(0, 280fr) minmax(0, 320fr) auto;
+    gap: 0 40px;
   }
 }

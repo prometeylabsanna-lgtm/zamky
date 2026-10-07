@@ -3,22 +3,16 @@
   <div class="site-footer__inner">
     <div class="site-footer__grid">
       <a href="{% url 'catalog:home' %}" class="logo">Logo</a>
-      <nav>
-        <a href="{% url 'pages:info_page' 'about' %}">{% t 'Про компанію' %}</a>
+      <nav aria-label="{% t 'Основні сторінки' %}">
+        <a href="{% url 'catalog:catalog' %}">{% t 'Каталог' %}</a>
+        <a href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
+        <a href="{% url 'pages:info_page' 'about' %}">{% t 'Про нас' %}</a>
         <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Контакти' %}</a>
-        <a href="{% url 'pages:info_page' 'about' %}">{% t 'Інформація про торгову точку' %}</a>
       </nav>
-      <nav>
-        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Обмін та повернення' %}</a>
-        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка' %}</a>
-        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Оплата' %}</a>
+      <nav aria-label="{% t 'Інформація' %}">
+        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка і оплата' %}</a>
         <a href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
-        <a href="{% url 'pages:info_page' 'offer' %}">{% t 'Договір оферти' %}</a>
-      </nav>
-      <nav>
-        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Консультація' %}</a>
-        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Підбір' %}</a>
-        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Монтаж' %}</a>
+        <a href="{% url 'pages:info_page' 'offer' %}">{% t 'Публічна оферта' %}</a>
       </nav>
       <div class="site-footer__contacts">
         <a href="tel:0670000000">067 00 00 00</a>
