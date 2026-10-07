@@ -1,0 +1,11 @@
+<div class="info-form-done">
+  <div class="info-form-done__icon" aria-hidden="true">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+  </div>
+  <h2 class="info-h2 info-form-done__title">Дякуємо, {{ done_name }}!</h2>
+  <p class="info-form-done__text">Ваше повідомлення отримано. Менеджер зв’яжеться з вами за номером {{ done_phone }} протягом робочого дня.</p>
+  <button type="button" class="info-form-done__reset"
+    hx-get="{% url 'pages:contact' %}"
+    hx-target="#form"
+    hx-swap="innerHTML">Надіслати ще одне повідомлення</button>
+</div>

@@ -948,40 +948,6 @@
   gap: 20px;
 }
 
-.info-layout {
-  margin-top: 48px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 28px;
-}
-
-.info-nav {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.info-nav a {
-  height: 52px;
-  padding: 0 20px;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  font-size: 16px;
-}
-
-.info-nav a.is-active {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  font-weight: 600;
-}
 
 @media (min-width: 720px) {
   .form-grid {
@@ -1004,14 +970,6 @@
     gap: 40px;
   }
 
-  .info-layout {
-    grid-template-columns: 280px minmax(0, 1fr);
-  }
-
-  .info-nav {
-    flex-direction: column;
-    overflow: visible;
-  }
 }
 
 .errorlist {

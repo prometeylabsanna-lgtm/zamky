@@ -1,0 +1,7 @@
+<section id="form" class="info-form-card">
+  {% if form_done %}
+    {% include 'pages/partials/contact_success.html' %}
+  {% else %}
+    {% include 'pages/partials/contact_idle.html' %}
+  {% endif %}
+</section>

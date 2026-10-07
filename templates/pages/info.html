@@ -1,75 +1,156 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ page_name }} — Замки{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/info.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container">
+<div class="container info-page"{% if scroll_form %} data-auto-scroll-form{% endif %}>
   <nav class="breadcrumbs">
     <a href="{% url 'catalog:home' %}">Головна</a>
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <span>{{ page_name }}</span>
   </nav>
 
   <div class="info-layout">
-    <aside>
+    <aside class="info-aside">
       <ul class="info-nav">
         {% for key, meta in info_pages.items %}
         <li>
-          <a href="{% url 'pages:info_page' key %}" class="{% if page_key == key %}is-active{% endif %}">{{ meta.name }}</a>
+          <a href="{% url 'pages:info_page' key %}" class="{% if page_key == key %}is-active{% endif %}">
+            <span>{{ meta.name }}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+          </a>
         </li>
         {% endfor %}
       </ul>
-      <div class="hide-mobile" style="margin-top:24px;padding:24px;border-radius:12px;background:#fbfbfb;">
-        <span style="font-size:13px;color:#8a8a8a;">Потрібна консультація?</span>
-        <a href="tel:0670000000" style="display:block;margin-top:10px;font-size:20px;font-weight:600;">067 00 00 00</a>
-        <span style="display:block;margin-top:8px;font-size:13px;color:#8a8a8a;">Пн–Сб, 9:00–19:00</span>
+      <div class="info-consult">
+        <span class="info-consult__hint">Потрібна консультація?</span>
+        <a href="tel:0670000000" class="info-consult__phone">067 00 00 00</a>
+        <span class="info-consult__hours">Пн–Сб, 9:00–19:00</span>
+        <a href="#form" class="info-consult__btn" data-to-form>Написати нам</a>
       </div>
     </aside>
 
-    <article style="max-width:800px;">
-      {% if page_key == 'about' %}
-      <h1 class="page-title" style="font-size:clamp(36px,4.5vw,56px);">Про нас</h1>
-      <p style="margin:24px 0 0;font-size:clamp(18px,1.6vw,21px);line-height:1.5;color:#3d3d3d;">Ми продаємо замки, серцевини та фурнітуру для дверей і меблів у Києві та по всій Україні. Допомагаємо підібрати механізм під конкретні двері і пояснюємо різницю між моделями простими словами.</p>
-      <div style="margin-top:48px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px;">
-        <div style="padding:24px;border-radius:12px;background:#fbfbfb;">
-          <strong style="display:block;font-size:18px;margin-bottom:10px;">Оригінальна продукція</strong>
-          <span style="font-size:14px;color:#8a8a8a;line-height:1.5;">Працюємо напряму з дистриб’юторами Mottura, Cisa, Kale, Apecs та інших брендів.</span>
+    <article class="info-article">
+      {% if page_key == 'about' or page_key == 'contacts' %}
+      <h1 class="info-h1">Про нас</h1>
+      <p class="info-lead">Ми продаємо замки, серцевини та фурнітуру для дверей і меблів у Києві та по всій Україні. Допомагаємо підібрати механізм під конкретні двері і пояснюємо різницю між моделями простими словами.</p>
+      <div class="info-cards">
+        <div class="info-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>
+          <span class="info-card__title">Оригінальна продукція</span>
+          <span class="info-card__text">Працюємо напряму з дистриб’юторами Mottura, Cisa, Kale, Apecs та інших брендів.</span>
         </div>
-        <div style="padding:24px;border-radius:12px;background:#fbfbfb;">
-          <strong style="display:block;font-size:18px;margin-bottom:10px;">Підбір під ваші двері</strong>
-          <span style="font-size:14px;color:#8a8a8a;line-height:1.5;">Підкажемо розмір циліндра, клас захисту та сумісність із замком.</span>
+        <div class="info-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 7.5A7 7 0 1 0 5 15l-1 4 4-1.3"></path><circle cx="15.5" cy="14.5" r="5"></circle><path d="M13.5 14.5h4"></path></svg>
+          <span class="info-card__title">Підбір під ваші двері</span>
+          <span class="info-card__text">Підкажемо розмір циліндра, клас захисту та сумісність із замком.</span>
         </div>
-        <div style="padding:24px;border-radius:12px;background:#fbfbfb;">
-          <strong style="display:block;font-size:18px;margin-bottom:10px;">Монтаж і сервіс</strong>
-          <span style="font-size:14px;color:#8a8a8a;line-height:1.5;">Встановлюємо та замінюємо замки, виготовляємо ключі за кодовою карткою.</span>
+        <div class="info-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l3 3M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"></path></svg>
+          <span class="info-card__title">Монтаж і сервіс</span>
+          <span class="info-card__text">Встановлюємо та замінюємо замки, виготовляємо ключі за кодовою карткою.</span>
         </div>
+      </div>
+      <h2 class="info-h2 info-h2--section">Як ми працюємо</h2>
+      <p class="info-body">Кожне замовлення перевіряє менеджер: уточнює розміри, наявність і зручний спосіб доставки. Якщо ви не впевнені в розмірі, надішліть фото торця дверей — ми допоможемо виміряти.</p>
+      <ul class="info-bullets">
+        <li><span class="info-bullets__dot"></span><span>Відправляємо замовлення в день оплати, якщо воно оформлене до 16:00.</span></li>
+        <li><span class="info-bullets__dot"></span><span>Надаємо гарантію виробника на всі механізми.</span></li>
+        <li><span class="info-bullets__dot"></span><span>Приймаємо оплату карткою, накладеним платежем і за рахунком для юросіб.</span></li>
+      </ul>
+      <h2 class="info-h2 info-h2--section">Торгова точка</h2>
+      <div class="info-table">
+        <div class="info-table__row"><span>Адреса</span><span>м. Київ, [вулиця, будинок]</span></div>
+        <div class="info-table__row is-alt"><span>Графік роботи</span><span>Пн–Пт 9:00–19:00, Сб 10:00–17:00, Нд — вихідний</span></div>
+        <div class="info-table__row"><span>Телефони</span><span><a href="tel:0670000000">067 00 00 00</a>, <a href="tel:0660000000">066 00 00 00</a></span></div>
+        <div class="info-table__row is-alt"><span>Email</span><a href="mailto:xxx@gmail.com">xxx@gmail.com</a></div>
       </div>
       {% elif page_key == 'delivery' %}
-      <h1 class="page-title" style="font-size:clamp(36px,4.5vw,56px);">Доставка і оплата</h1>
-      <p style="margin:24px 0 0;font-size:clamp(18px,1.6vw,21px);line-height:1.5;color:#3d3d3d;">Доставляємо по всій Україні. Замовлення, оформлені до 16:00, відправляємо того ж дня.</p>
-      <div style="margin-top:32px;border:1px solid #eee;border-radius:12px;overflow:hidden;font-size:15px;">
-        <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:14px 20px;background:#fbfbfb;color:#8a8a8a;font-size:13px;"><span>Спосіб</span><span>Термін</span><span style="text-align:right;">Вартість</span></div>
-        <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 20px;border-top:1px solid #eee;"><span style="font-weight:500;">Нова Пошта</span><span>1–2 дні</span><span style="text-align:right;">80 ₴</span></div>
-        <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 20px;border-top:1px solid #eee;"><span style="font-weight:500;">Кур’єр по Києву</span><span>в день замовлення</span><span style="text-align:right;">150 ₴</span></div>
-        <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 20px;border-top:1px solid #eee;"><span style="font-weight:500;">Самовивіз</span><span>через 2 години</span><span style="text-align:right;color:#2fb54a;">Безкоштовно</span></div>
+      <h1 class="info-h1">Доставка і оплата</h1>
+      <p class="info-lead">Доставляємо по всій Україні. Замовлення, оформлені до 16:00, відправляємо того ж дня.</p>
+      <h2 class="info-h2 info-h2--block">Способи доставки</h2>
+      <div class="info-table info-table--delivery">
+        <div class="info-table__head"><span>Спосіб</span><span>Термін</span><span>Вартість</span></div>
+        <div class="info-table__drow"><span>Нова Пошта, відділення або поштомат</span><span>1–2 дні</span><span>80 ₴</span></div>
+        <div class="info-table__drow"><span>Кур’єр по Києву</span><span>в день замовлення</span><span>150 ₴</span></div>
+        <div class="info-table__drow"><span>Самовивіз з магазину</span><span>через 2 години</span><span class="is-free">Безкоштовно</span></div>
       </div>
-      {% elif page_key == 'contacts' %}
-      <h1 class="page-title" style="font-size:clamp(36px,4.5vw,56px);">Контакти</h1>
-      <p style="margin:24px 0 0;font-size:clamp(18px,1.6vw,21px);line-height:1.5;color:#3d3d3d;">Напишіть або зателефонуйте — допоможемо з підбором замка чи серцевини.</p>
-      <div style="margin-top:32px;border:1px solid #eee;border-radius:12px;overflow:hidden;">
-        <div style="display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px;padding:16px 20px;"><span style="color:#8a8a8a;">Телефони</span><span><a href="tel:0670000000">067 00 00 00</a>, <a href="tel:0660000000">066 00 00 00</a></span></div>
-        <div style="display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px;padding:16px 20px;background:#fbfbfb;"><span style="color:#8a8a8a;">Email</span><a href="mailto:xxx@gmail.com">xxx@gmail.com</a></div>
-        <div style="display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px;padding:16px 20px;"><span style="color:#8a8a8a;">Адреса</span><span>м. Київ</span></div>
-        <div style="display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:20px;padding:16px 20px;background:#fbfbfb;"><span style="color:#8a8a8a;">Графік</span><span>Пн–Пт 9:00–19:00, Сб 10:00–17:00</span></div>
+      <p class="info-note">Вартість доставки Новою Поштою може відрізнятися залежно від ваги та габаритів посилки — точну суму менеджер назве під час підтвердження.</p>
+      <h2 class="info-h2 info-h2--block">Способи оплати</h2>
+      <div class="info-cards">
+        <div class="info-pay">
+          <span class="info-pay__title">Карткою онлайн</span>
+          <span class="info-pay__text">Visa, Mastercard, Apple Pay, Google Pay. Оплата після підтвердження замовлення.</span>
+        </div>
+        <div class="info-pay">
+          <span class="info-pay__title">Накладений платіж</span>
+          <span class="info-pay__text">Оплата у відділенні після огляду товару. Комісію перевізника сплачує отримувач.</span>
+        </div>
+        <div class="info-pay">
+          <span class="info-pay__title">Безготівковий</span>
+          <span class="info-pay__text">Рахунок для юридичних осіб і ФОП. Відправка після надходження коштів.</span>
+        </div>
       </div>
-      {% elif page_key == 'privacy' %}
-      <h1 class="page-title" style="font-size:clamp(36px,4.5vw,56px);">Політика конфіденційності</h1>
-      <p style="margin:24px 0 0;font-size:16px;line-height:1.7;color:#3d3d3d;">Ми обробляємо персональні дані лише для виконання замовлень: ім’я, телефон, email та адресу доставки. Дані не передаються третім особам, окрім служб доставки.</p>
+      <h2 class="info-h2 info-h2--block">Обмін та повернення</h2>
+      <p class="info-body">Ви можете обміняти або повернути товар протягом 14 днів з моменту отримання, якщо він не був у використанні, збережено упаковку, ключі та кодову картку.</p>
+      <ol class="info-steps">
+        <li><span>1</span><span>Зателефонуйте або напишіть нам і вкажіть номер замовлення.</span></li>
+        <li><span>2</span><span>Надішліть товар Новою Поштою на реквізити, які надасть менеджер.</span></li>
+        <li><span>3</span><span>Ми повернемо кошти протягом 3 робочих днів після отримання й перевірки товару.</span></li>
+      </ol>
+      {% elif page_key == 'offer' %}
+      <h1 class="info-h1">Договір оферти</h1>
+      <p class="info-rev">Редакція від 6 жовтня 2026 року</p>
+      <p class="info-body info-body--top">Цей документ є публічною пропозицією (офертою) [ПІБ ФОП], РНОКПП [номер] (далі — Продавець), укласти договір купівлі-продажу товарів дистанційним способом з будь-якою фізичною або юридичною особою (далі — Покупець).</p>
+      <h2 class="info-h2 info-h2--legal">1. Загальні положення</h2>
+      <p class="info-body">1.1. Оформлення замовлення на сайті означає повне й беззастережне прийняття Покупцем умов цього договору.</p>
+      <p class="info-body info-body--tight">1.2. Продавець має право змінювати умови оферти. Нова редакція набирає чинності з моменту публікації на сайті.</p>
+      <h2 class="info-h2 info-h2--legal">2. Предмет договору</h2>
+      <p class="info-body">2.1. Продавець зобов’язується передати у власність Покупця товар, а Покупець — оплатити та прийняти його на умовах цього договору.</p>
+      <p class="info-body info-body--tight">2.2. Найменування, кількість і ціна товару визначаються в замовленні, підтвердженому менеджером.</p>
+      <h2 class="info-h2 info-h2--legal">3. Ціна та оплата</h2>
+      <p class="info-body">3.1. Ціни на сайті вказані в гривнях. Вартість доставки не входить у ціну товару, якщо інше не зазначено.</p>
+      <p class="info-body info-body--tight">3.2. Покупець оплачує замовлення одним зі способів, наведених у розділі «Доставка і оплата».</p>
+      <h2 class="info-h2 info-h2--legal">4. Доставка та приймання</h2>
+      <p class="info-body">4.1. Право власності та ризик випадкового пошкодження переходять до Покупця в момент отримання товару.</p>
+      <p class="info-body info-body--tight">4.2. Під час отримання Покупець перевіряє комплектність і цілісність товару у присутності представника перевізника.</p>
+      <h2 class="info-h2 info-h2--legal">5. Повернення товару</h2>
+      <p class="info-body">5.1. Повернення та обмін здійснюються відповідно до Закону України «Про захист прав споживачів» протягом 14 днів з дня отримання товару.</p>
+      <h2 class="info-h2 info-h2--legal">6. Реквізити Продавця</h2>
+      <div class="info-legal-box">[ПІБ ФОП]<br>РНОКПП: [номер]<br>Адреса: м. Київ, [вулиця, будинок]<br>Телефон: 067 00 00 00 · Email: xxx@gmail.com</div>
       {% else %}
-      <h1 class="page-title" style="font-size:clamp(36px,4.5vw,56px);">Договір оферти</h1>
-      <p style="margin:24px 0 0;font-size:16px;line-height:1.7;color:#3d3d3d;">Оформлюючи замовлення на сайті, ви погоджуєтесь з умовами публічної оферти щодо купівлі-продажу товарів, доставки та повернення.</p>
+      <h1 class="info-h1">Політика конфіденційності</h1>
+      <p class="info-rev">Редакція від 6 жовтня 2026 року</p>
+      <p class="info-body info-body--top">Ця політика пояснює, які персональні дані ми збираємо, навіщо вони потрібні та як ми їх захищаємо. Користуючись сайтом, ви погоджуєтеся з її умовами.</p>
+      <h2 class="info-h2 info-h2--legal">Які дані ми збираємо</h2>
+      <ul class="info-bullets">
+        <li><span class="info-bullets__dot"></span><span>ім’я, прізвище, номер телефону та email;</span></li>
+        <li><span class="info-bullets__dot"></span><span>адресу доставки або номер відділення перевізника;</span></li>
+        <li><span class="info-bullets__dot"></span><span>технічні дані: тип пристрою, браузер, файли cookie.</span></li>
+      </ul>
+      <h2 class="info-h2 info-h2--legal">Навіщо вони потрібні</h2>
+      <p class="info-body">Ми використовуємо дані лише для обробки та доставки замовлень, зв’язку з вами щодо замовлення і покращення роботи сайту. Розсилки надсилаємо тільки за вашою згодою.</p>
+      <h2 class="info-h2 info-h2--legal">Кому ми їх передаємо</h2>
+      <p class="info-body">Дані передаються лише службам доставки та платіжним сервісам у обсязі, необхідному для виконання замовлення. Ми не продаємо персональні дані третім особам.</p>
+      <h2 class="info-h2 info-h2--legal">Ваші права</h2>
+      <p class="info-body">Ви можете в будь-який момент запросити перегляд, виправлення або видалення своїх даних, написавши на xxx@gmail.com. Ми відповімо протягом 30 днів.</p>
+      <div class="info-callout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+        <span>Дані зберігаються відповідно до Закону України «Про захист персональних даних» не довше, ніж це потрібно для мети їх обробки.</span>
+      </div>
       {% endif %}
+
+      {% include 'pages/partials/contact_card.html' %}
     </article>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/info.js' %}"></script>
 {% endblock %}
