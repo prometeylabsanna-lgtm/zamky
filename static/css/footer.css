@@ -47,8 +47,37 @@
   color: var(--color-accent);
 }
 
+.site-footer__link-btn {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.site-footer__link-btn:hover {
+  color: var(--color-accent);
+}
+
 .site-footer__contacts a {
   color: var(--color-accent);
+}
+
+.site-footer__meta {
+  margin: 8px 0 0;
+  max-width: 16em;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--color-footer-muted);
 }
 
 .site-footer__line {
