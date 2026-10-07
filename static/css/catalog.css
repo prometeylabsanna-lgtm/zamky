@@ -45,6 +45,13 @@
   cursor: pointer;
 }
 
+/* specificity > .catalog-filters-btn { display:flex } — як isCompact у Catalog.dc.html (w < 1100) */
+@media (min-width: 1100px) {
+  .catalog-filters-btn.hide-desktop {
+    display: none;
+  }
+}
+
 .catalog-filters-btn svg {
   color: var(--color-accent);
   flex: none;
@@ -226,10 +233,12 @@
   letter-spacing: -0.02em;
 }
 
+/* SVG path ^ ; open → none, closed → rotate(180deg) — як Catalog.dc.html g.rot */
 .filter-group__chevron {
   color: var(--color-accent);
   flex: none;
   transition: transform 0.2s;
+  transform-origin: center;
   transform: rotate(180deg);
 }
 

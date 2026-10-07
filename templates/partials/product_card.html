@@ -3,9 +3,9 @@
   <div class="product-card__img{% if product.stock_status == 'out' %} is-out{% endif %}">
     {% with img=product.primary_image %}
       {% if img %}
-        <img src="{{ img.image.url }}" alt="{{ product.name }}" loading="lazy">
+        <img src="{{ img.image.url }}" alt="{{ product.name }}"{% if not eager %} loading="lazy"{% endif %}>
       {% else %}
-        <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name }}" loading="lazy">
+        <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name }}"{% if not eager %} loading="lazy"{% endif %}>
       {% endif %}
     {% endwith %}
   </div>

@@ -1,9 +1,12 @@
 from decimal import Decimal
 
+from django.core.management import call_command
+from django.db.models import Max
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from catalog.models import Attribute, AttributeValue, Category, Product, ProductAttribute
+from catalog.views import plural_goods
 
 
 class CatalogFilterTests(TestCase):
@@ -71,3 +74,43 @@ class CatalogFilterTests(TestCase):
         response = self.client.get(reverse('catalog:catalog'), {'sku': 'MOT'})
         products = list(response.context['products'])
         self.assertEqual(len(products), 1)
+
+
+class PluralGoodsTests(TestCase):
+    def test_plural_42_towary(self):
+        self.assertEqual(plural_goods(1), 'товар')
+        self.assertEqual(plural_goods(2), 'товари')
+        self.assertEqual(plural_goods(42), 'товари')
+        self.assertEqual(plural_goods(5), 'товарів')
+        self.assertEqual(plural_goods(11), 'товарів')
+
+
+class SeedDemoTests(TestCase):
+    def _catalog_qs(self):
+        return Product.objects.filter(is_active=True, catalog_order__lt=500).exclude(
+            sku__startswith='HOME-'
+        )
+
+    def test_seed_demo_42_max_1690_idempotent(self):
+        call_command('seed_demo')
+        qs = self._catalog_qs()
+        self.assertEqual(qs.count(), 42)
+        self.assertEqual(qs.aggregate(hi=Max('price'))['hi'], Decimal('1690.00'))
+
+        call_command('seed_demo')
+        qs2 = self._catalog_qs()
+        self.assertEqual(qs2.count(), 42)
+        self.assertEqual(qs2.aggregate(hi=Max('price'))['hi'], Decimal('1690.00'))
+        self.assertEqual(
+            Product.objects.filter(sku__startswith='HOME-HIT-').count(),
+            8,
+        )
+        self.assertEqual(
+            Product.objects.filter(sku__startswith='HOME-NEW-').count(),
+            8,
+        )
+
+        response = self.client.get(reverse('catalog:catalog'))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['count_label'], '42 товари')
+        self.assertEqual(response.context['price_hi'], 1690)

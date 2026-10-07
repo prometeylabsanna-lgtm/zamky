@@ -273,9 +273,13 @@ class Command(BaseCommand):
 
         created = 0
         created += self._seed_cylinders(categories, attrs, av, img_dir)
-        created += self._seed_locks(categories, attrs, av, img_dir, media_seed)
+        # замки-демо не в каталозі (Catalog.dc.html = 42 циліндри, max 1690);
+        # лишаємо brand-категорії для сайдбару home без SKU у вітрині
         self._configure_home_carousels(img_dir)
-        self.stdout.write(f'Products created: {created}')
+        catalog_n = Product.objects.filter(is_active=True, catalog_order__lt=500).exclude(
+            sku__startswith='HOME-'
+        ).count()
+        self.stdout.write(f'Products created: {created} (catalog vitrine: {catalog_n})')
 
     def _attach_image(self, product, src, dest_name, alt, sort_order, primary=False):
         media_seed = Path(settings.MEDIA_ROOT) / 'products'
@@ -326,7 +330,8 @@ class Command(BaseCommand):
                 for ci, C in enumerate(COLORS):
                     idx = bi * 12 + si * 3 + ci
                     in_catalog = (idx * 7) % 10 <= 6
-                    # ABARO: усі 12 варіантів для PDP; інші бренди — лише як у Catalog.dc.html
+                    # Вітрина = як PRODUCTS у Catalog.dc.html (42 шт).
+                    # ABARO: додаткові варіанти для PDP з catalog_order≥500 (не в каталозі).
                     if B['b'] != 'ABARO' and not in_catalog:
                         continue
                     M = mechs[(idx + bi) % 3]
@@ -345,6 +350,7 @@ class Command(BaseCommand):
                         stock = 2
                     else:
                         stock = 12 + (idx % 5)
+                    # <500 → каталог; ≥500 → лише PDP/службові
                     catalog_order = (idx * 37) % 101 if in_catalog else 500 + idx
                     product = Product.objects.create(
                         category=brand_cat_map.get(B['b'], categories['Серцевини (циліндри)']),

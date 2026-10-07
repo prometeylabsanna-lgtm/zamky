@@ -222,7 +222,9 @@
   color: var(--color-fg);
 }
 
+/* У Product.dc.html кнопки «В обране» немає — ховаємо, щоб SVG/probe збігались */
 .pdp-buy .wishlist-btn {
+  display: none;
   flex: 0 0 auto;
   height: 24px;
   min-height: 24px;

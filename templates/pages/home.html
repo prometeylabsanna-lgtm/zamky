@@ -102,7 +102,7 @@
   </div>
   <div class="product-slider ic-scroll" data-slider-track>
     {% for product in hits %}
-    <div class="product-slider__item">{% include 'partials/product_card.html' %}</div>
+    <div class="product-slider__item">{% include 'partials/product_card.html' with eager=True %}</div>
     {% endfor %}
   </div>
 </section>
@@ -117,7 +117,7 @@
   </div>
   <div class="product-slider ic-scroll" data-slider-track>
     {% for product in news %}
-    <div class="product-slider__item">{% include 'partials/product_card.html' %}</div>
+    <div class="product-slider__item">{% include 'partials/product_card.html' with eager=True %}</div>
     {% endfor %}
   </div>
 </section>

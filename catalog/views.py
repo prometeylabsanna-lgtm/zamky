@@ -148,11 +148,7 @@ class CatalogView(ListView):
         return max(PAGE_SIZE, min(limit, 240))
 
     def get_queryset(self):
-        qs = (
-            Product.objects.filter(is_active=True)
-            .exclude(sku__startswith='HOME-')
-            .prefetch_related('images', 'attributes')
-        )
+        qs = self._catalog_products().prefetch_related('images', 'attributes')
         self.category = None
         slug = self.kwargs.get('slug')
         if slug:
@@ -191,8 +187,14 @@ class CatalogView(ListView):
         except (InvalidOperation, ValueError):
             return None
 
+    def _catalog_products(self):
+        """Товари вітрини каталогу (як PRODUCTS у Catalog.dc.html): без HOME-* і без PDP/lock (order≥500)."""
+        return Product.objects.filter(is_active=True, catalog_order__lt=500).exclude(
+            sku__startswith='HOME-'
+        )
+
     def _base_qs(self):
-        base = Product.objects.filter(is_active=True)
+        base = self._catalog_products()
         if self.category:
             base = base.filter(Q(category=self.category) | Q(category__parent=self.category))
         return base
@@ -215,7 +217,8 @@ class CatalogView(ListView):
             qs = qs.filter(price__gte=price_min)
         if price_max is not None:
             qs = qs.filter(price__lte=price_max)
-        return qs.distinct()
+        # без .distinct() тут — він ламає подальший values()+annotate (GROUP BY по ordering)
+        return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -248,6 +251,7 @@ class CatalogView(ListView):
             counted = (
                 self._filter_counts(base, skip_key=attr.slug)
                 .filter(attributes__attribute=attr)
+                .order_by()
                 .values('attributes__slug')
                 .annotate(c=Count('id', distinct=True))
             )
