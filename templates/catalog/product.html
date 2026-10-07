@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav class="breadcrumbs">
+    <a href="{% url 'catalog:home' %}">Головна</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <a href="{% url 'catalog:catalog' %}">Каталог товрів</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <span>{{ product.name|truncatechars:40 }}</span>
+  </nav>
+
+  <div class="product-layout">
+    <section>
+      <div class="gallery" data-gallery>
+        <div class="gallery__track" data-gallery-track>
+          {% for img in product.images.all %}
+          <div class="gallery__slide"><img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}"></div>
+          {% empty %}
+          <div class="gallery__slide"><img src="{% static 'img/product-brass.png' %}" alt="{{ product.name }}"></div>
+          {% endfor %}
+        </div>
+        <div style="position:absolute;top:20px;left:20px;">
+          <span class="badge badge--{{ product.stock_status }}" style="height:24px;padding:0 8px;font-size:13px;">
+            <span class="badge__dot" style="width:5px;height:5px;"></span>{{ product.stock_label }}
+          </span>
+        </div>
+        <button type="button" class="gallery__nav gallery__nav--prev" data-gallery-prev aria-label="Попереднє фото"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
+        <button type="button" class="gallery__nav gallery__nav--next" data-gallery-next aria-label="Наступне фото"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
+        <div style="position:absolute;bottom:20px;right:20px;font-size:12px;color:#a3a3a3;" data-gallery-counter>1 / {{ product.images.count|default:1 }}</div>
+      </div>
+      <div class="thumbs">
+        {% for img in product.images.all %}
+        <button type="button" data-thumb {% if forloop.first %}class="is-active"{% endif %}><img src="{{ img.image.url }}" alt=""></button>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="buy-box">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="badge badge--{{ product.stock_status }}" style="height:24px;padding:0 8px;font-size:12px;"><span class="badge__dot" style="width:5px;height:5px;"></span>{{ product.stock_label }}</span>
+        <span style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border:1px solid #e6e6e6;border-radius:6px;font-size:12px;color:#8a8a8a;">{{ product.sku }}</span>
+      </div>
+      <h1>{{ product.name }}</h1>
+      <div style="margin-top:24px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:14px;">
+        {% if product.brand %}<span style="height:24px;padding:0 8px;border-radius:6px;background:#111;color:#fff;display:inline-flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:.06em;">{{ product.brand }}</span>{% endif %}
+        <span style="color:#8a8a8a;"><span style="color:#ffc400;">★★★★</span><span style="color:#dedede;">★</span> <strong style="color:#111;">4.0</strong> · 2 відгуки</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;color:#8a8a8a;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>Гарантія 12 місяців</span>
+      </div>
+      <div style="margin-top:36px;height:1px;background:#eee;"></div>
+      <div style="margin-top:32px;">
+        {% if product.old_price %}<div style="font-size:14px;color:#a3a3a3;text-decoration:line-through;">{{ product.old_price|floatformat:0 }} ₴</div>{% endif %}
+        <div style="font-size:clamp(36px,4vw,48px);font-weight:700;letter-spacing:-0.03em;">{{ product.price|floatformat:0 }} ₴</div>
+      </div>
+      {% if product.short_description %}
+      <p style="margin:20px 0 0;font-size:15px;line-height:1.5;color:#555;">{{ product.short_description }}</p>
+      {% endif %}
+      <div class="buy-actions">
+        {% if product.stock_status != 'out' %}
+        <button type="button" class="btn" style="height:56px;width:100%;"
+          hx-post="{% url 'cart:add' product.pk %}"
+          hx-swap="none">Додати до кошика</button>
+        {% else %}
+        <button type="button" class="btn" style="height:56px;width:100%;background:#efefef;color:#6f6f6f;" disabled>Немає в наявності</button>
+        {% endif %}
+        {% include 'cart/partials/wishlist_btn.html' with product_id=product.pk in_wishlist=in_wishlist %}
+      </div>
+      {% if attr_map %}
+      <div style="margin-top:32px;">
+        <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;">Характеристики</h2>
+        {% for slug, values in attr_map.items %}
+        <div style="display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px solid #eee;font-size:14px;">
+          <span style="color:#8a8a8a;">{{ values.0.attribute.name }}</span>
+          <span>{% for v in values %}{{ v.value }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </section>
+  </div>
+
+  {% if related %}
+  <section class="slider-section" data-slider style="padding-left:0;padding-right:0;">
+    <div class="section-head" style="padding-left:0;padding-right:0;">
+      <h2 class="section-title" style="font-size:clamp(28px,3vw,40px);">Схожі товари</h2>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn--icon btn" data-slider-prev aria-label="Назад"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
+        <button type="button" class="btn--icon btn" data-slider-next aria-label="Вперед"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
+      </div>
+    </div>
+    <div class="product-slider ic-scroll" data-slider-track style="padding-left:0;padding-right:0;">
+      {% for product in related %}
+      <div class="product-slider__item">{% include 'partials/product_card.html' %}</div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

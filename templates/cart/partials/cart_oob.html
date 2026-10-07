@@ -1,0 +1,9 @@
+{% include 'cart/partials/badge.html' %}
+<div id="cart-drawer-body" hx-swap-oob="innerHTML">
+  {% include 'cart/partials/drawer.html' %}
+</div>
+{% if cart_error %}
+<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true">{{ cart_error }}</div>
+{% else %}
+<div id="cart-toast" class="toast is-visible" hx-swap-oob="true">Додано до кошика</div>
+{% endif %}

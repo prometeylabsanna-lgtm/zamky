@@ -1,0 +1,33 @@
+{% if cart_items %}
+  {% for item in cart_items %}
+  <div class="cart-row" style="grid-template-columns:64px minmax(0,1fr) auto;">
+    <a href="{{ item.product.get_absolute_url }}" class="cart-row__img" style="width:64px;height:64px;">
+      {% if item.product.primary_image %}
+        <img src="{{ item.product.primary_image.image.url }}" alt="">
+      {% endif %}
+    </a>
+    <div>
+      <a href="{{ item.product.get_absolute_url }}" style="font-size:14px;font-weight:500;">{{ item.product.name }}</a>
+      <div style="margin-top:8px;font-size:16px;font-weight:700;">{{ item.line_total|floatformat:0 }} ₴</div>
+    </div>
+    <form hx-post="{% url 'cart:update' item.product.pk %}" hx-target="#cart-drawer-body" hx-swap="innerHTML">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="remove">
+      <button type="submit" aria-label="Видалити" style="border:0;background:none;color:#b5b5b5;">✕</button>
+    </form>
+  </div>
+  {% endfor %}
+{% else %}
+  <div style="text-align:center;padding:40px 12px;color:#8a8a8a;">
+    <p>Кошик порожній</p>
+  </div>
+{% endif %}
+{% if cart_items %}
+<div class="cart-drawer__foot" style="position:sticky;bottom:0;background:#fff;margin:0 -20px -16px;padding:16px 20px;">
+  <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;">
+    <span>Разом</span>
+    <span>{{ cart_subtotal|floatformat:0 }} ₴</span>
+  </div>
+  <a href="{% url 'orders:checkout' %}?step=checkout" class="btn" style="width:100%;">Оформити замовлення</a>
+</div>
+{% endif %}

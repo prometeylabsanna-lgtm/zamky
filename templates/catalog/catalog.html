@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} — Каталог{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav class="breadcrumbs">
+    <a href="{% url 'catalog:home' %}">Головна</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <a href="{% url 'catalog:catalog' %}">Каталог товрів</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <span>{{ title }}</span>
+  </nav>
+
+  <div class="catalog-head">
+    <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 16px;">
+      <h1 class="page-title">{{ title }}</h1>
+      <span class="catalog-count">{{ page_obj.paginator.count }} товарів</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button type="button" class="btn--ghost btn hide-desktop" data-open-filters>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.8"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>
+        Фільтри
+        {% if selected_chips %}<span style="min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#ffc400;color:#fff;font-size:12px;font-weight:600;">{{ selected_chips|length }}</span>{% endif %}
+      </button>
+      <div class="dropdown">
+        <button type="button" class="sort-btn" data-dropdown-toggle>
+          <span style="color:#a3a3a3;" class="hide-mobile">Сортування:</span>
+          <span style="font-weight:500;">{% for id,label in sorts %}{% if id == current_sort %}{{ label }}{% endif %}{% endfor %}</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#111" stroke-width="1.6"><path d="M3 4.5l3 3 3-3"></path></svg>
+        </button>
+        <div class="dropdown__backdrop" data-dropdown-toggle></div>
+        <ul class="dropdown__panel" style="list-style:none;margin:0;">
+          {% for id,label in sorts %}
+          <li>
+            <a class="dropdown__item {% if id == current_sort %}is-active{% endif %}"
+               href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort={{ id }}"
+               hx-get="?{% for k,v in request.GET.items %}{% if k != 'sort' %}{{ k }}={{ v }}&{% endif %}{% endfor %}sort={{ id }}"
+               hx-target="#catalog-grid"
+               hx-push-url="true">{{ label }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="catalog-layout">
+    <div id="filters-overlay" class="filters-overlay" data-close-filters></div>
+    <aside id="filters" class="filters">
+      <div class="hide-desktop" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:28px;font-weight:600;">Фільтри</span>
+        <button type="button" class="btn--icon btn" data-close-filters aria-label="Закрити" style="background:#fff;border:1px solid #e6e6e6;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#111" stroke-width="1.6"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg></button>
+      </div>
+      <form method="get"
+            hx-get="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
+            hx-target="#catalog-grid"
+            hx-push-url="true"
+            hx-trigger="change delay:200ms, submit">
+        {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+        {% if query_q %}<input type="hidden" name="q" value="{{ query_q }}">{% endif %}
+        {% for group in filter_groups %}
+        <div class="filter-group">
+          <div class="filter-group__title">{{ group.attribute.name }}</div>
+          <ul class="filter-options">
+            {% for opt in group.options %}
+            <li>
+              <label>
+                <input type="checkbox" name="{{ group.attribute.slug }}" value="{{ opt.value.slug }}" {% if opt.selected %}checked{% endif %}>
+                <span class="filter-check">{% if opt.selected %}<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{% endif %}</span>
+                <span style="flex:1;">{{ opt.value.value }}</span>
+                <span style="font-size:13px;color:#c8c8c8;">{{ opt.count }}</span>
+              </label>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+        <div style="padding:8px 0 24px;">
+          <div style="height:44px;display:flex;align-items:center;font-size:22px;font-weight:500;">Артикул</div>
+          <label class="header-search" style="margin-top:12px;width:100%;">
+            <input type="text" name="sku" value="{{ current_sku }}" placeholder="Введіть артикул товару">
+          </label>
+        </div>
+        <div style="padding:0 0 24px;">
+          <div style="height:44px;display:flex;align-items:center;font-size:22px;font-weight:500;">Ціна</div>
+          <div style="margin-top:20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;">
+            <span style="font-size:15px;color:#a3a3a3;">Від:</span>
+            <input type="number" name="price_min" value="{{ current_price_min }}" style="height:40px;border:1px solid #e6e6e6;border-radius:6px;padding:0 10px;">
+            <span style="font-size:15px;color:#a3a3a3;">До:</span>
+            <input type="number" name="price_max" value="{{ current_price_max }}" style="height:40px;border:1px solid #e6e6e6;border-radius:6px;padding:0 10px;">
+          </div>
+        </div>
+        <button type="submit" class="btn" style="width:100%;">Застосувати фільтри</button>
+        {% if selected_chips %}
+        <a href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
+           class="btn" style="width:100%;margin-top:8px;background:none;color:#8a8a8a;height:44px;"
+           hx-get="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
+           hx-target="#catalog-grid"
+           hx-push-url="true">Скинути фільтри</a>
+        {% endif %}
+      </form>
+    </aside>
+
+    <section>
+      {% if selected_chips %}
+      <div class="chips">
+        {% for chip in selected_chips %}
+        <span class="chip">{{ chip.label }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div id="catalog-grid">
+        {% include 'catalog/partials/product_grid.html' %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+<div id="cart-drawer" class="cart-drawer" aria-hidden="true">
+  <div class="cart-drawer__backdrop" data-close-cart></div>
+  <div class="cart-drawer__panel">
+    <div class="cart-drawer__head">
+      <strong style="font-size:22px;">Кошик</strong>
+      <button type="button" class="btn--icon btn" data-close-cart aria-label="Закрити" style="background:#fff;border:1px solid #e6e6e6;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#111" stroke-width="1.6"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
+      </button>
+    </div>
+    <div id="cart-drawer-body" class="cart-drawer__body">
+      {% include 'cart/partials/drawer.html' %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+{% if products %}
+<div class="product-grid">
+  {% for product in products %}
+    {% include 'partials/product_card.html' %}
+  {% endfor %}
+</div>
+{% if page_obj.has_next %}
+<a class="btn" style="margin-top:40px;width:100%;background:#fff;border:1px solid #ffe7a3;color:#ffc400;"
+   href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+   hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+   hx-target="#catalog-grid"
+   hx-swap="beforeend"
+   hx-select=".product-grid > *, .btn">Завантажити ще</a>
+{% endif %}
+<p style="margin:16px 0 0;text-align:center;font-size:13px;color:#a3a3a3;">
+  Показано {{ page_obj.end_index }} з {{ page_obj.paginator.count }}
+</p>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state__icon">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
+  </div>
+  <h2 style="margin:8px 0 0;font-size:24px;font-weight:600;">Нічого не знайдено</h2>
+  <p style="margin:0;max-width:360px;font-size:15px;color:#8a8a8a;">Спробуйте змінити або скинути фільтри.</p>
+  <a href="{% url 'catalog:catalog' %}" class="btn" style="margin-top:12px;">Скинути фільтри</a>
+</div>
+{% endif %}
