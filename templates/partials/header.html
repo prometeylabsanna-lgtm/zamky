@@ -1,101 +1,50 @@
 {% load static %}
+{{ header_menu|json_script:"header-menu-data" }}
 <div class="site-header">
-  <div class="site-header__inner">
+  <header class="site-header__inner">
     <div class="header-desktop">
-      <a href="{% url 'catalog:home' %}" class="logo">Logo</a>
-      <nav class="header-nav" style="margin-left:16px;">
-        <button type="button" class="header-nav__btn" data-open-menu>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
+      <a href="{% url 'catalog:home' %}" class="logo logo--desktop">Logo</a>
+      <nav class="header-nav">
+        <button type="button" class="header-nav__btn{% if header_catalog_active %} is-current{% endif %}" data-open-mega>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
           <span>Каталог</span>
         </button>
-        <a href="{% url 'catalog:home' %}#new">Новинкі</a>
-        <a href="{% url 'pages:info_page' 'about' %}">Про нас</a>
+        <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинкі</a>
+        <a class="header-nav__link" href="{% url 'pages:info_page' 'about' %}">Про нас</a>
       </nav>
-      <div style="flex:1;"></div>
-      <div class="dropdown">
-        <button type="button" class="header-link" data-dropdown-toggle aria-label="Оберіть район">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
-          <span id="district-label">{% if selected_district %}{{ selected_district.short }}{% else %}{{ site_city.name }}{% endif %}</span>
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#c8c8c8" stroke-width="1.5"><path d="M3 4.5l3 3 3-3"></path></svg>
-        </button>
-        <div class="dropdown__backdrop" data-dropdown-toggle></div>
-        <div class="dropdown__panel">
-          <div style="padding:10px 12px 6px;font-size:12px;color:#a3a3a3;">Оберіть район Києва</div>
-          <form method="post" action="{% url 'orders:set_district' %}">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.path }}">
-            <button type="submit" name="slug" value="" class="dropdown__item {% if not selected_district_slug %}is-active{% endif %}">
-              <span>Київ — усе місто</span>
-            </button>
-            {% for d in site_districts %}
-            <button type="submit" name="slug" value="{{ d.slug }}" class="dropdown__item {% if selected_district_slug == d.slug %}is-active{% endif %}">
-              <span>{{ d.short }}</span>
-            </button>
-            {% endfor %}
-          </form>
-        </div>
-      </div>
-      <form class="header-search" action="{% url 'catalog:catalog' %}" method="get">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.2"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
-        <input type="search" name="q" placeholder="Пошук по каталогу" value="{{ request.GET.q }}">
-      </form>
-      <div class="dropdown">
-        <button type="button" class="header-contacts" data-dropdown-toggle>
-          <svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="#ffc400" stroke-width="1.6"><rect x="4" y="1" width="12" height="20" rx="2.5"></rect><path d="M9 17.5h2" stroke-linecap="round"></path></svg>
-          <span>Наші контакти</span>
-        </button>
-        <div class="dropdown__backdrop" data-dropdown-toggle></div>
-        <div class="dropdown__panel" style="width:280px;padding:20px;">
-          <a href="tel:0670000000" style="height:44px;display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;">067 00 00 00</a>
-          <a href="tel:0660000000" style="height:44px;display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;">066 00 00 00</a>
-          <a href="mailto:xxx@gmail.com" style="height:40px;display:flex;align-items:center;gap:12px;font-size:15px;">xxx@gmail.com</a>
-          <div style="margin-top:8px;padding-top:12px;border-top:1px solid #eee;font-size:13px;color:#8a8a8a;">Пн–Пт 9:00–19:00, Сб 10:00–17:00</div>
-        </div>
-      </div>
+      <div class="header-spacer"></div>
+      {% include 'partials/header_district.html' %}
+      {% include 'partials/header_search.html' %}
+      {% include 'partials/header_contacts.html' %}
+      {% include 'partials/header_lang.html' %}
       <button type="button" class="cart-btn" data-open-cart aria-label="Кошик">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
+        {% include 'partials/icon_cart.html' %}
         {% include 'cart/partials/badge.html' %}
       </button>
     </div>
 
     <div class="header-compact">
-      <div class="header-actions" style="justify-content:space-between;">
-        <a href="{% url 'catalog:home' %}" class="logo">Logo</a>
-        <div class="header-actions">
-          <button type="button" class="btn--icon btn" data-open-menu aria-label="Меню" style="background:#fff;border:1px solid #e6e6e6;color:#111;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
-          </button>
-          <button type="button" class="cart-btn" data-open-cart aria-label="Кошик">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path></svg>
-            <span id="cart-badge-mobile" class="cart-badge" {% if not cart_count %}hidden{% endif %}>{{ cart_count }}</span>
-          </button>
-        </div>
+      <div class="header-compact__row">
+        <a href="{% url 'catalog:home' %}" class="logo logo--compact">Logo</a>
+        <nav class="header-nav header-nav--tablet">
+          <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинкі</a>
+        </nav>
+        <div class="header-spacer"></div>
+        {% include 'partials/header_lang.html' with compact=1 %}
+        <button type="button" class="header-menu-btn" data-open-menu aria-label="Меню">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
+        </button>
+        <button type="button" class="cart-btn" data-open-cart aria-label="Кошик">
+          {% include 'partials/icon_cart.html' %}
+          {% include 'cart/partials/badge.html' with badge_id='cart-badge-mobile' %}
+        </button>
       </div>
-      <form class="header-search" action="{% url 'catalog:catalog' %}" method="get" style="width:100%;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.2"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
-        <input type="search" name="q" placeholder="Пошук по каталогу" value="{{ request.GET.q }}">
-      </form>
+      <div class="header-compact__tools">
+        {% include 'partials/header_search.html' with compact=1 %}
+        {% include 'partials/header_district.html' with compact=1 %}
+        {% include 'partials/header_contacts.html' with compact=1 %}
+      </div>
     </div>
-  </div>
-</div>
-
-<div id="mobile-menu" class="mobile-menu" aria-hidden="true">
-  <div class="mobile-menu__backdrop" data-close-menu></div>
-  <div class="mobile-menu__panel">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <span class="logo">Logo</span>
-      <button type="button" class="btn--icon btn" data-close-menu aria-label="Закрити" style="background:#fff;border:1px solid #e6e6e6;">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#111" stroke-width="1.6"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
-      </button>
-    </div>
-    <ul class="mobile-menu__list">
-      <li><a href="{% url 'catalog:catalog' %}">Каталог товарів</a></li>
-      <li><a href="{% url 'catalog:home' %}#hits">Хіти продажу</a></li>
-      <li><a href="{% url 'catalog:home' %}#new">Новинкі</a></li>
-      <li><a href="{% url 'pages:info_page' 'about' %}">Про нас</a></li>
-      <li><a href="{% url 'pages:info_page' 'delivery' %}">Доставка</a></li>
-      <li><a href="{% url 'pages:info_page' 'contacts' %}">Контакти</a></li>
-      <li><a href="{% url 'orders:checkout' %}">Кошик / оформлення</a></li>
-    </ul>
-  </div>
+  </header>
+  {% include 'partials/header_mega.html' %}
 </div>

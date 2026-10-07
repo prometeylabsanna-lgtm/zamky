@@ -1,6 +1,6 @@
 import uuid
 
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -47,6 +47,26 @@ def _save_contact(form):
         },
     )
     return obj
+
+
+class SetLangView(View):
+    def post(self, request):
+        code = (request.POST.get('lang') or 'UA').upper()
+        if code not in ('UA', 'EN', 'RU'):
+            code = 'UA'
+        request.session['lang'] = code
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+        response = redirect(next_url)
+        if request.headers.get('HX-Request') == 'true' or request.POST.get('ajax'):
+            response = render(request, 'partials/lang_label.html', {'site_lang': code})
+        response.set_cookie(
+            'zamky_lang',
+            code,
+            max_age=60 * 60 * 24 * 365,
+            samesite='Lax',
+            httponly=False,
+        )
+        return response
 
 
 class InfoView(TemplateView):

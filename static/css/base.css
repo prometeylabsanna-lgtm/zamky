@@ -36,6 +36,16 @@
   --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
   --shadow-dropdown: 0 16px 40px rgba(0, 0, 0, 0.08);
   --shadow-header: 0 1px 0 rgba(0, 0, 0, 0.04);
+  --shadow-header-scroll: 0 1px 0 var(--color-border-soft), 0 8px 24px rgba(0, 0, 0, 0.04);
+  --shadow-mega: 0 16px 48px rgba(0, 0, 0, 0.12);
+  --shadow-cart: -24px 0 64px rgba(0, 0, 0, 0.08);
+  --color-nav: #555;
+  --color-menu-name: #3d3d3d;
+  --color-menu-sub: #555;
+  --color-overlay: rgba(0, 0, 0, 0.3);
+  --color-overlay-soft: rgba(0, 0, 0, 0.25);
+  --color-chip: #e8e8e8;
+  --color-hours: #8a8a8a;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;

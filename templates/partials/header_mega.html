@@ -1,0 +1,48 @@
+{% load static %}
+<div id="mega-menu" class="mega" hidden>
+  <div class="mega__backdrop" data-close-mega></div>
+  <div class="mega__panel" role="dialog" aria-label="Каталог">
+    <div class="mega__col mega__col--cats">
+      <button type="button" class="mega__head" data-close-mega>
+        <span>Каталог товрів</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
+      </button>
+      <ul class="mega__list">
+        {% for c in header_menu %}
+        <li>
+          <button type="button" class="mega__row" data-mega-cat="{{ forloop.counter0 }}">
+            <span class="mega__ico">
+              {% if c.lock %}{% include 'partials/icon_lock.html' with kind=c.lock size=24 %}{% elif c.logo %}<img src="{% static c.logo %}" alt="" width="32" height="26">{% endif %}
+            </span>
+            <span class="mega__name">{{ c.name }}</span>
+            <svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="mega__col mega__col--subs" hidden>
+      <button type="button" class="mega__back" data-mega-back="cats">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+        <span data-mega-cat-name></span>
+      </button>
+      <div class="mega__title">
+        <span class="mega__title-ico" data-mega-title-ico></span>
+        <span class="mega__title-text" data-mega-cat-title></span>
+      </div>
+      <ul class="mega__list" data-mega-subs></ul>
+    </div>
+    <div class="mega__col mega__col--leaves" hidden>
+      <button type="button" class="mega__back" data-mega-back="subs">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+        <span data-mega-sub-name></span>
+      </button>
+      <div class="mega__title">
+        <span class="mega__title-ico" data-mega-leaf-ico></span>
+        <span class="mega__title-text" data-mega-sub-title></span>
+      </div>
+      <ul class="mega__list" data-mega-leaves></ul>
+      <a class="mega__find" href="{% url 'catalog:catalog' %}" data-mega-find><span>Знайти</span></a>
+    </div>
+  </div>
+</div>

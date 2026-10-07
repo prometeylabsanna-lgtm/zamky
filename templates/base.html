@@ -10,6 +10,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+  <link rel="stylesheet" href="{% static 'css/header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/header-menu.css' %}">
+  <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/cart-drawer.css' %}">
   <link rel="stylesheet" href="{% static 'css/components.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
@@ -20,8 +24,10 @@
   </main>
   {% include 'partials/footer.html' %}
   {% include 'cart/partials/drawer_shell.html' %}
+  {% include 'partials/header_mnav.html' %}
   <div id="cart-toast" class="toast" aria-live="polite"></div>
   <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'js/header.js' %}"></script>
   <script src="{% static 'js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>

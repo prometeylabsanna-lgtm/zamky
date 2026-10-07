@@ -4,6 +4,35 @@ from django.urls import reverse
 from .models import ContactRequest
 
 
+class HeaderShellTests(TestCase):
+    def test_header_renders_inventory(self):
+        response = self.client.get(reverse('pages:info'))
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('Каталог', body)
+        self.assertIn('Новинкі', body)
+        self.assertIn('Про нас', body)
+        self.assertIn('Наші контакти', body)
+        self.assertIn('aria-label="Кошик"', body)
+        self.assertIn('aria-label="Меню"', body)
+        self.assertIn('aria-label="Закрити"', body)
+        self.assertIn('aria-label="Оберіть район"', body)
+        self.assertIn('>UA<', body)
+        self.assertIn('data-set-lang="EN"', body)
+        self.assertIn('Каталог товрів', body)
+        self.assertIn('Замки. Всі права захищено', body)
+
+    def test_lang_cookie(self):
+        url = reverse('pages:set_lang')
+        response = self.client.post(url, {'lang': 'EN', 'next': '/info/'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.client.cookies['zamky_lang'].value, 'EN')
+        self.assertEqual(self.client.session['lang'], 'EN')
+        page = self.client.get(reverse('pages:info'))
+        self.assertContains(page, '>EN<')
+
+
+
 class ContactRequestTests(TestCase):
     def setUp(self):
         self.client = Client()

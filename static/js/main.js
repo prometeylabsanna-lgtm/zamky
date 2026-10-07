@@ -9,64 +9,30 @@
     return Array.from((root || document).querySelectorAll(sel));
   }
 
-  function closeAllDropdowns(except) {
-    qsa('.dropdown.is-open').forEach(function (el) {
-      if (el !== except) el.classList.remove('is-open');
-    });
-  }
-
-  document.addEventListener('click', function (e) {
-    var toggle = e.target.closest('[data-dropdown-toggle]');
-    if (toggle) {
-      e.preventDefault();
-      var wrap = toggle.closest('.dropdown');
-      if (!wrap) return;
-      var open = wrap.classList.contains('is-open');
-      closeAllDropdowns();
-      if (!open) wrap.classList.add('is-open');
-      return;
-    }
-    if (!e.target.closest('.dropdown')) closeAllDropdowns();
-  });
-
-  var menu = qs('#mobile-menu');
-  qsa('[data-open-menu]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      if (!menu) return;
-      menu.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-  qsa('[data-close-menu]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      if (!menu) return;
-      menu.classList.remove('is-open');
-      document.body.style.overflow = '';
-    });
-  });
-
   var drawer = qs('#cart-drawer');
   function openDrawer() {
     if (!drawer) return;
     drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   }
   function closeDrawer() {
     if (!drawer) return;
     drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
-  qsa('[data-open-cart]').forEach(function (btn) {
-    btn.addEventListener('click', function (e) {
+  document.addEventListener('click', function (e) {
+    var openBtn = e.target.closest('[data-open-cart]');
+    if (openBtn) {
       e.preventDefault();
       openDrawer();
       if (window.htmx) {
         htmx.ajax('GET', '/cart/drawer/', { target: '#cart-drawer-body', swap: 'innerHTML' });
       }
-    });
-  });
-  qsa('[data-close-cart]').forEach(function (btn) {
-    btn.addEventListener('click', closeDrawer);
+      return;
+    }
+    if (e.target.closest('[data-close-cart]')) closeDrawer();
   });
 
   document.body.addEventListener('htmx:afterSwap', function (e) {

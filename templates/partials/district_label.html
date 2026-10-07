@@ -1,1 +1,2 @@
-<span id="district-label" hx-swap-oob="true">{% if selected_district %}{{ selected_district.short }}{% else %}{{ site_city.name }}{% endif %}</span>
+<span id="district-label" class="district-label" hx-swap-oob="true">{% if selected_district %}{{ selected_district.short }}{% else %}{{ site_city.name }}{% endif %}</span>
+<span id="district-label-compact" class="district-label hide-mobile" hx-swap-oob="true">{% if selected_district %}{{ selected_district.short }}{% else %}{{ site_city.name }}{% endif %}</span>

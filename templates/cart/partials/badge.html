@@ -1,8 +1,1 @@
-<span id="{{ badge_id|default:'cart-badge' }}" class="cart-badge" {% if not cart_count %}hidden{% endif %} hx-swap-oob="true">
-  {{ cart_count }}
-</span>
-{% if badge_id != 'cart-badge-mobile' %}
-<span id="cart-badge-mobile" class="cart-badge" {% if not cart_count %}hidden{% endif %} hx-swap-oob="true">
-  {{ cart_count }}
-</span>
-{% endif %}
+<span id="{{ badge_id|default:'cart-badge' }}" class="cart-badge" {% if not cart_count %}hidden{% endif %} hx-swap-oob="true">{{ cart_count }}</span>
