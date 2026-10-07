@@ -27,11 +27,18 @@ class CheckoutForm(forms.Form):
         required=False,
         widget=forms.EmailInput(attrs={'placeholder': 'mail@example.com'}),
     )
+    city = forms.CharField(
+        label='Місто',
+        max_length=120,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Київ'}),
+    )
     district = forms.ModelChoiceField(
         label='Район',
         queryset=DeliveryDistrict.objects.filter(is_active=True),
         required=False,
         empty_label='Київ — усе місто',
+        widget=forms.HiddenInput(),
     )
     delivery_method = forms.ChoiceField(
         label='Доставка',
@@ -42,19 +49,29 @@ class CheckoutForm(forms.Form):
     payment_method = forms.ChoiceField(
         label='Оплата',
         choices=Order.PaymentMethod.choices,
-        initial=Order.PaymentMethod.COD,
+        initial=Order.PaymentMethod.CARD,
         widget=forms.HiddenInput(),
     )
     address = forms.CharField(
         label='Адреса / відділення',
         max_length=300,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Відділення / адреса'}),
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': '№ відділення',
+                'data-addr-input': '1',
+            }
+        ),
     )
     comment = forms.CharField(
         label='Коментар',
         required=False,
-        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Коментар до замовлення'}),
+        widget=forms.Textarea(
+            attrs={
+                'rows': 3,
+                'placeholder': 'Наприклад, зручний час для дзвінка',
+            }
+        ),
     )
     idempotency_key = forms.CharField(widget=forms.HiddenInput(), max_length=64)
 
@@ -68,7 +85,13 @@ class CheckoutForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
         method = cleaned.get('delivery_method')
+        city = (cleaned.get('city') or '').strip()
         address = (cleaned.get('address') or '').strip()
-        if method in {Order.DeliveryMethod.NP, Order.DeliveryMethod.COURIER} and not address:
-            self.add_error('address', 'Вкажіть адресу або відділення.')
+        cleaned['city'] = city
+        cleaned['address'] = address
+        if method in {Order.DeliveryMethod.NP, Order.DeliveryMethod.COURIER}:
+            if not city:
+                self.add_error('city', 'Вкажіть місто.')
+            if not address:
+                self.add_error('address', 'Вкажіть адресу або відділення.')
         return cleaned

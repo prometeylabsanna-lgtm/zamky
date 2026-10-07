@@ -62,6 +62,13 @@ def create_order_from_cart(request, cleaned_data, idempotency_key):
     delivery_price = DELIVERY_PRICES.get(delivery_method, Decimal('0'))
     subtotal = sum((item['line_total'] for item in items), Decimal('0'))
 
+    city = (cleaned_data.get('city') or '').strip()
+    address = (cleaned_data.get('address') or '').strip()
+    if city and address:
+        full_address = f'{city}, {address}'
+    else:
+        full_address = city or address
+
     order = Order.objects.create(
         first_name=cleaned_data['first_name'],
         last_name=cleaned_data.get('last_name', ''),
@@ -70,7 +77,7 @@ def create_order_from_cart(request, cleaned_data, idempotency_key):
         district=cleaned_data.get('district'),
         delivery_method=delivery_method,
         payment_method=cleaned_data['payment_method'],
-        address=cleaned_data.get('address', ''),
+        address=full_address,
         comment=cleaned_data.get('comment', ''),
         subtotal=subtotal,
         delivery_price=delivery_price,

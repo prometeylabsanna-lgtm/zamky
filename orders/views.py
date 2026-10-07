@@ -1,5 +1,6 @@
 import re
 import uuid
+from decimal import Decimal
 
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,6 +14,30 @@ from catalog.models import Product
 from .forms import CheckoutForm
 from .models import DeliveryDistrict, Order, QuickOrder
 from .services import CheckoutError, DELIVERY_PRICES, create_order_from_cart
+from .utils import DELIVERY_META, PAYMENT_META, format_uah
+
+
+def build_checkout_steps(step):
+    labels = ['Кошик', 'Оформлення', 'Готово']
+    if step == 'done':
+        idx = 2
+    elif step == 'cart':
+        idx = 0
+    else:
+        idx = 1
+    steps = []
+    for i, label in enumerate(labels):
+        if i < idx:
+            state = 'is-done'
+            n = '✓'
+        elif i == idx:
+            state = 'is-active'
+            n = str(i + 1)
+        else:
+            state = 'is-todo'
+            n = str(i + 1)
+        steps.append({'label': label, 'n': n, 'state': state})
+    return steps
 
 
 class SetDistrictView(View):
@@ -40,9 +65,11 @@ class CheckoutView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.cart = CartService(request)
-        self.step = request.GET.get('step', 'cart')
+        self.step = request.GET.get('step', 'checkout')
         if self.step not in {'cart', 'checkout', 'done'}:
-            self.step = 'cart'
+            self.step = 'checkout'
+        if self.step == 'cart' and self.cart.items():
+            self.step = 'checkout'
         return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
@@ -54,33 +81,108 @@ class CheckoutView(FormView):
             district = DeliveryDistrict.objects.filter(slug=slug, is_active=True).first()
             if district:
                 initial['district'] = district.pk
+        initial.setdefault('payment_method', Order.PaymentMethod.CARD)
+        initial.setdefault('delivery_method', Order.DeliveryMethod.NP)
         return initial
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        method = (
+            form.data.get('delivery_method')
+            if form.is_bound
+            else form.initial.get('delivery_method', Order.DeliveryMethod.NP)
+        )
+        meta = DELIVERY_META.get(method, DELIVERY_META['np'])
+        form.fields['address'].widget.attrs['placeholder'] = meta.get('addr_ph') or ''
+        return form
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         items = self.cart.items()
         subtotal = self.cart.subtotal()
-        delivery_method = self.request.POST.get('delivery_method') or self.request.GET.get(
-            'delivery', Order.DeliveryMethod.NP
+        qty_total = self.cart.total_quantity()
+        subtotal_old = sum((item['old_total'] for item in items), Decimal('0'))
+        savings = subtotal_old - subtotal
+        if savings < 0:
+            savings = Decimal('0')
+
+        form = ctx.get('form')
+        delivery_method = (
+            (form.data.get('delivery_method') if form and form.is_bound else None)
+            or self.request.POST.get('delivery_method')
+            or self.request.GET.get('delivery')
+            or Order.DeliveryMethod.NP
         )
         delivery_price = DELIVERY_PRICES.get(delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP])
+        meta = DELIVERY_META.get(delivery_method, DELIVERY_META['np'])
+
         order = None
-        if self.step == 'done':
+        step = self.step
+        if step == 'done':
             order_id = self.request.session.get('last_order_id')
             if order_id:
                 order = Order.objects.prefetch_related('items').filter(pk=order_id).first()
+        if not items and step != 'done':
+            step = 'checkout'
+
+        delivery_options = []
+        for value, title in Order.DeliveryMethod.choices:
+            dmeta = DELIVERY_META.get(value, {})
+            price = DELIVERY_PRICES.get(value, Decimal('0'))
+            delivery_options.append(
+                {
+                    'value': value,
+                    'title': title,
+                    'note': dmeta.get('note', ''),
+                    'addr_label': dmeta.get('addr_label', ''),
+                    'addr_ph': dmeta.get('addr_ph', ''),
+                    'price': price,
+                    'price_label': 'Безкоштовно' if price == 0 else format_uah(price),
+                    'free': price == 0,
+                    'active': delivery_method == value,
+                }
+            )
+
+        payment_value = (
+            (form.data.get('payment_method') if form and form.is_bound else None)
+            or (form.initial.get('payment_method') if form else None)
+            or Order.PaymentMethod.CARD
+        )
+        payment_options = []
+        for value, title in Order.PaymentMethod.choices:
+            # design order: card, cod, invoice
+            payment_options.append(
+                {
+                    'value': value,
+                    'title': title,
+                    'note': PAYMENT_META.get(value, {}).get('note', ''),
+                    'active': payment_value == value,
+                }
+            )
+        payment_order = {'card': 0, 'cod': 1, 'invoice': 2}
+        payment_options.sort(key=lambda x: payment_order.get(x['value'], 99))
+
         ctx.update(
             {
                 'cart_items': items,
                 'cart_subtotal': subtotal,
+                'cart_subtotal_old': subtotal_old,
+                'cart_savings': savings,
+                'cart_qty_total': qty_total,
                 'delivery_price': delivery_price,
+                'delivery_method': delivery_method,
                 'order_total': subtotal + delivery_price,
-                'step': self.step if items or self.step == 'done' else 'cart',
-                'is_empty': not items and self.step != 'done',
+                'step': step if items or step == 'done' else 'checkout',
+                'is_empty': not items and step != 'done',
                 'order': order,
                 'delivery_choices': Order.DeliveryMethod.choices,
                 'payment_choices': Order.PaymentMethod.choices,
                 'delivery_prices': DELIVERY_PRICES,
+                'delivery_options': delivery_options,
+                'payment_options': payment_options,
+                'checkout_steps': build_checkout_steps(step),
+                'addr_label': meta.get('addr_label') or 'Адреса',
+                'addr_ph': meta.get('addr_ph') or '',
             }
         )
         return ctx
@@ -94,8 +196,6 @@ class CheckoutView(FormView):
             return self.form_invalid(form)
         self.request.session['last_order_id'] = order.pk
         self.request.session.pop('checkout_idempotency', None)
-        if self.request.headers.get('HX-Request') == 'true':
-            return redirect(f"{reverse('orders:checkout')}?step=done")
         return redirect(f"{reverse('orders:checkout')}?step=done")
 
     def form_invalid(self, form):

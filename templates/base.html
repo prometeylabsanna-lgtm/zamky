@@ -19,11 +19,11 @@
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   {% include 'partials/header.html' %}
+  {% include 'cart/partials/drawer_shell.html' %}
   <main class="site-main">
     {% block content %}{% endblock %}
   </main>
   {% include 'partials/footer.html' %}
-  {% include 'cart/partials/drawer_shell.html' %}
   {% include 'partials/header_mnav.html' %}
   <div id="cart-toast" class="toast" aria-live="polite"></div>
   <script src="{% static 'vendor/htmx.min.js' %}"></script>

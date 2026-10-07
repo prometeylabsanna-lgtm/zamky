@@ -1,126 +1,211 @@
 {% extends 'base.html' %}
+{% load static checkout_tags %}
 
-{% block title %}Оформлення замовлення{% endblock %}
+{% block title %}{% if step == 'done' %}Дякуємо!{% else %}Оформлення замовлення{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <nav class="breadcrumbs">
+<div class="container checkout-page"
+  {% if not is_empty and step != 'done' %}
+  data-checkout
+  data-price-np="{{ delivery_prices.np }}"
+  data-price-courier="{{ delivery_prices.courier }}"
+  data-price-pickup="{{ delivery_prices.pickup }}"
+  {% endif %}>
+  <nav class="breadcrumbs" aria-label="Breadcrumbs">
     <a href="{% url 'catalog:home' %}">Головна</a>
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <span>{% if step == 'done' %}Замовлення прийнято{% elif step == 'checkout' %}Оформлення{% else %}Кошик{% endif %}</span>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <span>{% if step == 'done' %}Замовлення оформлено{% else %}Оформлення замовлення{% endif %}</span>
   </nav>
 
-  <div style="margin-top:48px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;">
-    <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;">
-      <h1 class="page-title">{% if step == 'done' %}Готово{% elif step == 'checkout' %}Оформлення{% else %}Кошик{% endif %}</h1>
-      {% if not is_empty and step != 'done' %}<span class="catalog-count">{{ cart_items|length }} позицій</span>{% endif %}
+  <div class="checkout-head">
+    <div class="checkout-head__title">
+      <h1 class="page-title">{% if step == 'done' %}Дякуємо!{% else %}Оформлення замовлення{% endif %}</h1>
+      {% if not is_empty and step != 'done' %}
+      <span id="checkout-count" class="checkout-count">{{ cart_qty_total }} {{ cart_qty_total|plural_goods }}</span>
+      {% endif %}
     </div>
+    <ol class="checkout-steps" aria-label="Кроки оформлення">
+      {% for s in checkout_steps %}
+      <li class="checkout-steps__item {{ s.state }}">
+        <span class="checkout-steps__mark">
+          <span class="checkout-steps__dot">{{ s.n }}</span>
+          <span>{{ s.label }}</span>
+        </span>
+        {% if not forloop.last %}<span class="checkout-steps__line" aria-hidden="true"></span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
   </div>
 
   {% if step == 'done' and order %}
-  <div class="empty-state">
-    <div class="empty-state__icon" style="background:#e3f8e8;color:#2fb54a;">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+  <div class="checkout-done">
+    <div class="checkout-done__icon" aria-hidden="true">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
     </div>
-    <h2 style="margin:8px 0 0;font-size:28px;font-weight:600;">Замовлення {{ order.number }} прийнято</h2>
-    <p style="margin:0;max-width:440px;font-size:16px;color:#8a8a8a;">Дякуємо, {{ order.first_name }}! Менеджер зателефонує на номер {{ order.phone }} протягом 15 хвилин.</p>
-    <div style="margin-top:8px;display:flex;flex-wrap:wrap;justify-content:center;gap:8px 24px;font-size:14px;color:#8a8a8a;">
-      <span>Сума: <strong style="color:#111;">{{ order.total|floatformat:0 }} ₴</strong></span>
-      <span>Доставка: <strong style="color:#111;">{{ order.get_delivery_method_display }}</strong></span>
-      <span>Оплата: <strong style="color:#111;">{{ order.get_payment_method_display }}</strong></span>
+    <h2 class="checkout-done__title">Замовлення {{ order.number }} прийнято</h2>
+    <p class="checkout-done__text">Дякуємо, {{ order.first_name }}! Менеджер зателефонує на номер {{ order.phone }} протягом 15 хвилин, щоб підтвердити деталі.</p>
+    <div class="checkout-done__meta">
+      <span>Сума: <strong>{{ order.total|uah }}</strong></span>
+      <span>Доставка: <strong>{{ order.get_delivery_method_display }}</strong></span>
+      <span>Оплата: <strong>{{ order.get_payment_method_display }}</strong></span>
     </div>
-    <a href="{% url 'catalog:home' %}" class="btn" style="margin-top:16px;height:56px;padding:0 32px;">На головну</a>
+    <a href="{% url 'catalog:home' %}" class="btn">На головну</a>
   </div>
 
   {% elif is_empty %}
-  <div class="empty-state">
-    <div class="empty-state__icon">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path></svg>
+  <div class="checkout-empty">
+    <div class="checkout-empty__icon" aria-hidden="true">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
     </div>
-    <h2 style="margin:8px 0 0;font-size:28px;font-weight:600;">Кошик порожній</h2>
-    <p style="margin:0;max-width:380px;font-size:16px;color:#8a8a8a;">Оберіть замок або серцевину в каталозі — товари з’являться тут.</p>
-    <a href="{% url 'catalog:catalog' %}" class="btn" style="margin-top:16px;height:56px;padding:0 32px;">Перейти до каталогу</a>
+    <h2 class="checkout-empty__title">Кошик порожній</h2>
+    <p class="checkout-empty__text">Оберіть замок або серцевину в каталозі — товари з’являться тут.</p>
+    <a href="{% url 'catalog:catalog' %}" class="btn">Перейти до каталогу</a>
   </div>
 
   {% else %}
   <div class="checkout-layout">
-    <div>
-      {% if step != 'checkout' %}
-      <section class="checkout-card" id="checkout-items">
-        <h2><span class="step-n">1</span>Товари у кошику</h2>
-        {% include 'orders/partials/checkout_items.html' %}
-        <a href="{% url 'orders:checkout' %}?step=checkout" class="btn" style="margin-top:24px;width:100%;height:56px;">Оформити замовлення</a>
-      </section>
-      {% else %}
-      <form method="post" action="{% url 'orders:checkout' %}?step=checkout" id="checkout" style="display:flex;flex-direction:column;gap:24px;">
+    <div class="checkout-main">
+      <form method="post" action="{% url 'orders:checkout' %}?step=checkout" id="checkout" class="checkout-form">
         {% csrf_token %}
         {{ form.idempotency_key }}
+        {{ form.delivery_method }}
+        {{ form.payment_method }}
         {% if form.non_field_errors %}<ul class="errorlist">{{ form.non_field_errors }}</ul>{% endif %}
 
         <section class="checkout-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
-            <h2><span class="step-n">1</span>Товари у замовленні</h2>
-            <a href="{% url 'orders:checkout' %}" class="btn--ghost btn" style="height:40px;padding:0 14px;font-size:14px;">Редагувати кошик</a>
+          <div class="checkout-card__head">
+            <h2 class="checkout-card__title"><span class="checkout-card__n">1</span>Товари у замовленні</h2>
+            <button type="button" class="checkout-edit" data-open-cart>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path><path d="M13.5 6.5l4 4"></path></svg>
+              Редагувати кошик
+            </button>
           </div>
-          <div id="checkout-items">{% include 'orders/partials/checkout_items.html' %}</div>
+          <div id="checkout-items" class="checkout-items">
+            {% include 'orders/partials/checkout_items.html' %}
+          </div>
         </section>
 
         <section class="checkout-card">
-          <h2><span class="step-n">2</span>Контактні дані</h2>
-          <div class="form-grid">
-            <label class="field">Ім’я* {{ form.first_name }}{% if form.first_name.errors %}<ul class="errorlist">{{ form.first_name.errors }}</ul>{% endif %}</label>
-            <label class="field">Прізвище {{ form.last_name }}</label>
-            <label class="field">Телефон* {{ form.phone }}{% if form.phone.errors %}<ul class="errorlist">{{ form.phone.errors }}</ul>{% endif %}</label>
-            <label class="field">Email {{ form.email }}</label>
+          <h2 class="checkout-card__title"><span class="checkout-card__n">2</span>Контактні дані</h2>
+          <div class="checkout-fields">
+            <label class="field"><span>Ім’я*</span>{{ form.first_name }}{% if form.first_name.errors %}<ul class="errorlist">{{ form.first_name.errors }}</ul>{% endif %}</label>
+            <label class="field"><span>Прізвище</span>{{ form.last_name }}</label>
+            <label class="field"><span>Телефон*</span>{{ form.phone }}{% if form.phone.errors %}<ul class="errorlist">{{ form.phone.errors }}</ul>{% endif %}</label>
+            <label class="field"><span>Email</span>{{ form.email }}</label>
           </div>
         </section>
 
         <section class="checkout-card" data-choice-group>
-          <h2><span class="step-n">3</span>Доставка</h2>
-          {{ form.delivery_method }}
-          <div style="margin-top:32px;display:flex;flex-direction:column;gap:12px;">
-            {% for value,label in delivery_choices %}
-            <button type="button" class="choice {% if form.delivery_method.value == value or not form.delivery_method.value and value == 'np' %}is-active{% endif %}" data-choice data-name="delivery_method" data-value="{{ value }}">
-              <span class="choice__radio"></span>
-              <span style="flex:1;">
-                <span style="display:block;font-size:16px;font-weight:500;">{{ label }}</span>
+          <h2 class="checkout-card__title"><span class="checkout-card__n">3</span>Доставка</h2>
+          <div class="checkout-choices">
+            {% for opt in delivery_options %}
+            <button type="button"
+              class="checkout-choice{% if opt.active %} is-active{% endif %}"
+              data-choice
+              data-name="delivery_method"
+              data-value="{{ opt.value }}"
+              data-addr-label="{{ opt.addr_label }}"
+              data-addr-ph="{{ opt.addr_ph }}">
+              <span class="checkout-choice__radio" aria-hidden="true"></span>
+              <span class="checkout-choice__body">
+                <span class="checkout-choice__title">{{ opt.title }}</span>
+                <span class="checkout-choice__note">{{ opt.note }}</span>
               </span>
-              <span style="font-weight:600;">{% if value == 'pickup' %}Безкоштовно{% elif value == 'courier' %}150 ₴{% else %}80 ₴{% endif %}</span>
+              <span class="checkout-choice__price{% if opt.free %} is-free{% endif %}">{{ opt.price_label }}</span>
             </button>
             {% endfor %}
           </div>
-          <div class="form-grid" style="margin-top:24px;">
-            <label class="field">Район {{ form.district }}</label>
-            <label class="field">Адреса / відділення {{ form.address }}{% if form.address.errors %}<ul class="errorlist">{{ form.address.errors }}</ul>{% endif %}</label>
+          <div class="checkout-fields checkout-addr{% if delivery_method == 'pickup' %} is-hidden{% endif %}" data-checkout-addr>
+            <label class="field"><span>Місто*</span>{{ form.city }}{% if form.city.errors %}<ul class="errorlist">{{ form.city.errors }}</ul>{% endif %}</label>
+            <label class="field">
+              <span data-checkout-addr-label>{{ addr_label }}*</span>
+              {{ form.address }}
+              {% if form.address.errors %}<ul class="errorlist">{{ form.address.errors }}</ul>{% endif %}
+            </label>
+          </div>
+          <div class="checkout-pickup{% if delivery_method == 'pickup' %} is-visible{% endif %}" data-checkout-pickup>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.3"></circle></svg>
+            <span>Київ, магазин IRON CUT. Пн–Сб 9:00–19:00. Замовлення буде готове протягом 2 годин — ми надішлемо SMS.</span>
           </div>
         </section>
 
         <section class="checkout-card" data-choice-group>
-          <h2><span class="step-n">4</span>Оплата</h2>
-          {{ form.payment_method }}
-          <div style="margin-top:32px;display:flex;flex-direction:column;gap:12px;">
-            {% for value,label in payment_choices %}
-            <button type="button" class="choice {% if form.payment_method.value == value or not form.payment_method.value and value == 'cod' %}is-active{% endif %}" data-choice data-name="payment_method" data-value="{{ value }}">
-              <span class="choice__radio"></span>
-              <span style="font-size:16px;font-weight:500;">{{ label }}</span>
+          <h2 class="checkout-card__title"><span class="checkout-card__n">4</span>Оплата</h2>
+          <div class="checkout-choices">
+            {% for opt in payment_options %}
+            <button type="button"
+              class="checkout-choice checkout-choice--pay{% if opt.active %} is-active{% endif %}"
+              data-choice
+              data-name="payment_method"
+              data-value="{{ opt.value }}">
+              <span class="checkout-choice__radio" aria-hidden="true"></span>
+              <span class="checkout-choice__body">
+                <span class="checkout-choice__title">{{ opt.title }}</span>
+                <span class="checkout-choice__note">{{ opt.note }}</span>
+              </span>
             </button>
             {% endfor %}
           </div>
-          <label class="field" style="margin-top:24px;">Коментар {{ form.comment }}</label>
+          <label class="field checkout-comment"><span>Коментар до замовлення</span>{{ form.comment }}</label>
         </section>
 
-        <button type="submit" class="btn" style="height:56px;width:100%;">Підтвердити замовлення</button>
+        <button type="button" class="checkout-back" data-open-cart>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+          Повернутися до кошика
+        </button>
       </form>
-      {% endif %}
     </div>
 
-    <aside class="summary">
-      <h3 style="margin:0;font-size:20px;font-weight:600;">Разом</h3>
-      <div class="summary__row"><span>Товари</span><span id="summary-subtotal" style="color:#111;">{{ cart_subtotal|floatformat:0 }} ₴</span></div>
-      <div class="summary__row"><span>Доставка</span><span id="summary-delivery" style="color:#111;">{% if step == 'checkout' %}{{ delivery_price|floatformat:0 }} ₴{% else %}—{% endif %}</span></div>
-      <div class="summary__total"><span>До сплати</span><span id="summary-total">{% if step == 'checkout' %}{{ order_total|floatformat:0 }}{% else %}{{ cart_subtotal|floatformat:0 }}{% endif %} ₴</span></div>
+    <aside class="checkout-aside">
+      <div class="checkout-summary">
+        <h2 class="checkout-summary__title">Ваше замовлення</h2>
+        <dl class="checkout-summary__rows">
+          <div class="checkout-summary__row">
+            <dt>Товари ({{ cart_qty_total }})</dt>
+            <dd id="summary-subtotal-old">{{ cart_subtotal_old|uah }}</dd>
+          </div>
+          <div class="checkout-summary__row">
+            <dt>Знижка</dt>
+            <dd id="summary-savings" class="is-save">−{{ cart_savings|uah }}</dd>
+          </div>
+          <div class="checkout-summary__row">
+            <dt>Доставка</dt>
+            <dd id="summary-delivery"{% if delivery_price == 0 %} class="is-ship-free"{% endif %}>
+              {% if delivery_price == 0 %}Безкоштовно{% else %}{{ delivery_price|uah }}{% endif %}
+            </dd>
+          </div>
+        </dl>
+        <span id="summary-subtotal" class="visually-hidden">{{ cart_subtotal|uah }}</span>
+        <div class="checkout-summary__rule" aria-hidden="true"></div>
+        <div class="checkout-summary__total">
+          <span class="checkout-summary__total-label">Разом</span>
+          <span id="summary-total" class="checkout-summary__total-value">{{ order_total|uah }}</span>
+        </div>
+        <button type="submit" form="checkout" class="checkout-summary__submit">Підтвердити замовлення</button>
+        <p class="checkout-summary__legal">Натискаючи кнопку, ви погоджуєтесь з умовами договору оферти та політикою конфіденційності.</p>
+      </div>
+      <div class="checkout-trust">
+        <span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>
+          Гарантія 12 місяців на всі товари
+        </span>
+        <span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"></path><path d="M3.5 4v4.5H8"></path><path d="M12 8v4l2.5 2"></path></svg>
+          Обмін та повернення протягом 14 днів
+        </span>
+      </div>
     </aside>
   </div>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not is_empty and step != 'done' %}
+<script src="{% static 'js/checkout.js' %}"></script>
+{% endif %}
 {% endblock %}

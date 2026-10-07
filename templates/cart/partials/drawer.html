@@ -9,7 +9,7 @@
       </a>
       <div class="cart-row__body">
         <div class="cart-row__top">
-          <a href="{{ item.product.get_absolute_url }}" class="cart-row__name">{{ item.product.name }}</a>
+          <p class="cart-row__name">{{ item.product.name }}</p>
           <form hx-post="{% url 'cart:update' item.product.pk %}" hx-target="#cart-drawer-body" hx-swap="innerHTML">
             {% csrf_token %}
             <input type="hidden" name="action" value="remove">
@@ -68,7 +68,7 @@
 {% else %}
   <div class="cart-drawer__empty">
     <div class="cart-drawer__empty-ico">{% include 'partials/icon_cart.html' with size=36 %}</div>
-    <h3>Кошик порожній</h3>
+    <p class="cart-drawer__empty-title">Кошик порожній</p>
     <p>Оберіть замок або серцевину в каталозі — товари з’являться тут.</p>
     <button type="button" class="btn" data-close-cart>Перейти до покупок</button>
   </div>

@@ -82,31 +82,40 @@ class CartUpdateView(View):
             error = ''
         except CartError as exc:
             error = str(exc)
+        from decimal import Decimal
+
+        items = cart.items()
         subtotal = cart.subtotal()
+        subtotal_old = sum((item['old_total'] for item in items), Decimal('0'))
+        savings = subtotal_old - subtotal
+        if savings < 0:
+            savings = Decimal('0')
         context = {
             'cart_count': cart.total_quantity(),
-            'cart_items': cart.items(),
+            'cart_items': items,
             'cart_subtotal': subtotal,
+            'cart_subtotal_old': subtotal_old,
+            'cart_savings': savings,
+            'cart_qty_total': cart.total_quantity(),
             'cart_error': error,
         }
         if request.headers.get('HX-Request') == 'true':
             page = request.POST.get('page')
             if page in {'checkout', 'cart'}:
-                if page == 'checkout':
-                    delivery_method = request.POST.get('delivery_method') or Order.DeliveryMethod.NP
-                    delivery_price = DELIVERY_PRICES.get(
-                        delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP]
-                    )
-                    context.update(
-                        {
-                            'page': 'checkout',
-                            'step': 'checkout',
-                            'delivery_price': delivery_price,
-                            'order_total': subtotal + delivery_price,
-                        }
-                    )
-                else:
-                    context.update({'page': 'cart', 'step': 'cart'})
+                delivery_method = request.POST.get('delivery_method') or Order.DeliveryMethod.NP
+                delivery_price = DELIVERY_PRICES.get(
+                    delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP]
+                )
+                context.update(
+                    {
+                        'page': 'checkout',
+                        'step': 'checkout',
+                        'delivery_method': delivery_method,
+                        'delivery_price': delivery_price,
+                        'order_total': subtotal + delivery_price,
+                        'oob_updates': True,
+                    }
+                )
                 return render(request, 'orders/partials/checkout_items.html', context)
             return render(request, 'cart/partials/cart_oob.html', context)
         return redirect('orders:checkout')

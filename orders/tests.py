@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from catalog.models import Category, Product
 from orders.models import Order, OrderItem
+from orders.utils import plural_positions
 
 
 class CheckoutTests(TestCase):
@@ -24,6 +25,16 @@ class CheckoutTests(TestCase):
     def _add_to_cart(self, qty=1):
         self.client.post(reverse('cart:add', args=[self.product.pk]), {'quantity': qty})
 
+    def test_plural_positions(self):
+        self.assertEqual(plural_positions(1), 'позиція')
+        self.assertEqual(plural_positions(2), 'позиції')
+        self.assertEqual(plural_positions(3), 'позиції')
+        self.assertEqual(plural_positions(4), 'позиції')
+        self.assertEqual(plural_positions(5), 'позицій')
+        self.assertEqual(plural_positions(11), 'позицій')
+        self.assertEqual(plural_positions(21), 'позиція')
+        self.assertEqual(plural_positions(22), 'позиції')
+
     def test_totals_qty(self):
         """qty>1: cart / HTMX / checkout UI / Order(+delivery) / stock."""
         price = Decimal('1700.00')
@@ -42,8 +53,9 @@ class CheckoutTests(TestCase):
         checkout = self.client.get(reverse('orders:checkout'))
         self.assertEqual(checkout.status_code, 200)
         body = checkout.content.decode()
-        self.assertIn('3400', body)
-        self.assertContains(checkout, '3400')
+        self.assertIn('3 400', body)
+        self.assertContains(checkout, 'Оформлення замовлення')
+        self.assertContains(checkout, 'checkout-steps')
 
         inc = self.client.post(
             reverse('cart:update', args=[self.product.pk]),
@@ -64,9 +76,9 @@ class CheckoutTests(TestCase):
         )
         self.assertEqual(inc_checkout.status_code, 200)
         inc_body = inc_checkout.content.decode()
-        self.assertIn('6800', inc_body)
+        self.assertIn('6 800', inc_body)
         # NP delivery 80 → order total 6880; OOB summary
-        self.assertIn('6880', inc_body)
+        self.assertIn('6 880', inc_body)
         self.assertEqual(
             self.client.session['cart'][str(self.product.pk)]['qty'],
             4,
@@ -92,6 +104,7 @@ class CheckoutTests(TestCase):
             {
                 'first_name': 'Олег',
                 'phone': '+380670000099',
+                'city': 'Київ',
                 'delivery_method': 'np',
                 'payment_method': 'cod',
                 'address': 'відділення 1',
@@ -148,20 +161,13 @@ class CheckoutTests(TestCase):
         }
         r1 = self.client.post(reverse('orders:checkout') + '?step=checkout', payload)
         self.assertEqual(r1.status_code, 302)
-        # повторна відправка того ж ключа після очистки кошика
         order = Order.objects.get()
         from orders.services import create_order_from_cart
-
-        class Req:
-            session = self.client.session
-
-        # emulate second submit with same key via service
         from django.test import RequestFactory
 
         factory = RequestFactory()
         request = factory.post('/')
         request.session = self.client.session
-        # cart empty now; still return existing order
         existing, created = create_order_from_cart(
             request,
             {
@@ -169,6 +175,7 @@ class CheckoutTests(TestCase):
                 'last_name': '',
                 'phone': '0670000000',
                 'email': '',
+                'city': '',
                 'district': None,
                 'delivery_method': 'pickup',
                 'payment_method': 'cod',
@@ -187,7 +194,6 @@ class CheckoutTests(TestCase):
         self.product.stock = 1
         self.product.save()
         self._add_to_cart(1)
-        # artificially inflate session qty
         session = self.client.session
         session['cart'] = {str(self.product.pk): {'qty': 5}}
         session['checkout_idempotency'] = 'idem-over'

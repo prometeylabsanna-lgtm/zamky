@@ -36,13 +36,13 @@ class Order(models.Model):
 
     class DeliveryMethod(models.TextChoices):
         NP = 'np', 'Нова Пошта'
-        COURIER = 'courier', 'Курʼєр по Києву'
+        COURIER = 'courier', 'Кур\u2019єр по Києву'
         PICKUP = 'pickup', 'Самовивіз'
 
     class PaymentMethod(models.TextChoices):
         COD = 'cod', 'Накладений платіж'
-        CARD = 'card', 'Оплата карткою'
-        INVOICE = 'invoice', 'Рахунок для юросіб'
+        CARD = 'card', 'Карткою онлайн'
+        INVOICE = 'invoice', 'Безготівковий розрахунок'
 
     number = models.CharField('Номер', max_length=32, unique=True, editable=False)
     status = models.CharField(
