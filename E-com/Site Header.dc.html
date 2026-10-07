@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position: relative; z-index: 40; font-family: 'Inter', sans-serif; color: #111; background: #fff; box-shadow: {{ headerShadow }}; transition: box-shadow .2s;">
+  <header style="max-width: 1440px; margin: 0 auto; padding: 24px clamp(16px, 2vw, 28px) 12px; box-sizing: border-box;">
+    <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; align-items: center; height: 48px; gap: 20px;">
+        <a href="Home.dc.html" style="font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: #111;">Logo</a>
+        <nav style="display: flex; align-items: center; gap: 20px; margin-left: 16px; font-size: 16px; line-height: 1; white-space: nowrap;">
+          <button onClick="{{ toggleMenu }}" style="display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; font-family: inherit; font-size: 16px; font-weight: 600; color: {{ catalogColor }}; cursor: pointer;" style-hover="color: #ffc400;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
+            <span>Каталог</span>
+          </button>
+          <a href="Home.dc.html#new" style="color: #111;">Новинкі</a>
+          <a href="Info.dc.html#about" style="color: #111;">Про нас</a>
+        </nav>
+        <div style="flex: 1;"></div>
+        <div style="position: relative; flex: none;">
+          <button onClick="{{ toggleDistrict }}" aria-expanded="{{ districtOpen }}" aria-label="Оберіть район" style="height: 48px; display: flex; align-items: center; gap: 6px; border: 0; background: none; padding: 0 2px; font-family: inherit; font-size: 16px; color: #111; cursor: pointer; white-space: nowrap;" style-hover="color: #ffc400;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
+            <span style="max-width: {{ districtLabelMax }}; overflow: hidden; text-overflow: ellipsis;">{{ districtLabel }}</span>
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#c8c8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ districtRot }}; transition: transform .2s;"><path d="M3 4.5l3 3 3-3"></path></svg>
+          </button>
+          <sc-if value="{{ districtOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeDistrict }}" style="position: fixed; inset: 0; z-index: 45;"></div>
+            <div style="position: absolute; top: 56px; right: -40px; z-index: 46; width: 300px; max-height: 70vh; overflow-y: auto; padding: 6px; box-sizing: border-box; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08);">
+              <div style="padding: 10px 12px 6px; font-size: 12px; color: #a3a3a3;">Оберіть район Києва</div>
+              <ul style="list-style: none; margin: 0; padding: 0;">
+                <li onClick="{{ pickCity }}" style="height: 40px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; font-weight: 600; color: #111; background: {{ cityBg }}; cursor: pointer; white-space: nowrap;" style-hover="background: #fbfbfb;">
+                  <span>Київ — усе місто</span>
+                  <sc-if value="{{ cityActive }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                </li>
+                <sc-for list="{{ districtList }}" as="d" hint-placeholder-count="10">
+                  <li onClick="{{ d.onPick }}" style="height: 40px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; color: #111; background: {{ d.bg }}; cursor: pointer; white-space: nowrap;" style-hover="background: #fbfbfb;">
+                    <span>{{ d.name }}</span>
+                    <sc-if value="{{ d.active }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+          </sc-if>
+        </div>
+        <label style="width: clamp(200px, 22vw, 330px); height: 48px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 0 16px; cursor: text;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
+          <input placeholder="Пошук по каталогу" style="flex: 1; min-width: 0; border: 0; outline: none; font-family: inherit; font-size: 11px; color: #111; background: none;">
+        </label>
+        <div style="position: relative; flex: none;">
+          <button onClick="{{ toggleContacts }}" aria-expanded="{{ contactsOpen }}" style="min-width: 199px; padding: 0 16px; white-space: nowrap; font-family: inherit; cursor: pointer; height: 48px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; color: #111;" style-hover="border-color: #ffc400;">
+          <svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="#ffc400" stroke-width="1.6"><rect x="4" y="1" width="12" height="20" rx="2.5"></rect><path d="M9 17.5h2" stroke-linecap="round"></path></svg>
+          <span>Наші контакти</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ contactsRot }}; transition: transform .2s;"><path d="M3 4.5l3 3 3-3"></path></svg>
+        </button>
+          <sc-if value="{{ contactsOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeContacts }}" style="position: fixed; inset: 0; z-index: 45;"></div>
+            <div style="position: absolute; top: 56px; right: 0; z-index: 46; width: 280px; padding: 20px; box-sizing: border-box; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 4px; white-space: nowrap;">
+              <a href="tel:0670000000" style="height: 44px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; color: #111;" style-hover="color: #ffc400;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>067 00 00 00</a>
+              <a href="tel:0660000000" style="height: 44px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; color: #111;" style-hover="color: #ffc400;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>066 00 00 00</a>
+              <a href="mailto:xxx@gmail.com" style="height: 40px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: #111;" style-hover="color: #ffc400;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 6.5L12 13l8.5-6.5"></path></svg>xxx@gmail.com</a>
+              <div style="margin-top: 8px; padding-top: 12px; border-top: 1px solid #eeeeee; font-size: 13px; line-height: 1.5; color: #8a8a8a;">Пн–Пт 9:00–19:00, Сб 10:00–17:00</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="position: relative; flex: none;">
+          <button onClick="{{ toggleLang }}" aria-label="Мова" style="height: 48px; display: flex; align-items: center; gap: 4px; border: 0; background: none; padding: 0 2px; font-family: inherit; font-size: 16px; color: #111; cursor: pointer;" style-hover="color: #ffc400;">
+            <span>{{ langLabel }}</span>
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#c8c8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ langRot }}; transition: transform .2s;"><path d="M3 4.5l3 3 3-3"></path></svg>
+          </button>
+          <sc-if value="{{ langOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeLang }}" style="position: fixed; inset: 0; z-index: 45;"></div>
+            <ul style="position: absolute; top: 52px; right: -8px; z-index: 46; min-width: 160px; margin: 0; padding: 6px; list-style: none; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08);">
+              <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+                <li onClick="{{ l.onPick }}" style="height: 40px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; color: #111; background: {{ l.bg }}; cursor: pointer; white-space: nowrap;" style-hover="background: #fbfbfb;">
+                  <span style="display: flex; align-items: center; gap: 10px;"><span style="font-weight: 600; width: 22px;">{{ l.code }}</span><span style="color: #8a8a8a;">{{ l.name }}</span></span>
+                  <sc-if value="{{ l.active }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+        </div>
+        <button onClick="{{ openCart }}" aria-label="Кошик" style="box-sizing: border-box; position: relative; border: 0; width: 48px; height: 48px; flex: none; border: 0; border-radius: 8px; background: #ffc400; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;" style-hover="background: #f0b800; color: #fff;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
+          <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+            <span style="position: absolute; top: -7px; right: -7px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 11px; background: #111; color: #fff; font-size: 11px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; transform: {{ badgeScale }}; transition: transform .2s cubic-bezier(.3,1.6,.5,1);">{{ cartCount }}</span>
+          </sc-if>
+        </button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isCompact }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; height: 48px; gap: 16px;">
+          <a href="Home.dc.html" style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: #111;">Logo</a>
+          <sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+            <nav style="display: flex; align-items: center; gap: 20px; margin-left: 12px; font-size: 16px; line-height: 1; white-space: nowrap;">
+              <a href="Home.dc.html#new" style="color: #111;">Новинкі</a>
+            </nav>
+          </sc-if>
+          <div style="flex: 1;"></div>
+          <div style="position: relative; flex: none;">
+          <button onClick="{{ toggleLang }}" aria-label="Мова" style="height: 48px; display: flex; align-items: center; gap: 4px; border: 0; background: none; padding: 0 2px; font-family: inherit; font-size: 16px; color: #111; cursor: pointer;" style-hover="color: #ffc400;">
+            <span>{{ langLabel }}</span>
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#c8c8c8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ langRot }}; transition: transform .2s;"><path d="M3 4.5l3 3 3-3"></path></svg>
+          </button>
+          <sc-if value="{{ langOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeLang }}" style="position: fixed; inset: 0; z-index: 45;"></div>
+            <ul style="position: absolute; top: 52px; right: -8px; z-index: 46; min-width: 160px; margin: 0; padding: 6px; list-style: none; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08);">
+              <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+                <li onClick="{{ l.onPick }}" style="height: 40px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; color: #111; background: {{ l.bg }}; cursor: pointer; white-space: nowrap;" style-hover="background: #fbfbfb;">
+                  <span style="display: flex; align-items: center; gap: 10px;"><span style="font-weight: 600; width: 22px;">{{ l.code }}</span><span style="color: #8a8a8a;">{{ l.name }}</span></span>
+                  <sc-if value="{{ l.active }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+        </div>
+          <button onClick="{{ openMnav }}" aria-label="Меню" style="width: 48px; height: 48px; flex: none; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; color: #111; cursor: pointer;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
+          </button>
+          <button onClick="{{ openCart }}" aria-label="Кошик" style="box-sizing: border-box; position: relative; border: 0; width: 48px; height: 48px; flex: none; border: 0; border-radius: 8px; background: #ffc400; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;" style-hover="color: #fff;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
+            <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+              <span style="position: absolute; top: -7px; right: -7px; min-width: 22px; height: 22px; padding: 0 5px; box-sizing: border-box; border-radius: 11px; background: #111; color: #fff; font-size: 11px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; transform: {{ badgeScale }}; transition: transform .2s cubic-bezier(.3,1.6,.5,1);">{{ cartCount }}</span>
+            </sc-if>
+          </button>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <label style="flex: 1; min-width: 0; height: 48px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; display: flex; align-items: center; gap: 12px; padding: 0 16px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
+            <input placeholder="Пошук по каталогу" style="flex: 1; min-width: 0; border: 0; outline: none; font-family: inherit; font-size: 13px; color: #111; background: none;">
+          </label>
+          <div style="position: relative; flex: none;">
+            <button onClick="{{ toggleDistrict }}" aria-label="Оберіть район" style="white-space: nowrap; font-family: inherit; cursor: pointer; height: 48px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; font-size: 14px; color: #111;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
+              <sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}"><span>{{ districtLabel }}</span></sc-if>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3 3 3-3"></path></svg>
+            </button>
+            <sc-if value="{{ districtOpen }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ closeDistrict }}" style="position: fixed; inset: 0; z-index: 45;"></div>
+              <div style="position: absolute; top: 56px; right: -64px; z-index: 46; width: min(300px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; padding: 6px; box-sizing: border-box; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08);">
+                <div style="padding: 10px 12px 6px; font-size: 12px; color: #a3a3a3;">Оберіть район Києва</div>
+                <ul style="list-style: none; margin: 0; padding: 0;">
+                  <li onClick="{{ pickCity }}" style="height: 44px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; font-weight: 600; color: #111; background: {{ cityBg }}; cursor: pointer; white-space: nowrap;">
+                    <span>Київ — усе місто</span>
+                    <sc-if value="{{ cityActive }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </li>
+                  <sc-for list="{{ districtList }}" as="d" hint-placeholder-count="10">
+                    <li onClick="{{ d.onPick }}" style="height: 44px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; color: #111; background: {{ d.bg }}; cursor: pointer; white-space: nowrap;">
+                      <span>{{ d.name }}</span>
+                      <sc-if value="{{ d.active }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                    </li>
+                  </sc-for>
+                </ul>
+              </div>
+            </sc-if>
+          </div>
+          <div style="position: relative; flex: none;">
+            <button onClick="{{ toggleContacts }}" aria-label="Наші контакти" style="white-space: nowrap; font-family: inherit; cursor: pointer; height: 48px; flex: none; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 14px; font-size: 14px; color: #111;">
+            <svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="#ffc400" stroke-width="1.6"><rect x="4" y="1" width="12" height="20" rx="2.5"></rect><path d="M9 17.5h2" stroke-linecap="round"></path></svg>
+            <sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}"><span>Наші контакти</span></sc-if>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3 3 3-3"></path></svg>
+          </button>
+            <sc-if value="{{ contactsOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeContacts }}" style="position: fixed; inset: 0; z-index: 45;"></div>
+            <div style="position: absolute; top: 56px; right: 0; z-index: 46; width: 280px; padding: 20px; box-sizing: border-box; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 4px; white-space: nowrap;">
+              <a href="tel:0670000000" style="height: 44px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; color: #111;" style-hover="color: #ffc400;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>067 00 00 00</a>
+              <a href="tel:0660000000" style="height: 44px; display: flex; align-items: center; gap: 12px; font-size: 18px; font-weight: 600; color: #111;" style-hover="color: #ffc400;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>066 00 00 00</a>
+              <a href="mailto:xxx@gmail.com" style="height: 40px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: #111;" style-hover="color: #ffc400;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 6.5L12 13l8.5-6.5"></path></svg>xxx@gmail.com</a>
+              <div style="margin-top: 8px; padding-top: 12px; border-top: 1px solid #eeeeee; font-size: 13px; line-height: 1.5; color: #8a8a8a;">Пн–Пт 9:00–19:00, Сб 10:00–17:00</div>
+            </div>
+          </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </header>
+
+  <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMenu }}" style="position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 50;"></div>
+    <div style="position: {{ menuPos }}; top: {{ menuTop }}; left: {{ menuLeft }}; right: {{ menuRight }}; width: {{ menuW }}; max-width: calc(100vw - 32px); max-height: {{ menuMaxH }}; overflow: auto; box-sizing: border-box; background: #fff; border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.12); z-index: 60; padding: 20px; display: flex; flex-direction: {{ menuDir }}; gap: 20px; transition: width .25s ease;">
+      <div style="flex: {{ colFlex }}; min-width: 0; display: flex; flex-direction: column;">
+        <button onClick="{{ closeMenu }}" style="width: 100%; height: 48px; border: 0; border-radius: 8px; background: #e8e8e8; color: #111; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer; flex: none;">
+          <span>Каталог товрів</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
+        </button>
+        <ul style="list-style: none; margin: 20px 0 0; padding: 0;">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="11">
+            <li onClick="{{ c.onPick }}" style="height: 44px; display: flex; align-items: center; gap: 8px; border-bottom: {{ c.border }}; color: {{ c.accent }}; cursor: pointer;" style-hover="color: #ffc400;">
+              <span style="width: 24px; height: 24px; flex: none; display: flex; align-items: center;">
+                <sc-if value="{{ c.isLock }}" hint-placeholder-val="{{ true }}">
+                  <sc-if value="{{ c.isCyl }}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg></sc-if><sc-if value="{{ c.isPad }}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path><rect x="4.75" y="10.5" width="14.5" height="10.5" rx="3.5"></rect><circle cx="12" cy="14.8" r="1.6"></circle><path d="M12 16.4v2"></path></svg></sc-if><sc-if value="{{ c.isShield }}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><rect x="9" y="11" width="6" height="4.8" rx="1"></rect><path d="M10.4 11V9.7a1.6 1.6 0 0 1 3.2 0V11"></path></svg></sc-if>
+                </sc-if>
+                <sc-if value="{{ c.logo }}" hint-placeholder-val="{{ false }}">
+                  <img src="{{ c.logo }}" alt="" style="width: 32px; height: 26px; margin-left: -2px; flex: none; display: block;">
+                </sc-if>
+              </span>
+              <span style="flex: 1; font-size: 16px; line-height: 1; color: #3d3d3d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ c.name }}</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+            </li>
+          </sc-for>
+        </ul>
+      </div>
+
+      <sc-if value="{{ hasCol2 }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1 1 0; min-width: 0; border-left: {{ sepL }}; border-top: {{ sepT }}; padding-left: {{ sepPadL }}; padding-top: {{ sepPadT }}; display: flex; flex-direction: column;">
+          <button onClick="{{ backToCats }}" style="align-self: flex-start; display: flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; font-family: inherit; font-size: 12px; line-height: 1; color: #c8c8c8; height: 16px; cursor: pointer;" style-hover="color: #ffc400;">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+            <span>{{ catName }}</span>
+          </button>
+          <div style="margin-top: 26px; display: flex; align-items: center; gap: 24px; color: #ffc400; min-height: 44px;">
+            <sc-if value="{{ catIsLock }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ catIsCyl }}" hint-placeholder-val="{{ false }}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg></sc-if><sc-if value="{{ catIsPad }}" hint-placeholder-val="{{ false }}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path><rect x="4.75" y="10.5" width="14.5" height="10.5" rx="3.5"></rect><circle cx="12" cy="14.8" r="1.6"></circle><path d="M12 16.4v2"></path></svg></sc-if><sc-if value="{{ catIsShield }}" hint-placeholder-val="{{ false }}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><rect x="9" y="11" width="6" height="4.8" rx="1"></rect><path d="M10.4 11V9.7a1.6 1.6 0 0 1 3.2 0V11"></path></svg></sc-if>
+            </sc-if>
+            <sc-if value="{{ catLogo }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ catLogo }}" alt="" style="width: 54px; height: 44px; flex: none; display: block; object-fit: contain;">
+            </sc-if>
+            <span style="font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: #111; line-height: 1;">{{ catName }}</span>
+          </div>
+          <ul style="list-style: none; margin: 25px 0 0; padding: 0;">
+            <sc-for list="{{ subs }}" as="s" hint-placeholder-count="4">
+              <li onClick="{{ s.onPick }}" style="height: 44px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eeeeee; color: {{ s.accent }}; cursor: pointer;" style-hover="color: #ffc400;">
+                <span style="flex: 1; font-size: 16px; line-height: 1; color: #555;">{{ s.name }}</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+              </li>
+            </sc-for>
+          </ul>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasCol3 }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1 1 0; min-width: 0; border-left: {{ sepL }}; border-top: {{ sepT }}; padding-left: {{ sepPadL }}; padding-top: {{ sepPadT }}; display: flex; flex-direction: column;">
+          <button onClick="{{ backToSubs }}" style="align-self: flex-start; display: flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; font-family: inherit; font-size: 12px; line-height: 1; color: #c8c8c8; height: 16px; cursor: pointer;" style-hover="color: #ffc400;">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+            <span>{{ subName }}</span>
+          </button>
+          <div style="margin-top: 26px; display: flex; align-items: center; gap: 24px; color: #ffc400; min-height: 44px;">
+            <sc-if value="{{ catIsLock }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ catIsCyl }}" hint-placeholder-val="{{ false }}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg></sc-if><sc-if value="{{ catIsPad }}" hint-placeholder-val="{{ false }}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path><rect x="4.75" y="10.5" width="14.5" height="10.5" rx="3.5"></rect><circle cx="12" cy="14.8" r="1.6"></circle><path d="M12 16.4v2"></path></svg></sc-if><sc-if value="{{ catIsShield }}" hint-placeholder-val="{{ false }}"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><rect x="9" y="11" width="6" height="4.8" rx="1"></rect><path d="M10.4 11V9.7a1.6 1.6 0 0 1 3.2 0V11"></path></svg></sc-if>
+            </sc-if>
+            <sc-if value="{{ catLogo }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ catLogo }}" alt="" style="width: 54px; height: 44px; flex: none; display: block; object-fit: contain;">
+            </sc-if>
+            <span style="font-size: 32px; font-weight: 600; letter-spacing: -0.02em; color: #111; line-height: 1;">{{ subName }}</span>
+          </div>
+          <ul style="list-style: none; margin: 25px 0 0; padding: 0;">
+            <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="5">
+              <li onClick="{{ l.onPick }}" style="height: 44px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eeeeee; color: {{ l.accent }}; cursor: pointer;" style-hover="color: #ffc400;">
+                <span style="flex: 1; font-size: 16px; line-height: 1; color: #555;">{{ l.name }}</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+              </li>
+            </sc-for>
+          </ul>
+          <a href="{{ findHref }}" style="margin-top: auto; padding-top: 24px; display: block;">
+            <span style="width: 100%; height: 48px; border-radius: 8px; background: #ffc400; color: #fff; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center;" style-hover="background: #f0b800;">Знайти</span>
+          </a>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <div onClick="{{ closeCart }}" style="position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 70; opacity: {{ cartOverlayOp }}; pointer-events: {{ cartPE }}; transition: opacity .3s ease;"></div>
+  <aside aria-label="Кошик" style="position: fixed; top: 0; right: 0; bottom: 0; width: min(520px, 100vw); background: #fff; z-index: 80; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; box-shadow: {{ cartShadow }}; visibility: {{ cartVis }}; transform: {{ cartX }}; transition: transform .35s cubic-bezier(.2,.7,.2,1), visibility .35s, box-shadow .35s; font-family: 'Inter', sans-serif;">
+    <div style="padding: 32px clamp(20px, 3vw, 40px) 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+      <div style="display: flex; align-items: baseline; gap: 12px;">
+        <h2 style="margin: 0; font-size: 32px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; color: #111;">Кошик</h2>
+        <span style="font-size: 15px; color: #a3a3a3;">{{ cartCountLabel }}</span>
+      </div>
+      <button onClick="{{ closeCart }}" aria-label="Закрити" style="width: 44px; height: 44px; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; color: #111; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="border-color: #ffc400;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
+      </button>
+    </div>
+
+    <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; padding: 40px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: #fffaeb; color: #ffc400; display: flex; align-items: center; justify-content: center;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
+        </div>
+        <h3 style="margin: 8px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; color: #111;">Кошик порожній</h3>
+        <p style="margin: 0; max-width: 300px; font-size: 15px; line-height: 1.5; color: #8a8a8a;">Оберіть замок або серцевину в каталозі — товари з’являться тут.</p>
+        <button onClick="{{ closeCart }}" style="margin-top: 12px; height: 56px; padding: 0 32px; border: 0; border-radius: 8px; background: #ffc400; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;" style-hover="background: #f0b800;">Перейти до покупок</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ cartHas }}" hint-placeholder-val="{{ false }}">
+      
+      <div style="flex: 1 0 auto; padding: 8px clamp(20px, 3vw, 40px);">
+        <sc-for list="{{ cartItems }}" as="it" hint-placeholder-count="2">
+          <div style="display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 20px; padding: 24px 0; border-bottom: 1px solid #eeeeee;">
+            <a href="Product.dc.html" style="width: 96px; height: 96px; border-radius: 12px; background: #fbfbfb; padding: 8px; box-sizing: border-box; display: block;">
+              <img src="{{ it.img }}" alt="" style="width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; display: block;">
+            </a>
+            <div style="min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <a href="Product.dc.html" style="flex: 1; min-width: 0; font-size: 15px; line-height: 1.35; font-weight: 500; color: #111; text-wrap: pretty;">{{ it.name }}</a>
+                <button onClick="{{ it.remove }}" aria-label="Видалити" title="Видалити" style="width: 32px; height: 32px; flex: none; margin: -4px -6px 0 0; border: 0; border-radius: 8px; background: none; color: #b5b5b5; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="color: #ff5a4f; background: #fff3f2;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l.8 12.2a1.5 1.5 0 0 0 1.5 1.3h6.4a1.5 1.5 0 0 0 1.5-1.3L17.5 7"></path><path d="M10 11v6M14 11v6"></path></svg>
+                </button>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; line-height: 1.2; color: #8a8a8a;">
+                <span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"><span style="width: 10px; height: 10px; border-radius: 50%; background: {{ it.swatch }}; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);"></span>{{ it.color }}</span>
+                <span style="width: 3px; height: 3px; border-radius: 50%; background: #d6d6d6;"></span>
+                <span style="white-space: nowrap;">{{ it.size }}</span>
+              </div>
+              <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="height: 40px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; display: flex; align-items: center;">
+                  <button onClick="{{ it.dec }}" aria-label="Менше" style="width: 36px; height: 100%; border: 0; background: none; color: {{ it.decColor }}; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10"></path></svg></button>
+                  <span style="min-width: 24px; text-align: center; font-size: 15px; font-weight: 600; color: #111;">{{ it.qty }}</span>
+                  <button onClick="{{ it.inc }}" aria-label="Більше" style="width: 36px; height: 100%; border: 0; background: none; color: #ffc400; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M8 3v10"></path></svg></button>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <span style="font-size: 12px; line-height: 1; color: #a3a3a3; text-decoration: line-through;">{{ it.oldTotal }}</span>
+                  <span style="font-size: 20px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; color: #111; white-space: nowrap;">{{ it.total }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding: 24px clamp(20px, 3vw, 40px) 32px; border-top: 1px solid #eeeeee; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; font-size: 14px; color: #8a8a8a;"><span>Товари ({{ cartCount }})</span><span style="color: #111;">{{ subtotalOld }}</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 14px; color: #8a8a8a;"><span>Знижка</span><span style="color: #ff5a4f;">−{{ savings }}</span></div>
+        <div style="margin-top: 8px; display: flex; align-items: flex-end; justify-content: space-between;">
+          <span style="font-size: 16px; color: #111;">Разом</span>
+          <span style="font-size: 36px; line-height: 0.9; font-weight: 700; letter-spacing: -0.03em; color: #111;">{{ subtotal }}</span>
+        </div>
+        <a href="Checkout.dc.html" style="margin-top: 12px; height: 56px; border-radius: 8px; background: #ffc400; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; font-weight: 600;" style-hover="background: #f0b800; color: #fff;">
+          Оформити замовлення
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+        </a>
+        <button onClick="{{ closeCart }}" style="height: 48px; border: 0; background: none; color: #111; font-size: 15px; cursor: pointer;" style-hover="color: #ffc400;">Продовжити покупки</button>
+      </div>
+    </sc-if>
+  </aside>
+
+  <div onClick="{{ closeMnav }}" style="position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 70; opacity: {{ mnavOp }}; pointer-events: {{ mnavPE }}; transition: opacity .3s ease;"></div>
+  <nav aria-label="Меню" style="position: fixed; top: 0; left: 0; bottom: 0; width: min(440px, 100vw); background: #fff; z-index: 80; overflow-y: auto; overscroll-behavior: contain; visibility: {{ mnavVis }}; transform: {{ mnavX }}; transition: transform .35s cubic-bezier(.2,.7,.2,1), visibility .35s; font-family: 'Inter', sans-serif; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 1; background: #fff; padding: 24px 20px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+      <a href="Home.dc.html" style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: #111;">Logo</a>
+      <button onClick="{{ closeMnav }}" aria-label="Закрити" style="width: 48px; height: 48px; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; color: #111; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
+      </button>
+    </div>
+    <div style="flex: 1 0 auto; padding: 8px 20px 32px; display: flex; flex-direction: column;">
+      <sc-if value="{{ mLevel0 }}" hint-placeholder-val="{{ true }}">
+        <div style="height: 48px; border-radius: 8px; background: #ffc400; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 16px; font-weight: 600;">
+          <span>Каталог товрів</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
+        </div>
+        <ul style="list-style: none; margin: 12px 0 0; padding: 0;">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="11">
+            <li onClick="{{ c.onPick }}" style="height: 52px; display: flex; align-items: center; gap: 12px; border-bottom: {{ c.border }}; color: #555; cursor: pointer;">
+              <span style="width: 24px; height: 24px; flex: none; display: flex; align-items: center;">
+                <sc-if value="{{ c.isLock }}" hint-placeholder-val="{{ true }}"><sc-if value="{{ c.isCyl }}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg></sc-if><sc-if value="{{ c.isPad }}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path><rect x="4.75" y="10.5" width="14.5" height="10.5" rx="3.5"></rect><circle cx="12" cy="14.8" r="1.6"></circle><path d="M12 16.4v2"></path></svg></sc-if><sc-if value="{{ c.isShield }}" hint-placeholder-val="{{ false }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><rect x="9" y="11" width="6" height="4.8" rx="1"></rect><path d="M10.4 11V9.7a1.6 1.6 0 0 1 3.2 0V11"></path></svg></sc-if></sc-if>
+                <sc-if value="{{ c.logo }}" hint-placeholder-val="{{ false }}"><img src="{{ c.logo }}" alt="" style="width: 32px; height: 26px; margin-left: -2px; flex: none; display: block;"></sc-if>
+              </span>
+              <span style="flex: 1; font-size: 16px; line-height: 1; color: #3d3d3d;">{{ c.name }}</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+            </li>
+          </sc-for>
+        </ul>
+        <div style="margin-top: 24px; display: flex; flex-direction: column; border-top: 1px solid #eeeeee;">
+          <a href="Home.dc.html#new" onClick="{{ closeMnav }}" style="height: 56px; display: flex; align-items: center; font-size: 20px; font-weight: 500; color: #111; border-bottom: 1px solid #eeeeee;">Новинкі</a>
+          <a href="Info.dc.html#about" onClick="{{ closeMnav }}" style="height: 56px; display: flex; align-items: center; font-size: 20px; font-weight: 500; color: #111; border-bottom: 1px solid #eeeeee;">Про нас</a>
+          <a href="Info.dc.html#delivery" onClick="{{ closeMnav }}" style="height: 56px; display: flex; align-items: center; font-size: 20px; font-weight: 500; color: #111; border-bottom: 1px solid #eeeeee;">Доставка і оплата</a>
+          <a href="Info.dc.html#contacts" onClick="{{ closeMnav }}" style="height: 56px; display: flex; align-items: center; font-size: 20px; font-weight: 500; color: #111; border-bottom: 1px solid #eeeeee;">Контакти</a>
+          <a href="Info.dc.html#offer" onClick="{{ closeMnav }}" style="height: 48px; display: flex; align-items: center; font-size: 15px; font-weight: 400; color: #8a8a8a; border-bottom: 1px solid #eeeeee;">Договір оферти</a>
+          <a href="Info.dc.html#privacy" onClick="{{ closeMnav }}" style="height: 48px; display: flex; align-items: center; font-size: 15px; font-weight: 400; color: #8a8a8a; border-bottom: 1px solid #eeeeee;">Політика конфіденційності</a>
+        </div>
+        <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-size: 13px; color: #a3a3a3;">Наші контакти</span>
+          <a href="tel:0670000000" style="font-size: 18px; color: #111; font-weight: 500;">067 00 00 00</a>
+          <a href="tel:0660000000" style="font-size: 18px; color: #111; font-weight: 500;">066 00 00 00</a>
+          <a href="mailto:xxx@gmail.com" style="font-size: 16px; color: #ffc400;">xxx@gmail.com</a>
+        </div>
+        <div style="margin-top: 32px; display: flex; gap: 8px;">
+          <button onClick="{{ setUA }}" style="height: 40px; padding: 0 16px; border: 1px solid {{ uaBorder }}; border-radius: 8px; background: {{ uaBg }}; font-size: 14px; font-weight: {{ uaW }}; color: #111; cursor: pointer;">UA</button>
+          <button onClick="{{ setEN }}" style="height: 40px; padding: 0 16px; border: 1px solid {{ enBorder }}; border-radius: 8px; background: {{ enBg }}; font-size: 14px; font-weight: {{ enW }}; color: #111; cursor: pointer;">EN</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ mLevel1 }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ backToCats }}" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 0; height: 32px; border: 0; background: none; font-size: 14px; color: #8a8a8a; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>Каталог товрів</button>
+        <div style="margin-top: 20px; display: flex; align-items: center; gap: 16px; color: #ffc400;">
+            <sc-if value="{{ catIsLock }}" hint-placeholder-val="{{ true }}"><sc-if value="{{ catIsCyl }}" hint-placeholder-val="{{ false }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg></sc-if><sc-if value="{{ catIsPad }}" hint-placeholder-val="{{ false }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path><rect x="4.75" y="10.5" width="14.5" height="10.5" rx="3.5"></rect><circle cx="12" cy="14.8" r="1.6"></circle><path d="M12 16.4v2"></path></svg></sc-if><sc-if value="{{ catIsShield }}" hint-placeholder-val="{{ false }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><rect x="9" y="11" width="6" height="4.8" rx="1"></rect><path d="M10.4 11V9.7a1.6 1.6 0 0 1 3.2 0V11"></path></svg></sc-if></sc-if>
+            <sc-if value="{{ catLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ catLogo }}" alt="" style="width: 48px; height: 40px; object-fit: contain; flex: none; display: block;"></sc-if>
+            <span style="font-size: 28px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: #111;">{{ catName }}</span>
+          </div>
+        <ul style="list-style: none; margin: 20px 0 0; padding: 0;">
+          <sc-for list="{{ subs }}" as="s" hint-placeholder-count="4">
+            <li onClick="{{ s.onPick }}" style="height: 56px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eeeeee; color: #555; cursor: pointer;">
+              <span style="flex: 1; font-size: 17px; line-height: 1.2; color: #3d3d3d;">{{ s.name }}</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+            </li>
+          </sc-for>
+        </ul>
+      </sc-if>
+      <sc-if value="{{ mLevel2 }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ backToSubs }}" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; padding: 0; height: 32px; border: 0; background: none; font-size: 14px; color: #8a8a8a; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>{{ catName }}</button>
+        <div style="margin-top: 20px; display: flex; align-items: center; gap: 16px; color: #ffc400;">
+            <sc-if value="{{ catIsLock }}" hint-placeholder-val="{{ true }}"><sc-if value="{{ catIsCyl }}" hint-placeholder-val="{{ false }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg></sc-if><sc-if value="{{ catIsPad }}" hint-placeholder-val="{{ false }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path><rect x="4.75" y="10.5" width="14.5" height="10.5" rx="3.5"></rect><circle cx="12" cy="14.8" r="1.6"></circle><path d="M12 16.4v2"></path></svg></sc-if><sc-if value="{{ catIsShield }}" hint-placeholder-val="{{ false }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex: none;"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><rect x="9" y="11" width="6" height="4.8" rx="1"></rect><path d="M10.4 11V9.7a1.6 1.6 0 0 1 3.2 0V11"></path></svg></sc-if></sc-if>
+            <sc-if value="{{ catLogo }}" hint-placeholder-val="{{ false }}"><img src="{{ catLogo }}" alt="" style="width: 48px; height: 40px; object-fit: contain; flex: none; display: block;"></sc-if>
+            <span style="font-size: 28px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: #111;">{{ subName }}</span>
+          </div>
+        <ul style="list-style: none; margin: 20px 0 0; padding: 0;">
+          <sc-for list="{{ leaves }}" as="l" hint-placeholder-count="5">
+            <li onClick="{{ l.onPick }}" style="height: 56px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eeeeee; color: {{ l.accent }}; cursor: pointer;">
+              <span style="flex: 1; font-size: 17px; line-height: 1.2; color: #3d3d3d;">{{ l.name }}</span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+            </li>
+          </sc-for>
+        </ul>
+        <a href="{{ findHref }}" style="margin-top: 32px; height: 56px; border-radius: 8px; background: #ffc400; color: #fff; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center;">Знайти</a>
+      </sc-if>
+    </div>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:720},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;catalog&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;openCatalog&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const CATS = [
+  { name: 'Серцевини (циліндри)', lock: true, tree: {
+    'Ключ / ключ': ['30×30 мм', '30×35 мм', '35×35 мм', '35×45 мм', 'Подовжені циліндри'],
+    'Ключ / тумблер': ['30×30 мм', '30×35 мм', '35×40 мм', '40×50 мм'],
+    'Половинчасті циліндри': ['10×30 мм', '10×40 мм', '10×50 мм'],
+    'Циліндри з захистом від злому': ['Захист від бампінгу', 'Захист від висвердлювання', 'Захист від зламу', 'Сертифіковані за EN 1303'],
+  } },
+  { name: 'Замки', lock: true, tree: {
+    'Врізні замки': ['Циліндрові врізні замки', 'Сувальдні врізні замки', 'Магнітні врізні замки', 'Електромеханічні врізні замки', 'Інші врізні замки'],
+    'Накладні замки': ['Механічні накладні замки', 'Електромеханічні накладні замки', 'Замки для хвірток', 'Ригельні накладні замки'],
+    'Сувальдні замки': ['Врізні сувальдні замки', 'Накладні сувальдні замки', 'Двосистемні замки', 'Перекодовувані замки'],
+    'Замки підвищеного захисту': ['Броньовані замки', 'Багатоточкові замки', 'Замки 4 класу захисту', 'Замки для сейф-дверей'],
+  } },
+  { name: 'Замки підвищеного захисту', lock: true, tree: {
+    'Багатоточкові замки': ['3-точкові замки', '4-точкові замки', '5-точкові замки'],
+    'Броньовані замки': ['Сувальдні броньовані', 'Циліндрові броньовані', 'Двосистемні броньовані'],
+    'Броненакладки': ['Накладки на циліндр', 'Накладки на сувальдний замок', 'Протизламні розетки'],
+    'Електромеханічні замки': ['З кодовою панеллю', 'З дистанційним керуванням', 'Smart-замки'],
+  } },
+  { name: 'Mottura', logo: 'assets/mottura.png', tree: {
+    'Циліндри Mottura': ['Champions', 'Champions Pro', 'Mottura 3D', 'Mottura 50'],
+    'Врізні замки Mottura': ['Сувальдні замки', 'Циліндрові замки', 'Багатоточкові замки'],
+    'Броненакладки Mottura': ['Накладки на циліндр', 'Накладки на сувальдний замок'],
+    'Комплектуючі Mottura': ['Ключі та заготовки', 'Ручки', 'Кодові карти'],
+  } },
+  { name: 'Cisa', logo: 'assets/cisa.png', tree: {
+    'Циліндри Cisa': ['Asix', 'Astral S', 'AP4 S', 'RS3 S'],
+    'Врізні замки Cisa': ['Сувальдні замки', 'Циліндрові замки', 'Електромеханічні замки'],
+    'Накладні замки Cisa': ['Механічні замки', 'Електромеханічні замки', 'Замки для хвірток'],
+    'Аксесуари Cisa': ['Доводчики', 'Броненакладки', 'Ключі'],
+  } },
+  { name: 'Elbor', logo: 'assets/elbor.png', tree: {
+    'Сувальдні замки Elbor': ['Гранит', 'Сапфир', 'Базальт'],
+    'Циліндрові замки Elbor': ['Гарант', 'Флагман'],
+    'Механізми Elbor': ['Циліндрові механізми', 'Перекодувальні механізми'],
+  } },
+  { name: 'Guardian', logo: 'assets/guardian.png', tree: {
+    'Сувальдні замки Guardian': ['Серія 10', 'Серія 30', 'Серія 32'],
+    'Циліндрові замки Guardian': ['Серія 12', 'Серія 21', 'Серія 25'],
+    'Накладки Guardian': ['Броненакладки', 'Декоративні накладки'],
+  } },
+  { name: 'Apecs', logo: 'assets/apecs.png', tree: {
+    'Циліндри Apecs': ['Premier', 'Standard', 'Optima'],
+    'Ручки Apecs': ['Ручки на розетці', 'Ручки на планці'],
+    'Петлі Apecs': ['Універсальні петлі', 'Приховані петлі'],
+    'Фурнітура Apecs': ['Фіксатори', 'Засувки', 'Упори'],
+  } },
+  { name: 'Securame', logo: 'assets/securame.png', tree: {
+    'Циліндри Securame': ['Serie 5000', 'Serie 6000', 'Serie 7000'],
+    'Броненакладки Securame': ['Накладки з ручкою', 'Накладки на циліндр'],
+    'Замки Securame': ['Врізні замки', 'Багатоточкові замки'],
+  } },
+  { name: 'Kale', logo: 'assets/kale.png', tree: {
+    'Циліндри Kale': ['164 SNC', '164 BNE', '164 DBNE', '164 GNC'],
+    'Врізні замки Kale': ['Kale 152', 'Kale 257', 'Kale 352'],
+    'Накладні замки Kale': ['Механічні замки', 'Ригельні замки'],
+    'Навісні замки Kale': ['Латунні замки', 'Сталеві замки'],
+  } },
+  { name: 'Elbor', logo: 'assets/elbor.png', tree: {
+    'Сувальдні замки Elbor': ['Гранит', 'Сапфир', 'Базальт'],
+    'Циліндрові замки Elbor': ['Гарант', 'Флагман'],
+    'Механізми Elbor': ['Циліндрові механізми', 'Перекодувальні механізми'],
+  } },
+];
+const CART_KEY = 'ironcut_cart';
+const COLORS = { G: ['Латунь', '#d8b866', 'assets/abaro-brass.png'], N: ['Нікель', '#c9cdd2', 'assets/abaro-nickel.png'], B: ['Чорний', '#2a2a2a', 'assets/abaro-black.png'] };
+const SIZE = { 60: '30×30', 70: '35×35', 80: '40×40', 90: '45×45' };
+const FREE_FROM = 2000;
+const fmt = n => Math.round(n).toLocaleString('uk-UA').replace(/\u00a0/g, ' ') + ' ₴';
+const plural = n => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? 'товар' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'товари' : 'товарів'; };
+const readItems = () => { try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch (e) { return []; } };
+const readCount = () => { try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]').reduce((n, i) => n + (i.qty || 1), 0); } catch (e) { return 0; } };
+
+class Component extends DCLogic {
+  cartVals() {
+    const items = this.state.items || [], cart = !!this.state.cart;
+    const view = items.map(i => {
+      const m = /-(\d+)-([A-Z])$/.exec(i.sku || '') || [];
+      const c = COLORS[m[2]] || COLORS.G;
+      const old = Math.round(i.price * 1.3 / 10) * 10 * i.qty;
+      const set = q => this.saveItems(items.map(x => x.sku === i.sku ? { ...x, qty: Math.max(1, Math.min(99, q)) } : x));
+      return { name: i.name, qty: i.qty, img: c[2], color: c[0], swatch: c[1], size: (SIZE[m[1]] || '30×30') + ' мм', total: fmt(i.price * i.qty), oldTotal: fmt(old), _old: old, _sum: i.price * i.qty,
+        decColor: i.qty <= 1 ? '#d6d6d6' : '#ffc400', dec: () => set(i.qty - 1), inc: () => set(i.qty + 1),
+        remove: () => this.saveItems(items.filter(x => x.sku !== i.sku)) };
+    });
+    const sum = view.reduce((n, i) => n + i._sum, 0), old = view.reduce((n, i) => n + i._old, 0);
+    const qty = items.reduce((n, i) => n + i.qty, 0);
+    return {
+      cartX: cart ? 'translateX(0)' : 'translateX(105%)', cartShadow: cart ? '-24px 0 64px rgba(0,0,0,0.08)' : 'none', cartVis: cart ? 'visible' : 'hidden', cartOverlayOp: cart ? 1 : 0, cartPE: cart ? 'auto' : 'none',
+      openCart: () => this.setCart(true), closeCart: () => this.setCart(false),
+      cartEmpty: items.length === 0, cartHas: items.length > 0, cartItems: view,
+      cartCountLabel: qty ? qty + ' ' + plural(qty) : '',
+      subtotal: fmt(sum), subtotalOld: fmt(old), savings: fmt(old - sum),
+    };
+  }
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1440, open: null, cat: null, sub: null, leaf: null, count: 0 };
+  componentDidMount() {
+    this.onResize = () => { const w = window.innerWidth; this.setState({ w }); if (w >= 1100 && this.state.mnav) this.setMnav(false); };
+    this.onKey = e => { if (e.key === 'Escape') { this.setState({ open: false }); if (this.state.cart) this.setCart(false); if (this.state.mnav) this.setMnav(false); } };
+    this.onOpen = e => { const c = e.detail && typeof e.detail.cat === 'number' ? e.detail.cat : null; if (window.innerWidth >= 1100) this.setState({ open: true, cat: c, sub: null, leaf: null }); else this.setMnav(true, c); };
+    this.onCart = () => { const c = readCount(); const up = !!this.ready && c > (this.state.count || 0); this.setState({ count: c, items: readItems(), bump: up }); if (up) { clearTimeout(this.bt); this.bt = setTimeout(() => this.setState({ bump: false }), 220); } };
+    this.onOpenCart = () => this.setCart(true);
+    window.addEventListener('ironcut-open-cart', this.onOpenCart);
+    this.onScroll = () => { const sc = window.scrollY > 4; if (sc !== this.state.scrolled) this.setState({ scrolled: sc }); };
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('keydown', this.onKey);
+    window.addEventListener('ironcut-open-catalog', this.onOpen);
+    window.addEventListener('ironcut-cart', this.onCart);
+    window.addEventListener('storage', this.onCart);
+    this.onCart();
+    this.ready = true;
+    let ds = null; try { ds = localStorage.getItem('ironcut_district'); } catch (e) {}
+    const h = location.hash.startsWith('#/') ? location.hash.replace(/^#\/?/, '').split('/') : null;
+    this.setState({ dSlug: h ? (h[1] || null) : (ds || null) });
+    this.onRoute = e => this.setState({ dSlug: e.detail.slug });
+    window.addEventListener('ironcut-route', this.onRoute);
+    this.onHashD = () => { if (location.hash.startsWith('#/')) this.setState({ dSlug: location.hash.replace(/^#\/?/, '').split('/')[1] || null }); };
+    window.addEventListener('hashchange', this.onHashD);
+    fetch('districts.json').then(r => r.json()).then(d => this.setState({ districts: d.districts || [] })).catch(() => {});
+    try { const l = localStorage.getItem('ironcut_lang'); if (l) this.setState({ lang: l }); } catch (e) {}
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.onScroll);
+    window.removeEventListener('ironcut-open-cart', this.onOpenCart);
+    window.removeEventListener('ironcut-route', this.onRoute);
+    window.removeEventListener('hashchange', this.onHashD);
+    document.body.style.overflow = '';
+    ['resize', 'keydown', 'ironcut-open-catalog', 'ironcut-cart', 'storage'].forEach((ev, i) =>
+      window.removeEventListener(ev, [this.onResize, this.onKey, this.onOpen, this.onCart, this.onCart][i]));
+  }
+  setMnav(v, cat = null) { this.setState({ mnav: v, cat, sub: null, leaf: null }); document.body.style.overflow = v ? 'hidden' : ''; }
+  setCart(v) { this.setState({ cart: v, open: false }); document.body.style.overflow = v ? 'hidden' : ''; }
+  pickDistrict(slug) {
+    try { localStorage.setItem('ironcut_district', slug || ''); } catch (e) {}
+    this.setState({ districtOpen: false, dSlug: slug });
+    if (this.state.mnav) this.setMnav(false);
+    const ev = new CustomEvent('ironcut-district-nav', { detail: { slug, handled: false } });
+    window.dispatchEvent(ev);
+    if (!ev.detail.handled) location.href = 'Home.dc.html#/kyiv' + (slug ? '/' + slug : '');
+  }
+  districtVals() {
+    const list = this.state.districts || [], slug = this.state.dSlug || null;
+    const cur = slug ? list.find(d => d.slug === slug) : null;
+    return {
+      districtLabel: cur ? cur.short : 'Київ',
+      districtLabelMax: this.state.w < 1280 ? '110px' : '160px',
+      districtOpen: !!this.state.districtOpen, districtRot: this.state.districtOpen ? 'rotate(180deg)' : 'none',
+      toggleDistrict: () => this.setState(st => ({ districtOpen: !st.districtOpen, contacts: false, langOpen: false, open: false })),
+      closeDistrict: () => this.setState({ districtOpen: false }),
+      pickCity: () => this.pickDistrict(null),
+      cityActive: !cur, cityBg: !cur ? '#fffaeb' : '#fff',
+      districtList: list.map(d => ({ name: d.name, active: d.slug === slug, bg: d.slug === slug ? '#fffaeb' : '#fff', onPick: () => this.pickDistrict(d.slug) })),
+    };
+  }
+  saveItems(items) { try { localStorage.setItem(CART_KEY, JSON.stringify(items)); } catch (e) {} window.dispatchEvent(new Event('ironcut-cart')); }
+  renderVals() {
+    const { w, cat, sub, leaf, count } = this.state;
+    const open = this.state.open ?? !!this.props.openCatalog;
+    const isDesktop = w >= 1100, isTablet = w >= 720 && w < 1100;
+    const C = cat != null ? CATS[cat] : null;
+    const subNames = C ? Object.keys(C.tree) : [];
+    const leafList = C && sub != null ? C.tree[subNames[sub]] || [] : [];
+    const levels = 1 + (C ? 1 : 0) + (C && sub != null ? 1 : 0);
+    const line = '1px solid #eeeeee';
+    return {
+      isDesktop, isTablet, isCompact: !isDesktop,
+      cartCount: count, hasCart: count > 0, badgeScale: this.state.bump ? 'scale(1.35)' : 'scale(1)',
+      ...this.cartVals(),
+      ...this.districtVals(),
+      headerShadow: this.state.scrolled ? '0 1px 0 #eeeeee, 0 8px 24px rgba(0,0,0,0.04)' : 'none',
+      catalogColor: open || this.props.active === 'catalog' ? '#ffc400' : '#555',
+      cats: CATS.map((c, i) => ({
+        name: c.name, isLock: !!c.lock, logo: c.logo || '', isCyl: i === 0, isPad: i === 1, isShield: i === 2,
+        accent: i === cat ? '#ffc400' : '#555',
+        border: i === CATS.length - 1 ? '0' : line,
+        onPick: () => this.setState({ cat: i, sub: null, leaf: null }),
+      })),
+      hasCol2: !!C, hasCol3: levels === 3,
+      catName: C ? C.name : '', catIsLock: !!(C && C.lock), catIsCyl: cat === 0, catIsPad: cat === 1, catIsShield: cat === 2, catLogo: C && C.logo ? C.logo : '',
+      subName: sub != null ? subNames[sub] : '',
+      subs: subNames.map((n, i) => ({ name: n, accent: i === sub ? '#ffc400' : '#555', onPick: () => this.setState({ sub: i, leaf: null }) })),
+      leaves: leafList.map((n, i) => ({ name: n, accent: i === leaf ? '#ffc400' : '#555', onPick: () => this.setState({ leaf: i }) })),
+      backToCats: () => this.setState({ cat: null, sub: null, leaf: null }),
+      backToSubs: () => this.setState({ sub: null, leaf: null }),
+      findHref: 'Catalog.dc.html#' + encodeURIComponent(leaf != null ? leafList[leaf] : (sub != null ? subNames[sub] : '')),
+      contactsOpen: !!this.state.contacts, contactsRot: this.state.contacts ? 'rotate(180deg)' : 'none',
+      toggleContacts: () => this.setState(st => ({ contacts: !st.contacts, open: false })), closeContacts: () => this.setState({ contacts: false }),
+      ...(() => {
+        const lang = this.state.lang || 'UA';
+        const pick = c => { try { localStorage.setItem('ironcut_lang', c); } catch (e) {} this.setState({ lang: c, langOpen: false }); };
+        const on = c => lang === c;
+        return {
+          langLabel: lang, langOpen: !!this.state.langOpen, langRot: this.state.langOpen ? 'rotate(180deg)' : 'none',
+          toggleLang: () => this.setState(st => ({ langOpen: !st.langOpen, contacts: false, open: false })), closeLang: () => this.setState({ langOpen: false }),
+          langs: [['UA', 'Українська'], ['EN', 'English']].map(([code, name]) => ({ code, name, active: on(code), bg: on(code) ? '#fffaeb' : '#fff', onPick: () => pick(code) })),
+          setUA: () => pick('UA'), setEN: () => pick('EN'),
+          uaBorder: on('UA') ? '#ffc400' : '#e6e6e6', uaBg: on('UA') ? '#fffaeb' : '#fff', uaW: on('UA') ? 600 : 400,
+          enBorder: on('EN') ? '#ffc400' : '#e6e6e6', enBg: on('EN') ? '#fffaeb' : '#fff', enW: on('EN') ? 600 : 400,
+        };
+      })(),
+      menuOpen: open && isDesktop,
+      openMnav: () => this.setMnav(true), closeMnav: () => this.setMnav(false),
+      mnavX: this.state.mnav ? 'translateX(0)' : 'translateX(-105%)', mnavVis: this.state.mnav ? 'visible' : 'hidden', mnavOp: this.state.mnav ? 1 : 0, mnavPE: this.state.mnav ? 'auto' : 'none',
+      mLevel0: cat == null, mLevel1: cat != null && sub == null, mLevel2: cat != null && sub != null,
+      closeMenu: () => this.setState({ open: false }),
+      toggleMenu: () => this.setState({ open: !open, cat: null, sub: null, leaf: null }),
+      menuPos: isDesktop ? 'absolute' : 'fixed',
+      menuTop: isDesktop ? '96px' : '16px',
+      menuLeft: isDesktop ? 'max(28px, calc((100vw - 1440px) / 2 + 28px))' : '16px',
+      menuRight: isDesktop ? 'auto' : '16px',
+      menuW: isDesktop ? ['331px', '685px', '1039px'][levels - 1] : 'auto',
+      menuMaxH: isDesktop ? 'none' : 'calc(100vh - 32px)',
+      menuDir: isDesktop ? 'row' : 'column',
+      colFlex: isDesktop ? '0 0 291px' : '0 0 auto',
+      sepL: isDesktop ? '1px solid #e6e6e6' : '0',
+      sepT: isDesktop ? '0' : '1px solid #e6e6e6',
+      sepPadL: isDesktop ? '20px' : '0',
+      sepPadT: isDesktop ? '0' : '20px',
+    };
+  }
+}
+</script>
+</body>
+</html>

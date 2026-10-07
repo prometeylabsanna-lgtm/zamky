@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+  <style>
+    html, body { margin: 0; padding: 0; background: #fff; }
+    body { font-family: 'Inter', sans-serif; color: #111; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { color: #ffc400; }
+    button, input { font-family: inherit; }
+    input::placeholder { color: #b5b5b5; }
+  </style>
+</helmet>
+
+<div data-screen-label="Каталог" style="min-height: 100vh; background: #fff; font-family: 'Inter', sans-serif; color: #111;">
+  <dc-import name="Site Header" active="catalog" style="position: sticky; top: 0; z-index: 40;" hint-size="100%,84px"></dc-import>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 0 clamp(16px, 2vw, 28px); box-sizing: border-box;">
+    <nav style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; line-height: 16px;">
+      <a href="Home.dc.html" style="color: #111;">Головна</a>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+      <a href="Catalog.dc.html" style="color: #111;">Каталог товрів</a>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+      <span style="color: #c8c8c8;">{{ title }}</span>
+    </nav>
+
+    <div style="margin-top: 48px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px;">
+      <div style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 16px;">
+        <h1 style="margin: 0; font-size: clamp(36px, 4.5vw, 64px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">{{ title }}</h1>
+        <span style="font-size: 16px; color: #a3a3a3;">{{ countLabel }}</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <sc-if value="{{ isCompact }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ openFilters }}" style="height: 48px; padding: 0 16px; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; gap: 10px; font-size: 15px; color: #111; cursor: pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>
+            <span>Фільтри</span>
+            <sc-if value="{{ hasActive }}" hint-placeholder-val="{{ false }}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px; background: #ffc400; color: #fff; font-size: 12px; font-weight: 600; line-height: 20px; text-align: center;">{{ activeCount }}</span></sc-if>
+          </button>
+        </sc-if>
+        <div style="position: relative;">
+          <button onClick="{{ toggleSort }}" style="height: 48px; padding: 0 4px 0 16px; border: 0; background: none; display: flex; align-items: center; gap: 10px; font-size: 15px; color: #111; cursor: pointer;">
+            <span style="color: #a3a3a3;">{{ sortPrefix }}</span>
+            <span style="font-weight: 500;">{{ sortLabel }}</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ sortRot }}; transition: transform .2s;"><path d="M3 4.5l3 3 3-3"></path></svg>
+          </button>
+          <sc-if value="{{ sortOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ closeSort }}" style="position: fixed; inset: 0; z-index: 20;"></div>
+            <ul style="position: absolute; top: 52px; right: 0; z-index: 21; min-width: 240px; margin: 0; padding: 8px; list-style: none; background: #fff; border: 1px solid #eeeeee; border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.08);">
+              <sc-for list="{{ sorts }}" as="o" hint-placeholder-count="5">
+                <li onClick="{{ o.onPick }}" style="height: 44px; padding: 0 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; color: #111; background: {{ o.bg }}; cursor: pointer;" style-hover="background: #fbfbfb;">
+                  <span style="font-weight: {{ o.weight }};">{{ o.label }}</span>
+                  <sc-if value="{{ o.active }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px; display: grid; grid-template-columns: {{ cols }}; gap: 20px; align-items: start;">
+      <aside style="position: {{ asidePos }}; inset: {{ asideInset }}; top: {{ asideTop }}; z-index: {{ asideZ }}; width: {{ asideW }}; max-height: {{ asideMaxH }}; overflow-y: auto; overscroll-behavior: contain; box-sizing: border-box; background: #fff; border: {{ asideBorder }}; border-radius: {{ asideRadius }}; padding: 20px; display: {{ asideDisplay }}; flex-direction: column;">
+        <sc-if value="{{ isCompact }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 28px; font-weight: 600; letter-spacing: -0.02em;">Фільтри</span>
+            <button onClick="{{ closeFilters }}" aria-label="Закрити" style="width: 44px; height: 44px; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#111" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg></button>
+          </div>
+        </sc-if>
+
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+          <div style="padding: 8px 0 16px;">
+            <button onClick="{{ g.onToggle }}" style="width: 100%; height: 44px; padding: 0; border: 0; background: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; text-align: left;">
+              <span style="font-size: 22px; font-weight: 500; letter-spacing: -0.02em; color: #111;">{{ g.title }}</span>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ g.rot }}; transition: transform .2s;"><path d="M3 7.5l3-3 3 3"></path></svg>
+            </button>
+            <sc-if value="{{ g.open }}" hint-placeholder-val="{{ true }}">
+              <ul style="list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px;">
+                <sc-for list="{{ g.options }}" as="o" hint-placeholder-count="3">
+                  <li onClick="{{ o.onToggle }}" style="min-height: 34px; display: flex; align-items: center; gap: 12px; font-size: 15px; color: {{ o.color }}; cursor: {{ o.cursor }};">
+                    <span style="width: 18px; height: 18px; flex: none; box-sizing: border-box; border-radius: 50%; border: 1.5px solid {{ o.ring }}; background: {{ o.fill }}; display: flex; align-items: center; justify-content: center; transition: all .15s;">
+                      <sc-if value="{{ o.checked }}" hint-placeholder-val="{{ false }}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                    </span>
+                    <span style="flex: 1;">{{ o.label }}</span>
+                    <span style="font-size: 13px; color: #c8c8c8;">{{ o.count }}</span>
+                  </li>
+                </sc-for>
+              </ul>
+            </sc-if>
+          </div>
+        </sc-for>
+
+        <div style="padding: 8px 0 24px;">
+          <div style="height: 44px; display: flex; align-items: center; font-size: 22px; font-weight: 500; letter-spacing: -0.02em;">Артикул</div>
+          <label style="margin-top: 12px; height: 48px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; display: flex; align-items: center; gap: 10px; padding: 0 14px;">
+            <svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="#ffc400" stroke-width="1.4"><rect x="1" y="1" width="20" height="14" rx="2.5"></rect><path d="M5 5h1M8 5h1M11 5h1M14 5h1M17 5h0M5 8h1M8 8h1M11 8h1M14 8h1M6 11h10" stroke-linecap="round"></path></svg>
+            <input value="{{ draftSku }}" onChange="{{ onSku }}" onKeyDown="{{ onSkuKey }}" placeholder="Введіть артикул товару" style="flex: 1; min-width: 0; border: 0; outline: none; font-size: 14px; color: #111; background: none;">
+          </label>
+        </div>
+
+        <div style="padding: 0 0 24px;">
+          <div style="height: 44px; display: flex; align-items: center; font-size: 22px; font-weight: 500; letter-spacing: -0.02em;">Ціна</div>
+          <div ref="{{ trackRef }}" onPointerDown="{{ onTrackDown }}" style="position: relative; height: 24px; margin: 16px 9px 0; touch-action: none; cursor: pointer;">
+            <span style="position: absolute; left: 0; right: 0; top: 11px; height: 2px; border-radius: 1px; background: #eeeeee;"></span>
+            <span style="position: absolute; top: 11px; height: 2px; left: {{ loPct }}; right: {{ hiRight }}; background: #ffc400;"></span>
+            <span data-thumb="lo" style="position: absolute; top: 3px; left: {{ loPct }}; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: #ffc400; box-shadow: 0 0 0 3px #fff, 0 1px 4px rgba(0,0,0,0.15); cursor: grab;"></span>
+            <span data-thumb="hi" style="position: absolute; top: 3px; left: {{ hiPct }}; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: #ffc400; box-shadow: 0 0 0 3px #fff, 0 1px 4px rgba(0,0,0,0.15); cursor: grab;"></span>
+          </div>
+          <div style="margin-top: 20px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px;">
+            <span style="font-size: 15px; color: #a3a3a3;">Від:</span>
+            <input value="{{ loInput }}" onChange="{{ onLoInput }}" onBlur="{{ commitInputs }}" inputMode="numeric" style="width: 100%; height: 40px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 6px; padding: 0 10px; font-size: 14px; color: #111; outline: none;" style-focus="border-color: #ffc400;">
+            <span style="font-size: 15px; color: #a3a3a3;">До:</span>
+            <input value="{{ hiInput }}" onChange="{{ onHiInput }}" onBlur="{{ commitInputs }}" inputMode="numeric" style="width: 100%; height: 40px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 6px; padding: 0 10px; font-size: 14px; color: #111; outline: none;" style-focus="border-color: #ffc400;">
+          </div>
+        </div>
+
+        <button onClick="{{ apply }}" style="height: 48px; flex: none; border: 0; border-radius: 8px; background: #ffc400; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;" style-hover="background: #f0b800;">{{ applyLabel }}</button>
+        <sc-if value="{{ draftHasAny }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ resetAll }}" style="margin-top: 8px; height: 44px; flex: none; border: 0; background: none; color: #8a8a8a; font-size: 14px; cursor: pointer;" style-hover="color: #111;">Скинути фільтри</button>
+        </sc-if>
+      </aside>
+      <sc-if value="{{ filtersOverlay }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ closeFilters }}" style="position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,0.3);"></div>
+      </sc-if>
+
+      <section style="min-width: 0;">
+        <sc-if value="{{ hasActive }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+            <sc-for list="{{ chips }}" as="c" hint-placeholder-count="2">
+              <button onClick="{{ c.onRemove }}" style="height: 36px; padding: 0 10px 0 14px; border: 1px solid #ffe7a3; border-radius: 18px; background: #fffaeb; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #111; cursor: pointer;" style-hover="border-color: #ffc400;">
+                <span>{{ c.label }}</span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"></path></svg>
+              </button>
+            </sc-for>
+            <button onClick="{{ resetAll }}" style="height: 36px; padding: 0 8px; border: 0; background: none; font-size: 14px; color: #8a8a8a; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;" style-hover="color: #111;">Скинути всі</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+          <div style="display: grid; grid-template-columns: {{ gridCols }}; gap: {{ gridGap }};">
+            <sc-for list="{{ shown }}" as="p" hint-placeholder-count="12">
+              <dc-import name="Product Card" product-name="{{ p.name }}" price="{{ p.priceLabel }}" old-price="{{ p.oldLabel }}" status="{{ p.status }}" image="{{ p.img }}" sku="{{ p.sku }}" price-value="{{ p.price }}" compact="{{ compact }}" style="width: 100%;" hint-size="100%,450px"></dc-import>
+            </sc-for>
+          </div>
+          <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ loadMore }}" style="margin-top: 40px; width: 100%; height: 48px; border: 1px solid #ffe7a3; border-radius: 8px; background: #fff; color: #ffc400; font-size: 16px; font-weight: 600; cursor: pointer; transition: all .2s;" style-hover="background: #fffaeb; border-color: #ffc400;">Завантажити ще</button>
+          </sc-if>
+          <p style="margin: 16px 0 0; text-align: center; font-size: 13px; color: #a3a3a3;">{{ shownLabel }}</p>
+        </sc-if>
+
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid #eeeeee; border-radius: 16px; padding: clamp(40px, 6vw, 80px) 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: #fffaeb; display: flex; align-items: center; justify-content: center;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg></div>
+            <h2 style="margin: 8px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.02em;">Нічого не знайдено</h2>
+            <p style="margin: 0; max-width: 360px; font-size: 15px; line-height: 1.5; color: #8a8a8a;">Спробуйте змінити або скинути фільтри.</p>
+            <button onClick="{{ resetAll }}" style="margin-top: 12px; height: 48px; padding: 0 24px; border: 0; border-radius: 8px; background: #ffc400; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;">Скинути фільтри</button>
+          </div>
+        </sc-if>
+      </section>
+    </div>
+  </main>
+
+  <div style="margin-top: 120px;"><dc-import name="Site Footer" hint-size="100%,318px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const BRANDS = [
+  { b: 'ABARO', code: 'ABR', model: 'B100', country: 'Туреччина', k: 1 },
+  { b: 'Mottura', code: 'MOT', model: 'Champions', country: 'Італія', k: 2.6 },
+  { b: 'Cisa', code: 'CIS', model: 'Asix', country: 'Італія', k: 1.9 },
+  { b: 'Kale', code: 'KAL', model: '164 BNE', country: 'Туреччина', k: 1.3 },
+  { b: 'Apecs', code: 'APC', model: 'Premier', country: 'Китай', k: 0.8 },
+];
+const COLORS = [
+  { id: 'G', label: 'Латунь', finish: 'G латунь полірована', img: 'assets/abaro-brass.png', add: 0 },
+  { id: 'N', label: 'Нікель', finish: 'N нікель сатин', img: 'assets/abaro-nickel.png', add: 40 },
+  { id: 'B', label: 'Чорний', finish: 'B чорний матовий', img: 'assets/abaro-black.png', add: 60 },
+];
+const SIZES = [{ len: 60, a: 30, b: 30, p: 400 }, { len: 70, a: 35, b: 35, p: 460 }, { len: 80, a: 40, b: 40, p: 520 }, { len: 90, a: 45, b: 45, p: 590 }];
+const MECH = [{ id: 'kk', label: 'Ключ / ключ', short: '5 ключів' }, { id: 'kt', label: 'Ключ / тумблер', short: 'ключ/тумблер' }, { id: 'half', label: 'Половинчастий', short: 'половинчастий' }];
+const fmt = n => n.toLocaleString('uk-UA').replace(/\u00a0/g, ' ') + ' ₴';
+const PRODUCTS = [];
+BRANDS.forEach((B, bi) => SIZES.forEach((S, si) => COLORS.forEach((C, ci) => {
+  const n = bi * 12 + si * 3 + ci;
+  if ((n * 7) % 10 > 6) return;
+  const M = MECH[(n + bi) % 3];
+  const price = Math.round(((S.p + C.add) * B.k) / 10) * 10;
+  PRODUCTS.push({
+    id: n, brand: B.b, country: B.country, color: C.label, mech: M.label,
+    sku: `${B.code}-${B.model.replace(/\s+/g, '')}-${S.len}-${C.id}`.toUpperCase(),
+    name: `Циліндр ${B.b} ${B.model} ${S.len} (${S.a}*${S.b}) ${C.finish}, ${M.short}`,
+    price, old: Math.round(price * 1.3 / 10) * 10, img: C.img,
+    status: n % 11 === 4 ? 'out' : n % 7 === 3 ? 'low' : 'in',
+    rating: 3 + ((n * 5) % 3), isNew: n % 4 === 1, order: (n * 37) % 101,
+  });
+})));
+const MIN = Math.floor(Math.min(...PRODUCTS.map(p => p.price)) / 10) * 10;
+const MAX = Math.ceil(Math.max(...PRODUCTS.map(p => p.price)) / 10) * 10;
+const GROUPS = [
+  { key: 'brand', title: 'Виробник/Бренд', options: BRANDS.map(b => b.b) },
+  { key: 'country', title: 'Країна виробництва', options: ['Туреччина', 'Італія', 'Китай'] },
+  { key: 'color', title: 'Колір/покриття', options: COLORS.map(c => c.label) },
+  { key: 'mech', title: 'Тип механізму', options: MECH.map(m => m.label) },
+];
+const SORTS = [
+  { id: 'default', label: 'За замовчуванням', fn: (a, b) => a.order - b.order },
+  { id: 'cheap', label: 'Спочатку дешевші', fn: (a, b) => a.price - b.price },
+  { id: 'expensive', label: 'Спочатку дорожчі', fn: (a, b) => b.price - a.price },
+  { id: 'rating', label: 'За рейтингом', fn: (a, b) => b.rating - a.rating || a.order - b.order },
+  { id: 'new', label: 'Спочатку новинки', fn: (a, b) => (b.isNew - a.isNew) || a.order - b.order },
+];
+const EMPTY = () => ({ brand: [], country: [], color: [], mech: [], sku: '', lo: MIN, hi: MAX });
+const PAGE = 12;
+const plural = n => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? 'товар' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'товари' : 'товарів'; };
+const match = (p, f, skip) => GROUPS.every(g => g.key === skip || !f[g.key].length || f[g.key].includes(p[g.key]))
+  && (!f.sku || p.sku.toLowerCase().includes(f.sku.trim().toLowerCase()))
+  && p.price >= f.lo && p.price <= f.hi;
+
+class Component extends DCLogic {
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1440, applied: EMPTY(), draft: EMPTY(), loIn: String(MIN), hiIn: String(MAX), sort: 'default', sortOpen: false, limit: PAGE, open: { brand: true, country: true, color: false, mech: true }, drawer: false, title: '' };
+  componentDidMount() {
+    this.r = () => this.setState({ w: window.innerWidth });
+    this.hc = () => { let t = ''; try { t = decodeURIComponent((location.hash || '').slice(1)); } catch (e) {} this.setState({ title: t }); };
+    window.addEventListener('resize', this.r);
+    window.addEventListener('hashchange', this.hc);
+    this.hc();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.r); window.removeEventListener('hashchange', this.hc); this.stopDrag(); document.body.style.overflow = ''; }
+  setDraft(patch) { this.setState(s => ({ draft: { ...s.draft, ...patch } })); }
+  valFromX(x) { const r = this.track.getBoundingClientRect(); const t = Math.min(1, Math.max(0, (x - r.left) / r.width)); return Math.round((MIN + t * (MAX - MIN)) / 10) * 10; }
+  stopDrag() { if (this.mv) { window.removeEventListener('pointermove', this.mv); window.removeEventListener('pointerup', this.up); this.mv = null; } }
+  dragTo(which, v) {
+    const d = this.state.draft;
+    const lo = which === 'lo' ? Math.min(v, d.hi) : d.lo, hi = which === 'hi' ? Math.max(v, d.lo) : d.hi;
+    this.setState({ draft: { ...d, lo, hi }, loIn: String(lo), hiIn: String(hi) });
+  }
+  setDrawer(v) { this.setState({ drawer: v }); document.body.style.overflow = v ? 'hidden' : ''; }
+  renderVals() {
+    const { w, applied, draft, sort, sortOpen, limit, open, drawer, loIn, hiIn, title } = this.state;
+    const isDesktop = w >= 1100, isMobile = w < 720;
+    const result = PRODUCTS.filter(p => match(p, applied)).sort(SORTS.find(s => s.id === sort).fn);
+    const shown = result.slice(0, limit).map(p => ({ ...p, priceLabel: fmt(p.price), oldLabel: fmt(p.old) }));
+    const draftCount = PRODUCTS.filter(p => match(p, draft)).length;
+    const chips = [];
+    GROUPS.forEach(g => applied[g.key].forEach(v => chips.push({ label: v, onRemove: () => { const n = { ...applied, [g.key]: applied[g.key].filter(x => x !== v) }; this.setState({ applied: n, draft: n, limit: PAGE }); } })));
+    if (applied.sku) chips.push({ label: 'Артикул: ' + applied.sku, onRemove: () => { const n = { ...applied, sku: '' }; this.setState({ applied: n, draft: n }); } });
+    if (applied.lo > MIN || applied.hi < MAX) chips.push({ label: `${fmt(applied.lo)} – ${fmt(applied.hi)}`, onRemove: () => { const n = { ...applied, lo: MIN, hi: MAX }; this.setState({ applied: n, draft: n, loIn: String(MIN), hiIn: String(MAX) }); } });
+    const draftHasAny = GROUPS.some(g => draft[g.key].length) || !!draft.sku || draft.lo > MIN || draft.hi < MAX;
+    const pct = v => ((v - MIN) / (MAX - MIN)) * 100;
+    const curSort = SORTS.find(s => s.id === sort);
+    const apply = () => { this.setState({ applied: { ...this.state.draft }, limit: PAGE }); if (drawer) this.setDrawer(false); };
+    return {
+      title: title || 'Циліндрові врізні замки',
+      countLabel: `${result.length} ${plural(result.length)}`,
+      isCompact: !isDesktop, compact: isMobile,
+      cols: isDesktop ? '330px minmax(0, 1fr)' : 'minmax(0, 1fr)',
+      gridCols: isDesktop || !isMobile ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))',
+      gridGap: isMobile ? '12px' : '20px',
+      asidePos: isDesktop ? 'sticky' : 'fixed', asideTop: isDesktop ? '96px' : '0', asideInset: isDesktop ? 'auto' : '0 auto 0 0',
+      asideZ: isDesktop ? 1 : 80, asideW: isDesktop ? 'auto' : 'min(400px, 100vw)', asideMaxH: isDesktop ? 'calc(100vh - 116px)' : '100vh',
+      asideBorder: isDesktop ? '1px solid #e6e6e6' : '0', asideRadius: isDesktop ? '12px' : '0',
+      asideDisplay: isDesktop || drawer ? 'flex' : 'none', filtersOverlay: !isDesktop && drawer,
+      openFilters: () => this.setDrawer(true), closeFilters: () => this.setDrawer(false),
+      groups: GROUPS.map(g => ({
+        title: g.title, open: !!open[g.key], rot: open[g.key] ? 'none' : 'rotate(180deg)',
+        onToggle: () => this.setState(s => ({ open: { ...s.open, [g.key]: !s.open[g.key] } })),
+        options: g.options.map(o => {
+          const on = draft[g.key].includes(o);
+          const cnt = PRODUCTS.filter(p => p[g.key] === o && match(p, draft, g.key)).length;
+          const dis = !on && cnt === 0;
+          return {
+            label: o, checked: on, count: cnt, ring: on ? '#ffc400' : dis ? '#e6e6e6' : '#ffc400', fill: on ? '#ffc400' : '#fff',
+            color: dis ? '#c8c8c8' : '#111', cursor: dis ? 'default' : 'pointer',
+            onToggle: () => { if (dis) return; this.setDraft({ [g.key]: on ? draft[g.key].filter(x => x !== o) : [...draft[g.key], o] }); },
+          };
+        }),
+      })),
+      draftSku: draft.sku,
+      onSku: e => this.setDraft({ sku: e.target.value }),
+      onSkuKey: e => { if (e.key === 'Enter') apply(); },
+      trackRef: el => { this.track = el; },
+      loPct: pct(draft.lo) + '%', hiPct: pct(draft.hi) + '%', hiRight: (100 - pct(draft.hi)) + '%',
+      onTrackDown: e => {
+        if (!this.track) return;
+        e.preventDefault();
+        const v = this.valFromX(e.clientX);
+        const which = e.target.dataset && e.target.dataset.thumb ? e.target.dataset.thumb : (Math.abs(v - draft.lo) <= Math.abs(v - draft.hi) ? 'lo' : 'hi');
+        this.dragTo(which, v);
+        this.stopDrag();
+        this.mv = ev => this.dragTo(which, this.valFromX(ev.clientX));
+        this.up = () => this.stopDrag();
+        window.addEventListener('pointermove', this.mv);
+        window.addEventListener('pointerup', this.up);
+      },
+      loInput: loIn, hiInput: hiIn,
+      onLoInput: e => this.setState({ loIn: e.target.value.replace(/[^\d]/g, '') }),
+      onHiInput: e => this.setState({ hiIn: e.target.value.replace(/[^\d]/g, '') }),
+      commitInputs: () => {
+        let lo = parseInt(loIn, 10), hi = parseInt(hiIn, 10);
+        lo = isNaN(lo) ? MIN : Math.max(MIN, Math.min(lo, MAX)); hi = isNaN(hi) ? MAX : Math.max(MIN, Math.min(hi, MAX));
+        if (lo > hi) [lo, hi] = [hi, lo];
+        this.setState({ draft: { ...this.state.draft, lo, hi }, loIn: String(lo), hiIn: String(hi) });
+      },
+      apply, applyLabel: draftCount === result.length && !draftHasAny ? 'Застосувати фільтри' : `Показати ${draftCount} ${plural(draftCount)}`,
+      draftHasAny,
+      resetAll: () => this.setState({ applied: EMPTY(), draft: EMPTY(), loIn: String(MIN), hiIn: String(MAX), limit: PAGE }),
+      hasActive: chips.length > 0, activeCount: chips.length, chips,
+      sortPrefix: isMobile ? '' : 'Сортування:', sortLabel: curSort.label, sortOpen, sortRot: sortOpen ? 'rotate(180deg)' : 'none',
+      toggleSort: () => this.setState({ sortOpen: !sortOpen }), closeSort: () => this.setState({ sortOpen: false }),
+      sorts: SORTS.map(s => ({ label: s.label, active: s.id === sort, bg: s.id === sort ? '#fffaeb' : '#fff', weight: s.id === sort ? 600 : 400, onPick: () => this.setState({ sort: s.id, sortOpen: false, limit: PAGE }) })),
+      shown, hasResults: result.length > 0, noResults: result.length === 0,
+      hasMore: result.length > limit,
+      loadMore: () => this.setState({ limit: limit + PAGE }),
+      shownLabel: `Показано ${Math.min(limit, result.length)} з ${result.length}`,
+    };
+  }
+}
+</script>
+</body>
+</html>

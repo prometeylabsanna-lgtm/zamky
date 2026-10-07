@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+  <style>
+    html, body { margin: 0; padding: 0; background: #fff; }
+    body { font-family: 'Inter', sans-serif; color: #111; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { color: #ffc400; }
+    button { font-family: inherit; }
+    input::placeholder { color: #b5b5b5; }
+  </style>
+</helmet>
+
+<div data-screen-label="Сторінка товару" style="min-height: 100vh; background: #fff; font-family: 'Inter', sans-serif; color: #111;">
+  <dc-import name="Site Header" active="catalog" style="position: sticky; top: 0; z-index: 40;" hint-size="100%,84px"></dc-import>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 0 clamp(16px, 2vw, 28px); box-sizing: border-box;">
+    <nav style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; line-height: 16px;">
+      <a href="Home.dc.html" style="color: #111;">Головна</a>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+      <a href="Catalog.dc.html" style="color: #111;">Каталог товрів</a>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+      <span style="color: #c8c8c8;">{{ title }}</span>
+    </nav>
+
+    <div style="margin-top: 40px; display: grid; grid-template-columns: {{ cols }}; grid-template-areas: {{ areas }}; column-gap: {{ colGap }}; row-gap: {{ rowGap }}; align-items: start;">
+      <section style="grid-area: gallery; min-width: 0;">
+        <div onTouchStart="{{ touchStart }}" onTouchEnd="{{ touchEnd }}" style="position: relative; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; background: #fbfbfb;">
+          <div style="display: flex; height: 100%; transform: {{ trackX }}; transition: transform .45s cubic-bezier(.2,.7,.2,1);">
+            <sc-for list="{{ slides }}" as="s" hint-placeholder-count="1">
+              <div style="flex: 0 0 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 9%;">
+                <img src="{{ s.src }}" alt="{{ s.alt }}" style="max-width: 100%; max-height: 100%; object-fit: contain; mix-blend-mode: multiply; display: block;">
+              </div>
+            </sc-for>
+          </div>
+          <div style="position: absolute; top: 20px; left: 20px; display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 6px; background: {{ badgeBg }}; color: {{ badgeColor }}; font-size: 13px; line-height: 1;">
+            <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ badgeColor }};"></span>
+            <span>{{ badgeText }}</span>
+          </div>
+          <button onClick="{{ prev }}" aria-label="Попереднє фото" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border: 0; border-radius: 8px; background: #fff; color: #ffc400; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" style-hover="background: #ffc400; color: #fff;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
+          <button onClick="{{ next }}" aria-label="Наступне фото" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border: 0; border-radius: 8px; background: #fff; color: #ffc400; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.03);" style-hover="background: #ffc400; color: #fff;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
+          <div style="position: absolute; bottom: 20px; right: 20px; font-size: 12px; line-height: 1; color: #a3a3a3;">{{ counter }}</div>
+        </div>
+        <div style="margin-top: 22px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(8px, 1.5vw, 21px);">
+          <sc-for list="{{ thumbs }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.onPick }}" aria-label="{{ t.alt }}" style="aspect-ratio: 1 / 1; padding: 0; border: 1px solid {{ t.border }}; border-radius: 8px; background: #fbfbfb; overflow: hidden; cursor: pointer; transition: border-color .2s;" style-hover="border-color: #ffc400;">
+              <img src="{{ t.src }}" alt="" style="width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; display: block;">
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="grid-area: buy; min-width: 0; position: {{ buyPos }}; top: 96px; align-self: start; display: flex; flex-direction: column; gap: 20px;">
+        <div style="border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(20px, 2.6vw, 36px); display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+              <span style="display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 6px; background: {{ badgeBg }}; color: {{ badgeColor }}; font-size: 12px; line-height: 1;">
+                <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ badgeColor }};"></span>{{ badgeText }}
+              </span>
+              <button onClick="{{ copySku }}" title="Скопіювати код" style="display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 6px; background: #fff; color: #8a8a8a; font-size: 12px; line-height: 1; cursor: pointer;" style-hover="border-color: #ffc400; color: #111;">
+                <span>{{ skuLabel }}</span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5"></rect><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"></path></svg>
+              </button>
+            </div>
+            
+          </div>
+
+          <h1 style="margin: 32px 0 0; font-size: clamp(28px, 3.2vw, 44px); line-height: 1.05; font-weight: 500; letter-spacing: -0.02em; color: #111; text-wrap: pretty;">{{ title }}</h1>
+
+          <div style="margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; line-height: 1;">
+            <span style="display: flex; align-items: center; gap: 8px; color: #111; font-weight: 500;">
+              <span style="height: 24px; padding: 0 8px; border-radius: 6px; background: #111; color: #fff; display: flex; align-items: center; font-size: 11px; font-weight: 700; letter-spacing: 0.06em;">ABARO</span>
+            </span>
+            <span style="width: 1px; height: 16px; background: #e6e6e6;"></span>
+            <a href="#reviews" style="display: flex; align-items: center; gap: 6px; color: #8a8a8a;">
+              <span style="font-size: 15px; letter-spacing: 1px;"><span style="color: #ffc400;">★★★★</span><span style="color: #dedede;">★</span></span>
+              <span style="color: #111; font-weight: 500;">4.0</span>
+              <span>· 2 відгуки</span>
+            </a>
+            <span style="width: 1px; height: 16px; background: #e6e6e6;"></span>
+            <span style="display: flex; align-items: center; gap: 6px; color: #8a8a8a;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>
+              Гарантія 12 місяців
+            </span>
+          </div>
+
+          <div style="margin-top: 36px; height: 1px; background: #eeeeee;"></div>
+
+          <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="font-size: 14px; line-height: 1; color: #8a8a8a;">Колір серцевини: <span style="color: #111; font-weight: 500;">{{ colorName }}</span></div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <sc-for list="{{ colors }}" as="c" hint-placeholder-count="3">
+                <button onClick="{{ c.onPick }}" aria-label="{{ c.label }}" title="{{ c.label }}" style="width: 96px; height: 80px; padding: 6px; box-sizing: border-box; border: 1px solid {{ c.border }}; border-radius: 8px; background: #fbfbfb; cursor: pointer; transition: border-color .2s; position: relative;" style-hover="border-color: #ffc400;">
+                  <img src="{{ c.img }}" alt="" style="width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; display: block;">
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <span style="font-size: 14px; line-height: 1; color: #8a8a8a;">Розмір A×B, мм: <span style="color: #111; font-weight: 500;">{{ sizeName }}</span></span>
+              <button onClick="{{ toggleGuide }}" style="display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: #111; font-size: 13px; line-height: 1; cursor: pointer; text-decoration: underline; text-decoration-color: #ffc400; text-underline-offset: 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1.5"></rect><path d="M6.5 8v3M10.5 8v4M14.5 8v3M18.5 8v4"></path></svg>
+                Як виміряти циліндр?
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px;">
+              <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="4">
+                <button onClick="{{ s.onPick }}" style="height: 48px; box-sizing: border-box; padding: 0 12px; border: 1px solid {{ s.border }}; border-radius: 8px; background: {{ s.bg }}; font-size: 15px; color: {{ s.color }}; cursor: pointer; transition: border-color .2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;" style-hover="border-color: #ffc400;">
+                  <span style="line-height: 1; font-weight: 500;">{{ s.label }}</span>
+                  <span style="line-height: 1; font-size: 11px; color: {{ s.subColor }};">{{ s.sub }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ guideOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 16px; border-radius: 8px; background: #fbfbfb; font-size: 14px; line-height: 1.45; color: #3d3d3d;">Виміряйте відстань від центру отвору під кріпильний гвинт до зовнішнього (A) і внутрішнього (B) краю дверного полотна разом з накладками. Сума A і B — загальна довжина циліндра.</div>
+            </sc-if>
+          </div>
+
+          <div style="margin-top: 36px; height: 1px; background: #eeeeee;"></div>
+
+          <div style="margin-top: 32px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px; line-height: 1; color: #a3a3a3; text-decoration: line-through;">{{ oldPrice }}</span>
+                <span style="height: 22px; padding: 0 6px; border-radius: 6px; background: #ffc400; color: #111; font-size: 12px; font-weight: 700; line-height: 22px;">{{ discount }}</span>
+              </div>
+              <span style="font-size: 56px; line-height: 0.9; font-weight: 700; letter-spacing: -0.03em; color: #111;">{{ price }}</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+              <span style="font-size: 13px; line-height: 1; color: {{ stockColor }};">{{ stockNote }}</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px;">
+            <div style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; flex: none;">
+              <button onClick="{{ dec }}" aria-label="Менше" style="width: 48px; height: 100%; border: 0; background: none; color: #ffc400; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="color: #111;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8h10"></path></svg></button>
+              <span style="min-width: 28px; text-align: center; font-size: 16px; font-weight: 600;">{{ qty }}</span>
+              <button onClick="{{ inc }}" aria-label="Більше" style="width: 48px; height: 100%; border: 0; background: none; color: #ffc400; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="color: #111;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 8h10M8 3v10"></path></svg></button>
+            </div>
+            <button onClick="{{ addToCart }}" disabled="{{ outOfStock }}" style="flex: 1 1 220px; height: 56px; padding: 0 24px; border: 0; border-radius: 8px; background: {{ cartBtnBg }}; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; font-weight: 600; cursor: {{ cartCursor }}; transition: background .2s;" style-hover="filter: brightness(0.96);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
+              <span>{{ cartLabel }}</span>
+            </button>
+          </div>
+
+          <sc-if value="{{ quickClosed }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ openQuick }}" style="margin-top: 8px; height: 56px; width: 100%; box-sizing: border-box; border: 1px solid #ffc400; border-radius: 8px; background: #fff; color: #111; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background .2s;" style-hover="background: #fffaeb;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H12L11 22l8.5-11.5H12L13 2z"></path></svg>
+              Швидке замовлення в 1 клік
+            </button>
+          </sc-if>
+          <sc-if value="{{ quickForm }}" hint-placeholder-val="{{ false }}">
+            <form onSubmit="{{ submitQuick }}" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <label style="flex: 1 1 220px; height: 56px; box-sizing: border-box; border: 1px solid #ffc400; border-radius: 8px; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+                <span style="font-size: 16px; color: #111;">+380</span>
+                <input type="tel" required="required" placeholder="00 000 00 00" autoFocus="autofocus" style="flex: 1; min-width: 0; border: 0; outline: none; font-family: inherit; font-size: 16px; color: #111; background: none;">
+              </label>
+              <button type="submit" style="height: 56px; padding: 0 24px; border: 0; border-radius: 8px; background: #111; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;" style-hover="background: #333;">Замовити</button>
+            </form>
+            <p style="margin: 8px 0 0; font-size: 12px; line-height: 1.4; color: #a3a3a3;">Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.</p>
+          </sc-if>
+          <sc-if value="{{ quickDone }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top: 8px; height: 56px; border-radius: 8px; background: #e3f8e8; color: #2fb54a; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 500;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              Дякуємо! Ми скоро передзвонимо
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <sc-for list="{{ accordions }}" as="q" hint-placeholder-count="3">
+            <div style="border: 1px solid {{ q.border }}; border-radius: 12px; overflow: hidden; transition: border-color .2s;">
+              <button onClick="{{ q.onToggle }}" style="width: 100%; height: 56px; padding: 0 20px; border: 0; background: #fff; display: flex; align-items: center; gap: 12px; font-size: 16px; color: #111; cursor: pointer; text-align: left;">
+                <span style="color: #ffc400; display: flex;">
+                  <sc-if value="{{ q.isTruck }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5h11v9h-11zM13.5 9.5h4l3 3v3h-7"></path><circle cx="6.5" cy="17.5" r="1.8"></circle><circle cx="17" cy="17.5" r="1.8"></circle></svg></sc-if>
+                  <sc-if value="{{ q.isCard }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"></rect><path d="M2.5 10h19M6 15h4"></path></svg></sc-if>
+                  <sc-if value="{{ q.isShield }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg></sc-if>
+                </span>
+                <span style="flex: 1; font-weight: 500;">{{ q.title }}</span>
+                <span style="font-size: 13px; color: #a3a3a3;">{{ q.hint }}</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform: {{ q.rot }}; transition: transform .2s;"><path d="M3.5 6l4.5 4.5L12.5 6"></path></svg>
+              </button>
+              <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+                <ul style="margin: 0; padding: 0 20px 18px 52px; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.4; color: #3d3d3d;">
+                  <sc-for list="{{ q.rows }}" as="r" hint-placeholder-count="2">
+                    <li style="display: flex; justify-content: space-between; gap: 16px;"><span>{{ r.k }}</span><span style="color: #111; font-weight: 500; text-align: right;">{{ r.v }}</span></li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    <div style="grid-area: info; min-width: 0; display: flex; flex-direction: column; gap: 96px;">
+      <section>
+        <h2 style="margin: 0; font-size: clamp(28px, 3vw, 40px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">Опис</h2>
+        <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 20px; font-size: 17px; line-height: 1.6; color: #3d3d3d; max-width: 640px; text-wrap: pretty;">
+          <p style="margin: 0;">Циліндр ABARO B100 — механізм секретності для врізних замків вхідних і міжкімнатних дверей. Корпус виготовлений з латуні, підходить для більшості замків з європрофілем.</p>
+          <p style="margin: 0;">Конструкція з п'ятьма ключами в комплекті має захист від бампінгу та висвердлювання. Ключі з пластиковою головкою зручно розрізняти, а заготовки можна виготовити лише за кодовою карткою.</p>
+          <p style="margin: 0;">Перед покупкою виміряйте відстань від центру отвору під кріпильний гвинт до кожного краю двері — це розміри A і B. Якщо сумніваєтесь, менеджер допоможе підібрати циліндр під ваші двері.</p>
+        </div>
+      </section>
+      <section>
+        <h2 style="margin: 0; font-size: clamp(28px, 3vw, 40px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">Характеристики</h2>
+        <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 32px;">
+          <sc-for list="{{ specGroups }}" as="g" hint-placeholder-count="4">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <h3 style="margin: 0; font-size: 13px; line-height: 1; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #a3a3a3;">{{ g.title }}</h3>
+              <dl style="margin: 0; border: 1px solid #eeeeee; border-radius: 12px; overflow: hidden;">
+                <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+                  <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: center; min-height: 52px; padding: 14px 20px; box-sizing: border-box; background: {{ r.bg }}; font-size: 15px; line-height: 1.3;">
+                    <dt style="color: #8a8a8a;">{{ r.k }}</dt>
+                    <dd style="margin: 0; color: #111; font-weight: 500; text-align: right;">{{ r.v }}</dd>
+                  </div>
+                </sc-for>
+              </dl>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </div>
+    </div>
+  
+
+    </main>
+
+  <div style="margin-top: 120px;"><dc-import name="Site Footer" hint-size="100%,318px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const COLORS = [
+  { id: 'G', label: 'Латунь', finish: 'G латунь полірована', cover: 'Полірована латунь', add: 0, img: 'assets/abaro-brass.png' },
+  { id: 'N', label: 'Нікель', finish: 'N нікель сатин', cover: 'Матовий нікель', add: 40, img: 'assets/abaro-nickel.png' },
+  { id: 'B', label: 'Чорний', finish: 'B чорний матовий', cover: 'Чорне матове', add: 60, img: 'assets/abaro-black.png' },
+];
+const SIZES = [
+  { len: 60, a: 30, b: 30, price: 400 },
+  { len: 70, a: 35, b: 35, price: 460 },
+  { len: 80, a: 40, b: 40, price: 520 },
+  { len: 90, a: 45, b: 45, price: 590 },
+];
+const STOCK = { 'N-90': 0, 'N-80': 3, 'B-90': 2, 'B-80': 0 };
+const EXTRA = ['thumb-2', 'thumb-3', 'thumb-4', 'thumb-5', 'thumb-6'].map(n => 'assets/' + n + '.png');
+const STATUS = {
+  in: ['В наявності', '#e3f8e8', '#2fb54a'],
+  low: ['Закінчується', '#fff2e5', '#ff7a00'],
+  out: ['Немає в наявності', '#efefef', '#6f6f6f'],
+};
+const fmt = n => n.toLocaleString('uk-UA').replace(/\u00a0/g, ' ') + ' ₴';
+const ACC = [
+  { id: 'd', icon: 'truck', title: 'Доставка', hint: 'від 1 дня', rows: [['Нова Пошта, відділення', '1–2 дні · за тарифами'], ['Кур’єр по Києву', 'в день замовлення'], ['Самовивіз з магазину', 'безкоштовно']] },
+  { id: 'p', icon: 'card', title: 'Оплата', hint: 'карткою або при отриманні', rows: [['Карткою онлайн', 'Visa, Mastercard'], ['Apple Pay / Google Pay', 'миттєво'], ['Накладений платіж', 'при отриманні'], ['Безготівковий розрахунок', 'для юросіб']] },
+  { id: 'w', icon: 'shield', title: 'Гарантія', hint: '12 місяців', rows: [['Гарантія виробника', '12 місяців'], ['Обмін та повернення', '14 днів'], ['Сервісна заміна ключів', 'за кодовою карткою']] },
+];
+
+class Component extends DCLogic {
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1440, slide: 0, color: 0, size: 0, qty: 1, added: false, fav: false, cmp: false, guide: false, acc: null, quick: 'closed', copied: false };
+  componentDidMount() {
+    this.r = () => this.setState({ w: window.innerWidth });
+    this.k = e => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return; if (e.key === 'ArrowLeft') this.go(-1); if (e.key === 'ArrowRight') this.go(1); };
+    window.addEventListener('resize', this.r);
+    window.addEventListener('keydown', this.k);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.r); window.removeEventListener('keydown', this.k); clearTimeout(this.t); clearTimeout(this.ct); }
+  go(d) { const n = 1 + EXTRA.length; this.setState(s => ({ slide: (s.slide + d + n) % n })); }
+  stockOf(c, s) { const k = c.id + '-' + s.len; return k in STOCK ? STOCK[k] : 20; }
+  renderVals() {
+    const { w, slide, color, size, qty, added, fav, cmp, guide, acc, quick, copied } = this.state;
+    const C = COLORS[color], S = SIZES[size];
+    const price = S.price + C.add, old = Math.round(price * 1.3 / 10) * 10;
+    const sku = `ABR-B100-${S.len}-${C.id}`;
+    const left = this.stockOf(C, S);
+    const status = left === 0 ? 'out' : left <= 3 ? 'low' : 'in';
+    const [badgeText, badgeBg, badgeColor] = STATUS[status];
+    const title = `Циліндр ABARO B100 ${S.len} (${S.a}*${S.b}) ${C.finish} 5 ключів`;
+    const slides = [C.img, ...EXTRA].map((src, i) => ({ src, alt: `${title} — фото ${i + 1}` }));
+    const thumbs = [C.img, ...EXTRA].map((src, i) => ({ src, alt: `Фото ${i + 1}`, border: i === slide ? '#ffc400' : 'transparent', onPick: () => this.setState({ slide: i }) }));
+    const out = status === 'out';
+    return {
+      cols: w >= 1100 ? 'minmax(0, 1fr) minmax(0, 1fr)' : 'minmax(0, 1fr)',
+      areas: w >= 1100 ? '"gallery buy" "info buy"' : '"gallery" "buy" "info"',
+      rowGap: w >= 1100 ? '120px' : '56px',
+      colGap: w >= 1280 ? '64px' : w >= 1100 ? '40px' : '0',
+      buyPos: w >= 1100 ? 'sticky' : 'static',
+      title, sku, badgeText, badgeBg, badgeColor,
+      skuLabel: copied ? 'Скопійовано' : 'Код товару: ' + sku,
+      copySku: () => { try { navigator.clipboard.writeText(sku); } catch (e) {} this.setState({ copied: true }); clearTimeout(this.ct); this.ct = setTimeout(() => this.setState({ copied: false }), 1200); },
+      slides, thumbs,
+      trackX: `translateX(-${slide * 100}%)`,
+      counter: `${slide + 1} / ${slides.length}`,
+      prev: () => this.go(-1), next: () => this.go(1),
+      touchStart: e => { this.tx = e.touches[0].clientX; },
+      touchEnd: e => { const dx = e.changedTouches[0].clientX - (this.tx || 0); if (Math.abs(dx) > 40) this.go(dx < 0 ? 1 : -1); },
+      colorName: C.label,
+      colors: COLORS.map((c, i) => ({ label: c.label, img: c.img, border: i === color ? '#ffc400' : 'transparent', onPick: () => this.setState({ color: i, slide: 0, qty: 1 }) })),
+      sizeName: `${S.a}×${S.b}`,
+      sizes: SIZES.map((s, i) => {
+        const sel = i === size, none = this.stockOf(C, s) === 0;
+        return { label: `${s.a}×${s.b}`, sub: none ? 'немає' : `${s.len} мм`, border: sel ? '#ffc400' : '#e6e6e6', bg: sel ? '#fffaeb' : '#fff', color: none ? '#b5b5b5' : '#111', subColor: none ? '#c8c8c8' : '#a3a3a3', onPick: () => this.setState({ size: i, qty: 1 }) };
+      }),
+      guideOpen: guide, toggleGuide: () => this.setState({ guide: !guide }),
+      price: fmt(price), oldPrice: fmt(old), discount: '−' + Math.round((1 - price / old) * 100) + '%',
+      stockNote: out ? 'Повідомимо про надходження' : left <= 3 ? `Залишилось ${left} шт.` : 'Відправимо сьогодні',
+      stockColor: out ? '#8a8a8a' : left <= 3 ? '#ff7a00' : '#2fb54a',
+      qty,
+      dec: () => this.setState(s => ({ qty: Math.max(1, s.qty - 1) })),
+      inc: () => this.setState(s => ({ qty: Math.min(Math.max(1, left), s.qty + 1) })),
+      outOfStock: out, cartCursor: out ? 'not-allowed' : 'pointer',
+      cartBtnBg: out ? '#d6d6d6' : added ? '#2fb54a' : '#ffc400',
+      cartLabel: out ? 'Немає в наявності' : added ? 'Додано до кошика' : 'До кошика',
+      addToCart: () => {
+        if (out) return;
+        try {
+          const key = 'ironcut_cart', a = JSON.parse(localStorage.getItem(key) || '[]');
+          const f = a.find(x => x.sku === sku);
+          if (f) f.qty += qty; else a.push({ sku, name: title, price, qty });
+          localStorage.setItem(key, JSON.stringify(a));
+        } catch (e) {}
+        window.dispatchEvent(new Event('ironcut-cart'));
+        window.dispatchEvent(new Event('ironcut-open-cart'));
+        this.setState({ added: true });
+        clearTimeout(this.t); this.t = setTimeout(() => this.setState({ added: false }), 1600);
+      },
+      quickClosed: quick === 'closed', quickForm: quick === 'form', quickDone: quick === 'done',
+      openQuick: () => this.setState({ quick: 'form' }),
+      submitQuick: e => { e.preventDefault(); this.setState({ quick: 'done' }); },
+      accordions: ACC.map(q => ({
+        title: q.title, hint: q.hint, isTruck: q.icon === 'truck', isCard: q.icon === 'card', isShield: q.icon === 'shield',
+        open: acc === q.id, rot: acc === q.id ? 'rotate(180deg)' : 'none', border: acc === q.id ? '#ffc400' : '#e6e6e6',
+        rows: q.rows.map(([k, v]) => ({ k, v })),
+        onToggle: () => this.setState({ acc: acc === q.id ? null : q.id }),
+      })),
+      specGroups: [
+        { title: 'Загальне', rows: [['Бренд', 'ABARO'], ['Модель', 'B100'], ['Артикул', sku], ['Тип', 'Ключ / ключ']] },
+        { title: 'Розміри', rows: [['Загальна довжина', `${S.len} мм`], ['Розмір A×B', `${S.a}×${S.b} мм`]] },
+        { title: 'Матеріал', rows: [['Корпус', 'Латунь'], ['Покриття', C.cover]] },
+        { title: 'Безпека та комплектація', rows: [['Захист від бампінгу', 'Так'], ['Захист від висвердлювання', 'Так'], ['Кількість ключів', '5'], ['Кодова картка', 'Так']] },
+      ].map(g => ({ title: g.title, rows: g.rows.map(([k, v], i) => ({ k, v, bg: i % 2 ? '#fbfbfb' : '#fff' })) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

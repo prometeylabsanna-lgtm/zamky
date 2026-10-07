@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<a href="{{ href }}" style="text-decoration: none; color: #111; box-sizing: border-box; width: 100%; height: 100%; min-height: {{ cardH }}; background: #fff; border: 1px solid #e6e6e6; border-radius: 12px; padding: {{ pad }}; display: flex; flex-direction: column; font-family: 'Inter', sans-serif; transition: box-shadow .2s, border-color .2s; cursor: pointer;" style-hover="box-shadow: 0 8px 24px rgba(0,0,0,0.06); border-color: #dcdcdc;">
+  <div style="flex-shrink: 0; height: {{ imgH }}; aspect-ratio: {{ imgAR }}; margin: {{ imgM }}; display: flex; align-items: center; justify-content: center;">
+    <img src="{{ image }}" alt="{{ name }}" style="width: 100%; height: 100%; object-fit: contain; display: block; filter: {{ imgFilter }}; opacity: {{ imgOp }};">
+  </div>
+  <div style="margin-top: {{ badgeMt }}; display: flex;">
+    <div style="display: flex; align-items: center; gap: 6px; height: 20px; padding: 0 6px; border-radius: 4px; background: {{ badgeBg }}; color: {{ badgeColor }}; font-size: {{ badgeFs }}; white-space: nowrap; line-height: 1;">
+      <span style="width: 4px; height: 4px; border-radius: 50%; background: {{ badgeColor }};"></span>
+      <span>{{ badgeText }}</span>
+    </div>
+  </div>
+  <div style="margin-top: {{ titleMt }}; font-size: {{ titleFs }}; line-height: 1.3; color: {{ titleColor }}; letter-spacing: -0.01em; text-wrap: pretty; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0;">{{ name }}</div>
+  <div style="margin-top: 6px; flex-shrink: 0; display: flex; align-items: center; gap: 2px; font-size: 12px; line-height: 1;">
+    <span style="color: #ffc400; letter-spacing: 1px;">★★★★</span><span style="color: #dedede;">★</span>
+    <span style="margin-left: 8px; color: #cfcfcf; font-size: 10px;">(2)</span>
+  </div>
+  <div style="margin-top: auto; padding-top: 12px; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px;">
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <span style="font-size: 11px; color: #a3a3a3; line-height: 1; text-decoration: {{ oldDeco }};">{{ oldLabel }}</span>
+      <span style="font-size: {{ priceFs }}; font-weight: 700; white-space: nowrap; color: {{ priceColor }}; line-height: 1; letter-spacing: -0.02em;">{{ price }}</span>
+    </div>
+    <sc-if value="{{ inStock }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ addToCart }}" aria-label="До кошика" style="width: {{ btnS }}; height: {{ btnS }}; flex: none; border: 1px solid #e6e6e6; border-radius: 8px; background: {{ btnBg }}; display: flex; align-items: center; justify-content: center; color: {{ btnColor }}; border-color: {{ btnBorder }}; transform: {{ btnScale }}; cursor: pointer; transition: background .2s, border-color .2s, color .2s, transform .18s cubic-bezier(.3,1.6,.5,1);" style-hover="background: #ffc400; border-color: #ffc400; color: #fff;">
+      <sc-if value="{{ notAdded }}" hint-placeholder-val="{{ true }}"><svg width="{{ iconS }}" height="{{ iconS }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg></sc-if><sc-if value="{{ isAdded }}" hint-placeholder-val="{{ false }}"><svg width="{{ iconS }}" height="{{ iconS }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+    </button>
+    </sc-if>
+    
+  </div>
+</a>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:302,&quot;height&quot;:450},&quot;name&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Циліндр ABARO B100 60 (30*30) G латунь полірована 5 ключів&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;oldPrice&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;520 ₴&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;price&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;400 ₴&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;status&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;in&quot;,&quot;low&quot;,&quot;out&quot;],&quot;default&quot;:&quot;in&quot;,&quot;tsType&quot;:&quot;'in'|'low'|'out'&quot;},&quot;image&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;assets/product-brass.png&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;compact&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.props.status ?? 'in';
+    const map = {
+      in: ['В наявності', '#e3f8e8', '#2fb54a'],
+      low: ['Закінчується', '#fff2e5', '#ff7a00'],
+      out: ['Немає в наявності', '#efefef', '#6f6f6f'],
+    };
+    const [badgeText, badgeBg, badgeColor] = map[s] || map.in;
+    const added = this.state && this.state.added;
+    const c = !!this.props.compact, out = s === 'out', nt = !!(this.state && this.state.notified);
+    return {
+      inStock: !out, isOut: out, notified: nt, notNotified: !nt,
+      imgFilter: out ? 'grayscale(1)' : 'none', imgOp: out ? 0.45 : 1,
+      titleColor: out ? '#8a8a8a' : '#111', priceColor: out ? '#b5b5b5' : '#111',
+      oldLabel: out ? 'Очікується' : (this.props.oldPrice ?? '520 ₴'), oldDeco: 'none',
+      notifyLabel: nt ? 'Повідомимо про надходження' : 'Повідомити про наявність',
+      notifyBg: nt ? '#e3f8e8' : '#fff', notifyBorder: nt ? '#e3f8e8' : '#e6e6e6', notifyColor: nt ? '#2fb54a' : '#8a8a8a',
+      notify: e => { e.preventDefault(); e.stopPropagation(); this.setState({ notified: !nt }); },
+      cardH: c ? '100%' : '450px', pad: c ? '12px' : '20px',
+      imgH: c ? 'auto' : '230px', imgAR: c ? '1 / 1' : 'auto', imgM: c ? '0' : '-5px -10px 0',
+      badgeMt: c ? '12px' : '29px', badgeFs: c ? '10px' : '11px',
+      titleMt: c ? '10px' : '16px', titleFs: c ? '12px' : '13px',
+      priceFs: c ? '20px' : '32px', btnS: c ? '36px' : '48px', iconS: c ? '18' : '22',
+      href: this.props.href ?? 'Product.dc.html',
+      btnBg: added ? '#ffc400' : '#fff', btnColor: added ? '#fff' : '#ffc400', btnBorder: added ? '#ffc400' : '#e6e6e6', isAdded: !!added, notAdded: !added, btnScale: this.state && this.state.pop ? 'scale(1.12)' : 'scale(1)',
+      addToCart: e => {
+        e.preventDefault(); e.stopPropagation();
+        try {
+          const key = 'ironcut_cart', a = JSON.parse(localStorage.getItem(key) || '[]');
+          const sku = this.props.sku ?? 'ABR-B100-60-G', f = a.find(x => x.sku === sku);
+          if (f) f.qty += 1; else a.push({ sku, name: this.props.productName ?? 'Циліндр ABARO B100 60 (30*30) G латунь полірована 5 ключів', price: this.props.priceValue ?? 400, qty: 1 });
+          localStorage.setItem(key, JSON.stringify(a));
+        } catch (err) {}
+        window.dispatchEvent(new Event('ironcut-cart'));
+        this.setState({ added: true, pop: true }); clearTimeout(this.t); clearTimeout(this.p); this.p = setTimeout(() => this.setState({ pop: false }), 180); this.t = setTimeout(() => this.setState({ added: false }), 1400);
+      },
+      badgeText, badgeBg, badgeColor,
+      name: this.props.productName ?? 'Циліндр ABARO B100 60 (30*30) G латунь полірована 5 ключів',
+      oldPrice: this.props.oldPrice ?? '520 ₴',
+      price: this.props.price ?? '400 ₴',
+      image: this.props.image ?? 'assets/product-brass.png',
+    };
+  }
+}
+</script>
+</body>
+</html>

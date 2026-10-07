@@ -1,0 +1,11 @@
+.env
+db.sqlite3
+.venv/
+media/
+__pycache__/
+*.pyc
+.DS_Store
+*.egg-info/
+.pytest_cache/
+htmlcov/
+.coverage

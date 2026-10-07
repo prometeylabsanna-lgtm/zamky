@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+  <style>
+    html, body { margin: 0; padding: 0; background: #fff; }
+    body { font-family: 'Inter', sans-serif; color: #111; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { color: #ffc400; }
+    button, input, textarea, select { font-family: inherit; }
+    input::placeholder, textarea::placeholder { color: #b5b5b5; }
+  </style>
+</helmet>
+
+<div data-screen-label="Інформаційні сторінки" style="min-height: 100vh; background: #fff; font-family: 'Inter', sans-serif; color: #111;">
+  <dc-import name="Site Header" style="position: sticky; top: 0; z-index: 40;" hint-size="100%,84px"></dc-import>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 0 clamp(16px, 2vw, 28px); box-sizing: border-box;">
+    <nav style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; line-height: 16px;">
+      <a href="Home.dc.html" style="color: #111;">Головна</a>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+      <span style="color: #c8c8c8;">{{ pageName }}</span>
+    </nav>
+
+    <div style="margin-top: 48px; display: grid; grid-template-columns: {{ cols }}; gap: {{ gap }}; align-items: start;">
+      <aside style="position: {{ asidePos }}; top: 108px; min-width: 0;">
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: {{ navDir }}; gap: 8px; overflow-x: auto; scrollbar-width: none;">
+          <sc-for list="{{ pages }}" as="p" hint-placeholder-count="4">
+            <li style="flex: none;">
+              <a href="{{ p.href }}" style="height: 52px; padding: 0 20px; box-sizing: border-box; border: 1px solid {{ p.border }}; border-radius: 10px; background: {{ p.bg }}; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 16px; font-weight: {{ p.weight }}; color: #111; white-space: nowrap; transition: border-color .2s;" style-hover="border-color: #ffc400; color: #111;">
+                <span>{{ p.name }}</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="{{ p.chev }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+              </a>
+            </li>
+          </sc-for>
+        </ul>
+        <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top: 24px; padding: 24px; border-radius: 12px; background: #fbfbfb; display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 13px; color: #8a8a8a;">Потрібна консультація?</span>
+            <a href="tel:0670000000" style="font-size: 20px; font-weight: 600; color: #111;">067 00 00 00</a>
+            <span style="font-size: 13px; line-height: 1.4; color: #8a8a8a;">Пн–Сб, 9:00–19:00</span>
+            <a href="#form" onClick="{{ toForm }}" style="margin-top: 8px; height: 44px; border-radius: 8px; background: #ffc400; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600;" style-hover="background: #f0b800; color: #fff;">Написати нам</a>
+          </div>
+        </sc-if>
+      </aside>
+
+      <article style="min-width: 0; max-width: 800px;">
+        <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ true }}">
+          <h1 style="margin: 0; font-size: clamp(36px, 4.5vw, 56px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">Про нас</h1>
+          <p style="margin: 24px 0 0; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; color: #3d3d3d; text-wrap: pretty;">Ми продаємо замки, серцевини та фурнітуру для дверей і меблів у Києві та по всій Україні. Допомагаємо підібрати механізм під конкретні двері і пояснюємо різницю між моделями простими словами.</p>
+          <div style="margin-top: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px;">
+            <div style="padding: 24px; border-radius: 12px; background: #fbfbfb; display: flex; flex-direction: column; gap: 10px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>
+              <span style="font-size: 18px; font-weight: 600; letter-spacing: -0.01em;">Оригінальна продукція</span>
+              <span style="font-size: 14px; line-height: 1.5; color: #8a8a8a;">Працюємо напряму з дистриб’юторами Mottura, Cisa, Kale, Apecs та інших брендів.</span>
+            </div>
+            <div style="padding: 24px; border-radius: 12px; background: #fbfbfb; display: flex; flex-direction: column; gap: 10px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 7.5A7 7 0 1 0 5 15l-1 4 4-1.3"></path><circle cx="15.5" cy="14.5" r="5"></circle><path d="M13.5 14.5h4"></path></svg>
+              <span style="font-size: 18px; font-weight: 600; letter-spacing: -0.01em;">Підбір під ваші двері</span>
+              <span style="font-size: 14px; line-height: 1.5; color: #8a8a8a;">Підкажемо розмір циліндра, клас захисту та сумісність із замком.</span>
+            </div>
+            <div style="padding: 24px; border-radius: 12px; background: #fbfbfb; display: flex; flex-direction: column; gap: 10px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l3 3M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"></path></svg>
+              <span style="font-size: 18px; font-weight: 600; letter-spacing: -0.01em;">Монтаж і сервіс</span>
+              <span style="font-size: 14px; line-height: 1.5; color: #8a8a8a;">Встановлюємо та замінюємо замки, виготовляємо ключі за кодовою карткою.</span>
+            </div>
+          </div>
+          <h2 style="margin: 64px 0 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Як ми працюємо</h2>
+          <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Кожне замовлення перевіряє менеджер: уточнює розміри, наявність і зручний спосіб доставки. Якщо ви не впевнені в розмірі, надішліть фото торця дверей — ми допоможемо виміряти.</p>
+          <ul style="margin: 20px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 16px; line-height: 1.6; color: #3d3d3d;">
+            <li style="display: flex; gap: 12px;"><span style="width: 6px; height: 6px; margin-top: 10px; border-radius: 50%; background: #ffc400; flex: none;"></span><span>Відправляємо замовлення в день оплати, якщо воно оформлене до 16:00.</span></li>
+            <li style="display: flex; gap: 12px;"><span style="width: 6px; height: 6px; margin-top: 10px; border-radius: 50%; background: #ffc400; flex: none;"></span><span>Надаємо гарантію виробника на всі механізми.</span></li>
+            <li style="display: flex; gap: 12px;"><span style="width: 6px; height: 6px; margin-top: 10px; border-radius: 50%; background: #ffc400; flex: none;"></span><span>Приймаємо оплату карткою, накладеним платежем і за рахунком для юросіб.</span></li>
+          </ul>
+          <h2 style="margin: 64px 0 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Торгова точка</h2>
+          <div style="margin-top: 24px; border: 1px solid #eeeeee; border-radius: 12px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; padding: 16px 20px; font-size: 15px; line-height: 1.4;"><span style="color: #8a8a8a;">Адреса</span><span>м. Київ, [вулиця, будинок]</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; padding: 16px 20px; font-size: 15px; line-height: 1.4; background: #fbfbfb;"><span style="color: #8a8a8a;">Графік роботи</span><span>Пн–Пт 9:00–19:00, Сб 10:00–17:00, Нд — вихідний</span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; padding: 16px 20px; font-size: 15px; line-height: 1.4;"><span style="color: #8a8a8a;">Телефони</span><span><a href="tel:0670000000">067 00 00 00</a>, <a href="tel:0660000000">066 00 00 00</a></span></div>
+            <div style="display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; padding: 16px 20px; font-size: 15px; line-height: 1.4; background: #fbfbfb;"><span style="color: #8a8a8a;">Email</span><a href="mailto:xxx@gmail.com" style="color: #111;">xxx@gmail.com</a></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDelivery }}" hint-placeholder-val="{{ false }}">
+          <h1 style="margin: 0; font-size: clamp(36px, 4.5vw, 56px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">Доставка і оплата</h1>
+          <p style="margin: 24px 0 0; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.5; color: #3d3d3d; text-wrap: pretty;">Доставляємо по всій Україні. Замовлення, оформлені до 16:00, відправляємо того ж дня.</p>
+          <h2 style="margin: 56px 0 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Способи доставки</h2>
+          <div style="margin-top: 24px; border: 1px solid #eeeeee; border-radius: 12px; overflow: hidden; font-size: 15px; line-height: 1.4;">
+            <div style="display: grid; grid-template-columns: {{ tableCols }}; gap: 16px; padding: 14px 20px; background: #fbfbfb; font-size: 13px; color: #8a8a8a; font-weight: 500;"><span>Спосіб</span><span>Термін</span><span style="text-align: right;">Вартість</span></div>
+            <div style="display: grid; grid-template-columns: {{ tableCols }}; gap: 16px; padding: 18px 20px; border-top: 1px solid #eeeeee;"><span style="font-weight: 500;">Нова Пошта, відділення або поштомат</span><span style="color: #3d3d3d;">1–2 дні</span><span style="text-align: right;">80 ₴</span></div>
+            <div style="display: grid; grid-template-columns: {{ tableCols }}; gap: 16px; padding: 18px 20px; border-top: 1px solid #eeeeee;"><span style="font-weight: 500;">Кур’єр по Києву</span><span style="color: #3d3d3d;">в день замовлення</span><span style="text-align: right;">150 ₴</span></div>
+            <div style="display: grid; grid-template-columns: {{ tableCols }}; gap: 16px; padding: 18px 20px; border-top: 1px solid #eeeeee;"><span style="font-weight: 500;">Самовивіз з магазину</span><span style="color: #3d3d3d;">через 2 години</span><span style="text-align: right; color: #2fb54a;">Безкоштовно</span></div>
+          </div>
+          <p style="margin: 16px 0 0; font-size: 14px; line-height: 1.6; color: #8a8a8a;">Вартість доставки Новою Поштою може відрізнятися залежно від ваги та габаритів посилки — точну суму менеджер назве під час підтвердження.</p>
+          <h2 style="margin: 56px 0 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Способи оплати</h2>
+          <div style="margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px;">
+            <div style="padding: 24px; border: 1px solid #eeeeee; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;"><span style="font-size: 17px; font-weight: 600;">Карткою онлайн</span><span style="font-size: 14px; line-height: 1.5; color: #8a8a8a;">Visa, Mastercard, Apple Pay, Google Pay. Оплата після підтвердження замовлення.</span></div>
+            <div style="padding: 24px; border: 1px solid #eeeeee; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;"><span style="font-size: 17px; font-weight: 600;">Накладений платіж</span><span style="font-size: 14px; line-height: 1.5; color: #8a8a8a;">Оплата у відділенні після огляду товару. Комісію перевізника сплачує отримувач.</span></div>
+            <div style="padding: 24px; border: 1px solid #eeeeee; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;"><span style="font-size: 17px; font-weight: 600;">Безготівковий</span><span style="font-size: 14px; line-height: 1.5; color: #8a8a8a;">Рахунок для юридичних осіб і ФОП. Відправка після надходження коштів.</span></div>
+          </div>
+          <h2 style="margin: 56px 0 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Обмін та повернення</h2>
+          <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Ви можете обміняти або повернути товар протягом 14 днів з моменту отримання, якщо він не був у використанні, збережено упаковку, ключі та кодову картку.</p>
+          <ol style="margin: 20px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; font-size: 16px; line-height: 1.6; color: #3d3d3d;">
+            <li style="display: flex; gap: 14px;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #fffaeb; color: #111; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex: none;">1</span><span>Зателефонуйте або напишіть нам і вкажіть номер замовлення.</span></li>
+            <li style="display: flex; gap: 14px;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #fffaeb; color: #111; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex: none;">2</span><span>Надішліть товар Новою Поштою на реквізити, які надасть менеджер.</span></li>
+            <li style="display: flex; gap: 14px;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #fffaeb; color: #111; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex: none;">3</span><span>Ми повернемо кошти протягом 3 робочих днів після отримання й перевірки товару.</span></li>
+          </ol>
+        </sc-if>
+
+        <sc-if value="{{ isOffer }}" hint-placeholder-val="{{ false }}">
+          <h1 style="margin: 0; font-size: clamp(36px, 4.5vw, 56px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">Договір оферти</h1>
+          <p style="margin: 16px 0 0; font-size: 14px; color: #a3a3a3;">Редакція від 6 жовтня 2026 року</p>
+          <p style="margin: 32px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Цей документ є публічною пропозицією (офертою) [ПІБ ФОП], РНОКПП [номер] (далі — Продавець), укласти договір купівлі-продажу товарів дистанційним способом з будь-якою фізичною або юридичною особою (далі — Покупець).</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">1. Загальні положення</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">1.1. Оформлення замовлення на сайті означає повне й беззастережне прийняття Покупцем умов цього договору.</p>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">1.2. Продавець має право змінювати умови оферти. Нова редакція набирає чинності з моменту публікації на сайті.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">2. Предмет договору</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">2.1. Продавець зобов’язується передати у власність Покупця товар, а Покупець — оплатити та прийняти його на умовах цього договору.</p>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">2.2. Найменування, кількість і ціна товару визначаються в замовленні, підтвердженому менеджером.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">3. Ціна та оплата</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">3.1. Ціни на сайті вказані в гривнях. Вартість доставки не входить у ціну товару, якщо інше не зазначено.</p>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">3.2. Покупець оплачує замовлення одним зі способів, наведених у розділі «Доставка і оплата».</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">4. Доставка та приймання</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">4.1. Право власності та ризик випадкового пошкодження переходять до Покупця в момент отримання товару.</p>
+          <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">4.2. Під час отримання Покупець перевіряє комплектність і цілісність товару у присутності представника перевізника.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">5. Повернення товару</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">5.1. Повернення та обмін здійснюються відповідно до Закону України «Про захист прав споживачів» протягом 14 днів з дня отримання товару.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">6. Реквізити Продавця</h2>
+          <div style="margin-top: 16px; padding: 24px; border-radius: 12px; background: #fbfbfb; font-size: 15px; line-height: 1.8; color: #3d3d3d;">[ПІБ ФОП]<br>РНОКПП: [номер]<br>Адреса: м. Київ, [вулиця, будинок]<br>Телефон: 067 00 00 00 · Email: xxx@gmail.com</div>
+        </sc-if>
+
+        <sc-if value="{{ isPrivacy }}" hint-placeholder-val="{{ false }}">
+          <h1 style="margin: 0; font-size: clamp(36px, 4.5vw, 56px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">Політика конфіденційності</h1>
+          <p style="margin: 16px 0 0; font-size: 14px; color: #a3a3a3;">Редакція від 6 жовтня 2026 року</p>
+          <p style="margin: 32px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Ця політика пояснює, які персональні дані ми збираємо, навіщо вони потрібні та як ми їх захищаємо. Користуючись сайтом, ви погоджуєтеся з її умовами.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">Які дані ми збираємо</h2>
+          <ul style="margin: 16px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.6; color: #3d3d3d;">
+            <li style="display: flex; gap: 12px;"><span style="width: 6px; height: 6px; margin-top: 10px; border-radius: 50%; background: #ffc400; flex: none;"></span><span>ім’я, прізвище, номер телефону та email;</span></li>
+            <li style="display: flex; gap: 12px;"><span style="width: 6px; height: 6px; margin-top: 10px; border-radius: 50%; background: #ffc400; flex: none;"></span><span>адресу доставки або номер відділення перевізника;</span></li>
+            <li style="display: flex; gap: 12px;"><span style="width: 6px; height: 6px; margin-top: 10px; border-radius: 50%; background: #ffc400; flex: none;"></span><span>технічні дані: тип пристрою, браузер, файли cookie.</span></li>
+          </ul>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">Навіщо вони потрібні</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Ми використовуємо дані лише для обробки та доставки замовлень, зв’язку з вами щодо замовлення і покращення роботи сайту. Розсилки надсилаємо тільки за вашою згодою.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">Кому ми їх передаємо</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Дані передаються лише службам доставки та платіжним сервісам у обсязі, необхідному для виконання замовлення. Ми не продаємо персональні дані третім особам.</p>
+          <h2 style="margin: 48px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; letter-spacing: -0.01em;">Ваші права</h2>
+          <p style="margin: 16px 0 0; font-size: 16px; line-height: 1.7; color: #3d3d3d;">Ви можете в будь-який момент запросити перегляд, виправлення або видалення своїх даних, написавши на xxx@gmail.com. Ми відповімо протягом 30 днів.</p>
+          <div style="margin-top: 32px; padding: 20px 24px; border-radius: 12px; background: #fffaeb; display: flex; gap: 14px; font-size: 15px; line-height: 1.6; color: #3d3d3d;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex: none; margin-top: 2px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+            <span>Дані зберігаються відповідно до Закону України «Про захист персональних даних» не довше, ніж це потрібно для мети їх обробки.</span>
+          </div>
+        </sc-if>
+
+        <section id="form" style="margin-top: 96px; border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(24px, 3.5vw, 48px);">
+          <sc-if value="{{ formIdle }}" hint-placeholder-val="{{ true }}">
+            <h2 style="margin: 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Залишилися питання?</h2>
+            <p style="margin: 12px 0 0; font-size: 16px; line-height: 1.5; color: #8a8a8a;">Напишіть нам — відповімо протягом робочого дня.</p>
+            <form onSubmit="{{ submit }}" noValidate="novalidate" style="margin-top: 32px; display: grid; grid-template-columns: {{ formCols }}; gap: 20px;">
+              <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Ім’я*</span>
+                <input name="name" value="{{ f.name }}" onChange="{{ onField }}" placeholder="Олександр" style="height: 56px; box-sizing: border-box; border: 1px solid {{ e.nameB }}; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                <span style="font-size: 12px; color: #ff5a4f; min-height: 14px;">{{ e.name }}</span>
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Телефон*</span>
+                <input name="phone" type="tel" value="{{ f.phone }}" onChange="{{ onField }}" placeholder="+380 00 000 00 00" style="height: 56px; box-sizing: border-box; border: 1px solid {{ e.phoneB }}; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                <span style="font-size: 12px; color: #ff5a4f; min-height: 14px;">{{ e.phone }}</span>
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Email</span>
+                <input name="email" type="email" value="{{ f.email }}" onChange="{{ onField }}" placeholder="mail@example.com" style="height: 56px; box-sizing: border-box; border: 1px solid {{ e.emailB }}; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                <span style="font-size: 12px; color: #ff5a4f; min-height: 14px;">{{ e.email }}</span>
+              </label>
+              <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Тема</span>
+                <select name="topic" value="{{ f.topic }}" onChange="{{ onField }}" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;">
+                  <option>Підбір замка або циліндра</option>
+                  <option>Питання щодо замовлення</option>
+                  <option>Доставка і оплата</option>
+                  <option>Обмін та повернення</option>
+                  <option>Монтаж</option>
+                  <option>Інше</option>
+                </select>
+                <span style="min-height: 14px;"></span>
+              </label>
+              <label style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Повідомлення*</span>
+                <textarea name="message" value="{{ f.message }}" onChange="{{ onField }}" rows="5" placeholder="Опишіть ваше питання. Для підбору вкажіть товщину дверей або розміри A і B." style="box-sizing: border-box; border: 1px solid {{ e.messageB }}; border-radius: 8px; padding: 16px; font-size: 16px; line-height: 1.5; color: #111; outline: none; resize: vertical; background: #fff;" style-focus="border-color: #ffc400;"></textarea>
+                <span style="font-size: 12px; color: #ff5a4f; min-height: 14px;">{{ e.message }}</span>
+              </label>
+              <label style="grid-column: 1 / -1; display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 1.5; color: #3d3d3d; cursor: pointer;">
+                <input type="checkbox" name="consent" checked="{{ f.consent }}" onChange="{{ onCheck }}" style="width: 20px; height: 20px; margin: 1px 0 0; accent-color: #ffc400; flex: none;">
+                <span>Погоджуюсь з <a href="#privacy" style="color: #111; text-decoration: underline; text-decoration-color: #ffc400; text-underline-offset: 3px;">політикою конфіденційності</a></span>
+              </label>
+              <sc-if value="{{ e.consent }}" hint-placeholder-val="{{ false }}">
+                <span style="grid-column: 1 / -1; margin-top: -12px; font-size: 12px; color: #ff5a4f;">{{ e.consent }}</span>
+              </sc-if>
+              <div style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 16px;">
+                <button type="submit" disabled="{{ sending }}" style="height: 56px; min-width: 243px; padding: 0 32px; border: 0; border-radius: 8px; background: #ffc400; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; opacity: {{ sendOp }};" style-hover="background: #f0b800;">{{ sendLabel }}</button>
+                <span style="font-size: 13px; color: #a3a3a3;">Або зателефонуйте: <a href="tel:0670000000" style="color: #111; font-weight: 500;">067 00 00 00</a></span>
+              </div>
+            </form>
+          </sc-if>
+          <sc-if value="{{ formDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 16px;">
+              <div style="width: 64px; height: 64px; border-radius: 50%; background: #e3f8e8; color: #2fb54a; display: flex; align-items: center; justify-content: center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              </div>
+              <h2 style="margin: 8px 0 0; font-size: clamp(26px, 2.6vw, 32px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Дякуємо, {{ doneName }}!</h2>
+              <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #8a8a8a; max-width: 520px;">Ваше повідомлення отримано. Менеджер зв’яжеться з вами за номером {{ donePhone }} протягом робочого дня.</p>
+              <button onClick="{{ resetForm }}" style="margin-top: 8px; height: 48px; padding: 0 24px; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; color: #111; font-size: 15px; cursor: pointer;" style-hover="border-color: #ffc400;">Надіслати ще одне повідомлення</button>
+            </div>
+          </sc-if>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <div style="margin-top: 120px;"><dc-import name="Site Footer" hint-size="100%,318px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PAGES = [
+  { id: 'about', name: 'Про нас' },
+  { id: 'delivery', name: 'Доставка і оплата' },
+  { id: 'offer', name: 'Договір оферти' },
+  { id: 'privacy', name: 'Політика конфіденційності' },
+];
+const EMPTY = { name: '', phone: '', email: '', topic: 'Підбір замка або циліндра', message: '', consent: false };
+const readHash = () => {
+  const h = (typeof location !== 'undefined' ? location.hash : '').replace('#', '');
+  if (h === 'contacts' || h === 'form') return { page: 'about', form: true };
+  return { page: PAGES.some(p => p.id === h) ? h : 'about', form: false };
+};
+
+class Component extends DCLogic {
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1440, page: readHash().page, f: { ...EMPTY }, errors: {}, status: 'idle', done: null };
+  componentDidMount() {
+    this.r = () => this.setState({ w: window.innerWidth });
+    this.hc = () => {
+      const { page, form } = readHash();
+      this.setState({ page });
+      setTimeout(() => {
+        const el = form ? document.getElementById('form') : null;
+        window.scrollTo({ top: el ? el.getBoundingClientRect().top + window.scrollY - 100 : 0, behavior: 'smooth' });
+      }, 30);
+    };
+    window.addEventListener('resize', this.r);
+    window.addEventListener('hashchange', this.hc);
+    if (readHash().form) this.hc();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.r); window.removeEventListener('hashchange', this.hc); clearTimeout(this.t); }
+  validate(f) {
+    const e = {};
+    if (f.name.trim().length < 2) e.name = 'Вкажіть ім’я';
+    if (f.phone.replace(/\D/g, '').length < 10) e.phone = 'Вкажіть номер у форматі +380 00 000 00 00';
+    if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) e.email = 'Перевірте email';
+    if (f.message.trim().length < 10) e.message = 'Напишіть хоча б кілька слів (від 10 символів)';
+    if (!f.consent) e.consent = 'Потрібна згода на обробку даних';
+    return e;
+  }
+  renderVals() {
+    const { w, page, f, errors, status, done } = this.state;
+    const isDesktop = w >= 1100;
+    const cur = PAGES.find(p => p.id === page) || PAGES[0];
+    const err = k => errors[k] || '';
+    const bd = k => (errors[k] ? '#ff5a4f' : '#e6e6e6');
+    return {
+      isDesktop, pageName: cur.name,
+      isAbout: page === 'about', isDelivery: page === 'delivery', isOffer: page === 'offer', isPrivacy: page === 'privacy',
+      cols: isDesktop ? '320px minmax(0, 1fr)' : 'minmax(0, 1fr)',
+      gap: isDesktop ? '80px' : '32px',
+      asidePos: isDesktop ? 'sticky' : 'static',
+      navDir: isDesktop ? 'column' : 'row',
+      tableCols: w < 720 ? 'minmax(0, 1.4fr) minmax(0, 1fr) auto' : 'minmax(0, 2fr) minmax(0, 1fr) 120px',
+      formCols: w < 720 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))',
+      pages: PAGES.map(p => {
+        const a = p.id === page;
+        return { name: p.name, href: '#' + p.id, border: a ? '#ffc400' : '#eeeeee', bg: a ? '#fffaeb' : '#fff', weight: a ? 600 : 400, chev: a ? '#ffc400' : '#c8c8c8' };
+      }),
+      toForm: e => { e.preventDefault(); const el = document.getElementById('form'); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth' }); },
+      f,
+      e: { name: err('name'), phone: err('phone'), email: err('email'), message: err('message'), consent: err('consent'), nameB: bd('name'), phoneB: bd('phone'), emailB: bd('email'), messageB: bd('message') },
+      onField: ev => { const { name, value } = ev.target; this.setState(s => ({ f: { ...s.f, [name]: value }, errors: { ...s.errors, [name]: undefined } })); },
+      onCheck: ev => { const v = ev.target.checked; this.setState(s => ({ f: { ...s.f, consent: v }, errors: { ...s.errors, consent: undefined } })); },
+      submit: ev => {
+        ev.preventDefault();
+        const e = this.validate(f);
+        if (Object.keys(e).length) { this.setState({ errors: e }); return; }
+        this.setState({ status: 'sending', errors: {} });
+        this.t = setTimeout(() => this.setState({ status: 'done', done: { name: f.name.trim(), phone: f.phone.trim() } }), 900);
+      },
+      sending: status === 'sending', sendOp: status === 'sending' ? 0.7 : 1,
+      sendLabel: status === 'sending' ? 'Надсилаємо…' : 'Надіслати повідомлення',
+      formIdle: status !== 'done', formDone: status === 'done',
+      doneName: done ? done.name : '', donePhone: done ? done.phone : '',
+      resetForm: () => this.setState({ status: 'idle', f: { ...EMPTY }, done: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+  <style>
+    html, body { margin: 0; padding: 0; background: #fff; }
+    body { font-family: 'Inter', sans-serif; color: #111; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { color: #ffc400; }
+    button, input, textarea { font-family: inherit; }
+    input::placeholder, textarea::placeholder { color: #b5b5b5; }
+  </style>
+</helmet>
+
+<div data-screen-label="Оформлення замовлення" style="min-height: 100vh; background: #fff; font-family: 'Inter', sans-serif; color: #111;">
+  <dc-import name="Site Header" style="position: sticky; top: 0; z-index: 40;" hint-size="100%,84px"></dc-import>
+
+  <main style="max-width: 1440px; margin: 0 auto; padding: 0 clamp(16px, 2vw, 28px); box-sizing: border-box;">
+    <nav style="margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; line-height: 16px;">
+      <a href="Home.dc.html" style="color: #111;">Головна</a>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#c8c8c8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+      <span style="color: #c8c8c8;">{{ crumb }}</span>
+    </nav>
+
+    <div style="margin-top: 48px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px;">
+      <div style="display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;">
+        <h1 style="margin: 0; font-size: clamp(36px, 4.5vw, 64px); line-height: 1; font-weight: 600; letter-spacing: -0.03em;">{{ pageTitle }}</h1>
+        <span style="font-size: 16px; color: #a3a3a3;">{{ countLabel }}</span>
+      </div>
+      <ol style="list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 12px; font-size: 14px; line-height: 1;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+          <li style="display: flex; align-items: center; gap: 12px;">
+            <span style="display: flex; align-items: center; gap: 8px; color: {{ s.color }};">
+              <span style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; background: {{ s.dotBg }}; color: {{ s.dotColor }}; border: 1px solid {{ s.dotBorder }}; box-sizing: border-box;">{{ s.n }}</span>
+              <span>{{ s.label }}</span>
+            </span>
+            <sc-if value="{{ s.notLast }}" hint-placeholder-val="{{ true }}"><span style="width: 32px; height: 1px; background: #e6e6e6;"></span></sc-if>
+          </li>
+        </sc-for>
+      </ol>
+    </div>
+
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top: 48px; border: 1px solid #eeeeee; border-radius: 16px; padding: clamp(40px, 8vw, 96px) 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: #fffaeb; color: #ffc400; display: flex; align-items: center; justify-content: center;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
+        </div>
+        <h2 style="margin: 8px 0 0; font-size: 28px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Кошик порожній</h2>
+        <p style="margin: 0; max-width: 380px; font-size: 16px; line-height: 1.5; color: #8a8a8a;">Оберіть замок або серцевину в каталозі — товари з’являться тут.</p>
+        <a href="Home.dc.html#hits" style="margin-top: 16px; height: 56px; padding: 0 32px; border-radius: 8px; background: #ffc400; color: #fff; display: flex; align-items: center; font-size: 16px; font-weight: 600;" style-hover="background: #f0b800; color: #fff;">Перейти до каталогу</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top: 48px; border: 1px solid #eeeeee; border-radius: 16px; padding: clamp(40px, 8vw, 96px) 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: #e3f8e8; color: #2fb54a; display: flex; align-items: center; justify-content: center;">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </div>
+        <h2 style="margin: 8px 0 0; font-size: 28px; line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;">Замовлення {{ orderNo }} прийнято</h2>
+        <p style="margin: 0; max-width: 440px; font-size: 16px; line-height: 1.5; color: #8a8a8a;">Дякуємо, {{ doneName }}! Менеджер зателефонує на номер {{ donePhone }} протягом 15 хвилин, щоб підтвердити деталі.</p>
+        <div style="margin-top: 8px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px; font-size: 14px; color: #8a8a8a;">
+          <span>Сума: <span style="color: #111; font-weight: 600;">{{ doneTotal }}</span></span>
+          <span>Доставка: <span style="color: #111; font-weight: 500;">{{ doneDelivery }}</span></span>
+          <span>Оплата: <span style="color: #111; font-weight: 500;">{{ donePayment }}</span></span>
+        </div>
+        <a href="Home.dc.html" style="margin-top: 16px; height: 56px; padding: 0 32px; border-radius: 8px; background: #ffc400; color: #fff; display: flex; align-items: center; font-size: 16px; font-weight: 600;" style-hover="background: #f0b800; color: #fff;">На головну</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+      <div style="margin-top: 56px; display: grid; grid-template-columns: {{ cols }}; gap: {{ gap }}; align-items: start;">
+        <div style="min-width: 0; display: flex; flex-direction: column;">
+
+          
+
+          <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+            <form id="checkout" onSubmit="{{ submit }}" style="display: flex; flex-direction: column; gap: 24px;">
+              <section style="border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(24px, 3vw, 40px);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                  <h2 style="margin: 0; display: flex; align-items: center; gap: 12px; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #ffc400; color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center;">1</span>Товари у замовленні</h2>
+                  <button type="button" onClick="{{ backToCart }}" style="height: 40px; padding: 0 14px; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center; gap: 8px; font-size: 14px; color: #111; cursor: pointer; flex: none;" style-hover="border-color: #ffc400;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path><path d="M13.5 6.5l4 4"></path></svg>Редагувати кошик</button>
+                </div>
+                <div style="margin-top: 16px; display: flex; flex-direction: column;">
+                  <sc-for list="{{ items }}" as="it" hint-placeholder-count="2">
+                    <div style="display: grid; grid-template-columns: {{ rowCols }}; grid-template-areas: {{ rowAreas }}; gap: 16px 24px; align-items: center; padding: 24px 0; border-bottom: {{ it.border }};">
+                      <a href="Product.dc.html" style="grid-area: img; width: {{ thumbSize }}; height: {{ thumbSize }}; border-radius: 12px; background: #fbfbfb; padding: 8px; box-sizing: border-box; display: block;">
+                        <img src="{{ it.img }}" alt="{{ it.name }}" style="width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; display: block;">
+                      </a>
+                      <div style="grid-area: info; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+                        <a href="Product.dc.html" style="font-size: 15px; line-height: 1.35; font-weight: 500; color: #111; text-wrap: pretty;">{{ it.name }}</a>
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; line-height: 1.2; color: #8a8a8a;">
+                          <span style="display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;"><span style="width: 10px; height: 10px; border-radius: 50%; background: {{ it.swatch }}; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);"></span>{{ it.color }}</span>
+                          <span style="width: 3px; height: 3px; border-radius: 50%; background: #d6d6d6;"></span>
+                          <span style="white-space: nowrap;">{{ it.size }}</span>
+                          <span style="width: 3px; height: 3px; border-radius: 50%; background: #d6d6d6;"></span>
+                          <span style="white-space: nowrap;">{{ it.unit }} / шт.</span>
+                        </div>
+                      </div>
+                      <div style="grid-area: qty; justify-self: start; height: 44px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; background: #fff; display: flex; align-items: center;">
+                        <button type="button" onClick="{{ it.dec }}" aria-label="Менше" style="width: 40px; height: 100%; border: 0; background: none; color: {{ it.decColor }}; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10"></path></svg></button>
+                        <input value="{{ it.qty }}" onChange="{{ it.setQty }}" inputMode="numeric" aria-label="Кількість" style="width: 32px; height: 100%; border: 0; outline: none; text-align: center; font-size: 15px; font-weight: 600; color: #111; background: none; padding: 0;">
+                        <button type="button" onClick="{{ it.inc }}" aria-label="Більше" style="width: 40px; height: 100%; border: 0; background: none; color: #ffc400; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 8h10M8 3v10"></path></svg></button>
+                      </div>
+                      <div style="grid-area: sum; justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 96px;">
+                        <span style="font-size: 12px; line-height: 1; color: #a3a3a3; text-decoration: line-through;">{{ it.oldTotal }}</span>
+                        <span style="font-size: 20px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; color: #111; white-space: nowrap;">{{ it.total }}</span>
+                      </div>
+                      <button type="button" onClick="{{ it.remove }}" aria-label="Видалити" title="Видалити" style="grid-area: del; justify-self: end; align-self: {{ delAlign }}; width: 40px; height: 40px; border: 0; border-radius: 8px; background: none; color: #b5b5b5; display: flex; align-items: center; justify-content: center; cursor: pointer;" style-hover="color: #ff5a4f; background: #fff3f2;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l.8 12.2a1.5 1.5 0 0 0 1.5 1.3h6.4a1.5 1.5 0 0 0 1.5-1.3L17.5 7"></path><path d="M10 11v6M14 11v6"></path></svg>
+                      </button>
+                    </div>
+                  </sc-for>
+                </div>
+                
+              </section>
+
+              <section style="border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(24px, 3vw, 40px);">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 12px; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #ffc400; color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center;">2</span>Контактні дані</h2>
+                <div style="margin-top: 32px; display: grid; grid-template-columns: {{ formCols }}; gap: 20px;">
+                  <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Ім’я*</span>
+                    <input name="name" required="required" value="{{ f.name }}" onChange="{{ onField }}" placeholder="Олександр" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Прізвище</span>
+                    <input name="last" value="{{ f.last }}" onChange="{{ onField }}" placeholder="Коваленко" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Телефон*</span>
+                    <input name="phone" type="tel" required="required" value="{{ f.phone }}" onChange="{{ onField }}" placeholder="+380 00 000 00 00" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                  </label>
+                  <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Email</span>
+                    <input name="email" type="email" value="{{ f.email }}" onChange="{{ onField }}" placeholder="mail@example.com" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                  </label>
+                </div>
+              </section>
+
+              <section style="border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(24px, 3vw, 40px);">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 12px; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #ffc400; color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center;">3</span>Доставка</h2>
+                <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
+                  <sc-for list="{{ deliveries }}" as="d" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ d.onPick }}" style="text-align: left; min-height: 72px; padding: 16px 20px; border: 1px solid {{ d.border }}; border-radius: 12px; background: {{ d.bg }}; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all .2s;" style-hover="border-color: #ffc400;">
+                      <span style="width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; border: {{ d.radio }}; flex: none;"></span>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 16px; font-weight: 500; color: #111;">{{ d.title }}</span>
+                        <span style="font-size: 13px; line-height: 1.3; color: #8a8a8a;">{{ d.note }}</span>
+                      </span>
+                      <span style="flex: none; font-size: 15px; font-weight: 600; color: {{ d.priceColor }}; white-space: nowrap;">{{ d.priceLabel }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ needAddress }}" hint-placeholder-val="{{ true }}">
+                  <div style="margin-top: 16px; display: grid; grid-template-columns: {{ formCols }}; gap: 20px;">
+                    <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>Місто*</span>
+                      <input name="city" required="required" value="{{ f.city }}" onChange="{{ onField }}" placeholder="Київ" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                    </label>
+                    <label style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;"><span>{{ addrLabel }}*</span>
+                      <input name="addr" required="required" value="{{ f.addr }}" onChange="{{ onField }}" placeholder="{{ addrPh }}" style="height: 56px; box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 0 16px; font-size: 16px; color: #111; outline: none; background: #fff;" style-focus="border-color: #ffc400;">
+                    </label>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ isPickup }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top: 16px; padding: 20px; border-radius: 12px; background: #fbfbfb; display: flex; gap: 12px; font-size: 14px; line-height: 1.5; color: #3d3d3d;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex: none;"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.3"></circle></svg>
+                    <span>Київ, магазин IRON CUT. Пн–Сб 9:00–19:00. Замовлення буде готове протягом 2 годин — ми надішлемо SMS.</span>
+                  </div>
+                </sc-if>
+              </section>
+
+              <section style="border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(24px, 3vw, 40px);">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 12px; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;"><span style="width: 28px; height: 28px; border-radius: 50%; background: #ffc400; color: #fff; font-size: 13px; display: flex; align-items: center; justify-content: center;">4</span>Оплата</h2>
+                <div style="margin-top: 32px; display: flex; flex-direction: column; gap: 12px;">
+                  <sc-for list="{{ payments }}" as="p" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ p.onPick }}" style="text-align: left; min-height: 64px; padding: 16px 20px; border: 1px solid {{ p.border }}; border-radius: 12px; background: {{ p.bg }}; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all .2s;" style-hover="border-color: #ffc400;">
+                      <span style="width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; border: {{ p.radio }}; flex: none;"></span>
+                      <span style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 16px; font-weight: 500; color: #111;">{{ p.title }}</span>
+                        <span style="font-size: 13px; color: #8a8a8a;">{{ p.note }}</span>
+                      </span>
+                    </button>
+                  </sc-for>
+                </div>
+                <label style="margin-top: 24px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: #8a8a8a;">Коментар до замовлення
+                  <textarea name="comment" value="{{ f.comment }}" onChange="{{ onField }}" rows="3" placeholder="Наприклад, зручний час для дзвінка" style="box-sizing: border-box; border: 1px solid #e6e6e6; border-radius: 8px; padding: 16px; font-size: 16px; line-height: 1.4; color: #111; outline: none; resize: vertical; background: #fff;" style-focus="border-color: #ffc400;"></textarea>
+                </label>
+              </section>
+
+              <button type="button" onClick="{{ backToCart }}" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; font-size: 15px; color: #111; cursor: pointer;" style-hover="color: #ffc400;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+                Повернутися до кошика
+              </button>
+            </form>
+          </sc-if>
+        </div>
+
+        <aside style="min-width: 0; position: {{ asidePos }}; top: 96px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="border: 1px solid #e6e6e6; border-radius: 16px; padding: clamp(20px, 2.6vw, 32px); display: flex; flex-direction: column;">
+            <h2 style="margin: 0; font-size: 22px; line-height: 1; font-weight: 600; letter-spacing: -0.02em;">Ваше замовлення</h2>
+
+            
+
+            <dl style="margin: 24px 0 0; display: flex; flex-direction: column; gap: 14px; font-size: 15px; line-height: 1.2;">
+              <div style="display: flex; justify-content: space-between; gap: 16px;"><dt style="color: #8a8a8a;">Товари ({{ qtyTotal }})</dt><dd style="margin: 0;">{{ subtotalOld }}</dd></div>
+              <div style="display: flex; justify-content: space-between; gap: 16px;"><dt style="color: #8a8a8a;">Знижка</dt><dd style="margin: 0; color: #ff5a4f;">−{{ savings }}</dd></div>
+              <sc-if value="{{ hasPromo }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; justify-content: space-between; gap: 16px;"><dt style="color: #8a8a8a;">Промокод IRON5</dt><dd style="margin: 0; color: #ff5a4f;">−{{ promoAmount }}</dd></div>
+              </sc-if>
+              <div style="display: flex; justify-content: space-between; gap: 16px;"><dt style="color: #8a8a8a;">Доставка</dt><dd style="margin: 0; color: {{ shipColor }}; text-align: right;">{{ shipLabel }}</dd></div>
+            </dl>
+
+            
+
+            <div style="margin-top: 24px; height: 1px; background: #eeeeee;"></div>
+            <div style="margin-top: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;">
+              <span style="font-size: 16px; color: #111;">Разом</span>
+              <span style="font-size: 40px; line-height: 0.9; font-weight: 700; letter-spacing: -0.03em;">{{ total }}</span>
+            </div>
+
+            
+            <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+              <button type="submit" form="checkout" style="margin-top: 24px; height: 56px; border: 0; border-radius: 8px; background: #ffc400; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer;" style-hover="background: #f0b800;">Підтвердити замовлення</button>
+              <p style="margin: 12px 0 0; font-size: 12px; line-height: 1.4; color: #a3a3a3;">Натискаючи кнопку, ви погоджуєтесь з умовами договору оферти та політикою конфіденційності.</p>
+            </sc-if>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; padding: 0 8px; font-size: 13px; line-height: 1.3; color: #8a8a8a;">
+            <span style="display: flex; align-items: center; gap: 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>Гарантія 12 місяців на всі товари</span>
+            <span style="display: flex; align-items: center; gap: 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"></path><path d="M3.5 4v4.5H8"></path><path d="M12 8v4l2.5 2"></path></svg>Обмін та повернення протягом 14 днів</span>
+          </div>
+        </aside>
+      </div>
+    </sc-if>
+  </main>
+
+  <div style="margin-top: 120px;"><dc-import name="Site Footer" hint-size="100%,318px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const KEY = 'ironcut_cart';
+const COLORS = {
+  G: { label: 'Латунь', swatch: '#d8b866', img: 'assets/abaro-brass.png' },
+  N: { label: 'Нікель', swatch: '#c9cdd2', img: 'assets/abaro-nickel.png' },
+  B: { label: 'Чорний', swatch: '#2a2a2a', img: 'assets/abaro-black.png' },
+};
+const SIZE = { 60: '30×30', 70: '35×35', 80: '40×40', 90: '45×45' };
+const FREE_FROM = 2000;
+const DELIVERY = [
+  { id: 'np', title: 'Нова Пошта', note: 'Відділення або поштомат · 1–2 дні', price: 80, addr: 'Відділення / поштомат', ph: '№ відділення' },
+  { id: 'courier', title: 'Кур’єр по Києву', note: 'В день замовлення', price: 150, addr: 'Адреса', ph: 'Вулиця, будинок, квартира' },
+  { id: 'pickup', title: 'Самовивіз', note: 'З магазину в Києві · сьогодні', price: 0 },
+];
+const PAYMENT = [
+  { id: 'card', title: 'Карткою онлайн', note: 'Visa, Mastercard, Apple Pay, Google Pay' },
+  { id: 'cod', title: 'Накладений платіж', note: 'Оплата при отриманні' },
+  { id: 'invoice', title: 'Безготівковий розрахунок', note: 'Рахунок для юридичних осіб' },
+];
+const fmt = n => Math.round(n).toLocaleString('uk-UA').replace(/\u00a0/g, ' ') + ' ₴';
+const plural = n => { const m10 = n % 10, m100 = n % 100; return m10 === 1 && m100 !== 11 ? 'товар' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'товари' : 'товарів'; };
+const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } };
+
+class Component extends DCLogic {
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1440, items: [], step: 'checkout', delivery: 'np', payment: 'card', f: { name: '', last: '', phone: '', email: '', city: '', addr: '', comment: '' }, promoInput: '', promo: false, promoErr: false, done: null };
+  componentDidMount() {
+    this.r = () => this.setState({ w: window.innerWidth });
+    this.sync = () => this.setState({ items: read() });
+    window.addEventListener('resize', this.r);
+    window.addEventListener('storage', this.sync);
+    window.addEventListener('ironcut-cart', this.sync);
+    this.sync();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.r); window.removeEventListener('storage', this.sync); window.removeEventListener('ironcut-cart', this.sync); }
+  save(items) {
+    try { localStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {}
+    this.setState({ items });
+    window.dispatchEvent(new Event('ironcut-cart'));
+  }
+  setQty(sku, q) { this.save(this.state.items.map(i => i.sku === sku ? { ...i, qty: Math.max(1, Math.min(99, q)) } : i)); }
+  renderVals() {
+    const { w, items, step, delivery, payment, f, promo, promoInput, promoErr, done } = this.state;
+    const isDesktop = w >= 1100, isMobile = w < 720;
+    const view = items.map(i => {
+      const m = /-(\d+)-([A-Z])$/.exec(i.sku || '') || [];
+      const c = COLORS[m[2]] || COLORS.G;
+      const unitOld = Math.round(i.price * 1.3 / 10) * 10;
+      return {
+        sku: i.sku, name: i.name, qty: i.qty, img: c.img, color: c.label, swatch: c.swatch,
+        size: (SIZE[m[1]] || '30×30') + ' мм',
+        unit: fmt(i.price), total: fmt(i.price * i.qty), oldTotal: fmt(unitOld * i.qty),
+        isMin: i.qty <= 1, decColor: i.qty <= 1 ? '#d6d6d6' : '#ffc400',
+        dec: () => this.setQty(i.sku, i.qty - 1),
+        inc: () => this.setQty(i.sku, i.qty + 1),
+        setQty: e => { const v = parseInt(e.target.value.replace(/\D/g, ''), 10); this.setQty(i.sku, isNaN(v) ? 1 : v); },
+        remove: () => this.save(items.filter(x => x.sku !== i.sku)),
+        _old: unitOld * i.qty, _sum: i.price * i.qty, border: '1px solid #eeeeee',
+      };
+    });
+    const qtyTotal = items.reduce((n, i) => n + i.qty, 0);
+    const subtotal = view.reduce((n, i) => n + i._sum, 0);
+    const subtotalOld = view.reduce((n, i) => n + i._old, 0);
+    const promoAmount = promo ? Math.round(subtotal * 0.05) : 0;
+    const after = subtotal - promoAmount;
+    const D = DELIVERY.find(d => d.id === delivery);
+    const free = false;
+    const ship = step === 'checkout' ? (free || D.price === 0 ? 0 : D.price) : null;
+    const total = after + (ship || 0);
+    const isEmpty = !done && items.length === 0;
+    const stepIdx = done ? 2 : step === 'checkout' ? 1 : 0;
+    return {
+      crumb: done ? 'Замовлення оформлено' : 'Оформлення замовлення',
+      pageTitle: done ? 'Дякуємо!' : 'Оформлення замовлення',
+      countLabel: done || isEmpty ? '' : `${qtyTotal} ${plural(qtyTotal)}`,
+      steps: ['Кошик', 'Оформлення', 'Готово'].map((label, i) => ({
+        n: i < stepIdx ? '✓' : String(i + 1), label, notLast: i < 2,
+        color: i <= stepIdx ? '#111' : '#a3a3a3',
+        dotBg: i < stepIdx ? '#111' : i === stepIdx ? '#ffc400' : '#fff',
+        dotColor: i <= stepIdx ? '#fff' : '#a3a3a3',
+        dotBorder: i <= stepIdx ? 'transparent' : '#e6e6e6',
+      })),
+      isEmpty, isDone: !!done, hasItems: !done && items.length > 0,
+      isCart: step === 'cart', isCheckout: step === 'checkout',
+      cols: isDesktop ? 'minmax(0, 1fr) 440px' : 'minmax(0, 1fr)',
+      gap: isDesktop ? '64px' : '40px',
+      asidePos: isDesktop ? 'sticky' : 'static',
+      rowCols: isMobile ? '80px minmax(0, 1fr) auto' : '88px minmax(0, 1fr) auto auto auto',
+      rowAreas: isMobile ? '"img info del" "qty qty sum"' : '"img info qty sum del"',
+      thumbSize: isMobile ? '80px' : '88px',
+      delAlign: isMobile ? 'start' : 'center',
+      sumAlign: 'flex-end',
+      formCols: isMobile ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))',
+      items: view.map((v, k) => ({ ...v, border: k === view.length - 1 ? '0' : '1px solid #eeeeee' })),
+      itemsSum: fmt(subtotal),
+      clearCart: () => this.save([]),
+      qtyTotal, subtotalOld: fmt(subtotalOld), savings: fmt(subtotalOld - subtotal),
+      hasPromo: promo, promoAmount: fmt(promoAmount),
+      shipLabel: ship === null ? (free ? 'Безкоштовно' : 'Розрахуємо на наступному кроці') : ship === 0 ? 'Безкоштовно' : fmt(ship),
+      shipColor: ship === 0 || (ship === null && free) ? '#2fb54a' : ship === null ? '#a3a3a3' : '#111',
+      total: fmt(total),
+      promoInput, promoBorder: promoErr ? '#ff5a4f' : '#e6e6e6',
+      promoMsg: promo ? 'Промокод застосовано: −5%' : promoErr ? 'Промокод не знайдено. Спробуйте IRON5' : '',
+      promoMsgColor: promo ? '#2fb54a' : '#ff5a4f',
+      onPromo: e => this.setState({ promoInput: e.target.value, promoErr: false }),
+      applyPromo: () => { const ok = promoInput.trim().toUpperCase() === 'IRON5'; this.setState({ promo: ok, promoErr: !ok }); },
+      toCheckout: () => { this.setState({ step: 'checkout' }); window.scrollTo({ top: 0, behavior: 'smooth' }); },
+      backToCart: () => window.dispatchEvent(new Event('ironcut-open-cart')),
+      f, onField: e => { const { name, value } = e.target; this.setState(s => ({ f: { ...s.f, [name]: value } })); },
+      deliveries: DELIVERY.map(d => ({
+        title: d.title, note: d.note, priceLabel: d.price ? fmt(d.price) : 'Безкоштовно', priceColor: d.price ? '#111' : '#2fb54a',
+        border: d.id === delivery ? '#ffc400' : '#e6e6e6', bg: d.id === delivery ? '#fffaeb' : '#fff',
+        radio: d.id === delivery ? '5px solid #ffc400' : '1.5px solid #d6d6d6',
+        onPick: () => this.setState({ delivery: d.id }),
+      })),
+      needAddress: delivery !== 'pickup', isPickup: delivery === 'pickup',
+      addrLabel: D.addr || '', addrPh: D.ph || '',
+      payments: PAYMENT.map(p => ({
+        title: p.title, note: p.note,
+        border: p.id === payment ? '#ffc400' : '#e6e6e6', bg: p.id === payment ? '#fffaeb' : '#fff',
+        radio: p.id === payment ? '5px solid #ffc400' : '1.5px solid #d6d6d6',
+        onPick: () => this.setState({ payment: p.id }),
+      })),
+      submit: e => {
+        e.preventDefault();
+        const no = '№' + String(Date.now()).slice(-6);
+        this.setState({ done: { no, name: f.name, phone: f.phone, total: fmt(total), delivery: D.title, payment: PAYMENT.find(p => p.id === payment).title } });
+        this.save([]);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+      orderNo: done ? done.no : '', doneName: done ? done.name : '', donePhone: done ? done.phone : '',
+      doneTotal: done ? done.total : '', doneDelivery: done ? done.delivery : '', donePayment: done ? done.payment : '',
+    };
+  }
+}
+</script>
+</body>
+</html>
