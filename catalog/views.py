@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import Max, Min, Prefetch, Q
+from django.db.models import Count, Max, Min, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView, TemplateView
 
@@ -11,12 +11,37 @@ from orders.models import DeliveryDistrict
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
 
 SORT_MAP = {
-    'default': ('-is_hit', '-created_at'),
-    'cheap': ('price', 'name'),
-    'expensive': ('-price', 'name'),
-    'new': ('-is_new', '-created_at'),
-    'rating': ('-is_hit', 'price'),
+    'default': ('catalog_order', 'name'),
+    'cheap': ('price', 'catalog_order'),
+    'expensive': ('-price', 'catalog_order'),
+    'new': ('-is_new', 'catalog_order'),
+    'rating': ('-rating', 'catalog_order'),
 }
+
+FILTER_TITLES = {
+    'brand': 'Виробник/Бренд',
+    'country': 'Країна виробництва',
+    'color': 'Колір/покриття',
+    'mech': 'Тип механізму',
+}
+
+FILTER_OPEN_DEFAULT = {
+    'brand': True,
+    'country': True,
+    'color': False,
+    'mech': True,
+}
+
+PAGE_SIZE = 12
+
+
+def plural_goods(n):
+    a, b = n % 10, n % 100
+    if a == 1 and b != 11:
+        return 'товар'
+    if 2 <= a <= 4 and (b < 12 or b > 14):
+        return 'товари'
+    return 'товарів'
 
 
 class HomeView(TemplateView):
@@ -27,16 +52,24 @@ class HomeView(TemplateView):
         cats = Category.objects.filter(is_active=True, parent__isnull=True)
         hits = (
             Product.objects.filter(is_active=True, is_hit=True)
-            .prefetch_related('images')[:12]
+            .prefetch_related('images')
+            .order_by('catalog_order')[:12]
         )
         news = (
             Product.objects.filter(is_active=True, is_new=True)
-            .prefetch_related('images')[:12]
+            .prefetch_related('images')
+            .order_by('catalog_order')[:12]
         )
         if not hits:
-            hits = Product.objects.filter(is_active=True).prefetch_related('images')[:8]
+            hits = Product.objects.filter(is_active=True).prefetch_related('images').order_by(
+                'catalog_order'
+            )[:8]
         if not news:
-            news = Product.objects.filter(is_active=True).order_by('-created_at').prefetch_related('images')[:8]
+            news = (
+                Product.objects.filter(is_active=True)
+                .order_by('-created_at')
+                .prefetch_related('images')[:8]
+            )
 
         district = None
         slug = self.kwargs.get('district_slug') or self.request.session.get('district_slug')
@@ -69,7 +102,14 @@ class CatalogView(ListView):
     model = Product
     template_name = 'catalog/catalog.html'
     context_object_name = 'products'
-    paginate_by = 12
+    paginate_by = PAGE_SIZE
+
+    def get_paginate_by(self, queryset):
+        try:
+            limit = int(self.request.GET.get('limit', PAGE_SIZE))
+        except (TypeError, ValueError):
+            limit = PAGE_SIZE
+        return max(PAGE_SIZE, min(limit, 240))
 
     def get_queryset(self):
         qs = Product.objects.filter(is_active=True).prefetch_related('images', 'attributes')
@@ -111,26 +151,103 @@ class CatalogView(ListView):
         except (InvalidOperation, ValueError):
             return None
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
+    def _base_qs(self):
         base = Product.objects.filter(is_active=True)
         if self.category:
             base = base.filter(Q(category=self.category) | Q(category__parent=self.category))
+        return base
+
+    def _filter_counts(self, base, skip_key=None):
+        """Лічильники опцій з урахуванням інших активних фільтрів (як у дизайні)."""
+        qs = base
+        for key in ('brand', 'country', 'color', 'mech'):
+            if key == skip_key:
+                continue
+            values = self.request.GET.getlist(key)
+            if values:
+                qs = qs.filter(attributes__slug__in=values, attributes__attribute__slug=key)
+        sku = self.request.GET.get('sku', '').strip()
+        if sku:
+            qs = qs.filter(sku__icontains=sku)
+        price_min = self._decimal(self.request.GET.get('price_min'))
+        price_max = self._decimal(self.request.GET.get('price_max'))
+        if price_min is not None:
+            qs = qs.filter(price__gte=price_min)
+        if price_max is not None:
+            qs = qs.filter(price__lte=price_max)
+        return qs.distinct()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        base = self._base_qs()
         agg = base.aggregate(lo=Min('price'), hi=Max('price'))
         price_lo = int(agg['lo'] or 0)
         price_hi = int(agg['hi'] or 0)
+        # як у дизайні: округлення діапазону
+        if price_lo:
+            price_lo = (price_lo // 10) * 10
+        if price_hi:
+            price_hi = ((price_hi + 9) // 10) * 10
+
+        cur_min = self.request.GET.get('price_min')
+        cur_max = self.request.GET.get('price_max')
+        current_price_min = int(cur_min) if cur_min not in (None, '') else price_lo
+        current_price_max = int(cur_max) if cur_max not in (None, '') else price_hi
 
         filter_groups = []
-        for attr in Attribute.objects.filter(filterable=True).prefetch_related('values'):
+        filter_attrs = {
+            a.slug: a
+            for a in Attribute.objects.filter(filterable=True, slug__in=FILTER_TITLES).prefetch_related(
+                'values'
+            )
+        }
+        for slug in FILTER_TITLES:
+            attr = filter_attrs.get(slug)
+            if not attr:
+                continue
+            counted = (
+                self._filter_counts(base, skip_key=attr.slug)
+                .filter(attributes__attribute=attr)
+                .values('attributes__slug')
+                .annotate(c=Count('id', distinct=True))
+            )
+            count_map = {row['attributes__slug']: row['c'] for row in counted}
             options = []
             for val in attr.values.all():
-                count = base.filter(attributes=val).count()
                 selected = val.slug in self.request.GET.getlist(attr.slug)
-                options.append({'value': val, 'count': count, 'selected': selected})
-            filter_groups.append({'attribute': attr, 'options': options})
+                count = count_map.get(val.slug, 0)
+                options.append(
+                    {
+                        'value': val,
+                        'count': count,
+                        'selected': selected,
+                        'disabled': (not selected) and count == 0,
+                    }
+                )
+            # порядок опцій як у Catalog.dc.html
+            value_order = {
+                'brand': ['ABARO', 'Mottura', 'Cisa', 'Kale', 'Apecs'],
+                'country': ['Туреччина', 'Італія', 'Китай'],
+                'color': ['Латунь', 'Нікель', 'Чорний'],
+                'mech': ['Ключ / ключ', 'Ключ / тумблер', 'Половинчастий'],
+            }.get(attr.slug)
+            if value_order:
+                options.sort(
+                    key=lambda o: value_order.index(o['value'].value)
+                    if o['value'].value in value_order
+                    else 99
+                )
+            filter_groups.append(
+                {
+                    'attribute': attr,
+                    'title': FILTER_TITLES.get(attr.slug, attr.name),
+                    'open': FILTER_OPEN_DEFAULT.get(attr.slug, True),
+                    'options': options,
+                }
+            )
 
         selected_chips = []
-        for attr in Attribute.objects.filter(filterable=True):
+        for attr in filter_attrs.values():
             for slug in self.request.GET.getlist(attr.slug):
                 val = AttributeValue.objects.filter(attribute=attr, slug=slug).first()
                 if val:
@@ -140,6 +257,13 @@ class CatalogView(ListView):
         if sku:
             selected_chips.append({'label': f'Артикул: {sku}', 'key': 'sku', 'slug': sku})
 
+        if current_price_min > price_lo or current_price_max < price_hi:
+            lo_l = f'{current_price_min:,}'.replace(',', ' ') + ' ₴'
+            hi_l = f'{current_price_max:,}'.replace(',', ' ') + ' ₴'
+            selected_chips.append(
+                {'label': f'{lo_l} – {hi_l}', 'key': 'price', 'slug': ''}
+            )
+
         sort = self.request.GET.get('sort', 'default')
         sorts = [
             ('default', 'За замовчуванням'),
@@ -148,25 +272,38 @@ class CatalogView(ListView):
             ('rating', 'За рейтингом'),
             ('new', 'Спочатку новинки'),
         ]
+        total = ctx['page_obj'].paginator.count
+        shown = min(ctx['page_obj'].end_index(), total) if total else 0
+        limit = self.get_paginate_by(None)
         ctx.update(
             {
                 'category': self.category,
                 'title': self.category.name if self.category else 'Циліндрові врізні замки',
+                'count_label': f'{total} {plural_goods(total)}',
                 'filter_groups': filter_groups,
                 'selected_chips': selected_chips,
                 'price_lo': price_lo,
                 'price_hi': price_hi,
-                'current_price_min': self.request.GET.get('price_min', price_lo),
-                'current_price_max': self.request.GET.get('price_max', price_hi),
+                'current_price_min': current_price_min,
+                'current_price_max': current_price_max,
                 'current_sku': sku,
                 'current_sort': sort,
                 'sorts': sorts,
+                'sort_label': dict(sorts).get(sort, sorts[0][1]),
                 'query_q': self.request.GET.get('q', ''),
+                'shown_label': f'Показано {shown} з {total}',
+                'next_limit': limit + PAGE_SIZE,
+                'has_more': shown < total,
+                'page_size': PAGE_SIZE,
                 'is_htmx': self.request.headers.get('HX-Request') == 'true',
             }
         )
         if self.request.headers.get('HX-Request') == 'true':
-            self.template_name = 'catalog/partials/product_grid.html'
+            swap = self.request.headers.get('HX-Target', '')
+            if swap in ('product-grid', '#product-grid'):
+                self.template_name = 'catalog/partials/product_cards.html'
+            else:
+                self.template_name = 'catalog/partials/product_grid.html'
         return ctx
 
 

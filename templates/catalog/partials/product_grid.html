@@ -1,27 +1,31 @@
 {% if products %}
-<div class="product-grid">
+<div class="product-grid" id="product-grid">
   {% for product in products %}
     {% include 'partials/product_card.html' %}
   {% endfor %}
 </div>
-{% if page_obj.has_next %}
-<a class="btn" style="margin-top:40px;width:100%;background:#fff;border:1px solid #ffe7a3;color:#ffc400;"
-   href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
-   hx-get="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}"
+{% if has_more %}
+{% with base=request.path %}
+<button type="button"
+   class="catalog-more"
+   hx-get="{{ base }}?{% for k,v in request.GET.items %}{% if k != 'limit' and k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}limit={{ next_limit }}"
    hx-target="#catalog-grid"
-   hx-swap="beforeend"
-   hx-select=".product-grid > *, .btn">Завантажити ще</a>
+   hx-swap="innerHTML"
+   hx-push-url="true">Завантажити ще</button>
+{% endwith %}
 {% endif %}
-<p style="margin:16px 0 0;text-align:center;font-size:13px;color:#a3a3a3;">
-  Показано {{ page_obj.end_index }} з {{ page_obj.paginator.count }}
-</p>
+<p class="catalog-shown">{{ shown_label }}</p>
 {% else %}
 <div class="empty-state">
   <div class="empty-state__icon">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffc400" stroke-width="2"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
   </div>
-  <h2 style="margin:8px 0 0;font-size:24px;font-weight:600;">Нічого не знайдено</h2>
-  <p style="margin:0;max-width:360px;font-size:15px;color:#8a8a8a;">Спробуйте змінити або скинути фільтри.</p>
-  <a href="{% url 'catalog:catalog' %}" class="btn" style="margin-top:12px;">Скинути фільтри</a>
+  <h2 class="empty-state__title">Нічого не знайдено</h2>
+  <p class="empty-state__text">Спробуйте змінити або скинути фільтри.</p>
+  <a href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
+     class="btn"
+     hx-get="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
+     hx-target="#catalog-grid"
+     hx-push-url="true">Скинути фільтри</a>
 </div>
 {% endif %}

@@ -101,6 +101,7 @@ class ProductAdmin(ModelAdmin):
         'category',
         'price',
         'stock',
+        'catalog_order',
         'is_active',
         'is_hit',
         'is_new',

@@ -263,14 +263,7 @@ class Command(BaseCommand):
         media_seed.mkdir(parents=True, exist_ok=True)
 
         created = 0
-        created += self._seed_abaro(
-            categories['Серцевини (циліндри)'],
-            attrs,
-            av,
-            img_dir,
-            media_seed,
-        )
-        created += self._seed_other_brands(categories, attrs, av, img_dir, media_seed)
+        created += self._seed_cylinders(categories, attrs, av, img_dir)
         created += self._seed_locks(categories, attrs, av, img_dir, media_seed)
         self.stdout.write(f'Products created: {created}')
 
@@ -289,88 +282,10 @@ class Command(BaseCommand):
                 is_primary=primary,
             )
 
-    def _seed_abaro(self, category, attrs, av, img_dir, media_seed):
-        family = ProductFamily.objects.create(
-            name='ABARO B100',
-            slug='abaro-b100',
-            brand='ABARO',
-            description=ABARO_DESC,
-            short_description='Циліндровий механізм для дверей із комплектом ключів.',
-        )
-        n = 0
-        for C in COLORS:
-            for S in SIZES:
-                price = Decimal(str(S['p'] + C['add']))
-                old = Decimal(str(round(float(price) * 1.3 / 10) * 10))
-                sku = f"ABR-B100-{S['len']}-{C['id']}"
-                name = (
-                    f"Циліндр ABARO B100 {S['len']} "
-                    f"({S['a']}*{S['b']}) {C['finish']} 5 ключів"
-                )
-                stock = ABARO_STOCK.get((C['id'], S['len']), 20)
-                product = Product.objects.create(
-                    category=category,
-                    family=family,
-                    name=name,
-                    slug=slugify(sku.lower()),
-                    sku=sku,
-                    price=price,
-                    old_price=old,
-                    stock=stock,
-                    is_active=True,
-                    is_hit=S['len'] == 60 and C['id'] == 'G',
-                    is_new=False,
-                    brand='ABARO',
-                    color_code=C['id'],
-                    color_label=C['label'],
-                    finish=C['finish'],
-                    cover=C['cover'],
-                    size_mm=S['len'],
-                    size_a=S['a'],
-                    size_b=S['b'],
-                    short_description=family.short_description,
-                    description=family.description,
-                )
-                for key, val in (
-                    ('brand', 'ABARO'),
-                    ('model', 'B100'),
-                    ('sku_attr', sku),
-                    ('mech', 'Ключ / ключ'),
-                    ('len', f"{S['len']} мм"),
-                    ('ab', f"{S['a']}×{S['b']} мм"),
-                    ('body', 'Латунь'),
-                    ('cover', C['cover']),
-                    ('bump', 'Так'),
-                    ('drill', 'Так'),
-                    ('keys', '5'),
-                    ('card', 'Так'),
-                    ('country', 'Туреччина'),
-                    ('color', C['label']),
-                ):
-                    ProductAttribute.objects.create(product=product, attribute_value=av(key, val))
-
-                primary = img_dir / C['img']
-                self._attach_image(
-                    product,
-                    primary,
-                    f'{sku.lower()}.png',
-                    name,
-                    0,
-                    primary=True,
-                )
-                for ti, thumb in enumerate(EXTRA_THUMBS, start=1):
-                    self._attach_image(
-                        product,
-                        img_dir / thumb,
-                        f'{sku.lower()}-t{ti}.png',
-                        f'{name} — фото {ti + 1}',
-                        ti,
-                    )
-                n += 1
-        return n
-
-    def _seed_other_brands(self, categories, attrs, av, img_dir, media_seed):
+    def _seed_cylinders(self, categories, attrs, av, img_dir):
+        """Циліндри як у E-com/Catalog.dc.html (+ повна сімʼя ABARO для PDP)."""
         brands = [
+            {'b': 'ABARO', 'code': 'ABR', 'model': 'B100', 'country': 'Туреччина', 'k': 1},
             {'b': 'Mottura', 'code': 'MOT', 'model': 'Champions', 'country': 'Італія', 'k': 2.6},
             {'b': 'Cisa', 'code': 'CIS', 'model': 'Asix', 'country': 'Італія', 'k': 1.9},
             {'b': 'Kale', 'code': 'KAL', 'model': '164 BNE', 'country': 'Туреччина', 'k': 1.3},
@@ -382,18 +297,27 @@ class Command(BaseCommand):
             {'id': 'half', 'label': 'Половинчастий', 'short': 'половинчастий'},
         ]
         brand_cat_map = {
+            'ABARO': categories['Серцевини (циліндри)'],
             'Mottura': categories['Mottura'],
             'Cisa': categories['Cisa'],
             'Kale': categories['Kale'],
             'Apecs': categories['Apecs'],
         }
-        cylinder_cat = categories['Серцевини (циліндри)']
-        n = 0
+        family = ProductFamily.objects.create(
+            name='ABARO B100',
+            slug='abaro-b100',
+            brand='ABARO',
+            description=ABARO_DESC,
+            short_description='Циліндровий механізм для дверей із комплектом ключів.',
+        )
+        created = 0
         for bi, B in enumerate(brands):
             for si, S in enumerate(SIZES):
                 for ci, C in enumerate(COLORS):
                     idx = bi * 12 + si * 3 + ci
-                    if (idx * 7) % 10 > 6:
+                    in_catalog = (idx * 7) % 10 <= 6
+                    # ABARO: усі 12 варіантів для PDP; інші бренди — лише як у Catalog.dc.html
+                    if B['b'] != 'ABARO' and not in_catalog:
                         continue
                     M = mechs[(idx + bi) % 3]
                     price = Decimal(str(round(((S['p'] + C['add']) * B['k']) / 10) * 10))
@@ -403,9 +327,18 @@ class Command(BaseCommand):
                         f"Циліндр {B['b']} {B['model']} {S['len']} "
                         f"({S['a']}*{S['b']}) {C['finish']}, {M['short']}"
                     )
-                    stock = 0 if idx % 11 == 4 else (2 if idx % 7 == 3 else 12 + (idx % 5))
+                    if B['b'] == 'ABARO' and (C['id'], S['len']) in ABARO_STOCK:
+                        stock = ABARO_STOCK[(C['id'], S['len'])]
+                    elif idx % 11 == 4:
+                        stock = 0
+                    elif idx % 7 == 3:
+                        stock = 2
+                    else:
+                        stock = 12 + (idx % 5)
+                    catalog_order = (idx * 37) % 101 if in_catalog else 500 + idx
                     product = Product.objects.create(
-                        category=brand_cat_map.get(B['b'], cylinder_cat),
+                        category=brand_cat_map.get(B['b'], categories['Серцевини (циліндри)']),
+                        family=family if B['b'] == 'ABARO' else None,
                         name=name,
                         slug=slugify(sku.lower()),
                         sku=sku,
@@ -415,6 +348,8 @@ class Command(BaseCommand):
                         is_active=True,
                         is_hit=idx % 3 == 0,
                         is_new=idx % 4 == 1,
+                        catalog_order=catalog_order,
+                        rating=3 + ((idx * 5) % 3),
                         brand=B['b'],
                         color_code=C['id'],
                         color_label=C['label'],
@@ -423,33 +358,58 @@ class Command(BaseCommand):
                         size_mm=S['len'],
                         size_a=S['a'],
                         size_b=S['b'],
-                        short_description='Циліндровий механізм для дверей із комплектом ключів.',
+                        short_description=(
+                            family.short_description
+                            if B['b'] == 'ABARO'
+                            else 'Циліндровий механізм для дверей із комплектом ключів.'
+                        ),
                         description=(
-                            'Надійна серцевина для міжкімнатних і вхідних дверей. '
-                            'Сумісна з більшістю європейських замків. Гарантія 12 місяців.'
+                            family.description
+                            if B['b'] == 'ABARO'
+                            else (
+                                'Надійна серцевина для міжкімнатних і вхідних дверей. '
+                                'Сумісна з більшістю європейських замків. Гарантія 12 місяців.'
+                            )
                         ),
                     )
-                    for key, val in (
+                    attr_pairs = [
                         ('brand', B['b']),
                         ('country', B['country']),
                         ('color', C['label']),
                         ('mech', M['label']),
-                    ):
+                    ]
+                    if B['b'] == 'ABARO':
+                        attr_pairs.extend(
+                            [
+                                ('model', 'B100'),
+                                ('sku_attr', sku),
+                                ('len', f"{S['len']} мм"),
+                                ('ab', f"{S['a']}×{S['b']} мм"),
+                                ('body', 'Латунь'),
+                                ('cover', C['cover']),
+                                ('bump', 'Так'),
+                                ('drill', 'Так'),
+                                ('keys', '5'),
+                                ('card', 'Так'),
+                            ]
+                        )
+                    for key, val in attr_pairs:
                         ProductAttribute.objects.create(product=product, attribute_value=av(key, val))
                     src = img_dir / C['img']
                     if not src.exists():
                         src = img_dir / 'product-brass.png'
                     self._attach_image(product, src, f'{sku.lower()}.png', name, 0, primary=True)
-                    for ti, thumb in enumerate(['thumb-1.png', 'thumb-2.png', 'thumb-3.png'], start=1):
+                    thumbs = EXTRA_THUMBS if B['b'] == 'ABARO' else ['thumb-1.png', 'thumb-2.png', 'thumb-3.png']
+                    for ti, thumb in enumerate(thumbs, start=1):
                         self._attach_image(
                             product,
                             img_dir / thumb,
                             f'{sku.lower()}-t{ti}.png',
-                            f'{name} фото {ti}',
+                            f'{name} — фото {ti + 1}',
                             ti,
                         )
-                    n += 1
-        return n
+                    created += 1
+        return created
 
     def _seed_locks(self, categories, attrs, av, img_dir, media_seed):
         lock_cat = categories['Замки']
@@ -467,17 +427,13 @@ class Command(BaseCommand):
                 is_active=True,
                 is_hit=True,
                 is_new=i == 0,
+                catalog_order=900 + i,
+                rating=4,
                 brand=brand,
                 short_description='Врізний замок підвищеної надійності.',
                 description='Металевий корпус, комплект кріплення, ключі в наборі.',
             )
-            for key, val in (
-                ('brand', brand),
-                ('country', 'Україна' if brand == 'Elbor' else 'Італія'),
-                ('color', 'Нікель'),
-                ('mech', 'Ключ / ключ'),
-            ):
-                ProductAttribute.objects.create(product=product, attribute_value=av(key, val))
+            # без filterable-атрибутів — щоб сайдбар каталогу збігався з Catalog.dc.html
             src = img_dir / 'product-chrome.png'
             self._attach_image(product, src, f'{sku.lower()}.png', product.name, 0, primary=True)
             n += 1

@@ -153,6 +153,8 @@ class Product(models.Model):
     is_active = models.BooleanField('Активний', default=True)
     is_hit = models.BooleanField('Хіт продажу', default=False)
     is_new = models.BooleanField('Новинка', default=False)
+    catalog_order = models.PositiveIntegerField('Порядок у каталозі', default=0, db_index=True)
+    rating = models.PositiveSmallIntegerField('Рейтинг', default=4)
     brand = models.CharField('Бренд', max_length=100, blank=True)
     color_code = models.CharField('Код кольору', max_length=8, blank=True)
     color_label = models.CharField('Колір', max_length=64, blank=True)
@@ -175,7 +177,7 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товари'
-        ordering = ['-is_hit', '-created_at']
+        ordering = ['catalog_order', 'name']
 
     def __str__(self):
         return self.name
