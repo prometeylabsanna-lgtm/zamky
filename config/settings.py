@@ -86,6 +86,40 @@ TIME_ZONE = 'Europe/Kyiv'
 USE_I18N = True
 USE_TZ = True
 
+# Django не знає код «ua» (є лише «uk»). Реєструємо + гарантуємо .mo,
+# інакше runserver падає: OSError: No translation files found for default language ua.
+from django.conf.locale import LANG_INFO  # noqa: E402
+
+LANG_INFO['ua'] = {
+    'bidi': False,
+    'code': 'ua',
+    'name': 'Ukrainian',
+    'name_local': 'Українська',
+}
+
+
+def _ensure_locale_mo():
+    import shutil
+
+    try:
+        import django
+    except ImportError:
+        return
+    django_locale = Path(django.__file__).resolve().parent / 'conf' / 'locale'
+    for our_code, django_code in (('ua', 'uk'), ('ru', 'ru')):
+        dest_dir = BASE_DIR / 'locale' / our_code / 'LC_MESSAGES'
+        dest_mo = dest_dir / 'django.mo'
+        if dest_mo.exists() and dest_mo.stat().st_size > 0:
+            continue
+        src = django_locale / django_code / 'LC_MESSAGES' / 'django.mo'
+        if not src.exists():
+            continue
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest_mo)
+
+
+_ensure_locale_mo()
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
