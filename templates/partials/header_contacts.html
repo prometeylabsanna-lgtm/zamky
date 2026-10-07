@@ -1,7 +1,8 @@
+{% load i18n_ui %}
 <div class="dropdown dropdown--contacts{% if compact %} dropdown--compact{% endif %}">
-  <button type="button" class="{% if compact %}header-chip header-chip--contacts{% else %}header-contacts{% endif %}" data-dropdown-toggle aria-expanded="false"{% if compact %} aria-label="Наші контакти"{% endif %}>
+  <button type="button" class="{% if compact %}header-chip header-chip--contacts{% else %}header-contacts{% endif %}" data-dropdown-toggle aria-expanded="false"{% if compact %} aria-label="{% t 'Наші контакти' %}"{% endif %}>
     <svg class="icon-accent" width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="4" y="1" width="12" height="20" rx="2.5"></rect><path d="M9 17.5h2" stroke-linecap="round"></path></svg>
-    {% if not compact %}<span>Наші контакти</span>{% else %}<span class="hide-mobile">Наші контакти</span>{% endif %}
+    {% if not compact %}<span>{% t 'Наші контакти' %}</span>{% else %}<span class="hide-mobile">{% t 'Наші контакти' %}</span>{% endif %}
     {% include 'partials/icon_chevron.html' with w=12 h=12 sw='1.6' %}
   </button>
   <div class="dropdown__backdrop" data-dropdown-toggle></div>
@@ -18,6 +19,6 @@
       <svg class="icon-accent" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 6.5L12 13l8.5-6.5"></path></svg>
       xxx@gmail.com
     </a>
-    <div class="contacts-hours">Пн–Пт 9:00–19:00, Сб 10:00–17:00</div>
+    <div class="contacts-hours">{% t 'Пн–Пт 9:00–19:00, Сб 10:00–17:00' %}</div>
   </div>
 </div>

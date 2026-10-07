@@ -1,12 +1,13 @@
+{% load i18n_ui %}
 <div id="cart-drawer" class="cart-drawer" aria-hidden="true">
   <div class="cart-drawer__backdrop" data-close-cart></div>
-  <aside class="cart-drawer__panel" aria-label="Кошик">
+  <aside class="cart-drawer__panel" aria-label="{% t 'Кошик' %}">
     <div class="cart-drawer__head">
       <div class="cart-drawer__head-title">
-        <h2>Кошик</h2>
+        <h2>{% t 'Кошик' %}</h2>
         <span class="cart-drawer__count">{% if cart_count %}{{ cart_count }}{% endif %}</span>
       </div>
-      <button type="button" class="cart-drawer__close" data-close-cart aria-label="Закрити">
+      <button type="button" class="cart-drawer__close" data-close-cart aria-label="{% t 'Закрити' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
       </button>
     </div>

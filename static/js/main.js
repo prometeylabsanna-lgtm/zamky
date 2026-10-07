@@ -28,7 +28,11 @@
       e.preventDefault();
       openDrawer();
       if (window.htmx) {
-        htmx.ajax('GET', '/cart/drawer/', { target: '#cart-drawer-body', swap: 'innerHTML' });
+        var pref = (location.pathname.match(/^\/(uk|ru)(?=\/|$)/) || [])[0] || '/uk';
+        htmx.ajax('GET', pref + '/cart/drawer/', {
+          target: '#cart-drawer-body',
+          swap: 'innerHTML',
+        });
       }
       return;
     }

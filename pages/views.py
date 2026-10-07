@@ -1,9 +1,14 @@
 import uuid
 
+from django.conf import settings
 from django.shortcuts import redirect, render
+from django.urls import translate_url
 from django.views import View
 from django.views.generic import TemplateView
 
+from pages.i18n_lib import tr
+
+from . import info_content
 from .forms import ContactForm
 from .models import ContactRequest
 
@@ -15,6 +20,15 @@ INFO_PAGES = {
 }
 
 INFO_NAV = ('about', 'delivery', 'offer', 'privacy')
+
+LANG_ALIASES = {
+    'UA': 'uk',
+    'RU': 'ru',
+    'ua': 'uk',
+    'ru': 'ru',
+    'UK': 'uk',
+    'uk': 'uk',
+}
 
 
 def _page_key(raw):
@@ -51,21 +65,38 @@ def _save_contact(form):
 
 class SetLangView(View):
     def post(self, request):
-        code = (request.POST.get('lang') or 'UA').upper()
-        if code not in ('UA', 'EN', 'RU'):
-            code = 'UA'
-        request.session['lang'] = code
-        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
-        response = redirect(next_url)
-        if request.headers.get('HX-Request') == 'true' or request.POST.get('ajax'):
-            response = render(request, 'partials/lang_label.html', {'site_lang': code})
+        raw = (request.POST.get('lang') or 'uk').strip()
+        code = LANG_ALIASES.get(raw, LANG_ALIASES.get(raw.upper(), 'uk'))
+        if code not in dict(settings.LANGUAGES):
+            code = settings.LANGUAGE_CODE
+
+        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or f'/{code}/'
+        # translate_url() uses the *current* language as source — do not activate target first.
+        try:
+            translated = translate_url(next_url, code)
+        except Exception:
+            translated = None
+        if not translated or translated == next_url:
+            # Fallback: swap /uk|/ru prefix manually.
+            from urllib.parse import urlsplit, urlunsplit
+            import re
+
+            parts = urlsplit(next_url)
+            path = parts.path or '/'
+            path = re.sub(r'^/(uk|ru)(?=/|$)', f'/{code}', path)
+            if not path.startswith(f'/{code}'):
+                path = f'/{code}{path if path.startswith("/") else "/" + path}'
+            translated = urlunsplit(('', '', path, parts.query, parts.fragment))
+
+        response = redirect(translated)
         response.set_cookie(
-            'zamky_lang',
+            settings.LANGUAGE_COOKIE_NAME,
             code,
-            max_age=60 * 60 * 24 * 365,
-            samesite='Lax',
+            max_age=settings.LANGUAGE_COOKIE_AGE,
+            samesite=getattr(settings, 'LANGUAGE_COOKIE_SAMESITE', 'Lax'),
             httponly=False,
         )
+        request.session['lang'] = code
         return response
 
 
@@ -76,11 +107,16 @@ class InfoView(TemplateView):
         ctx = super().get_context_data(**kwargs)
         raw = self.kwargs.get('page', 'about')
         page_key = _page_key(raw)
+        pages = {
+            key: {'name': tr(INFO_PAGES[key]['name'])}
+            for key in INFO_NAV
+        }
         ctx.update(
             {
                 'page_key': page_key,
-                'page_name': INFO_PAGES[page_key]['name'],
-                'info_pages': {key: INFO_PAGES[key] for key in INFO_NAV},
+                'page_name': tr(INFO_PAGES[page_key]['name']),
+                'info_pages': pages,
+                'info_content': info_content.for_page(page_key),
                 'scroll_form': raw == 'contacts',
                 'form': ctx.get('form') or _new_form(self.request),
             }

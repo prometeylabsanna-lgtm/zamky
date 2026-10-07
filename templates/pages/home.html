@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load i18n_ui static %}
 
-{% block title %}{% if district %}{{ district.h1 }}{% else %}Замки для дверей та меблів — купити в Києві{% endif %}{% endblock %}
+{% block title %}{% if district %}{{ district.h1|tr }}{% else %}{% t 'Замки для дверей та меблів — купити в Києві' %}{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
@@ -11,7 +11,7 @@
 <div class="home">
   {% if district or is_city %}
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
-    <a href="{% url 'catalog:home' %}">Головна</a>
+    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     {% if district %}
     <a href="{% url 'catalog:city' %}">{{ site_city.name }}</a>
@@ -26,7 +26,7 @@
   <div class="home-top">
     <aside class="home-aside">
       <a href="{% url 'catalog:catalog' %}" class="home-aside__btn">
-        <span>Каталог товрів</span>
+        <span>{% t 'Каталог товрів' %}</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
       </a>
       <ul class="home-cats">
@@ -46,7 +46,7 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8.4 9.6A4 4 0 1 1 15.6 9.6L14.6 19a1.6 1.6 0 0 1-1.6 1.5h-2A1.6 1.6 0 0 1 9.4 19z"></path><circle cx="12" cy="8" r="1.3"></circle><path d="M12 9.3v2.7"></path></svg>
               {% endif %}
             </span>
-            <span class="home-cats__name">{{ c.name }}</span>
+            <span class="home-cats__name">{{ c.name|tr }}</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
           </a>
         </li>
@@ -55,16 +55,16 @@
     </aside>
 
     <section class="hero">
-      <img src="{% static 'img/hero-clean.png' %}" alt="Замок на дверях">
+      <img src="{% static 'img/hero-clean.png' %}" alt="{% t 'Замок на дверях' %}">
       <div class="hero__card">
         {% if district %}
-          <h1>{{ district.h1 }}</h1>
-          <p>Великий вибір замків різних типів і механізмів для дому, офісу та комерційних приміщень у {{ district.name_locative }} районі</p>
+          <h1>{{ district.h1|tr }}</h1>
+          <p>{% t 'Великий вибір замків різних типів і механізмів для дому, офісу та комерційних приміщень у' %} {{ district.name_locative|tr }} {% t 'районі' %}</p>
         {% else %}
-          <h1>Замки для дверей та<br>меблів — купити в Києві</h1>
-          <p>Великий вибір замків різних типів і механізмів для дому, офісу та комерційних приміщень</p>
+          <h1>{% t 'Замки для дверей та меблів — купити в Києві' %}</h1>
+          <p>{% t 'Великий вибір замків різних типів і механізмів для дому, офісу та комерційних приміщень' %}</p>
         {% endif %}
-        <a href="#hits" class="hero__cta"><span>Переглянути</span></a>
+        <a href="#hits" class="hero__cta"><span>{% t 'Переглянути' %}</span></a>
       </div>
     </section>
   </div>
@@ -94,10 +94,10 @@
 
 <section id="hits" class="slider-section" data-slider>
   <div class="section-head">
-    <h2 class="section-title">Хіти продажу</h2>
+    <h2 class="section-title">{% t 'Хіти продажу' %}</h2>
     <div class="slider-nav">
-      <button type="button" class="btn--icon" data-slider-prev aria-label="Назад"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
-      <button type="button" class="btn--icon" data-slider-next aria-label="Вперед"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
+      <button type="button" class="btn--icon" data-slider-prev aria-label="{% t 'Назад' %}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
+      <button type="button" class="btn--icon" data-slider-next aria-label="{% t 'Вперед' %}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
     </div>
   </div>
   <div class="product-slider ic-scroll" data-slider-track>
@@ -109,10 +109,10 @@
 
 <section id="new" class="slider-section slider-section--new" data-slider>
   <div class="section-head">
-    <h2 class="section-title">Новинки</h2>
+    <h2 class="section-title">{% t 'Новинки' %}</h2>
     <div class="slider-nav">
-      <button type="button" class="btn--icon" data-slider-prev aria-label="Назад"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
-      <button type="button" class="btn--icon" data-slider-next aria-label="Вперед"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
+      <button type="button" class="btn--icon" data-slider-prev aria-label="{% t 'Назад' %}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg></button>
+      <button type="button" class="btn--icon" data-slider-next aria-label="{% t 'Вперед' %}"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button>
     </div>
   </div>
   <div class="product-slider ic-scroll" data-slider-track>
@@ -123,11 +123,11 @@
 </section>
 
 {% if district %}
-<section class="home-district" aria-label="Інформація про район">
+<section class="home-district" aria-label="{% t 'Інформація про район' %}">
   <div class="home-district__grid">
     <div class="home-district__seo">
-      <h2>Замки в {{ district.name_locative }} районі {{ site_city.name_genitive|default:'Києва' }}</h2>
-      <p>{{ district.seo_text }}</p>
+      <h2>{% t 'Замки в' %} {{ district.name_locative|tr }} {% t 'районі' %} {{ site_city.name_genitive|default:'Києва'|tr }}</h2>
+      <p>{{ district.seo_text|tr }}</p>
       <div class="home-district__areas">
         {% for a in district.areas %}
         <span class="home-district__area">
@@ -138,11 +138,11 @@
       </div>
     </div>
     <div class="home-district__others">
-      <h3>Інші райони Києва</h3>
+      <h3>{% t 'Інші райони Києва' %}</h3>
       <div class="home-district__list">
         {% for o in other_districts %}
         <a href="{% url 'catalog:district' o.slug %}">
-          <span>{{ o.name }}</span>
+          <span>{{ o.name|tr }}</span>
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
         </a>
         {% endfor %}

@@ -14,11 +14,13 @@ from catalog.models import Product
 from .forms import CheckoutForm
 from .models import DeliveryDistrict, Order, QuickOrder
 from .services import CheckoutError, DELIVERY_PRICES, create_order_from_cart
-from .utils import DELIVERY_META, PAYMENT_META, format_uah
+from pages.i18n_lib import tr
+
+from .utils import delivery_meta, format_uah, payment_meta
 
 
 def build_checkout_steps(step):
-    labels = ['Кошик', 'Оформлення', 'Готово']
+    labels = [tr('Кошик'), tr('Оформлення'), tr('Готово')]
     if step == 'done':
         idx = 2
     elif step == 'cart':
@@ -92,7 +94,8 @@ class CheckoutView(FormView):
             if form.is_bound
             else form.initial.get('delivery_method', Order.DeliveryMethod.NP)
         )
-        meta = DELIVERY_META.get(method, DELIVERY_META['np'])
+        dmeta = delivery_meta()
+        meta = dmeta.get(method, dmeta['np'])
         form.fields['address'].widget.attrs['placeholder'] = meta.get('addr_ph') or ''
         return form
 
@@ -114,7 +117,9 @@ class CheckoutView(FormView):
             or Order.DeliveryMethod.NP
         )
         delivery_price = DELIVERY_PRICES.get(delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP])
-        meta = DELIVERY_META.get(delivery_method, DELIVERY_META['np'])
+        dmeta_all = delivery_meta()
+        meta = dmeta_all.get(delivery_method, dmeta_all['np'])
+        pmeta_all = payment_meta()
 
         order = None
         step = self.step
@@ -127,17 +132,17 @@ class CheckoutView(FormView):
 
         delivery_options = []
         for value, title in Order.DeliveryMethod.choices:
-            dmeta = DELIVERY_META.get(value, {})
+            dmeta = dmeta_all.get(value, {})
             price = DELIVERY_PRICES.get(value, Decimal('0'))
             delivery_options.append(
                 {
                     'value': value,
-                    'title': title,
+                    'title': tr(title),
                     'note': dmeta.get('note', ''),
                     'addr_label': dmeta.get('addr_label', ''),
                     'addr_ph': dmeta.get('addr_ph', ''),
                     'price': price,
-                    'price_label': 'Безкоштовно' if price == 0 else format_uah(price),
+                    'price_label': tr('Безкоштовно') if price == 0 else format_uah(price),
                     'free': price == 0,
                     'active': delivery_method == value,
                 }
@@ -154,8 +159,8 @@ class CheckoutView(FormView):
             payment_options.append(
                 {
                     'value': value,
-                    'title': title,
-                    'note': PAYMENT_META.get(value, {}).get('note', ''),
+                    'title': tr(title),
+                    'note': pmeta_all.get(value, {}).get('note', ''),
                     'active': payment_value == value,
                 }
             )

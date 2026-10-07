@@ -1,17 +1,17 @@
-{% load static %}
+{% load static i18n_ui %}
 <div id="mobile-menu" class="mnav" aria-hidden="true">
   <div class="mnav__backdrop" data-close-menu></div>
-  <nav class="mnav__panel" aria-label="Меню">
+  <nav class="mnav__panel" aria-label="{% t 'Меню' %}">
     <div class="mnav__head">
       <a href="{% url 'catalog:home' %}" class="logo logo--compact">Logo</a>
-      <button type="button" class="mnav__close" data-close-menu aria-label="Закрити">
+      <button type="button" class="mnav__close" data-close-menu aria-label="{% t 'Закрити' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
       </button>
     </div>
     <div class="mnav__body">
       <div class="mnav__level is-active" data-mnav-level="0">
         <a href="{% url 'catalog:catalog' %}" class="mnav__catalog-btn">
-          <span>Каталог товарів</span>
+          <span>{% t 'Каталог товарів' %}</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
         </a>
         <ul class="mnav__list">
@@ -28,28 +28,28 @@
           {% endfor %}
         </ul>
         <div class="mnav__links">
-          <a href="{% url 'catalog:home' %}#new">Новинки</a>
-          <a href="{% url 'pages:info_page' 'about' %}">Про нас</a>
-          <a href="{% url 'pages:info_page' 'delivery' %}">Доставка і оплата</a>
-          <a href="{% url 'pages:info_page' 'about' %}#contacts">Контакти</a>
-          <a class="mnav__links--muted" href="{% url 'pages:info_page' 'offer' %}">Договір оферти</a>
-          <a class="mnav__links--muted" href="{% url 'pages:info_page' 'privacy' %}">Політика конфіденційності</a>
+          <a href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
+          <a href="{% url 'pages:info_page' 'about' %}">{% t 'Про нас' %}</a>
+          <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка і оплата' %}</a>
+          <a href="{% url 'pages:info_page' 'about' %}#contacts">{% t 'Контакти' %}</a>
+          <a class="mnav__links--muted" href="{% url 'pages:info_page' 'offer' %}">{% t 'Договір оферти' %}</a>
+          <a class="mnav__links--muted" href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
         </div>
         <div class="mnav__phones">
-          <span class="mnav__phones-label">Наші контакти</span>
+          <span class="mnav__phones-label">{% t 'Наші контакти' %}</span>
           <a href="tel:0670000000">067 00 00 00</a>
           <a href="tel:0660000000">066 00 00 00</a>
           <a class="mnav__mail" href="mailto:xxx@gmail.com">xxx@gmail.com</a>
         </div>
         <div class="mnav__langs">
-          <button type="button" class="mnav__lang {% if site_lang == 'UA' %}is-active{% endif %}" data-set-lang="UA">UA</button>
-          <button type="button" class="mnav__lang {% if site_lang == 'EN' %}is-active{% endif %}" data-set-lang="EN">EN</button>
+          <button type="button" class="mnav__lang {% if site_lang == 'UA' %}is-active{% endif %}" data-set-lang="uk">UA</button>
+          <button type="button" class="mnav__lang {% if site_lang == 'RU' %}is-active{% endif %}" data-set-lang="ru">RU</button>
         </div>
       </div>
       <div class="mnav__level" data-mnav-level="1" hidden>
         <button type="button" class="mnav__back" data-mnav-back="0">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
-          Каталог товрів
+          {% t 'Каталог товрів' %}
         </button>
         <div class="mnav__title">
           <span class="mega__title-ico" data-mnav-ico></span>
@@ -67,7 +67,7 @@
           <span data-mnav-sub-title></span>
         </div>
         <ul class="mnav__list" data-mnav-leaves></ul>
-        <a class="mnav__find" href="{% url 'catalog:catalog' %}" data-mnav-find>Знайти</a>
+        <a class="mnav__find" href="{% url 'catalog:catalog' %}" data-mnav-find>{% t 'Знайти' %}</a>
       </div>
     </div>
   </nav>

@@ -26,14 +26,17 @@ class CheckoutTests(TestCase):
         self.client.post(reverse('cart:add', args=[self.product.pk]), {'quantity': qty})
 
     def test_plural_positions(self):
-        self.assertEqual(plural_positions(1), 'позиція')
-        self.assertEqual(plural_positions(2), 'позиції')
-        self.assertEqual(plural_positions(3), 'позиції')
-        self.assertEqual(plural_positions(4), 'позиції')
-        self.assertEqual(plural_positions(5), 'позицій')
-        self.assertEqual(plural_positions(11), 'позицій')
-        self.assertEqual(plural_positions(21), 'позиція')
-        self.assertEqual(plural_positions(22), 'позиції')
+        from django.utils import translation
+
+        with translation.override('uk'):
+            self.assertEqual(plural_positions(1), 'позиція')
+            self.assertEqual(plural_positions(2), 'позиції')
+            self.assertEqual(plural_positions(3), 'позиції')
+            self.assertEqual(plural_positions(4), 'позиції')
+            self.assertEqual(plural_positions(5), 'позицій')
+            self.assertEqual(plural_positions(11), 'позицій')
+            self.assertEqual(plural_positions(21), 'позиція')
+            self.assertEqual(plural_positions(22), 'позиції')
 
     def test_totals_qty(self):
         """qty>1: cart / HTMX / checkout UI / Order(+delivery) / stock."""

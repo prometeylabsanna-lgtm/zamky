@@ -1,5 +1,6 @@
+{% load i18n_ui %}
 <div class="dropdown dropdown--district{% if compact %} dropdown--compact{% endif %}">
-  <button type="button" class="{% if compact %}header-chip{% else %}header-link{% endif %}" data-dropdown-toggle aria-label="Оберіть район" aria-expanded="false">
+  <button type="button" class="{% if compact %}header-chip{% else %}header-link{% endif %}" data-dropdown-toggle aria-label="{% t 'Оберіть район' %}" aria-expanded="false">
     <svg class="icon-accent" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
     {% if compact %}
       <span id="district-label-compact" class="district-label hide-mobile">{% if selected_district %}{{ selected_district.short }}{% else %}{{ site_city.name }}{% endif %}</span>
@@ -10,12 +11,12 @@
   </button>
   <div class="dropdown__backdrop" data-dropdown-toggle></div>
   <div class="dropdown__panel dropdown__panel--district">
-    <div class="dropdown__hint">Оберіть район Києва</div>
+    <div class="dropdown__hint">{% t 'Оберіть район Києва' %}</div>
     <form method="post" action="{% url 'orders:set_district' %}">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.path }}">
       <button type="submit" name="slug" value="" class="dropdown__item dropdown__item--city {% if not selected_district_slug %}is-active{% endif %}">
-        <span>Київ — усе місто</span>
+        <span>{% t 'Київ — усе місто' %}</span>
         {% if not selected_district_slug %}{% include 'partials/icon_check.html' %}{% endif %}
       </button>
       {% for d in site_districts %}

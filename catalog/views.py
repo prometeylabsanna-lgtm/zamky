@@ -3,10 +3,12 @@ from decimal import Decimal, InvalidOperation
 
 from django.db.models import Count, Max, Min, Prefetch, Q
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
 from cart.services import WishlistService
 from orders.models import DeliveryDistrict
+from pages.i18n_lib import plural_goods, tr
 
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
 
@@ -33,15 +35,6 @@ FILTER_OPEN_DEFAULT = {
 }
 
 PAGE_SIZE = 12
-
-
-def plural_goods(n):
-    a, b = n % 10, n % 100
-    if a == 1 and b != 11:
-        return 'товар'
-    if 2 <= a <= 4 and (b < 12 or b > 14):
-        return 'товари'
-    return 'товарів'
 
 
 class HomeView(TemplateView):
@@ -86,23 +79,23 @@ class HomeView(TemplateView):
 
         features = [
             {
-                'title': 'Надійні\nзамки',
-                'text': 'Перевірені рішення\nдля захисту вашого дом',
+                'title': tr('Надійні\nзамки'),
+                'text': tr('Перевірені рішення\nдля захисту вашого дом'),
                 'icon': 'shield',
             },
             {
-                'title': 'Популярні\nбренди',
+                'title': tr('Популярні\nбренди'),
                 'text': 'Mottura, Cisa, Elbor, Guardian,\nApecs, Securemme, Kale',
                 'icon': 'award',
             },
             {
-                'title': 'Допомога\nу виборі',
-                'text': 'Підберемо замок або\nсерцевину під ваші двері',
+                'title': tr('Допомога\nу виборі'),
+                'text': tr('Підберемо замок або\nсерцевину під ваші двері'),
                 'icon': 'chat',
             },
             {
-                'title': 'Доставка\nпо Україні',
-                'text': 'Швидко відправляємо\nзамовлення',
+                'title': tr('Доставка\nпо Україні'),
+                'text': tr('Швидко відправляємо\nзамовлення'),
                 'icon': 'pin',
             },
         ]
@@ -111,8 +104,11 @@ class HomeView(TemplateView):
                 f
                 if i != 3
                 else {
-                    'title': 'Доставка\nпо району',
-                    'text': f'{district.delivery_note}\nпо {district.name_locative} району',
+                    'title': tr('Доставка\nпо району'),
+                    'text': tr('{note}\nпо {district} району').format(
+                        note=tr(district.delivery_note),
+                        district=tr(district.name_locative),
+                    ),
                     'icon': 'pin',
                 }
                 for i, f in enumerate(features)
@@ -284,7 +280,7 @@ class CatalogView(ListView):
             filter_groups.append(
                 {
                     'attribute': attr,
-                    'title': FILTER_TITLES.get(attr.slug, attr.name),
+                    'title': tr(FILTER_TITLES.get(attr.slug, attr.name)),
                     'open': FILTER_OPEN_DEFAULT.get(attr.slug, True),
                     'options': options,
                 }
@@ -295,11 +291,15 @@ class CatalogView(ListView):
             for slug in self.request.GET.getlist(attr.slug):
                 val = AttributeValue.objects.filter(attribute=attr, slug=slug).first()
                 if val:
-                    selected_chips.append({'label': val.value, 'key': attr.slug, 'slug': slug})
+                    selected_chips.append(
+                        {'label': tr(val.value), 'key': attr.slug, 'slug': slug}
+                    )
 
         sku = self.request.GET.get('sku', '').strip()
         if sku:
-            selected_chips.append({'label': f'Артикул: {sku}', 'key': 'sku', 'slug': sku})
+            selected_chips.append(
+                {'label': tr('Артикул: {sku}').format(sku=sku), 'key': 'sku', 'slug': sku}
+            )
 
         if current_price_min > price_lo or current_price_max < price_hi:
             lo_l = f'{current_price_min:,}'.replace(',', ' ') + ' ₴'
@@ -310,11 +310,11 @@ class CatalogView(ListView):
 
         sort = self.request.GET.get('sort', 'default')
         sorts = [
-            ('default', 'За замовчуванням'),
-            ('cheap', 'Спочатку дешевші'),
-            ('expensive', 'Спочатку дорожчі'),
-            ('rating', 'За рейтингом'),
-            ('new', 'Спочатку новинки'),
+            ('default', tr('За замовчуванням')),
+            ('cheap', tr('Спочатку дешевші')),
+            ('expensive', tr('Спочатку дорожчі')),
+            ('rating', tr('За рейтингом')),
+            ('new', tr('Спочатку новинки')),
         ]
         total = ctx['page_obj'].paginator.count
         shown = min(ctx['page_obj'].end_index(), total) if total else 0
@@ -322,7 +322,9 @@ class CatalogView(ListView):
         ctx.update(
             {
                 'category': self.category,
-                'title': self.category.name if self.category else 'Циліндрові врізні замки',
+                'title': tr(self.category.name)
+                if self.category
+                else tr('Циліндрові врізні замки'),
                 'count_label': f'{total} {plural_goods(total)}',
                 'filter_groups': filter_groups,
                 'selected_chips': selected_chips,
@@ -335,7 +337,9 @@ class CatalogView(ListView):
                 'sorts': sorts,
                 'sort_label': dict(sorts).get(sort, sorts[0][1]),
                 'query_q': self.request.GET.get('q', ''),
-                'shown_label': f'Показано {shown} з {total}',
+                'shown_label': tr('Показано {shown} з {total}').format(
+                    shown=shown, total=total
+                ),
                 'next_limit': limit + PAGE_SIZE,
                 'has_more': shown < total,
                 'page_size': PAGE_SIZE,
@@ -434,7 +438,7 @@ class ProductDetailView(DetailView):
                         'sku': v.sku,
                         'slug': v.slug,
                         'url': v.get_absolute_url(),
-                        'name': v.name,
+                        'name': tr(v.name),
                         'price': int(v.price),
                         'old_price': int(v.old_price) if v.old_price else None,
                         'discount': v.discount_percent,
@@ -443,23 +447,23 @@ class ProductDetailView(DetailView):
                         'badge': v.stock_label,
                         'stock_note': v.stock_note,
                         'color': v.color_code,
-                        'color_label': v.color_label,
+                        'color_label': tr(v.color_label),
                         'size': v.size_mm,
                         'size_a': v.size_a,
                         'size_b': v.size_b,
                         'size_label': v.size_label,
-                        'cover': v.cover,
+                        'cover': tr(v.cover),
                         'images': imgs,
-                        'add_url': f'/cart/add/{v.pk}/',
-                        'quick_url': f'/orders/quick/{v.pk}/',
-                        'wishlist_url': f'/cart/wishlist/{v.pk}/',
+                        'add_url': reverse('cart:add', kwargs={'pk': v.pk}),
+                        'quick_url': reverse('orders:quick', kwargs={'pk': v.pk}),
+                        'wishlist_url': reverse('cart:wishlist', kwargs={'pk': v.pk}),
                     }
                 )
                 if v.color_code and v.color_code not in seen_colors:
                     primary = v.images.first()
                     seen_colors[v.color_code] = {
                         'code': v.color_code,
-                        'label': v.color_label,
+                        'label': tr(v.color_label),
                         'img': primary.image.url if primary else '',
                     }
                 if v.size_mm and v.size_mm not in seen_sizes:
@@ -480,14 +484,25 @@ class ProductDetailView(DetailView):
         description_parts = []
         desc = product.description or (product.family.description if product.family_id else '')
         if desc:
-            description_parts = [p.strip() for p in desc.split('\n\n') if p.strip()]
+            description_parts = [tr(p.strip()) for p in desc.split('\n\n') if p.strip()]
+
+        accordions = []
+        for block in self.ACCORDIONS:
+            accordions.append(
+                {
+                    **block,
+                    'title': tr(block['title']),
+                    'hint': tr(block['hint']),
+                    'rows': [(tr(a), tr(b)) for a, b in block['rows']],
+                }
+            )
 
         ctx.update(
             {
                 'in_wishlist': wishlist.contains(product.pk),
                 'spec_groups': spec_groups,
                 'description_parts': description_parts,
-                'accordions': self.ACCORDIONS,
+                'accordions': accordions,
                 'variant_colors': colors,
                 'variant_sizes': sizes,
                 'variants_json': json.dumps(variants, ensure_ascii=False),
@@ -505,10 +520,12 @@ class ProductDetailView(DetailView):
                 continue
             group = attr.group
             key = group.pk if group else 0
-            title = group.name if group else 'Інше'
+            title = tr(group.name) if group else tr('Інше')
             order = group.sort_order if group else 999
             bucket = rows_by_group.setdefault(key, {'title': title, 'order': order, 'rows': []})
-            bucket['rows'].append({'k': attr.name, 'v': av.value, 'order': attr.sort_order})
+            bucket['rows'].append(
+                {'k': tr(attr.name), 'v': tr(av.value), 'order': attr.sort_order}
+            )
         groups = sorted(rows_by_group.values(), key=lambda g: g['order'])
         for g in groups:
             g['rows'] = sorted(g['rows'], key=lambda r: r['order'])

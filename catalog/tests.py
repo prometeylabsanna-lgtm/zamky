@@ -78,11 +78,14 @@ class CatalogFilterTests(TestCase):
 
 class PluralGoodsTests(TestCase):
     def test_plural_42_towary(self):
-        self.assertEqual(plural_goods(1), 'товар')
-        self.assertEqual(plural_goods(2), 'товари')
-        self.assertEqual(plural_goods(42), 'товари')
-        self.assertEqual(plural_goods(5), 'товарів')
-        self.assertEqual(plural_goods(11), 'товарів')
+        from django.utils import translation
+
+        with translation.override('uk'):
+            self.assertEqual(plural_goods(1), 'товар')
+            self.assertEqual(plural_goods(2), 'товари')
+            self.assertEqual(plural_goods(42), 'товари')
+            self.assertEqual(plural_goods(5), 'товарів')
+            self.assertEqual(plural_goods(11), 'товарів')
 
 
 class SeedDemoTests(TestCase):
@@ -110,7 +113,10 @@ class SeedDemoTests(TestCase):
             8,
         )
 
-        response = self.client.get(reverse('catalog:catalog'))
+        from django.utils import translation
+
+        with translation.override('uk'):
+            response = self.client.get(reverse('catalog:catalog'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['count_label'], '42 товари')
         self.assertEqual(response.context['price_hi'], 1690)

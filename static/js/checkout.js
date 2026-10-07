@@ -47,7 +47,7 @@
     }
     if (btn) {
       if (addrLabel) {
-        var lab = btn.getAttribute('data-addr-label') || 'Адреса';
+        var lab = btn.getAttribute('data-addr-label') || (window.t ? window.t('Адреса') : 'Адреса');
         addrLabel.textContent = lab + '*';
       }
       if (addrInput) {
@@ -58,7 +58,7 @@
     var ship = prices[method] != null ? prices[method] : prices.np;
     var shipEl = qs('#summary-delivery');
     if (shipEl) {
-      shipEl.textContent = ship === 0 ? 'Безкоштовно' : fmt(ship);
+      shipEl.textContent = ship === 0 ? (window.t ? window.t('Безкоштовно') : 'Безкоштовно') : fmt(ship);
       shipEl.classList.toggle('is-ship-free', ship === 0);
       shipEl.classList.remove('is-ship-muted');
     }

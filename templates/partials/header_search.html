@@ -1,4 +1,5 @@
+{% load i18n_ui %}
 <form class="header-search{% if compact %} header-search--compact{% endif %}" action="{% url 'catalog:catalog' %}" method="get">
   <svg class="icon-accent" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
-  <input type="search" name="q" placeholder="Пошук по каталогу" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search">
+  <input type="search" name="q" placeholder="{% t 'Пошук по каталогу' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search">
 </form>

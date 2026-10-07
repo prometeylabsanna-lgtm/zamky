@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n_ui %}
 {{ header_menu|json_script:"header-menu-data" }}
 <div class="site-header">
   <header class="site-header__inner">
@@ -7,17 +7,17 @@
       <nav class="header-nav">
         <button type="button" class="header-nav__btn{% if header_catalog_active %} is-current{% endif %}" data-open-mega>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
-          <span>Каталог</span>
+          <span>{% t 'Каталог' %}</span>
         </button>
-        <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинки</a>
-        <a class="header-nav__link" href="{% url 'pages:info_page' 'about' %}">Про нас</a>
+        <a class="header-nav__link" href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
+        <a class="header-nav__link" href="{% url 'pages:info_page' 'about' %}">{% t 'Про нас' %}</a>
       </nav>
       <div class="header-spacer"></div>
       {% include 'partials/header_district.html' %}
       {% include 'partials/header_search.html' %}
       {% include 'partials/header_contacts.html' %}
       {% include 'partials/header_lang.html' %}
-      <button type="button" class="cart-btn" data-open-cart aria-label="Кошик">
+      <button type="button" class="cart-btn" data-open-cart aria-label="{% t 'Кошик' %}">
         {% include 'partials/icon_cart.html' %}
         {% include 'cart/partials/badge.html' %}
       </button>
@@ -27,14 +27,14 @@
       <div class="header-compact__row">
         <a href="{% url 'catalog:home' %}" class="logo logo--compact">Logo</a>
         <nav class="header-nav header-nav--tablet">
-          <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинки</a>
+          <a class="header-nav__link" href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
         </nav>
         <div class="header-spacer"></div>
         {% include 'partials/header_lang.html' with compact=1 %}
-        <button type="button" class="header-menu-btn" data-open-menu aria-label="Меню">
+        <button type="button" class="header-menu-btn" data-open-menu aria-label="{% t 'Меню' %}">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
         </button>
-        <button type="button" class="cart-btn" data-open-cart aria-label="Кошик">
+        <button type="button" class="cart-btn" data-open-cart aria-label="{% t 'Кошик' %}">
           {% include 'partials/icon_cart.html' %}
           {% include 'cart/partials/badge.html' with badge_id='cart-badge-mobile' %}
         </button>

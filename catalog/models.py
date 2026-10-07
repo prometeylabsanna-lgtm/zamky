@@ -206,19 +206,23 @@ class Product(models.Model):
 
     @property
     def stock_label(self):
+        from pages.i18n_lib import tr
+
         return {
-            'in': 'В наявності',
-            'low': 'Закінчується',
-            'out': 'Немає в наявності',
+            'in': tr('В наявності'),
+            'low': tr('Закінчується'),
+            'out': tr('Немає в наявності'),
         }[self.stock_status]
 
     @property
     def stock_note(self):
+        from pages.i18n_lib import tr
+
         if self.stock_status == 'out':
-            return 'Повідомимо про надходження'
+            return tr('Повідомимо про надходження')
         if self.stock_status == 'low':
-            return f'Залишилось {self.stock} шт.'
-        return 'Відправимо сьогодні'
+            return tr('Залишилось {n} шт.').format(n=self.stock)
+        return tr('Відправимо сьогодні')
 
     @property
     def primary_image(self):

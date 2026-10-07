@@ -1,3 +1,4 @@
-<h2 class="info-h2 info-h2--form">Залишилися питання?</h2>
-<p class="info-form__lead">Напишіть нам — відповімо протягом робочого дня.</p>
+{% load i18n_ui %}
+<h2 class="info-h2 info-h2--form">{% t 'Залишилися питання?' %}</h2>
+<p class="info-form__lead">{% t 'Напишіть нам — відповімо протягом робочого дня.' %}</p>
 {% include 'pages/partials/contact_form.html' %}

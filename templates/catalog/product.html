@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load i18n_ui static %}
 
-{% block title %}{{ product.name }}{% endblock %}
+{% block title %}{{ product.name|tr }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/product.css' %}">
@@ -14,11 +14,11 @@
   data-product-id="{{ product.pk }}">
   <script type="application/json" id="pdp-variants">{{ variants_json|safe }}</script>
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
-    <a href="{% url 'catalog:home' %}">Головна</a>
+    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <a href="{% url 'catalog:catalog' %}">Каталог товрів</a>
+    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товрів' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <span data-crumb-title>{{ product.name }}</span>
+    <span data-crumb-title>{{ product.name|tr }}</span>
   </nav>
 
   <div class="pdp-layout">
@@ -27,7 +27,7 @@
     <div class="pdp-info">
       {% if description_parts %}
       <section class="pdp-desc">
-        <h2>Опис</h2>
+        <h2>{% t 'Опис' %}</h2>
         <div class="pdp-desc__body">
           {% for p in description_parts %}
           <p>{{ p }}</p>
@@ -37,7 +37,7 @@
       {% endif %}
       {% if spec_groups %}
       <section class="pdp-specs">
-        <h2>Характеристики</h2>
+        <h2>{% t 'Характеристики' %}</h2>
         <div class="pdp-specs__groups" data-spec-groups>
           {% for g in spec_groups %}
           <div class="pdp-specs__group">
@@ -46,7 +46,7 @@
               {% for r in g.rows %}
               <div class="pdp-specs__row{% if r.zebra %} is-zebra{% endif %}">
                 <dt>{{ r.k }}</dt>
-                <dd{% if r.k == 'Артикул' %} data-spec-sku{% endif %}{% if r.k == 'Покриття' %} data-spec-cover{% endif %}{% if r.k == 'Загальна довжина' %} data-spec-len{% endif %}{% if r.k == 'Розмір A×B' %} data-spec-ab{% endif %}>{{ r.v }}</dd>
+                <dd{% if r.k == 'Артикул' %} data-spec-sku{% endif %}{% if r.k == 'Покриття' %} data-spec-cover{% endif %}{% if r.k == 'Загальна довжина' %} data-spec-len{% endif %}{% if r.k == 'Розмір A×B' %} data-spec-ab{% endif %}>{{ r.v|tr }}</dd>
               </div>
               {% endfor %}
             </dl>

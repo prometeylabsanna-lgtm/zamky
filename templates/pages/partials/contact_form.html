@@ -1,3 +1,4 @@
+{% load i18n_ui %}
 <form class="info-form" method="post" action="{% url 'pages:contact' %}" novalidate
   hx-post="{% url 'pages:contact' %}"
   hx-target="#form"
@@ -6,12 +7,12 @@
   {% csrf_token %}
   {{ form.idempotency_key }}
   <label class="field{% if form.name.errors %} is-invalid{% endif %}">
-    <span>Ім’я*</span>
+    <span>{% t 'Ім’я*' %}</span>
     {{ form.name }}
     <span class="field__err">{{ form.name.errors.0 }}</span>
   </label>
   <label class="field{% if form.phone.errors %} is-invalid{% endif %}">
-    <span>Телефон*</span>
+    <span>{% t 'Телефон*' %}</span>
     {{ form.phone }}
     <span class="field__err">{{ form.phone.errors.0 }}</span>
   </label>
@@ -21,12 +22,12 @@
     <span class="field__err">{{ form.email.errors.0 }}</span>
   </label>
   <label class="field">
-    <span>Тема</span>
+    <span>{% t 'Тема' %}</span>
     {{ form.topic }}
     <span class="field__err"></span>
   </label>
   <label class="field field--full{% if form.message.errors %} is-invalid{% endif %}">
-    <span>Повідомлення*</span>
+    <span>{% t 'Повідомлення*' %}</span>
     {{ form.message }}
     <span class="field__err">{{ form.message.errors.0 }}</span>
   </label>
@@ -38,7 +39,7 @@
   <span class="info-consent__err">{{ form.consent.errors.0 }}</span>
   {% endif %}
   <div class="info-form__actions">
-    <button type="submit" class="info-form__submit" data-send-label>Надіслати повідомлення</button>
+    <button type="submit" class="info-form__submit" data-send-label>{% t 'Надіслати повідомлення' %}</button>
     <span class="info-form__or">Або зателефонуйте: <a href="tel:0670000000">067 00 00 00</a></span>
   </div>
 </form>

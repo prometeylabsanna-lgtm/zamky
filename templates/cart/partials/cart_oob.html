@@ -1,3 +1,4 @@
+{% load i18n_ui %}
 {% include 'cart/partials/badge.html' %}
 {% include 'cart/partials/badge.html' with badge_id='cart-badge-mobile' %}
 <div id="cart-drawer-body" hx-swap-oob="innerHTML">
@@ -6,5 +7,5 @@
 {% if cart_error %}
 <div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true">{{ cart_error }}</div>
 {% else %}
-<div id="cart-toast" class="toast is-visible" hx-swap-oob="true">Додано до кошика</div>
+<div id="cart-toast" class="toast is-visible" hx-swap-oob="true">{% t 'Додано до кошика' %}</div>
 {% endif %}

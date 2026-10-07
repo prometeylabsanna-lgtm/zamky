@@ -88,7 +88,9 @@
         return (
           '<button type="button" class="pdp-thumbs__btn' +
           (i === state.slide ? ' is-active' : '') +
-          '" data-thumb aria-label="Фото ' +
+          '" data-thumb aria-label="' +
+          (window.t ? window.t('Фото') : 'Фото') +
+          ' ' +
           (i + 1) +
           '"><img src="' +
           img.src +
@@ -170,7 +172,7 @@
 
     var skuLabel = qs('[data-sku-label]');
     var skuBtn = qs('[data-copy-sku]');
-    if (skuLabel) skuLabel.textContent = 'Код товару: ' + v.sku;
+    if (skuLabel) skuLabel.textContent = (window.t ? window.t('Код товару:') : 'Код товару:') + ' ' + v.sku;
     if (skuBtn) skuBtn.setAttribute('data-sku', v.sku);
 
     var colorName = qs('[data-color-name]');
@@ -189,7 +191,11 @@
       btn.classList.toggle('is-active', len === v.size);
       btn.classList.toggle('is-out', out);
       var sub = btn.querySelector('[data-size-sub]');
-      if (sub) sub.textContent = out ? 'немає' : len + ' мм';
+      if (sub) {
+        sub.textContent = out
+          ? (window.t ? window.t('немає') : 'немає')
+          : len + ' ' + (window.t ? window.t('мм') : 'мм');
+      }
     });
 
     var oldEl = qs('[data-old-price]');
@@ -220,7 +226,10 @@
       if (window.htmx) htmx.process(cartBtn);
     }
     if (cartLabel) {
-      cartLabel.textContent = v.status === 'out' ? 'Немає в наявності' : 'До кошика';
+      cartLabel.textContent =
+        v.status === 'out'
+          ? (window.t ? window.t('Немає в наявності') : 'Немає в наявності')
+          : (window.t ? window.t('До кошика') : 'До кошика');
     }
 
     var wish = qs('[data-wishlist-btn]');
@@ -235,9 +244,12 @@
     var specCover = qs('[data-spec-cover]');
     if (specCover) specCover.textContent = v.cover;
     var specLen = qs('[data-spec-len]');
-    if (specLen) specLen.textContent = v.size + ' мм';
+    if (specLen) specLen.textContent = v.size + ' ' + (window.t ? window.t('мм') : 'мм');
     var specAb = qs('[data-spec-ab]');
-    if (specAb) specAb.textContent = v.size_a + '×' + v.size_b + ' мм';
+    if (specAb) {
+      specAb.textContent =
+        v.size_a + '×' + v.size_b + ' ' + (window.t ? window.t('мм') : 'мм');
+    }
 
     renderGallery(v);
 
@@ -259,8 +271,14 @@
       '<input type="hidden" name="quantity" value="' +
       state.qty +
       '" data-quick-qty>' +
-      '<button type="submit" class="pdp-quick__submit">Замовити</button></form>' +
-      '<p class="pdp-quick__note">Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.</p>';
+      '<button type="submit" class="pdp-quick__submit">' +
+      (window.t ? window.t('Замовити') : 'Замовити') +
+      '</button></form>' +
+      '<p class="pdp-quick__note">' +
+      (window.t
+        ? window.t('Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.')
+        : 'Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.') +
+      '</p>';
     if (window.htmx) htmx.process(box);
   }
 
@@ -345,10 +363,11 @@
       } catch (e) {}
       var label = qs('[data-sku-label]');
       if (label) {
-        label.textContent = 'Скопійовано';
+        label.textContent = window.t ? window.t('Скопійовано') : 'Скопійовано';
         clearTimeout(skuBtn._t);
         skuBtn._t = setTimeout(function () {
-          label.textContent = 'Код товару: ' + sku;
+          label.textContent =
+            (window.t ? window.t('Код товару:') : 'Код товару:') + ' ' + sku;
         }, 1200);
       }
     });
@@ -366,16 +385,24 @@
       if (path.indexOf('/cart/add/') !== -1 && !cartBtn.disabled) {
         cartBtn.classList.add('is-added');
         var label = qs('[data-cart-label]');
-        if (label) label.textContent = 'Додано до кошика';
+        if (label) {
+          label.textContent = window.t ? window.t('Додано до кошика') : 'Додано до кошика';
+        }
         clearTimeout(cartBtn._t);
         cartBtn._t = setTimeout(function () {
           cartBtn.classList.remove('is-added');
-          if (label && !cartBtn.disabled) label.textContent = 'До кошика';
+          if (label && !cartBtn.disabled) {
+            label.textContent = window.t ? window.t('До кошика') : 'До кошика';
+          }
         }, 1600);
         if (window.Zamky && window.Zamky.openDrawer) {
           window.Zamky.openDrawer();
           if (window.htmx) {
-            htmx.ajax('GET', '/cart/drawer/', { target: '#cart-drawer-body', swap: 'innerHTML' });
+            var pref = (location.pathname.match(/^\/(uk|ru)(?=\/|$)/) || [])[0] || '/uk';
+            htmx.ajax('GET', pref + '/cart/drawer/', {
+              target: '#cart-drawer-body',
+              swap: 'innerHTML',
+            });
           }
         }
       }

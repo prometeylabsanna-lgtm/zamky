@@ -88,7 +88,8 @@
   }
 
   function catalogUrl() {
-    return '/catalog/';
+    var pref = (location.pathname.match(/^\/(uk|ru)(?=\/|$)/) || [])[0] || '/uk';
+    return pref + '/catalog/';
   }
 
   function renderMega() {
@@ -291,27 +292,22 @@
   }
 
   function setLang(code) {
-    var body = new URLSearchParams();
-    body.set('lang', code);
-    body.set('ajax', '1');
-    body.set('next', window.location.pathname);
-    fetch('/lang/', {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrf(),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: body.toString(),
-      credentials: 'same-origin',
-    }).then(function () {
-      qsa('.lang-label').forEach(function (el) {
-        el.textContent = code;
-      });
-      qsa('[data-set-lang]').forEach(function (btn) {
-        btn.classList.toggle('is-active', btn.getAttribute('data-set-lang') === code);
-      });
-      closeDropdowns();
-    });
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/lang/';
+    form.style.display = 'none';
+    function field(name, value) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
+    field('csrfmiddlewaretoken', csrf());
+    field('lang', code);
+    field('next', window.location.pathname + window.location.search + window.location.hash);
+    document.body.appendChild(form);
+    form.submit();
   }
 
   document.addEventListener('click', function (e) {

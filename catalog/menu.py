@@ -164,15 +164,21 @@ MENU_CATS = [
 
 
 def menu_payload():
+    from pages.i18n_lib import tr
+
     rows = []
     for item in MENU_CATS:
         rows.append(
             {
-                'name': item['name'],
+                'name': tr(item['name']),
                 'lock': item['lock'],
                 'logo': item['logo'],
                 'subs': [
-                    {'name': sub, 'leaves': leaves} for sub, leaves in item['tree'].items()
+                    {
+                        'name': tr(sub),
+                        'leaves': [tr(leaf) for leaf in leaves],
+                    }
+                    for sub, leaves in item['tree'].items()
                 ],
             }
         )

@@ -1,14 +1,14 @@
-{% load checkout_tags %}
+{% load i18n_ui checkout_tags %}
 {% if oob_updates %}{% include 'cart/partials/badge.html' %}{% endif %}
 {% for item in cart_items %}
 <div class="checkout-row">
   <a href="{{ item.product.get_absolute_url }}" class="checkout-row__img">
     {% if item.product.primary_image %}
-    <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}">
+    <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name|tr }}">
     {% endif %}
   </a>
   <div class="checkout-row__info">
-    <a href="{{ item.product.get_absolute_url }}" class="checkout-row__name">{{ item.product.name }}</a>
+    <a href="{{ item.product.get_absolute_url }}" class="checkout-row__name">{{ item.product.name|tr }}</a>
     <div class="checkout-row__meta">
       {% if item.product.color_label %}
       <span class="checkout-row__color">
@@ -29,17 +29,17 @@
     data-delivery="{{ delivery_method|default:'np' }}">
     <button type="button"
       class="checkout-qty__btn{% if item.quantity <= 1 %} is-muted{% endif %}"
-      aria-label="Менше"
+      aria-label="{% t 'Менше' %}"
       hx-post="{% url 'cart:update' item.product.pk %}"
       hx-target="#checkout-items"
       hx-swap="innerHTML"
       hx-vals='{"action": "dec", "page": "checkout", "delivery_method": "{{ delivery_method|default:"np" }}"}'>
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h10"></path></svg>
     </button>
-    <input class="checkout-qty__input" type="text" value="{{ item.quantity }}" inputmode="numeric" aria-label="Кількість" readonly>
+    <input class="checkout-qty__input" type="text" value="{{ item.quantity }}" inputmode="numeric" aria-label="{% t 'Кількість' %}" readonly>
     <button type="button"
       class="checkout-qty__btn"
-      aria-label="Більше"
+      aria-label="{% t 'Більше' %}"
       hx-post="{% url 'cart:update' item.product.pk %}"
       hx-target="#checkout-items"
       hx-swap="innerHTML"
@@ -55,8 +55,8 @@
   </div>
   <button type="button"
     class="checkout-row__del"
-    aria-label="Видалити"
-    title="Видалити"
+    aria-label="{% t 'Видалити' %}"
+    title="{% t 'Видалити' %}"
     hx-post="{% url 'cart:update' item.product.pk %}"
     hx-target="#checkout-items"
     hx-swap="innerHTML"
@@ -65,7 +65,7 @@
   </button>
 </div>
 {% empty %}
-<p class="checkout-empty__text">Кошик порожній</p>
+<p class="checkout-empty__text">{% t 'Кошик порожній' %}</p>
 {% endfor %}
 {% if oob_updates %}
 {% if cart_error %}

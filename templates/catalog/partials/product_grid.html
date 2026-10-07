@@ -1,3 +1,4 @@
+{% load i18n_ui %}
 {% if products %}
 <div class="product-grid" id="product-grid">
   {% for product in products %}
@@ -11,7 +12,7 @@
    hx-get="{{ base }}?{% for k,v in request.GET.items %}{% if k != 'limit' and k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}limit={{ next_limit }}"
    hx-target="#catalog-grid"
    hx-swap="innerHTML"
-   hx-push-url="true">Завантажити ще</button>
+   hx-push-url="true">{% t 'Завантажити ще' %}</button>
 {% endwith %}
 {% endif %}
 <p class="catalog-shown">{{ shown_label }}</p>
@@ -20,12 +21,12 @@
   <div class="empty-state__icon">
     <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4 4"></path></svg>
   </div>
-  <h2 class="empty-state__title">Нічого не знайдено</h2>
-  <p class="empty-state__text">Спробуйте змінити або скинути фільтри.</p>
+  <h2 class="empty-state__title">{% t 'Нічого не знайдено' %}</h2>
+  <p class="empty-state__text">{% t 'Спробуйте змінити або скинути фільтри.' %}</p>
   <a href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
      class="btn"
      hx-get="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}"
      hx-target="#catalog-grid"
-     hx-push-url="true">Скинути фільтри</a>
+     hx-push-url="true">{% t 'Скинути фільтри' %}</a>
 </div>
 {% endif %}

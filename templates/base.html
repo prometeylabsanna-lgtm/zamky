@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n_ui %}
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="{{ LANGUAGE_CODE|default:'uk' }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}Замки{% endblock %}</title>
+  <title>{% block title %}{% t 'Замки' %}{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,6 +19,15 @@
   {% block extra_css %}{% endblock %}
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {{ js_i18n|json_script:"js-i18n" }}
+  <script>
+    (function () {
+      var el = document.getElementById('js-i18n');
+      try { window.ZAMKY_I18N = el ? JSON.parse(el.textContent) : {}; }
+      catch (e) { window.ZAMKY_I18N = {}; }
+      window.t = function (s) { return (window.ZAMKY_I18N && window.ZAMKY_I18N[s]) || s; };
+    })();
+  </script>
   {% include 'partials/header.html' %}
   {% include 'cart/partials/drawer_shell.html' %}
   <main class="site-main">

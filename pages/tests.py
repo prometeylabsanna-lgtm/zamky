@@ -1,12 +1,18 @@
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
 
 from .models import ContactRequest
 
 
+@override_settings(ALLOWED_HOSTS=['*'])
 class HeaderShellTests(TestCase):
+    def tearDown(self):
+        translation.deactivate_all()
+
     def test_header_renders_inventory(self):
-        response = self.client.get(reverse('pages:info'))
+        with translation.override('uk'):
+            response = self.client.get(reverse('pages:info'))
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
         self.assertIn('Каталог', body)
@@ -18,26 +24,33 @@ class HeaderShellTests(TestCase):
         self.assertIn('aria-label="Закрити"', body)
         self.assertIn('aria-label="Оберіть район"', body)
         self.assertIn('>UA<', body)
-        self.assertIn('data-set-lang="EN"', body)
+        self.assertIn('data-set-lang="ru"', body)
+        self.assertNotIn('data-set-lang="EN"', body)
         self.assertIn('Каталог товрів', body)
         self.assertIn('Замки. Всі права захищено', body)
 
-    def test_lang_cookie(self):
-        url = reverse('pages:set_lang')
-        response = self.client.post(url, {'lang': 'EN', 'next': '/info/'})
+    def test_lang_cookie_and_prefix(self):
+        response = self.client.post('/lang/', {'lang': 'ru', 'next': '/uk/info/'})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(self.client.cookies['zamky_lang'].value, 'EN')
-        self.assertEqual(self.client.session['lang'], 'EN')
-        page = self.client.get(reverse('pages:info'))
-        self.assertContains(page, '>EN<')
+        self.assertEqual(self.client.cookies['zamky_lang'].value, 'ru')
+        self.assertTrue(response.url.startswith('/ru/'))
+        page = self.client.get('/ru/info/')
+        self.assertContains(page, '>RU<')
+        self.assertContains(page, 'Наши контакты')
+        self.assertContains(page, 'Все права защищены')
 
 
-
+@override_settings(ALLOWED_HOSTS=['*'])
 class ContactRequestTests(TestCase):
     def setUp(self):
         self.client = Client()
-        self.url = reverse('pages:contact')
-        self.page_url = reverse('pages:info')
+        translation.deactivate_all()
+        with translation.override('uk'):
+            self.url = reverse('pages:contact')
+            self.page_url = reverse('pages:info')
+
+    def tearDown(self):
+        translation.deactivate_all()
 
     def _valid(self, **extra):
         data = {
@@ -104,3 +117,11 @@ class ContactRequestTests(TestCase):
         self.client.post(self.url, payload, HTTP_HX_REQUEST='true')
         self.client.post(self.url, payload, HTTP_HX_REQUEST='true')
         self.assertEqual(ContactRequest.objects.count(), 1)
+
+    def test_russian_info_page(self):
+        response = self.client.get('/ru/info/about/')
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('О нас', body)
+        self.assertIn('Как мы работаем', body)
+        self.assertIn('Торговая точка', body)

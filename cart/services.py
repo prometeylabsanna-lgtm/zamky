@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 
 from catalog.models import Product
+from pages.i18n_lib import tr
 
 CART_SESSION_KEY = 'cart'
 WISHLIST_SESSION_KEY = 'wishlist'
@@ -33,14 +34,14 @@ class CartService:
         product = get_object_or_404(Product, pk=product_id, is_active=True)
         quantity = int(quantity)
         if quantity < 1:
-            raise CartError('Кількість має бути не менше 1.')
+            raise CartError(tr('Кількість має бути не менше 1.'))
         if product.stock <= 0:
-            raise CartError('Товару немає в наявності.')
+            raise CartError(tr('Товару немає в наявності.'))
         key = str(product.pk)
         current = int(self.cart.get(key, {}).get('qty', 0))
         new_qty = current + quantity
         if new_qty > product.stock:
-            raise CartError(f'Доступно лише {product.stock} шт.')
+            raise CartError(tr('Доступно лише {n} шт.').format(n=product.stock))
         self.cart[key] = {'qty': new_qty}
         self.save()
         return product, new_qty
@@ -54,7 +55,7 @@ class CartService:
             self.save()
             return product, 0
         if quantity > product.stock:
-            raise CartError(f'Доступно лише {product.stock} шт.')
+            raise CartError(tr('Доступно лише {n} шт.').format(n=product.stock))
         self.cart[key] = {'qty': quantity}
         self.save()
         return product, quantity
@@ -122,7 +123,11 @@ class CartService:
         for item in self.items():
             product = item['product']
             if item['quantity'] > product.stock:
-                problems.append(f'{product.name}: доступно {product.stock} шт.')
+                problems.append(
+                    tr('{name}: доступно {n} шт.').format(
+                        name=tr(product.name), n=product.stock
+                    )
+                )
         return problems
 
 

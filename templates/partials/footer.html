@@ -1,23 +1,24 @@
+{% load i18n_ui %}
 <footer id="footer" class="site-footer">
   <div class="site-footer__inner">
     <div class="site-footer__grid">
       <a href="{% url 'catalog:home' %}" class="logo">Logo</a>
       <nav>
-        <a href="{% url 'pages:info_page' 'about' %}">Про компанію</a>
-        <a href="{% url 'pages:info_page' 'contacts' %}">Контакти</a>
-        <a href="{% url 'pages:info_page' 'about' %}">Інформація про торгову точку</a>
+        <a href="{% url 'pages:info_page' 'about' %}">{% t 'Про компанію' %}</a>
+        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Контакти' %}</a>
+        <a href="{% url 'pages:info_page' 'about' %}">{% t 'Інформація про торгову точку' %}</a>
       </nav>
       <nav>
-        <a href="{% url 'pages:info_page' 'delivery' %}">Обмін та повернення</a>
-        <a href="{% url 'pages:info_page' 'delivery' %}">Доставка</a>
-        <a href="{% url 'pages:info_page' 'delivery' %}">Оплата</a>
-        <a href="{% url 'pages:info_page' 'privacy' %}">Політика конфіденційності</a>
-        <a href="{% url 'pages:info_page' 'offer' %}">Договір оферти</a>
+        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Обмін та повернення' %}</a>
+        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка' %}</a>
+        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Оплата' %}</a>
+        <a href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
+        <a href="{% url 'pages:info_page' 'offer' %}">{% t 'Договір оферти' %}</a>
       </nav>
       <nav>
-        <a href="{% url 'pages:info_page' 'contacts' %}">Консультація</a>
-        <a href="{% url 'pages:info_page' 'contacts' %}">Підбір</a>
-        <a href="{% url 'pages:info_page' 'contacts' %}">Монтаж</a>
+        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Консультація' %}</a>
+        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Підбір' %}</a>
+        <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Монтаж' %}</a>
       </nav>
       <div class="site-footer__contacts">
         <a href="tel:0670000000">067 00 00 00</a>
@@ -26,6 +27,6 @@
       </div>
     </div>
     <div class="site-footer__line"></div>
-    <p class="site-footer__copy">Замки. Всі права захищено, копіювання матеріалів заборонено</p>
+    <p class="site-footer__copy">{% t 'Замки. Всі права захищено, копіювання матеріалів заборонено' %}</p>
   </div>
 </footer>

@@ -127,7 +127,7 @@
 
   function syncSortPrefix() {
     qsa('[data-sort-prefix]').forEach(function (el) {
-      el.textContent = window.innerWidth < 720 ? '' : 'Сортування:';
+      el.textContent = window.innerWidth < 720 ? '' : (window.t ? window.t('Сортування:') : 'Сортування:');
     });
   }
 

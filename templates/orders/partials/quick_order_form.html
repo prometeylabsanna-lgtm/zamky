@@ -1,3 +1,4 @@
+{% load i18n_ui %}
 <form class="pdp-quick__form" data-quick-form
   hx-post="{% url 'orders:quick' product.pk %}"
   hx-target="[data-quick-root]"
@@ -7,10 +8,10 @@
     <input type="tel" name="phone" required placeholder="00 000 00 00" autocomplete="tel" inputmode="tel" autofocus>
   </label>
   <input type="hidden" name="quantity" value="1" data-quick-qty>
-  <button type="submit" class="pdp-quick__submit">Замовити</button>
+  <button type="submit" class="pdp-quick__submit">{% t 'Замовити' %}</button>
 </form>
 {% if error %}
 <p class="pdp-quick__error">{{ error }}</p>
 {% else %}
-<p class="pdp-quick__note">Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.</p>
+<p class="pdp-quick__note">{% t 'Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.' %}</p>
 {% endif %}

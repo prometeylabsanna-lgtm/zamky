@@ -1,11 +1,11 @@
-{% load static %}
+{% load i18n_ui static %}
 <a href="{{ product.get_absolute_url }}" class="product-card{% if compact %} product-card--compact{% endif %}">
   <div class="product-card__img{% if product.stock_status == 'out' %} is-out{% endif %}">
     {% with img=product.primary_image %}
       {% if img %}
-        <img src="{{ img.image.url }}" alt="{{ product.name }}"{% if not eager %} loading="lazy"{% endif %}>
+        <img src="{{ img.image.url }}" alt="{{ product.name|tr }}"{% if not eager %} loading="lazy"{% endif %}>
       {% else %}
-        <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name }}"{% if not eager %} loading="lazy"{% endif %}>
+        <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name|tr }}"{% if not eager %} loading="lazy"{% endif %}>
       {% endif %}
     {% endwith %}
   </div>
@@ -15,7 +15,7 @@
       <span>{{ product.stock_label }}</span>
     </span>
   </div>
-  <div class="product-card__title{% if product.stock_status == 'out' %} is-out{% endif %}">{{ product.name }}</div>
+  <div class="product-card__title{% if product.stock_status == 'out' %} is-out{% endif %}">{{ product.name|tr }}</div>
   <div class="product-card__stars">
     <span>★★★★</span><span class="empty">★</span>
     <span class="product-card__meta">(2)</span>
@@ -23,7 +23,7 @@
   <div class="product-card__foot">
     <div class="product-card__prices">
       {% if product.stock_status == 'out' %}
-        <div class="product-card__old">Очікується</div>
+        <div class="product-card__old">{% t 'Очікується' %}</div>
       {% elif product.old_price %}
         <div class="product-card__old">{{ product.old_price_display }}</div>
       {% endif %}
@@ -35,7 +35,7 @@
     <button
       type="button"
       class="product-card__cart"
-      aria-label="До кошика"
+      aria-label="{% t 'До кошика' %}"
       hx-post="{% url 'cart:add' product.pk %}"
       hx-swap="none"
       onclick="event.preventDefault(); event.stopPropagation();"

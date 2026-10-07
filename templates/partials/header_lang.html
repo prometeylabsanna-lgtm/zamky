@@ -1,5 +1,6 @@
+{% load i18n_ui %}
 <div class="dropdown dropdown--lang{% if compact %} dropdown--compact{% endif %}">
-  <button type="button" class="header-lang" data-dropdown-toggle aria-label="Мова" aria-expanded="false">
+  <button type="button" class="header-lang" data-dropdown-toggle aria-label="{% t 'Мова' %}" aria-expanded="false">
     {% if compact %}
       <span class="lang-label" id="lang-label-compact">{{ site_lang }}</span>
     {% else %}
@@ -10,15 +11,15 @@
   <div class="dropdown__backdrop" data-dropdown-toggle></div>
   <ul class="dropdown__panel dropdown__panel--lang">
     <li>
-      <button type="button" class="dropdown__item {% if site_lang == 'UA' %}is-active{% endif %}" data-set-lang="UA">
-        <span class="lang-row"><span class="lang-row__code">UA</span><span class="lang-row__name">Українська</span></span>
+      <button type="button" class="dropdown__item {% if site_lang == 'UA' %}is-active{% endif %}" data-set-lang="uk">
+        <span class="lang-row"><span class="lang-row__code">UA</span><span class="lang-row__name">{% t 'Українська' %}</span></span>
         {% if site_lang == 'UA' %}{% include 'partials/icon_check.html' %}{% endif %}
       </button>
     </li>
     <li>
-      <button type="button" class="dropdown__item {% if site_lang == 'EN' %}is-active{% endif %}" data-set-lang="EN">
-        <span class="lang-row"><span class="lang-row__code">EN</span><span class="lang-row__name">English</span></span>
-        {% if site_lang == 'EN' %}{% include 'partials/icon_check.html' %}{% endif %}
+      <button type="button" class="dropdown__item {% if site_lang == 'RU' %}is-active{% endif %}" data-set-lang="ru">
+        <span class="lang-row"><span class="lang-row__code">RU</span><span class="lang-row__name">{% t 'Русский' %}</span></span>
+        {% if site_lang == 'RU' %}{% include 'partials/icon_check.html' %}{% endif %}
       </button>
     </li>
   </ul>

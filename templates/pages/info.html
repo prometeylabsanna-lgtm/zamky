@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n_ui %}
 
-{% block title %}{{ page_name }} — Замки{% endblock %}
+{% block title %}{{ page_name }} — {% t 'Замки' %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/info.css' %}">
@@ -11,7 +11,7 @@
 {% block content %}
 <div class="container info-page"{% if scroll_form %} data-auto-scroll-form{% endif %}>
   <nav class="breadcrumbs">
-    <a href="{% url 'catalog:home' %}">Головна</a>
+    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <span>{{ page_name }}</span>
   </nav>
@@ -29,121 +29,124 @@
         {% endfor %}
       </ul>
       <div class="info-consult">
-        <span class="info-consult__hint">Потрібна консультація?</span>
+        <span class="info-consult__hint">{% t 'Потрібна консультація?' %}</span>
         <a href="tel:0670000000" class="info-consult__phone">067 00 00 00</a>
-        <span class="info-consult__hours">Пн–Сб, 9:00–19:00</span>
-        <a href="#form" class="info-consult__btn" data-to-form>Написати нам</a>
+        <span class="info-consult__hours">{% t 'Пн–Сб, 9:00–19:00' %}</span>
+        <a href="#form" class="info-consult__btn" data-to-form>{% t 'Написати нам' %}</a>
       </div>
     </aside>
 
     <article class="info-article">
       {% if page_key == 'about' or page_key == 'contacts' %}
-      <h1 class="info-h1">Про нас</h1>
-      <p class="info-lead">Ми продаємо замки, серцевини та фурнітуру для дверей і меблів у Києві та по всій Україні. Допомагаємо підібрати механізм під конкретні двері і пояснюємо різницю між моделями простими словами.</p>
+      {% with c=info_content %}
+      <h1 class="info-h1">{{ c.h1 }}</h1>
+      <p class="info-lead">{{ c.lead }}</p>
       <div class="info-cards">
+        {% for card in c.cards %}
         <div class="info-card">
+          {% if forloop.counter == 1 %}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>
-          <span class="info-card__title">Оригінальна продукція</span>
-          <span class="info-card__text">Працюємо напряму з дистриб’юторами Mottura, Cisa, Kale, Apecs та інших брендів.</span>
-        </div>
-        <div class="info-card">
+          {% elif forloop.counter == 2 %}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 7.5A7 7 0 1 0 5 15l-1 4 4-1.3"></path><circle cx="15.5" cy="14.5" r="5"></circle><path d="M13.5 14.5h4"></path></svg>
-          <span class="info-card__title">Підбір під ваші двері</span>
-          <span class="info-card__text">Підкажемо розмір циліндра, клас захисту та сумісність із замком.</span>
-        </div>
-        <div class="info-card">
+          {% else %}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5l3 3M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"></path></svg>
-          <span class="info-card__title">Монтаж і сервіс</span>
-          <span class="info-card__text">Встановлюємо та замінюємо замки, виготовляємо ключі за кодовою карткою.</span>
+          {% endif %}
+          <span class="info-card__title">{{ card.title }}</span>
+          <span class="info-card__text">{{ card.text }}</span>
         </div>
+        {% endfor %}
       </div>
-      <h2 class="info-h2 info-h2--section">Як ми працюємо</h2>
-      <p class="info-body">Кожне замовлення перевіряє менеджер: уточнює розміри, наявність і зручний спосіб доставки. Якщо ви не впевнені в розмірі, надішліть фото торця дверей — ми допоможемо виміряти.</p>
+      <h2 class="info-h2 info-h2--section">{{ c.how_title }}</h2>
+      <p class="info-body">{{ c.how_body }}</p>
       <ul class="info-bullets">
-        <li><span class="info-bullets__dot"></span><span>Відправляємо замовлення в день оплати, якщо воно оформлене до 16:00.</span></li>
-        <li><span class="info-bullets__dot"></span><span>Надаємо гарантію виробника на всі механізми.</span></li>
-        <li><span class="info-bullets__dot"></span><span>Приймаємо оплату карткою, накладеним платежем і за рахунком для юросіб.</span></li>
+        {% for b in c.bullets %}
+        <li><span class="info-bullets__dot"></span><span>{{ b }}</span></li>
+        {% endfor %}
       </ul>
-      <h2 class="info-h2 info-h2--section">Торгова точка</h2>
+      <h2 class="info-h2 info-h2--section">{{ c.shop_title }}</h2>
       <div class="info-table">
-        <div class="info-table__row"><span>Адреса</span><span>м. Київ, [вулиця, будинок]</span></div>
-        <div class="info-table__row is-alt"><span>Графік роботи</span><span>Пн–Пт 9:00–19:00, Сб 10:00–17:00, Нд — вихідний</span></div>
-        <div class="info-table__row"><span>Телефони</span><span><a href="tel:0670000000">067 00 00 00</a>, <a href="tel:0660000000">066 00 00 00</a></span></div>
-        <div class="info-table__row is-alt"><span>Email</span><a href="mailto:xxx@gmail.com">xxx@gmail.com</a></div>
+        {% for label, value in c.rows %}
+        <div class="info-table__row{% if forloop.counter|divisibleby:2 %} is-alt{% endif %}">
+          <span>{{ label }}</span>
+          {% if value == 'phones' %}
+          <span><a href="tel:0670000000">067 00 00 00</a>, <a href="tel:0660000000">066 00 00 00</a></span>
+          {% elif value == 'email' %}
+          <a href="mailto:xxx@gmail.com">xxx@gmail.com</a>
+          {% else %}
+          <span>{{ value }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
       </div>
+      {% endwith %}
+
       {% elif page_key == 'delivery' %}
-      <h1 class="info-h1">Доставка і оплата</h1>
-      <p class="info-lead">Доставляємо по всій Україні. Замовлення, оформлені до 16:00, відправляємо того ж дня.</p>
-      <h2 class="info-h2 info-h2--block">Способи доставки</h2>
+      {% with c=info_content %}
+      <h1 class="info-h1">{{ c.h1 }}</h1>
+      <p class="info-lead">{{ c.lead }}</p>
+      <h2 class="info-h2 info-h2--block">{{ c.methods_title }}</h2>
       <div class="info-table info-table--delivery">
-        <div class="info-table__head"><span>Спосіб</span><span>Термін</span><span>Вартість</span></div>
-        <div class="info-table__drow"><span>Нова Пошта, відділення або поштомат</span><span>1–2 дні</span><span>80 ₴</span></div>
-        <div class="info-table__drow"><span>Кур’єр по Києву</span><span>в день замовлення</span><span>150 ₴</span></div>
-        <div class="info-table__drow"><span>Самовивіз з магазину</span><span>через 2 години</span><span class="is-free">Безкоштовно</span></div>
+        <div class="info-table__head"><span>{{ c.head.0 }}</span><span>{{ c.head.1 }}</span><span>{{ c.head.2 }}</span></div>
+        {% for a,b,cost in c.rows %}
+        <div class="info-table__drow"><span>{{ a }}</span><span>{{ b }}</span><span{% if forloop.last %} class="is-free"{% endif %}>{{ cost }}</span></div>
+        {% endfor %}
       </div>
-      <p class="info-note">Вартість доставки Новою Поштою може відрізнятися залежно від ваги та габаритів посилки — точну суму менеджер назве під час підтвердження.</p>
-      <h2 class="info-h2 info-h2--block">Способи оплати</h2>
+      <p class="info-note">{{ c.note }}</p>
+      <h2 class="info-h2 info-h2--block">{{ c.pay_title }}</h2>
       <div class="info-cards">
+        {% for title, text in c.pays %}
         <div class="info-pay">
-          <span class="info-pay__title">Карткою онлайн</span>
-          <span class="info-pay__text">Visa, Mastercard, Apple Pay, Google Pay. Оплата після підтвердження замовлення.</span>
+          <span class="info-pay__title">{{ title }}</span>
+          <span class="info-pay__text">{{ text }}</span>
         </div>
-        <div class="info-pay">
-          <span class="info-pay__title">Накладений платіж</span>
-          <span class="info-pay__text">Оплата у відділенні після огляду товару. Комісію перевізника сплачує отримувач.</span>
-        </div>
-        <div class="info-pay">
-          <span class="info-pay__title">Безготівковий</span>
-          <span class="info-pay__text">Рахунок для юридичних осіб і ФОП. Відправка після надходження коштів.</span>
-        </div>
+        {% endfor %}
       </div>
-      <h2 class="info-h2 info-h2--block">Обмін та повернення</h2>
-      <p class="info-body">Ви можете обміняти або повернути товар протягом 14 днів з моменту отримання, якщо він не був у використанні, збережено упаковку, ключі та кодову картку.</p>
+      <h2 class="info-h2 info-h2--block">{{ c.return_title }}</h2>
+      <p class="info-body">{{ c.return_body }}</p>
       <ol class="info-steps">
-        <li><span>1</span><span>Зателефонуйте або напишіть нам і вкажіть номер замовлення.</span></li>
-        <li><span>2</span><span>Надішліть товар Новою Поштою на реквізити, які надасть менеджер.</span></li>
-        <li><span>3</span><span>Ми повернемо кошти протягом 3 робочих днів після отримання й перевірки товару.</span></li>
+        {% for step in c.steps %}
+        <li><span>{{ forloop.counter }}</span><span>{{ step }}</span></li>
+        {% endfor %}
       </ol>
+      {% endwith %}
+
       {% elif page_key == 'offer' %}
-      <h1 class="info-h1">Договір оферти</h1>
-      <p class="info-rev">Редакція від 6 жовтня 2026 року</p>
-      <p class="info-body info-body--top">Цей документ є публічною пропозицією (офертою) [ПІБ ФОП], РНОКПП [номер] (далі — Продавець), укласти договір купівлі-продажу товарів дистанційним способом з будь-якою фізичною або юридичною особою (далі — Покупець).</p>
-      <h2 class="info-h2 info-h2--legal">1. Загальні положення</h2>
-      <p class="info-body">1.1. Оформлення замовлення на сайті означає повне й беззастережне прийняття Покупцем умов цього договору.</p>
-      <p class="info-body info-body--tight">1.2. Продавець має право змінювати умови оферти. Нова редакція набирає чинності з моменту публікації на сайті.</p>
-      <h2 class="info-h2 info-h2--legal">2. Предмет договору</h2>
-      <p class="info-body">2.1. Продавець зобов’язується передати у власність Покупця товар, а Покупець — оплатити та прийняти його на умовах цього договору.</p>
-      <p class="info-body info-body--tight">2.2. Найменування, кількість і ціна товару визначаються в замовленні, підтвердженому менеджером.</p>
-      <h2 class="info-h2 info-h2--legal">3. Ціна та оплата</h2>
-      <p class="info-body">3.1. Ціни на сайті вказані в гривнях. Вартість доставки не входить у ціну товару, якщо інше не зазначено.</p>
-      <p class="info-body info-body--tight">3.2. Покупець оплачує замовлення одним зі способів, наведених у розділі «Доставка і оплата».</p>
-      <h2 class="info-h2 info-h2--legal">4. Доставка та приймання</h2>
-      <p class="info-body">4.1. Право власності та ризик випадкового пошкодження переходять до Покупця в момент отримання товару.</p>
-      <p class="info-body info-body--tight">4.2. Під час отримання Покупець перевіряє комплектність і цілісність товару у присутності представника перевізника.</p>
-      <h2 class="info-h2 info-h2--legal">5. Повернення товару</h2>
-      <p class="info-body">5.1. Повернення та обмін здійснюються відповідно до Закону України «Про захист прав споживачів» протягом 14 днів з дня отримання товару.</p>
-      <h2 class="info-h2 info-h2--legal">6. Реквізити Продавця</h2>
-      <div class="info-legal-box">[ПІБ ФОП]<br>РНОКПП: [номер]<br>Адреса: м. Київ, [вулиця, будинок]<br>Телефон: 067 00 00 00 · Email: xxx@gmail.com</div>
+      {% with c=info_content %}
+      <h1 class="info-h1">{{ c.h1 }}</h1>
+      <p class="info-rev">{{ c.rev }}</p>
+      <p class="info-body info-body--top">{{ c.intro }}</p>
+      {% for title, paras in c.sections %}
+      <h2 class="info-h2 info-h2--legal">{{ title }}</h2>
+      {% for p in paras %}
+      <p class="info-body{% if not forloop.first %} info-body--tight{% endif %}">{{ p }}</p>
+      {% empty %}
+      <div class="info-legal-box">{{ c.legal_box|linebreaksbr }}</div>
+      {% endfor %}
+      {% endfor %}
+      {% endwith %}
+
       {% else %}
-      <h1 class="info-h1">Політика конфіденційності</h1>
-      <p class="info-rev">Редакція від 6 жовтня 2026 року</p>
-      <p class="info-body info-body--top">Ця політика пояснює, які персональні дані ми збираємо, навіщо вони потрібні та як ми їх захищаємо. Користуючись сайтом, ви погоджуєтеся з її умовами.</p>
-      <h2 class="info-h2 info-h2--legal">Які дані ми збираємо</h2>
+      {% with c=info_content %}
+      <h1 class="info-h1">{{ c.h1 }}</h1>
+      <p class="info-rev">{{ c.rev }}</p>
+      <p class="info-body info-body--top">{{ c.intro }}</p>
+      <h2 class="info-h2 info-h2--legal">{{ c.collect_title }}</h2>
       <ul class="info-bullets">
-        <li><span class="info-bullets__dot"></span><span>ім’я, прізвище, номер телефону та email;</span></li>
-        <li><span class="info-bullets__dot"></span><span>адресу доставки або номер відділення перевізника;</span></li>
-        <li><span class="info-bullets__dot"></span><span>технічні дані: тип пристрою, браузер, файли cookie.</span></li>
+        {% for b in c.collect %}
+        <li><span class="info-bullets__dot"></span><span>{{ b }}</span></li>
+        {% endfor %}
       </ul>
-      <h2 class="info-h2 info-h2--legal">Навіщо вони потрібні</h2>
-      <p class="info-body">Ми використовуємо дані лише для обробки та доставки замовлень, зв’язку з вами щодо замовлення і покращення роботи сайту. Розсилки надсилаємо тільки за вашою згодою.</p>
-      <h2 class="info-h2 info-h2--legal">Кому ми їх передаємо</h2>
-      <p class="info-body">Дані передаються лише службам доставки та платіжним сервісам у обсязі, необхідному для виконання замовлення. Ми не продаємо персональні дані третім особам.</p>
-      <h2 class="info-h2 info-h2--legal">Ваші права</h2>
-      <p class="info-body">Ви можете в будь-який момент запросити перегляд, виправлення або видалення своїх даних, написавши на xxx@gmail.com. Ми відповімо протягом 30 днів.</p>
+      <h2 class="info-h2 info-h2--legal">{{ c.why_title }}</h2>
+      <p class="info-body">{{ c.why }}</p>
+      <h2 class="info-h2 info-h2--legal">{{ c.who_title }}</h2>
+      <p class="info-body">{{ c.who }}</p>
+      <h2 class="info-h2 info-h2--legal">{{ c.rights_title }}</h2>
+      <p class="info-body">{{ c.rights }}</p>
       <div class="info-callout">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
-        <span>Дані зберігаються відповідно до Закону України «Про захист персональних даних» не довше, ніж це потрібно для мети їх обробки.</span>
+        <span>{{ c.callout }}</span>
       </div>
+      {% endwith %}
       {% endif %}
 
       {% include 'pages/partials/contact_card.html' %}

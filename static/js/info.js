@@ -27,7 +27,7 @@
     var btn = form.querySelector('[data-send-label]');
     if (btn) {
       btn.dataset.prev = btn.textContent;
-      btn.textContent = 'Надсилаємо…';
+      btn.textContent = window.t ? window.t('Надсилаємо…') : 'Надсилаємо…';
     }
   });
 
