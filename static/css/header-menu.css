@@ -80,6 +80,9 @@
   font-size: 16px;
   font-weight: 600;
   flex: none;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mega__list {
@@ -291,6 +294,9 @@
   padding: 0 20px;
   font-size: 16px;
   font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mnav__list {

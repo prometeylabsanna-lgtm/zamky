@@ -3,10 +3,10 @@
   <div class="mega__backdrop" data-close-mega></div>
   <div class="mega__panel" role="dialog" aria-label="Каталог">
     <div class="mega__col mega__col--cats">
-      <button type="button" class="mega__head" data-close-mega>
-        <span>Каталог товрів</span>
+      <a href="{% url 'catalog:catalog' %}" class="mega__head">
+        <span>Каталог товарів</span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
-      </button>
+      </a>
       <ul class="mega__list">
         {% for c in header_menu %}
         <li>
