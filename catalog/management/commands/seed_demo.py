@@ -116,6 +116,7 @@ class Command(BaseCommand):
         Attribute.objects.all().delete()
         AttributeGroup.objects.all().delete()
 
+        # Порядок як у E-com/Home.dc.html (Elbor двічі).
         cats_data = [
             ('Серцевини (циліндри)', 'cyl', None),
             ('Замки', 'pad', None),
@@ -127,12 +128,19 @@ class Command(BaseCommand):
             ('Apecs', 'brand', 'apecs.png'),
             ('Securame', 'brand', 'securame.png'),
             ('Kale', 'brand', 'kale.png'),
+            ('Elbor', 'brand', 'elbor.png'),
         ]
         categories = {}
         for i, (name, icon, logo) in enumerate(cats_data):
+            base_slug = slugify(name) or f'cat-{i}'
+            slug = base_slug
+            n = 1
+            while Category.objects.filter(slug=slug).exists():
+                slug = f'{base_slug}-{n}'
+                n += 1
             cat = Category.objects.create(
                 name=name,
-                slug=slugify(name) or f'cat-{i}',
+                slug=slug,
                 icon=icon,
                 sort_order=i,
                 is_active=True,
@@ -142,7 +150,8 @@ class Command(BaseCommand):
                 if src.exists():
                     with src.open('rb') as fh:
                         cat.logo.save(logo, File(fh), save=True)
-            categories[name] = cat
+            if name not in categories:
+                categories[name] = cat
 
         groups = {
             'general': AttributeGroup.objects.create(name='Загальне', slug='zagalne', sort_order=1),
@@ -265,6 +274,7 @@ class Command(BaseCommand):
         created = 0
         created += self._seed_cylinders(categories, attrs, av, img_dir)
         created += self._seed_locks(categories, attrs, av, img_dir, media_seed)
+        self._configure_home_carousels(img_dir)
         self.stdout.write(f'Products created: {created}')
 
     def _attach_image(self, product, src, dest_name, alt, sort_order, primary=False):
@@ -438,3 +448,60 @@ class Command(BaseCommand):
             self._attach_image(product, src, f'{sku.lower()}.png', product.name, 0, primary=True)
             n += 1
         return n
+
+    def _configure_home_carousels(self, img_dir):
+        """Окремі HOME-* товари для каруселей (не потрапляють у каталог)."""
+        home_name = (
+            'Циліндр ABARO B100 60 (30*30) G латунь полірована 5 ключів'
+        )
+        Product.objects.update(is_hit=False, is_new=False)
+        Product.objects.filter(sku__startswith='HOME-').delete()
+
+        brass = img_dir / 'product-brass.png'
+        chrome = img_dir / 'product-chrome.png'
+        cat = Category.objects.filter(name='Серцевини (циліндри)').first()
+        if not cat:
+            return
+
+        hit_stocks = [12, 2, 12, 12, 12, 12, 12, 12]
+        for i, stock in enumerate(hit_stocks):
+            p = Product.objects.create(
+                category=cat,
+                name=home_name,
+                slug=f'home-hit-{i}',
+                sku=f'HOME-HIT-{i}',
+                price=Decimal('400'),
+                old_price=Decimal('520'),
+                stock=stock,
+                is_active=True,
+                is_hit=True,
+                is_new=False,
+                catalog_order=i,
+                rating=4,
+                brand='ABARO',
+                short_description='Циліндровий механізм для дверей із комплектом ключів.',
+                description=ABARO_DESC,
+            )
+            self._attach_image(p, brass, f'home-hit-{i}.png', home_name, 0, primary=True)
+
+        news_stocks = [12, 12, 0, 12, 12, 12, 12, 12]
+        for i, stock in enumerate(news_stocks):
+            p = Product.objects.create(
+                category=cat,
+                name=home_name,
+                slug=f'home-new-{i}',
+                sku=f'HOME-NEW-{i}',
+                price=Decimal('400'),
+                old_price=Decimal('520'),
+                stock=stock,
+                is_active=True,
+                is_hit=False,
+                is_new=True,
+                catalog_order=i,
+                rating=4,
+                brand='ABARO',
+                short_description='Циліндровий механізм для дверей із комплектом ключів.',
+                description=ABARO_DESC,
+            )
+            src = chrome if i == 2 else brass
+            self._attach_image(p, src, f'home-new-{i}.png', home_name, 0, primary=True)

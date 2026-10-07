@@ -49,16 +49,18 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        cats = Category.objects.filter(is_active=True, parent__isnull=True)
+        cats = Category.objects.filter(is_active=True, parent__isnull=True).order_by(
+            'sort_order', 'name'
+        )
         hits = (
             Product.objects.filter(is_active=True, is_hit=True)
             .prefetch_related('images')
-            .order_by('catalog_order')[:12]
+            .order_by('catalog_order', 'pk')[:8]
         )
         news = (
             Product.objects.filter(is_active=True, is_new=True)
             .prefetch_related('images')
-            .order_by('catalog_order')[:12]
+            .order_by('catalog_order', 'pk')[:8]
         )
         if not hits:
             hits = Product.objects.filter(is_active=True).prefetch_related('images').order_by(
@@ -72,11 +74,49 @@ class HomeView(TemplateView):
             )
 
         district = None
-        slug = self.kwargs.get('district_slug') or self.request.session.get('district_slug')
+        is_city = False
+        slug = self.kwargs.get('district_slug')
+        city_slug = self.kwargs.get('city_slug')
         if slug:
             district = DeliveryDistrict.objects.filter(slug=slug, is_active=True).first()
             if district:
                 self.request.session['district_slug'] = district.slug
+        elif city_slug == 'kyiv' or self.request.path.rstrip('/').endswith('/kyiv'):
+            is_city = True
+
+        features = [
+            {
+                'title': 'Надійні\nзамки',
+                'text': 'Перевірені рішення\nдля захисту вашого дом',
+                'icon': 'shield',
+            },
+            {
+                'title': 'Популярні\nбренди',
+                'text': 'Mottura, Cisa, Elbor, Guardian,\nApecs, Securemme, Kale',
+                'icon': 'award',
+            },
+            {
+                'title': 'Допомога\nу виборі',
+                'text': 'Підберемо замок або\nсерцевину під ваші двері',
+                'icon': 'chat',
+            },
+            {
+                'title': 'Доставка\nпо Україні',
+                'text': 'Швидко відправляємо\nзамовлення',
+                'icon': 'pin',
+            },
+        ]
+        if district:
+            features = [
+                f
+                if i != 3
+                else {
+                    'title': 'Доставка\nпо району',
+                    'text': f'{district.delivery_note}\nпо {district.name_locative} району',
+                    'icon': 'pin',
+                }
+                for i, f in enumerate(features)
+            ]
 
         ctx.update(
             {
@@ -84,15 +124,11 @@ class HomeView(TemplateView):
                 'hits': hits,
                 'news': news,
                 'district': district,
+                'is_city': is_city,
                 'other_districts': DeliveryDistrict.objects.filter(is_active=True).exclude(
                     pk=getattr(district, 'pk', None)
                 ),
-                'features': [
-                    {'title': 'Надійні\nзамки', 'text': 'Перевірені рішення\nдля захисту вашого дому', 'icon': 'shield'},
-                    {'title': 'Популярні\nбренди', 'text': 'Mottura, Cisa, Elbor, Guardian,\nApecs, Securemme, Kale', 'icon': 'award'},
-                    {'title': 'Допомога\nу виборі', 'text': 'Підберемо замок або\nсерцевину під ваші двері', 'icon': 'chat'},
-                    {'title': 'Доставка\nпо Україні', 'text': 'Швидко відправляємо\nзамовлення', 'icon': 'pin'},
-                ],
+                'features': features,
             }
         )
         return ctx
@@ -112,7 +148,11 @@ class CatalogView(ListView):
         return max(PAGE_SIZE, min(limit, 240))
 
     def get_queryset(self):
-        qs = Product.objects.filter(is_active=True).prefetch_related('images', 'attributes')
+        qs = (
+            Product.objects.filter(is_active=True)
+            .exclude(sku__startswith='HOME-')
+            .prefetch_related('images', 'attributes')
+        )
         self.category = None
         slug = self.kwargs.get('slug')
         if slug:
