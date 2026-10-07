@@ -12,7 +12,7 @@
   </div>
   <form class="qty" hx-post="{% url 'cart:update' item.product.pk %}" hx-target="#checkout-items" hx-swap="innerHTML">
     {% csrf_token %}
-    <input type="hidden" name="page" value="checkout">
+    <input type="hidden" name="page" value="{% if page %}{{ page }}{% elif step == 'checkout' %}checkout{% else %}cart{% endif %}">
     <button type="submit" name="action" value="dec" aria-label="Менше">−</button>
     <input type="text" name="quantity" value="{{ item.quantity }}" readonly>
     <button type="submit" name="action" value="inc" aria-label="Більше">+</button>
@@ -23,7 +23,7 @@
   </div>
   <form hx-post="{% url 'cart:update' item.product.pk %}" hx-target="#checkout-items" hx-swap="innerHTML">
     {% csrf_token %}
-    <input type="hidden" name="page" value="checkout">
+    <input type="hidden" name="page" value="{% if page %}{{ page }}{% elif step == 'checkout' %}checkout{% else %}cart{% endif %}">
     <input type="hidden" name="action" value="remove">
     <button type="submit" aria-label="Видалити" style="width:40px;height:40px;border:0;border-radius:8px;background:none;color:#b5b5b5;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l.8 12.2a1.5 1.5 0 0 0 1.5 1.3h6.4a1.5 1.5 0 0 0 1.5-1.3L17.5 7"></path></svg>
@@ -35,4 +35,11 @@
 {% endfor %}
 {% if cart_error %}
 <div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true">{{ cart_error }}</div>
+{% endif %}
+<span id="summary-subtotal" hx-swap-oob="true">{{ cart_subtotal|floatformat:0 }} ₴</span>
+{% if page == 'checkout' and order_total is not None %}
+<span id="summary-delivery" hx-swap-oob="true">{{ delivery_price|floatformat:0 }} ₴</span>
+<span id="summary-total" hx-swap-oob="true">{{ order_total|floatformat:0 }} ₴</span>
+{% else %}
+<span id="summary-total" hx-swap-oob="true">{{ cart_subtotal|floatformat:0 }} ₴</span>
 {% endif %}

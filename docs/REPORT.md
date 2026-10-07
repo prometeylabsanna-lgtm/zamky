@@ -42,9 +42,15 @@ python manage.py runserver
 - HTMX 2.x (вендорний файл): фільтри/сортування каталогу, кошик, wishlist, оновлення лічильника.
 - Unfold-адмінка з inlines.
 - Seed `seed_demo` (~45 товарів з дизайну).
-- Тести: кошик, stock, idempotency checkout, фільтри — зелені.
+- Тести: кошик, stock, idempotency checkout, фільтри, `test_totals_qty` (qty>1) — зелені.
 - Сторінки `/`, `/catalog/`, `/product/<slug>/`, `/checkout/`, `/info/...` повертають 200.
-- Скріншоти: `Замки_context/screens/` (desktop 1440 і mobile 390).
+- Скріншоти: `Замки_context/screens/` (desktop 1440 і mobile 390); cart/checkout desktop з товаром qty=2.
+
+## FIX_CART (qty>1)
+
+- Підрахунок у `CartService` / `create_order_from_cart` був коректний (`price * qty`); «баг» на старому `cart_desktop.png` — зйомка не на 1440.
+- Checkout summary: на кроці оформлення показує `delivery_price` + `order_total`; HTMX `cart/update` з `page=cart|checkout` оновлює summary через OOB.
+- Регресія: `orders.tests.CheckoutTests.test_totals_qty`.
 
 ## Що лишилось / ризики
 
@@ -52,5 +58,4 @@ python manage.py runserver
 - Оплата — лише вибір методу (без інтеграції еквайрингу).
 - Відгуки/рейтинг на картці — статичний UI з дизайну.
 - Фільтр ціни — інпути без drag-range з макета.
-- Cart/checkout скріншоти можуть показувати порожній кошик, якщо сесію не підхоплено headless Chrome.
 - Для production потрібні сильний `SECRET_KEY`, `DEBUG=False`, HTTPS, Postgres, збір static.

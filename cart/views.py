@@ -4,6 +4,8 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from catalog.models import Product
+from orders.models import Order
+from orders.services import DELIVERY_PRICES
 
 from .services import CartError, CartService, WishlistService
 
@@ -80,15 +82,31 @@ class CartUpdateView(View):
             error = ''
         except CartError as exc:
             error = str(exc)
+        subtotal = cart.subtotal()
         context = {
             'cart_count': cart.total_quantity(),
             'cart_items': cart.items(),
-            'cart_subtotal': cart.subtotal(),
+            'cart_subtotal': subtotal,
             'cart_error': error,
         }
         if request.headers.get('HX-Request') == 'true':
             page = request.POST.get('page')
-            if page == 'checkout':
+            if page in {'checkout', 'cart'}:
+                if page == 'checkout':
+                    delivery_method = request.POST.get('delivery_method') or Order.DeliveryMethod.NP
+                    delivery_price = DELIVERY_PRICES.get(
+                        delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP]
+                    )
+                    context.update(
+                        {
+                            'page': 'checkout',
+                            'step': 'checkout',
+                            'delivery_price': delivery_price,
+                            'order_total': subtotal + delivery_price,
+                        }
+                    )
+                else:
+                    context.update({'page': 'cart', 'step': 'cart'})
                 return render(request, 'orders/partials/checkout_items.html', context)
             return render(request, 'cart/partials/cart_oob.html', context)
         return redirect('orders:checkout')

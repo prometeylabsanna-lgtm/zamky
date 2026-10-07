@@ -4,7 +4,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from catalog.models import Category, Product
-from orders.models import Order
+from orders.models import Order, OrderItem
 
 
 class CheckoutTests(TestCase):
@@ -23,6 +23,94 @@ class CheckoutTests(TestCase):
 
     def _add_to_cart(self, qty=1):
         self.client.post(reverse('cart:add', args=[self.product.pk]), {'quantity': qty})
+
+    def test_totals_qty(self):
+        """qty>1: cart / HTMX / checkout UI / Order(+delivery) / stock."""
+        price = Decimal('1700.00')
+        self.product.price = price
+        self.product.old_price = Decimal('2000.00')
+        self.product.stock = 10
+        self.product.save()
+
+        self._add_to_cart(2)
+        expected_line = price * 2
+        self.assertEqual(
+            self.client.session['cart'][str(self.product.pk)]['qty'],
+            2,
+        )
+
+        checkout = self.client.get(reverse('orders:checkout'))
+        self.assertEqual(checkout.status_code, 200)
+        body = checkout.content.decode()
+        self.assertIn('3400', body)
+        self.assertContains(checkout, '3400')
+
+        inc = self.client.post(
+            reverse('cart:update', args=[self.product.pk]),
+            {'action': 'inc'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(inc.status_code, 200)
+        self.assertIn('5100', inc.content.decode())
+        self.assertEqual(
+            self.client.session['cart'][str(self.product.pk)]['qty'],
+            3,
+        )
+
+        inc_checkout = self.client.post(
+            reverse('cart:update', args=[self.product.pk]),
+            {'action': 'inc', 'page': 'checkout'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(inc_checkout.status_code, 200)
+        inc_body = inc_checkout.content.decode()
+        self.assertIn('6800', inc_body)
+        # NP delivery 80 → order total 6880; OOB summary
+        self.assertIn('6880', inc_body)
+        self.assertEqual(
+            self.client.session['cart'][str(self.product.pk)]['qty'],
+            4,
+        )
+
+        # повернути qty=2 для оформлення
+        self.client.post(
+            reverse('cart:update', args=[self.product.pk]),
+            {'quantity': 2},
+        )
+        self.assertEqual(
+            self.client.session['cart'][str(self.product.pk)]['qty'],
+            2,
+        )
+
+        key = 'idem-totals-qty'
+        session = self.client.session
+        session['checkout_idempotency'] = key
+        session.save()
+        stock_before = self.product.stock
+        response = self.client.post(
+            reverse('orders:checkout') + '?step=checkout',
+            {
+                'first_name': 'Олег',
+                'phone': '+380670000099',
+                'delivery_method': 'np',
+                'payment_method': 'cod',
+                'address': 'відділення 1',
+                'idempotency_key': key,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+
+        order = Order.objects.get(idempotency_key=key)
+        item = OrderItem.objects.get(order=order)
+        self.assertEqual(item.unit_price, price)
+        self.assertEqual(item.quantity, 2)
+        self.assertEqual(item.line_total, expected_line)
+        self.assertEqual(order.subtotal, expected_line)
+        self.assertEqual(order.delivery_price, Decimal('80.00'))
+        self.assertEqual(order.total, expected_line + Decimal('80.00'))
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, stock_before - 2)
 
     def test_checkout_decrements_stock(self):
         self._add_to_cart(2)

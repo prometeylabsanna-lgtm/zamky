@@ -116,9 +116,9 @@
 
     <aside class="summary">
       <h3 style="margin:0;font-size:20px;font-weight:600;">Разом</h3>
-      <div class="summary__row"><span>Товари</span><span style="color:#111;">{{ cart_subtotal|floatformat:0 }} ₴</span></div>
-      <div class="summary__row"><span>Доставка</span><span style="color:#111;">{% if step == 'checkout' %}від 0 ₴{% else %}—{% endif %}</span></div>
-      <div class="summary__total"><span>До сплати</span><span>{{ cart_subtotal|floatformat:0 }} ₴</span></div>
+      <div class="summary__row"><span>Товари</span><span id="summary-subtotal" style="color:#111;">{{ cart_subtotal|floatformat:0 }} ₴</span></div>
+      <div class="summary__row"><span>Доставка</span><span id="summary-delivery" style="color:#111;">{% if step == 'checkout' %}{{ delivery_price|floatformat:0 }} ₴{% else %}—{% endif %}</span></div>
+      <div class="summary__total"><span>До сплати</span><span id="summary-total">{% if step == 'checkout' %}{{ order_total|floatformat:0 }}{% else %}{{ cart_subtotal|floatformat:0 }}{% endif %} ₴</span></div>
     </aside>
   </div>
   {% endif %}
