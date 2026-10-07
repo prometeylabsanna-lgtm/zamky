@@ -3,6 +3,7 @@
 // Usage:
 //  node render.mjs --url URL --out DIR --name NAME [--widths 1440,390] [--click "Text"]... [--serve DIR] [--wait 5000] [--timeout 120000]
 //  --serve DIR: starts `python3 -m http.server` on a free port for DIR; use {SERVE} in --url.
+//  --click "nav:{SERVE}/Other.html" navigates (same origin); "wait:MS" sleeps; "css:SEL" clicks selector.
 //  --click: clicks the smallest visible element whose trimmed text starts with Text (repeatable, in order) -> state render.
 // Outputs: NAME_<w>.png (full page) and NAME_<w>.json (probe).
 import fs from 'fs'; import os from 'os'; import path from 'path'; import net from 'net'; import { spawn } from 'child_process';
@@ -41,6 +42,8 @@ async function main() {
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: 900, deviceScaleFactor: 1, mobile: w < 600 });
     await send('Page.navigate', { url }); await sleep(+opt.wait);
     for (const txt of opt.click) {
+      if (txt.startsWith('nav:')) { await send('Page.navigate', { url: txt.slice(4).replace('{SERVE}', url.match(/^https?:\/\/[^/]+/)[0]) }); await sleep(+opt.wait); console.log('nav', txt); continue; }
+      if (txt.startsWith('wait:')) { await sleep(+txt.slice(5)); continue; }
       const ok = await ev(`(()=>{const T=${JSON.stringify(txt)};
 if(T.startsWith('css:')){const e=document.querySelector(T.slice(4));if(!e)return false;e.click();return 'css'}
 const C=[];document.querySelectorAll('body *').forEach(e=>{const b=e.getBoundingClientRect();if(!b.width||!b.height)return;const t=(e.innerText||'').trim();const lab=e.getAttribute('aria-label')||e.getAttribute('title')||'';if(t.startsWith(T)||lab===T)C.push({e,t})});
