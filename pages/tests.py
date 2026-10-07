@@ -10,7 +10,7 @@ class HeaderShellTests(TestCase):
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
         self.assertIn('Каталог', body)
-        self.assertIn('Новинкі', body)
+        self.assertIn('Новинки', body)
         self.assertIn('Про нас', body)
         self.assertIn('Наші контакти', body)
         self.assertIn('aria-label="Кошик"', body)

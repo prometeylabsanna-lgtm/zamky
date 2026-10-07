@@ -9,7 +9,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
           <span>Каталог</span>
         </button>
-        <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинкі</a>
+        <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинки</a>
         <a class="header-nav__link" href="{% url 'pages:info_page' 'about' %}">Про нас</a>
       </nav>
       <div class="header-spacer"></div>
@@ -27,7 +27,7 @@
       <div class="header-compact__row">
         <a href="{% url 'catalog:home' %}" class="logo logo--compact">Logo</a>
         <nav class="header-nav header-nav--tablet">
-          <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинкі</a>
+          <a class="header-nav__link" href="{% url 'catalog:home' %}#new">Новинки</a>
         </nav>
         <div class="header-spacer"></div>
         {% include 'partials/header_lang.html' with compact=1 %}
