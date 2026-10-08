@@ -1,0 +1,6 @@
+<span
+  id="{{ badge_id|default:'wishlist-badge' }}"
+  class="wish-badge"
+  {% if not wishlist_count %}hidden{% endif %}
+  {% if oob %}hx-swap-oob="true"{% endif %}
+>{{ wishlist_count }}</span>

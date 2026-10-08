@@ -1,0 +1,23 @@
+{% load i18n_ui %}
+<button
+  id="wishlist-card-{{ product_id }}"
+  type="button"
+  class="product-card__wish{% if in_wishlist %} is-active{% endif %}"
+  aria-label="{% if in_wishlist %}{% t 'В обраному' %}{% else %}{% t 'В обране' %}{% endif %}"
+  aria-pressed="{% if in_wishlist %}true{% else %}false{% endif %}"
+  hx-post="{% url 'cart:wishlist' product_id %}"
+  {% if wishlist_page %}
+  hx-vals='{"variant": "page"}'
+  hx-target="closest .wishlist-item"
+  hx-swap="delete"
+  {% else %}
+  hx-vals='{"variant": "card"}'
+  hx-swap="outerHTML"
+  {% endif %}
+  onclick="event.preventDefault(); event.stopPropagation();"
+  data-wishlist-card>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="{% if in_wishlist %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"></path></svg>
+</button>
+{% if swap_oob %}
+{% include 'cart/partials/wishlist_badges_oob.html' with wishlist_count=wishlist_count %}
+{% endif %}

@@ -27,7 +27,9 @@ class HeaderShellTests(TestCase):
         self.assertIn('data-set-lang="ru"', body)
         self.assertNotIn('data-set-lang="EN"', body)
         self.assertIn('Каталог товрів', body)
-        self.assertIn('Замки. Всі права захищено', body)
+        self.assertIn('@Замки 2026', body)
+        self.assertIn('PrometeyLabs', body)
+        self.assertNotIn('site-footer__credit-link', body)
 
     def test_lang_cookie_and_prefix(self):
         response = self.client.post('/lang/', {'lang': 'ru', 'next': '/ua/info/'})
@@ -37,10 +39,43 @@ class HeaderShellTests(TestCase):
         page = self.client.get('/ru/info/')
         self.assertContains(page, '>RU<')
         self.assertContains(page, 'Наши контакты')
-        self.assertContains(page, 'Все права защищены')
+        self.assertContains(page, 'Сайт создан в')
         back = self.client.post('/lang/', {'lang': 'ua', 'next': '/ru/catalog/'})
         self.assertEqual(back.status_code, 302)
         self.assertTrue(back.url.startswith('/ua/'))
+
+
+CREDIT_URL = 'https://www.prometeylabs.com/internet-shop-v2/'
+
+
+@override_settings(ALLOWED_HOSTS=['*'])
+class FooterDeveloperLinkTests(TestCase):
+    def tearDown(self):
+        translation.deactivate_all()
+
+    def test_home_has_nofollow_credit_link(self):
+        with translation.override('ua'):
+            response = self.client.get(reverse('catalog:home'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, CREDIT_URL)
+        self.assertContains(response, 'nofollow')
+        self.assertContains(response, '>PrometeyLabs</a>')
+        self.assertContains(response, '@Замки 2026')
+
+    def test_localized_home_keeps_credit_link(self):
+        for path in ('/ua/', '/ru/'):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, CREDIT_URL)
+            self.assertContains(response, 'site-footer__credit-link')
+
+    def test_inner_pages_show_credit_without_link(self):
+        for path in ('/ua/catalog/', '/ua/info/privacy/', '/ua/info/about/'):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'PrometeyLabs')
+            self.assertNotContains(response, CREDIT_URL)
+            self.assertNotContains(response, 'site-footer__credit-link')
 
 
 @override_settings(ALLOWED_HOSTS=['*'])

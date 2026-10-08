@@ -7,6 +7,7 @@
         <a href="{% url 'catalog:catalog' %}">{% t 'Каталог' %}</a>
         <a href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
         <a href="{% url 'pages:info_page' 'about' %}">{% t 'Про нас' %}</a>
+        <a href="{% url 'cart:wishlist_page' %}">{% t 'Обране' %}</a>
         <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Контакти' %}</a>
       </nav>
       <nav aria-label="{% t 'Інформація' %}">
@@ -24,6 +25,21 @@
       </div>
     </div>
     <div class="site-footer__line"></div>
-    <p class="site-footer__copy">{% t 'Замки. Всі права захищено, копіювання матеріалів заборонено' %}</p>
+    <div class="site-footer__bottom">
+      <p class="site-footer__copy">@Замки 2026</p>
+      <p class="site-footer__credit">
+        {% t 'Сайт зроблено в' %}
+        {% if request.resolver_match and request.resolver_match.url_name == 'home' %}
+          <a
+            class="site-footer__credit-link"
+            href="https://www.prometeylabs.com/internet-shop-v2/"
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+          >PrometeyLabs</a>
+        {% else %}
+          <span class="site-footer__credit-name">PrometeyLabs</span>
+        {% endif %}
+      </p>
+    </div>
   </div>
 </footer>

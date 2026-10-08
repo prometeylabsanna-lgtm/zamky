@@ -8,6 +8,11 @@
         <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name|tr }}"{% if not eager %} loading="lazy"{% endif %}>
       {% endif %}
     {% endwith %}
+    {% if product.pk in wishlist_ids %}
+      {% include 'cart/partials/wishlist_card_btn.html' with product_id=product.pk in_wishlist=True wishlist_page=wishlist_page %}
+    {% else %}
+      {% include 'cart/partials/wishlist_card_btn.html' with product_id=product.pk in_wishlist=False wishlist_page=wishlist_page %}
+    {% endif %}
   </div>
   <div class="product-card__badge">
     <span class="badge badge--{{ product.stock_status }}">

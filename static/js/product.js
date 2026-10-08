@@ -73,9 +73,11 @@
     if (!track || !thumbs || !v) return;
     var imgs = v.images || [];
     track.innerHTML = imgs
-      .map(function (img) {
+      .map(function (img, i) {
         return (
-          '<div class="pdp-gallery__slide"><img src="' +
+          '<div class="pdp-gallery__slide' +
+          (i === 0 ? ' is-active' : '') +
+          '"><img src="' +
           img.src +
           '" alt="' +
           (img.alt || '').replace(/"/g, '&quot;') +
@@ -111,7 +113,11 @@
     var slides = qsa('.pdp-gallery__slide', track);
     if (!slides.length) return;
     state.slide = (i + slides.length) % slides.length;
-    track.style.transform = 'translateX(-' + state.slide * 100 + '%)';
+    // Без transform: інакше stacking context ламає mix-blend-mode → білий прямокутник.
+    track.style.transform = '';
+    slides.forEach(function (slide, si) {
+      slide.classList.toggle('is-active', si === state.slide);
+    });
     qsa('[data-thumb]').forEach(function (t, ti) {
       t.classList.toggle('is-active', ti === state.slide);
     });

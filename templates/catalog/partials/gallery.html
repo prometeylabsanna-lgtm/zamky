@@ -3,11 +3,11 @@
   <div class="pdp-gallery__main" data-gallery data-gallery-root>
     <div class="pdp-gallery__track" data-gallery-track>
       {% for img in product.images.all %}
-      <div class="pdp-gallery__slide">
+      <div class="pdp-gallery__slide{% if forloop.first %} is-active{% endif %}">
         <img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}" data-gallery-img>
       </div>
       {% empty %}
-      <div class="pdp-gallery__slide">
+      <div class="pdp-gallery__slide is-active">
         <img src="{% static 'img/product-brass.png' %}" alt="{{ product.name|tr }}" data-gallery-img>
       </div>
       {% endfor %}

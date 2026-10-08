@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load i18n_ui static %}
+
+{% block title %}{% t 'Обране' %} — {% t 'Замки' %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/wishlist.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="wishlist-page">
+  <div class="wishlist-page__inner">
+    <header class="wishlist-page__head">
+      <h1 class="wishlist-page__title">{% t 'Обране' %}</h1>
+      {% if products %}
+      <p class="wishlist-page__count" data-wishlist-count-label>{{ products|length }}</p>
+      {% endif %}
+    </header>
+
+    <div id="wishlist-root">
+      {% if products %}
+      <div class="wishlist-grid" data-wishlist-grid>
+        {% for product in products %}
+        <article class="wishlist-item" id="wishlist-item-{{ product.pk }}">
+          {% include 'partials/product_card.html' with wishlist_page=True %}
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+        {% include 'cart/partials/wishlist_empty.html' %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

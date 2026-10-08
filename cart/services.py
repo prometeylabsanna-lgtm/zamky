@@ -160,3 +160,25 @@ class WishlistService:
 
     def count(self):
         return len(self.items_ids)
+
+    def products(self):
+        """Активні товари в порядку додавання; прибирає зниклі id."""
+        if not self.items_ids:
+            return []
+        by_id = {
+            p.pk: p
+            for p in Product.objects.filter(
+                pk__in=self.items_ids, is_active=True
+            ).prefetch_related('images')
+        }
+        result = []
+        kept = []
+        for pk in self.items_ids:
+            product = by_id.get(pk)
+            if product:
+                result.append(product)
+                kept.append(pk)
+        if kept != self.items_ids:
+            self.items_ids = kept
+            self.save()
+        return result

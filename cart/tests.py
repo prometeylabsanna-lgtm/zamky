@@ -52,3 +52,21 @@ class CartTests(TestCase):
         self.assertIn(self.product.pk, self.client.session['wishlist'])
         self.client.post(url)
         self.assertNotIn(self.product.pk, self.client.session['wishlist'])
+
+    def test_wishlist_page_and_card_toggle(self):
+        page = self.client.get(reverse('cart:wishlist_page'))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'У обраному поки порожньо')
+        url = reverse('cart:wishlist', args=[self.product.pk])
+        hx = self.client.post(
+            url,
+            {'variant': 'card'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(hx.status_code, 200)
+        self.assertContains(hx, 'product-card__wish')
+        self.assertContains(hx, 'is-active')
+        self.assertContains(hx, 'wishlist-badge')
+        page2 = self.client.get(reverse('cart:wishlist_page'))
+        self.assertContains(page2, self.product.name)
+        self.assertContains(page2, 'product-card__wish')

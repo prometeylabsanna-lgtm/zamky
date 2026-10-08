@@ -1,0 +1,7 @@
+{# Порожня відповідь для hx-swap="delete" + OOB бейджі #}
+{% include 'cart/partials/wishlist_badges_oob.html' with wishlist_count=wishlist_count %}
+{% if wishlist_count == 0 %}
+<div id="wishlist-root" hx-swap-oob="true">
+  {% include 'cart/partials/wishlist_empty.html' %}
+</div>
+{% endif %}

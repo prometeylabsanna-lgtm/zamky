@@ -130,10 +130,33 @@ class WishlistToggleView(View):
             'product_id': pk,
             'in_wishlist': added,
             'wishlist_count': wishlist.count(),
+            'swap_oob': True,
         }
         if request.headers.get('HX-Request') == 'true':
+            variant = (request.POST.get('variant') or 'pdp').strip()
+            if variant == 'card':
+                return render(request, 'cart/partials/wishlist_card_btn.html', context)
+            if variant == 'page' and not added:
+                return render(request, 'cart/partials/wishlist_page_remove.html', context)
             return render(request, 'cart/partials/wishlist_btn.html', context)
-        return redirect(request.META.get('HTTP_REFERER') or '/')
+        return redirect(request.META.get('HTTP_REFERER') or 'cart:wishlist_page')
+
+
+class WishlistPageView(TemplateView):
+    template_name = 'cart/wishlist.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        wishlist = WishlistService(self.request)
+        products = wishlist.products()
+        ctx.update(
+            {
+                'products': products,
+                'wishlist_count': len(products),
+                'wishlist_ids': {p.pk for p in products},
+            }
+        )
+        return ctx
 
 
 class CartBadgeView(View):

@@ -1,0 +1,6 @@
+{% load i18n_ui %}
+<div class="wishlist-empty">
+  <p class="wishlist-empty__title">{% t 'У обраному поки порожньо' %}</p>
+  <p class="wishlist-empty__text">{% t 'Додавайте товари серцем на картках — збережемо їх тут.' %}</p>
+  <a href="{% url 'catalog:catalog' %}" class="btn">{% t 'До каталогу' %}</a>
+</div>
