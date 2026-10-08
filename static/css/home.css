@@ -203,6 +203,25 @@
   justify-content: space-between;
   gap: 24px;
   position: relative;
+  transform: translateY(0);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition:
+    transform 0.28s var(--ease-slide),
+    box-shadow 0.28s var(--ease-slide),
+    background 0.28s var(--ease-slide);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .feature:hover {
+    transform: translateY(-4px);
+    background: #f3f3f3;
+    box-shadow: 0 10px 28px rgba(17, 17, 17, 0.08);
+  }
+
+  .feature:hover .feature__icon {
+    transform: scale(1.08);
+  }
 }
 
 .feature__top {
@@ -232,6 +251,24 @@
 .feature__icon {
   color: var(--color-accent);
   flex: none;
+  transform: scale(1);
+  transition: transform 0.28s var(--ease-pop);
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature,
+  .feature__icon {
+    transition: none;
+  }
+
+  .feature:hover {
+    transform: none;
+  }
+
+  .feature:hover .feature__icon {
+    transform: none;
+  }
 }
 
 .slider-section {

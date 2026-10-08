@@ -10,8 +10,9 @@
 {% block content %}
 <div class="container pdp" data-pdp
   data-color="{{ current_color }}"
-  data-size="{{ current_size }}"
-  data-product-id="{{ product.pk }}">
+  data-size="{{ current_size|default:0 }}"
+  data-product-id="{{ product.pk }}"
+  data-stock="{{ product.stock }}">
   <script type="application/json" id="pdp-variants">{{ variants_json|safe }}</script>
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
     <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>

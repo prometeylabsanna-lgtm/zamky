@@ -38,6 +38,39 @@
   border-color: var(--color-accent);
 }
 
+.field__err {
+  display: block;
+  min-height: 14px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-danger);
+}
+
+.field.is-invalid input,
+.field.is-invalid textarea,
+.field.is-invalid select {
+  border-color: var(--color-danger);
+}
+
+.field.is-valid input,
+.field.is-valid textarea,
+.field.is-valid select {
+  border-color: var(--color-success);
+}
+
+.field.is-invalid input:focus,
+.field.is-invalid textarea:focus,
+.field.is-invalid select:focus {
+  border-color: var(--color-danger);
+}
+
+.field.is-valid input:focus,
+.field.is-valid textarea:focus,
+.field.is-valid select:focus {
+  border-color: var(--color-success);
+}
+
 .qty {
   height: 44px;
   border: 1px solid var(--color-border);

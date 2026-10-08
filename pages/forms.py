@@ -1,7 +1,12 @@
-import re
-
 from django import forms
 
+from config.validators import (
+    MSG_CONSENT,
+    MSG_EMAIL,
+    MSG_MESSAGE,
+    clean_person_name,
+    clean_ua_phone,
+)
 from pages.i18n_lib import tr, tr_lazy
 
 from .models import ContactRequest
@@ -15,27 +20,39 @@ class ContactForm(forms.Form):
     name = forms.CharField(
         label=tr_lazy('Ім’я*'),
         max_length=120,
-        widget=forms.TextInput(attrs={'placeholder': 'Олександр', 'autocomplete': 'name'}),
-    )
-    phone = forms.CharField(
-        label=tr_lazy('Телефон*'),
-        max_length=32,
         widget=forms.TextInput(
             attrs={
-                'type': 'tel',
-                'placeholder': '+380 00 000 00 00',
-                'autocomplete': 'tel',
-                'inputmode': 'tel',
+                'placeholder': 'Олександр',
+                'autocomplete': 'name',
+                'data-validate': 'name',
             }
         ),
     )
+    phone = forms.CharField(
+        label=tr_lazy('Телефон*'),
+        max_length=22,
+        widget=forms.TextInput(
+            attrs={
+                'type': 'tel',
+                'placeholder': '+38 (___) ___ - __ - __',
+                'autocomplete': 'tel',
+                'inputmode': 'tel',
+                'data-validate': 'phone',
+            }
+        ),
+    )
+
     email = forms.EmailField(
         label=tr_lazy('Email'),
         required=False,
         widget=forms.EmailInput(
-            attrs={'placeholder': 'mail@example.com', 'autocomplete': 'email'}
+            attrs={
+                'placeholder': 'mail@example.com',
+                'autocomplete': 'email',
+                'data-validate': 'email',
+            }
         ),
-        error_messages={'invalid': tr_lazy('Перевірте email')},
+        error_messages={'invalid': tr_lazy(MSG_EMAIL)},
     )
     topic = forms.ChoiceField(
         label=tr_lazy('Тема'),
@@ -50,10 +67,14 @@ class ContactForm(forms.Form):
                 'placeholder': tr_lazy(
                     'Опишіть ваше питання. Для підбору вкажіть товщину дверей або розміри A і B.'
                 ),
+                'data-validate': 'message',
             }
         ),
     )
-    consent = forms.BooleanField(required=False)
+    consent = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'data-validate': 'consent'}),
+    )
     idempotency_key = forms.CharField(widget=forms.HiddenInput(), max_length=64)
 
     def __init__(self, *args, **kwargs):
@@ -65,26 +86,19 @@ class ContactForm(forms.Form):
         self.fields['topic'].choices = _topic_choices()
 
     def clean_name(self):
-        name = self.cleaned_data['name'].strip()
-        if len(name) < 2:
-            raise forms.ValidationError(tr('Вкажіть ім’я'))
-        return name
+        return clean_person_name(self.cleaned_data.get('name', ''))
 
     def clean_phone(self):
-        phone = self.cleaned_data['phone'].strip()
-        digits = re.sub(r'\D+', '', phone)
-        if len(digits) < 10:
-            raise forms.ValidationError(tr('Вкажіть номер у форматі +380 00 000 00 00'))
-        return phone
+        return clean_ua_phone(self.cleaned_data.get('phone', ''))
 
     def clean_message(self):
-        message = self.cleaned_data['message'].strip()
+        message = (self.cleaned_data.get('message') or '').strip()
         if len(message) < 10:
-            raise forms.ValidationError(tr('Напишіть хоча б кілька слів (від 10 символів)'))
+            raise forms.ValidationError(tr(MSG_MESSAGE))
         return message
 
     def clean_consent(self):
         consent = self.cleaned_data.get('consent')
         if not consent:
-            raise forms.ValidationError(tr('Потрібна згода на обробку даних'))
+            raise forms.ValidationError(tr(MSG_CONSENT))
         return True

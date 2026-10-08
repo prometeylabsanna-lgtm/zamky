@@ -69,7 +69,7 @@
   {% else %}
   <div class="checkout-layout">
     <div class="checkout-main">
-      <form method="post" action="{% url 'orders:checkout' %}?step=checkout" id="checkout" class="checkout-form">
+      <form method="post" action="{% url 'orders:checkout' %}?step=checkout" id="checkout" class="checkout-form" data-validate-form novalidate>
         {% csrf_token %}
         {{ form.idempotency_key }}
         {{ form.delivery_method }}
@@ -92,10 +92,22 @@
         <section class="checkout-card">
           <h2 class="checkout-card__title"><span class="checkout-card__n">2</span>{% t 'Контактні дані' %}</h2>
           <div class="checkout-fields">
-            <label class="field"><span>{% t 'Ім’я*' %}</span>{{ form.first_name }}{% if form.first_name.errors %}<ul class="errorlist">{{ form.first_name.errors }}</ul>{% endif %}</label>
-            <label class="field"><span>{% t 'Прізвище' %}</span>{{ form.last_name }}</label>
-            <label class="field"><span>{% t 'Телефон*' %}</span>{{ form.phone }}{% if form.phone.errors %}<ul class="errorlist">{{ form.phone.errors }}</ul>{% endif %}</label>
-            <label class="field"><span>Email</span>{{ form.email }}</label>
+            <label class="field{% if form.first_name.errors %} is-invalid{% endif %}">
+              <span>{% t 'Ім’я*' %}</span>{{ form.first_name }}
+              <span class="field__err" data-field-error>{{ form.first_name.errors.0 }}</span>
+            </label>
+            <label class="field{% if form.last_name.errors %} is-invalid{% endif %}">
+              <span>{% t 'Прізвище' %}</span>{{ form.last_name }}
+              <span class="field__err" data-field-error>{{ form.last_name.errors.0 }}</span>
+            </label>
+            <label class="field{% if form.phone.errors %} is-invalid{% endif %}">
+              <span>{% t 'Телефон*' %}</span>{{ form.phone }}
+              <span class="field__err" data-field-error>{{ form.phone.errors.0 }}</span>
+            </label>
+            <label class="field{% if form.email.errors %} is-invalid{% endif %}">
+              <span>Email</span>{{ form.email }}
+              <span class="field__err" data-field-error>{{ form.email.errors.0 }}</span>
+            </label>
           </div>
         </section>
 
@@ -120,11 +132,14 @@
             {% endfor %}
           </div>
           <div class="checkout-fields checkout-addr{% if delivery_method == 'pickup' %} is-hidden{% endif %}" data-checkout-addr>
-            <label class="field"><span>{% t 'Місто*' %}</span>{{ form.city }}{% if form.city.errors %}<ul class="errorlist">{{ form.city.errors }}</ul>{% endif %}</label>
-            <label class="field">
+            <label class="field{% if form.city.errors %} is-invalid{% endif %}">
+              <span>{% t 'Місто*' %}</span>{{ form.city }}
+              <span class="field__err" data-field-error>{{ form.city.errors.0 }}</span>
+            </label>
+            <label class="field{% if form.address.errors %} is-invalid{% endif %}">
               <span data-checkout-addr-label>{{ addr_label }}*</span>
               {{ form.address }}
-              {% if form.address.errors %}<ul class="errorlist">{{ form.address.errors }}</ul>{% endif %}
+              <span class="field__err" data-field-error>{{ form.address.errors.0 }}</span>
             </label>
           </div>
           <div class="checkout-pickup{% if delivery_method == 'pickup' %} is-visible{% endif %}" data-checkout-pickup>

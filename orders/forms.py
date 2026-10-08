@@ -1,7 +1,6 @@
-import re
-
 from django import forms
 
+from config.validators import clean_person_name, clean_ua_phone
 from pages.i18n_lib import tr, tr_lazy
 
 from .models import DeliveryDistrict, Order
@@ -11,29 +10,62 @@ class CheckoutForm(forms.Form):
     first_name = forms.CharField(
         label=tr_lazy('Імʼя'),
         max_length=100,
-        widget=forms.TextInput(attrs={'placeholder': 'Олександр'}),
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Олександр',
+                'autocomplete': 'given-name',
+                'data-validate': 'name',
+            }
+        ),
     )
     last_name = forms.CharField(
         label=tr_lazy('Прізвище'),
         max_length=100,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Коваленко'}),
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Коваленко',
+                'autocomplete': 'family-name',
+                'data-validate': 'name-optional',
+            }
+        ),
     )
     phone = forms.CharField(
         label=tr_lazy('Телефон'),
-        max_length=32,
-        widget=forms.TextInput(attrs={'placeholder': '+380 00 000 00 00', 'type': 'tel'}),
+        max_length=22,
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': '+38 (___) ___ - __ - __',
+                'type': 'tel',
+                'autocomplete': 'tel',
+                'inputmode': 'tel',
+                'data-validate': 'phone',
+            }
+        ),
     )
+
     email = forms.EmailField(
         label=tr_lazy('Email'),
         required=False,
-        widget=forms.EmailInput(attrs={'placeholder': 'mail@example.com'}),
+        widget=forms.EmailInput(
+            attrs={
+                'placeholder': 'mail@example.com',
+                'autocomplete': 'email',
+                'data-validate': 'email',
+            }
+        ),
     )
     city = forms.CharField(
         label=tr_lazy('Місто'),
         max_length=120,
         required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Київ'}),
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Київ',
+                'data-validate': 'city',
+                'autocomplete': 'address-level2',
+            }
+        ),
     )
     district = forms.ModelChoiceField(
         label=tr_lazy('Район'),
@@ -62,6 +94,7 @@ class CheckoutForm(forms.Form):
             attrs={
                 'placeholder': '№ відділення',
                 'data-addr-input': '1',
+                'data-validate': 'address',
             }
         ),
     )
@@ -94,12 +127,14 @@ class CheckoutForm(forms.Form):
             (v, tr(lbl)) for v, lbl in Order.PaymentMethod.choices
         ]
 
+    def clean_first_name(self):
+        return clean_person_name(self.cleaned_data.get('first_name', ''))
+
+    def clean_last_name(self):
+        return clean_person_name(self.cleaned_data.get('last_name', ''), required=False)
+
     def clean_phone(self):
-        phone = self.cleaned_data['phone'].strip()
-        digits = re.sub(r'\D+', '', phone)
-        if len(digits) < 10:
-            raise forms.ValidationError(tr('Вкажіть коректний номер телефону.'))
-        return phone
+        return clean_ua_phone(self.cleaned_data.get('phone', ''))
 
     def clean(self):
         cleaned = super().clean()

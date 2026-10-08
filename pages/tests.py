@@ -128,9 +128,16 @@ class ContactRequestTests(TestCase):
         response = self.client.post(self.url, self._valid(name='A', phone='12', message='short'))
         self.assertEqual(ContactRequest.objects.count(), 0)
         body = response.content.decode()
-        self.assertIn('Вкажіть ім’я', body)
-        self.assertIn('Вкажіть номер у форматі +380 00 000 00 00', body)
+        self.assertIn('мінімум 2 літери', body)
+        self.assertIn('+380 (XX) XXX-XX-XX', body)
         self.assertIn('від 10 символів', body)
+
+    def test_name_rejects_digits(self):
+        response = self.client.post(
+            self.url, self._valid(name='цакп287366434365')
+        )
+        self.assertEqual(ContactRequest.objects.count(), 0)
+        self.assertIn('лише букви', response.content.decode())
 
     def test_no_consent(self):
         data = self._valid()

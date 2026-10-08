@@ -1,17 +1,21 @@
 {% load i18n_ui %}
-<form class="pdp-quick__form" data-quick-form
+<form class="pdp-quick__form" data-quick-form data-validate-form
   hx-post="{% url 'orders:quick' product.pk %}"
   hx-target="[data-quick-root]"
   hx-swap="innerHTML">
-  <label class="pdp-quick__phone">
-    <span>+380</span>
-    <input type="tel" name="phone" required placeholder="00 000 00 00" autocomplete="tel" inputmode="tel" autofocus>
-  </label>
+  <div class="pdp-quick__phone-wrap{% if error %} is-invalid{% endif %}">
+    <label class="pdp-quick__phone">
+      <input type="tel" name="phone" required
+        data-validate="phone"
+        placeholder="+38 (___) ___ - __ - __"
+        value="{{ phone_value|default:'' }}"
+        autocomplete="tel" inputmode="tel" maxlength="22" autofocus>
+    </label>
+    <span class="field__err" data-field-error>{% if error %}{{ error }}{% endif %}</span>
+  </div>
   <input type="hidden" name="quantity" value="1" data-quick-qty>
   <button type="submit" class="pdp-quick__submit">{% t 'Замовити' %}</button>
 </form>
-{% if error %}
-<p class="pdp-quick__error">{{ error }}</p>
-{% else %}
+{% if not error %}
 <p class="pdp-quick__note">{% t 'Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.' %}</p>
 {% endif %}

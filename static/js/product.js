@@ -217,10 +217,8 @@
       note.className = 'pdp-stock-note__text is-' + v.status;
     }
 
-    var qtyEl = qs('[data-qty]');
-    var qtyInput = qs('[data-qty-input]');
-    if (qtyEl) qtyEl.textContent = '1';
-    if (qtyInput) qtyInput.value = '1';
+    root.setAttribute('data-stock', String(v.stock != null ? v.stock : 0));
+    syncQty();
 
     var cartBtn = qs('[data-add-cart]');
     var cartLabel = qs('[data-cart-label]');
@@ -269,11 +267,15 @@
     var box = qs('[data-quick-root]');
     if (!box || !v) return;
     box.innerHTML =
-      '<form class="pdp-quick__form" data-quick-form hx-post="' +
+      '<form class="pdp-quick__form" data-quick-form data-validate-form hx-post="' +
       v.quick_url +
       '" hx-target="[data-quick-root]" hx-swap="innerHTML">' +
-      '<label class="pdp-quick__phone"><span>+380</span>' +
-      '<input type="tel" name="phone" required placeholder="00 000 00 00" autocomplete="tel" inputmode="tel" autofocus></label>' +
+      '<div class="pdp-quick__phone-wrap">' +
+      '<label class="pdp-quick__phone">' +
+      '<input type="tel" name="phone" required data-validate="phone" ' +
+      'placeholder="+38 (___) ___ - __ - __" autocomplete="tel" inputmode="tel" maxlength="22" autofocus>' +
+      '</label>' +
+      '<span class="field__err" data-field-error></span></div>' +
       '<input type="hidden" name="quantity" value="' +
       state.qty +
       '" data-quick-qty>' +
@@ -335,9 +337,19 @@
 
   var dec = qs('[data-qty-dec]');
   var inc = qs('[data-qty-inc]');
+  function maxQty() {
+    var v = current();
+    if (v) {
+      if (v.status === 'out') return 1;
+      return Math.max(1, parseInt(v.stock, 10) || 1);
+    }
+    var fallback = parseInt(root.getAttribute('data-stock') || '1', 10);
+    return Math.max(1, fallback || 1);
+  }
+
   function syncQty() {
     var v = current();
-    var max = v ? Math.max(1, v.stock || 1) : 1;
+    var max = maxQty();
     if (v && v.status === 'out') state.qty = 1;
     else state.qty = Math.min(Math.max(1, state.qty), max);
     var qtyEl = qs('[data-qty]');
@@ -346,15 +358,19 @@
     if (qtyEl) qtyEl.textContent = String(state.qty);
     if (qtyInput) qtyInput.value = String(state.qty);
     if (quickQty) quickQty.value = String(state.qty);
+    if (dec) dec.disabled = state.qty <= 1;
+    if (inc) inc.disabled = !!(v && v.status === 'out') || state.qty >= max;
   }
   if (dec) {
     dec.addEventListener('click', function () {
+      if (dec.disabled) return;
       state.qty -= 1;
       syncQty();
     });
   }
   if (inc) {
     inc.addEventListener('click', function () {
+      if (inc.disabled) return;
       state.qty += 1;
       syncQty();
     });

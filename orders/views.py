@@ -1,4 +1,3 @@
-import re
 import uuid
 from decimal import Decimal
 
@@ -217,22 +216,14 @@ class OrderSuccessView(DetailView):
 
 
 class QuickOrderView(View):
-    phone_re = re.compile(r'^[\d\s\-\+\(\)]{9,20}$')
-
     def post(self, request, pk):
+        from config.validators import MSG_PHONE, normalize_ua_phone
+
         product = get_object_or_404(Product, pk=pk, is_active=True)
         raw = (request.POST.get('phone') or '').strip()
-        digits = re.sub(r'\D', '', raw)
-        if digits.startswith('380') and len(digits) >= 12:
-            phone = '+' + digits
-        elif len(digits) == 9:
-            phone = '+380' + digits
-        elif len(digits) == 10 and digits.startswith('0'):
-            phone = '+38' + digits
-        else:
-            phone = raw if raw.startswith('+') else ('+380' + digits if digits else '')
-        if not digits or len(digits) < 9 or not self.phone_re.match(phone or raw):
-            context = {'error': 'Вкажіть коректний телефон', 'product': product}
+        phone = normalize_ua_phone(raw)
+        if not phone:
+            context = {'error': tr(MSG_PHONE), 'product': product, 'phone_value': raw}
             if request.headers.get('HX-Request') == 'true':
                 return render(request, 'orders/partials/quick_order_form.html', context)
             return HttpResponseBadRequest(context['error'])

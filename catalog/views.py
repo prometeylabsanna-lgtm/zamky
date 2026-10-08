@@ -414,6 +414,38 @@ class ProductDetailView(DetailView):
         variants = []
         colors = []
         sizes = []
+
+        def _variant_payload(v):
+            imgs = [
+                {'src': img.image.url, 'alt': img.alt or v.name}
+                for img in v.images.all()
+            ]
+            return {
+                'id': v.pk,
+                'sku': v.sku,
+                'slug': v.slug,
+                'url': v.get_absolute_url(),
+                'name': tr(v.name),
+                'price': int(v.price),
+                'old_price': int(v.old_price) if v.old_price else None,
+                'discount': v.discount_percent,
+                'stock': int(v.stock or 0),
+                'status': v.stock_status,
+                'badge': v.stock_label,
+                'stock_note': v.stock_note,
+                'color': v.color_code or '',
+                'color_label': tr(v.color_label),
+                'size': v.size_mm or 0,
+                'size_a': v.size_a,
+                'size_b': v.size_b,
+                'size_label': v.size_label,
+                'cover': tr(v.cover),
+                'images': imgs,
+                'add_url': reverse('cart:add', kwargs={'pk': v.pk}),
+                'quick_url': reverse('orders:quick', kwargs={'pk': v.pk}),
+                'wishlist_url': reverse('cart:wishlist', kwargs={'pk': v.pk}),
+            }
+
         if product.family_id:
             family_qs = (
                 Product.objects.filter(is_active=True, family=product.family)
@@ -425,40 +457,7 @@ class ProductDetailView(DetailView):
             seen_colors = {}
             seen_sizes = {}
             for v in family_qs:
-                imgs = [
-                    {
-                        'src': img.image.url,
-                        'alt': img.alt or v.name,
-                    }
-                    for img in v.images.all()
-                ]
-                variants.append(
-                    {
-                        'id': v.pk,
-                        'sku': v.sku,
-                        'slug': v.slug,
-                        'url': v.get_absolute_url(),
-                        'name': tr(v.name),
-                        'price': int(v.price),
-                        'old_price': int(v.old_price) if v.old_price else None,
-                        'discount': v.discount_percent,
-                        'stock': v.stock,
-                        'status': v.stock_status,
-                        'badge': v.stock_label,
-                        'stock_note': v.stock_note,
-                        'color': v.color_code,
-                        'color_label': tr(v.color_label),
-                        'size': v.size_mm,
-                        'size_a': v.size_a,
-                        'size_b': v.size_b,
-                        'size_label': v.size_label,
-                        'cover': tr(v.cover),
-                        'images': imgs,
-                        'add_url': reverse('cart:add', kwargs={'pk': v.pk}),
-                        'quick_url': reverse('orders:quick', kwargs={'pk': v.pk}),
-                        'wishlist_url': reverse('cart:wishlist', kwargs={'pk': v.pk}),
-                    }
-                )
+                variants.append(_variant_payload(v))
                 if v.color_code and v.color_code not in seen_colors:
                     primary = v.images.first()
                     seen_colors[v.color_code] = {
@@ -479,6 +478,9 @@ class ProductDetailView(DetailView):
                 key=lambda x: color_order.get(x['code'], 99),
             )
             sizes = sorted(seen_sizes.values(), key=lambda x: x['len'])
+        else:
+            # Товар без family — все одно потрібен варіант для qty/stock у JS.
+            variants.append(_variant_payload(product))
 
         spec_groups = self._spec_groups(product)
         description_parts = []

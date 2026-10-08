@@ -1,5 +1,6 @@
 {% load i18n_ui %}
 <form class="info-form" method="post" action="{% url 'pages:contact' %}" novalidate
+  data-validate-form
   hx-post="{% url 'pages:contact' %}"
   hx-target="#form"
   hx-swap="innerHTML"
@@ -9,35 +10,35 @@
   <label class="field{% if form.name.errors %} is-invalid{% endif %}">
     <span>{% t 'Ім’я*' %}</span>
     {{ form.name }}
-    <span class="field__err">{{ form.name.errors.0 }}</span>
+    <span class="field__err" data-field-error>{{ form.name.errors.0 }}</span>
   </label>
   <label class="field{% if form.phone.errors %} is-invalid{% endif %}">
     <span>{% t 'Телефон*' %}</span>
     {{ form.phone }}
-    <span class="field__err">{{ form.phone.errors.0 }}</span>
+    <span class="field__err" data-field-error>{{ form.phone.errors.0 }}</span>
   </label>
   <label class="field{% if form.email.errors %} is-invalid{% endif %}">
     <span>Email</span>
     {{ form.email }}
-    <span class="field__err">{{ form.email.errors.0 }}</span>
+    <span class="field__err" data-field-error>{{ form.email.errors.0 }}</span>
   </label>
   <label class="field">
     <span>{% t 'Тема' %}</span>
     {{ form.topic }}
-    <span class="field__err"></span>
+    <span class="field__err" data-field-error></span>
   </label>
   <label class="field field--full{% if form.message.errors %} is-invalid{% endif %}">
     <span>{% t 'Повідомлення*' %}</span>
     {{ form.message }}
-    <span class="field__err">{{ form.message.errors.0 }}</span>
+    <span class="field__err" data-field-error>{{ form.message.errors.0 }}</span>
   </label>
-  <label class="info-consent">
-    {{ form.consent }}
-    <span>Погоджуюсь з <a href="{% url 'pages:info_page' 'privacy' %}">політикою конфіденційності</a></span>
-  </label>
-  {% if form.consent.errors %}
-  <span class="info-consent__err">{{ form.consent.errors.0 }}</span>
-  {% endif %}
+  <div class="info-consent-wrap{% if form.consent.errors %} is-invalid{% endif %}">
+    <label class="info-consent">
+      {{ form.consent }}
+      <span>Погоджуюсь з <a href="{% url 'pages:info_page' 'privacy' %}">політикою конфіденційності</a></span>
+    </label>
+    <span class="info-consent__err" data-field-error>{% if form.consent.errors %}{{ form.consent.errors.0 }}{% endif %}</span>
+  </div>
   <div class="info-form__actions">
     <button type="submit" class="info-form__submit" data-send-label>{% t 'Надіслати повідомлення' %}</button>
     <span class="info-form__or">Або зателефонуйте: <a href="tel:0670000000">067 00 00 00</a></span>
