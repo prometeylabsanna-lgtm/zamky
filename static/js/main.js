@@ -158,5 +158,39 @@
     });
   });
 
+  function showNetToast(msg) {
+    var toast = qs('#cart-toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('is-visible', 'toast--error');
+    toast.setAttribute('role', 'alert');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () {
+      toast.classList.remove('is-visible', 'toast--error');
+      toast.textContent = '';
+    }, 2800);
+  }
+
+  var netMsg = function () {
+    return window.t
+      ? window.t('Немає звʼязку. Перевірте інтернет і спробуйте ще раз.')
+      : 'Немає звʼязку. Перевірте інтернет і спробуйте ще раз.';
+  };
+  var errMsg = function () {
+    return window.t
+      ? window.t('Не вдалося виконати запит. Спробуйте ще раз.')
+      : 'Не вдалося виконати запит. Спробуйте ще раз.';
+  };
+
+  document.body.addEventListener('htmx:sendError', function () {
+    showNetToast(netMsg());
+  });
+  document.body.addEventListener('htmx:responseError', function () {
+    showNetToast(navigator.onLine === false ? netMsg() : errMsg());
+  });
+  window.addEventListener('offline', function () {
+    showNetToast(netMsg());
+  });
+
   window.Zamky = { openDrawer: openDrawer, closeDrawer: closeDrawer };
 })();

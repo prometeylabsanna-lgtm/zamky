@@ -21,6 +21,7 @@ class CartService:
         if not isinstance(cart, dict):
             cart = {}
         self.cart = cart
+        self.last_warnings: list[str] = []
 
     def save(self):
         self.session[CART_SESSION_KEY] = self.cart
@@ -30,9 +31,16 @@ class CartService:
         self.cart = {}
         self.save()
 
+    @staticmethod
+    def _parse_qty(quantity):
+        try:
+            return int(quantity)
+        except (TypeError, ValueError) as exc:
+            raise CartError(tr('Некоректна кількість.')) from exc
+
     def add(self, product_id, quantity=1):
         product = get_object_or_404(Product, pk=product_id, is_active=True)
-        quantity = int(quantity)
+        quantity = self._parse_qty(quantity)
         if quantity < 1:
             raise CartError(tr('Кількість має бути не менше 1.'))
         if product.stock <= 0:
@@ -48,7 +56,7 @@ class CartService:
 
     def set_quantity(self, product_id, quantity):
         product = get_object_or_404(Product, pk=product_id, is_active=True)
-        quantity = int(quantity)
+        quantity = self._parse_qty(quantity)
         key = str(product.pk)
         if quantity <= 0:
             self.cart.pop(key, None)
@@ -78,6 +86,7 @@ class CartService:
         products = self._products_map()
         result = []
         dirty = False
+        self.last_warnings = []
         for key, data in list(self.cart.items()):
             product = products.get(int(key))
             if not product:
@@ -94,9 +103,19 @@ class CartService:
                 if qty < 1:
                     self.cart.pop(key, None)
                     dirty = True
+                    self.last_warnings.append(
+                        tr('«{name}» більше немає в наявності та видалено з кошика.').format(
+                            name=tr(product.name)
+                        )
+                    )
                     continue
                 self.cart[key] = {'qty': qty}
                 dirty = True
+                self.last_warnings.append(
+                    tr('Кількість «{name}» зменшено до {n} шт.').format(
+                        name=tr(product.name), n=qty
+                    )
+                )
             line_total = product.price * qty
             old_total = (product.old_price or product.price) * qty
             result.append(
@@ -111,6 +130,9 @@ class CartService:
         if dirty:
             self.save()
         return result
+
+    def warnings_text(self) -> str:
+        return '; '.join(self.last_warnings)
 
     def total_quantity(self):
         return sum(int(v.get('qty', 0)) for v in self.cart.values())

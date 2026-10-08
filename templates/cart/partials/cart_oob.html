@@ -2,10 +2,12 @@
 {% include 'cart/partials/badge.html' %}
 {% include 'cart/partials/badge.html' with badge_id='cart-badge-mobile' %}
 <div id="cart-drawer-body" hx-swap-oob="innerHTML">
-  {% include 'cart/partials/drawer.html' %}
+  {% include 'cart/partials/drawer.html' with cart_warning='' %}
 </div>
 {% if cart_error %}
-<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true">{{ cart_error }}</div>
-{% else %}
-<div id="cart-toast" class="toast is-visible" hx-swap-oob="true">{% t 'Додано до кошика' %}</div>
+<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true" role="alert">{{ cart_error }}</div>
+{% elif cart_warning %}
+<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true" role="alert">{{ cart_warning }}</div>
+{% elif show_added_toast %}
+<div id="cart-toast" class="toast is-visible" hx-swap-oob="true" role="status">{% t 'Додано до кошика' %}</div>
 {% endif %}

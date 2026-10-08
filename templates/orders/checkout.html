@@ -67,6 +67,9 @@
   </div>
 
   {% else %}
+  {% if cart_warning %}
+  <ul class="errorlist" role="alert"><li>{{ cart_warning }}</li></ul>
+  {% endif %}
   <div class="checkout-layout">
     <div class="checkout-main">
       <form method="post" action="{% url 'orders:checkout' %}?step=checkout" id="checkout" class="checkout-form" data-validate-form novalidate>

@@ -1,20 +1,20 @@
 import uuid
 from decimal import Decimal
 
-from django.http import HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, FormView
+from django.views.generic import FormView
 
 from cart.services import CartService
 from catalog.models import Product
+from config.redirects import safe_next_url
+from pages.i18n_lib import tr
 
 from .forms import CheckoutForm
 from .models import DeliveryDistrict, Order, QuickOrder
 from .services import CheckoutError, DELIVERY_PRICES, create_order_from_cart
-from pages.i18n_lib import tr
-
 from .utils import delivery_meta, format_uah, payment_meta
 
 
@@ -52,7 +52,11 @@ class SetDistrictView(View):
                 request.session.pop('district_slug', None)
         else:
             request.session.pop('district_slug', None)
-        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+        next_url = safe_next_url(
+            request,
+            request.POST.get('next') or request.META.get('HTTP_REFERER'),
+            fallback='/',
+        )
         if request.headers.get('HX-Request') == 'true':
             response = render(request, 'partials/district_label.html', {})
             response['HX-Redirect'] = next_url
@@ -101,6 +105,7 @@ class CheckoutView(FormView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         items = self.cart.items()
+        cart_warning = self.cart.warnings_text()
         subtotal = self.cart.subtotal()
         qty_total = self.cart.total_quantity()
         subtotal_old = sum((item['old_total'] for item in items), Decimal('0'))
@@ -187,6 +192,7 @@ class CheckoutView(FormView):
                 'checkout_steps': build_checkout_steps(step),
                 'addr_label': meta.get('addr_label') or 'Адреса',
                 'addr_ph': meta.get('addr_ph') or '',
+                'cart_warning': cart_warning,
             }
         )
         return ctx
@@ -207,12 +213,15 @@ class CheckoutView(FormView):
         return super().form_invalid(form)
 
 
-class OrderSuccessView(DetailView):
-    model = Order
-    template_name = 'orders/success.html'
-    context_object_name = 'order'
-    slug_field = 'number'
-    slug_url_kwarg = 'number'
+class OrderSuccessView(View):
+    """Гостьовий thanks лише через session last_order_id (SEC-01)."""
+
+    def get(self, request, number):
+        last_id = request.session.get('last_order_id')
+        if not last_id:
+            raise Http404()
+        get_object_or_404(Order, pk=last_id, number=number)
+        return redirect(f"{reverse('orders:checkout')}?step=done")
 
 
 class QuickOrderView(View):
@@ -227,10 +236,28 @@ class QuickOrderView(View):
             if request.headers.get('HX-Request') == 'true':
                 return render(request, 'orders/partials/quick_order_form.html', context)
             return HttpResponseBadRequest(context['error'])
+        if product.stock <= 0:
+            context = {
+                'error': tr('Товару немає в наявності.'),
+                'product': product,
+                'phone_value': raw,
+            }
+            if request.headers.get('HX-Request') == 'true':
+                return render(request, 'orders/partials/quick_order_form.html', context)
+            return HttpResponseBadRequest(context['error'])
         try:
             qty = max(1, int(request.POST.get('quantity', 1)))
         except (TypeError, ValueError):
             qty = 1
+        if qty > product.stock:
+            context = {
+                'error': tr('Доступно лише {n} шт.').format(n=product.stock),
+                'product': product,
+                'phone_value': raw,
+            }
+            if request.headers.get('HX-Request') == 'true':
+                return render(request, 'orders/partials/quick_order_form.html', context)
+            return HttpResponseBadRequest(context['error'])
         QuickOrder.objects.create(
             product=product,
             phone=phone,

@@ -1,9 +1,12 @@
-from django.http import HttpResponse, HttpResponseBadRequest
+from decimal import Decimal
+
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import TemplateView
 
 from catalog.models import Product
+from config.redirects import safe_next_url
 from orders.models import Order
 from orders.services import DELIVERY_PRICES
 
@@ -22,6 +25,7 @@ class CartDrawerView(TemplateView):
                 'cart_items': items,
                 'cart_subtotal': cart.subtotal(),
                 'cart_count': cart.total_quantity(),
+                'cart_warning': cart.warnings_text(),
             }
         )
         return ctx
@@ -31,7 +35,7 @@ class CartAddView(View):
     def post(self, request, pk):
         cart = CartService(request)
         try:
-            cart.add(pk, quantity=int(request.POST.get('quantity', 1)))
+            cart.add(pk, quantity=request.POST.get('quantity', 1))
             error = ''
         except CartError as exc:
             error = str(exc)
@@ -39,11 +43,15 @@ class CartAddView(View):
 
     def _response(self, request, error=''):
         cart = CartService(request)
+        items = cart.items()
+        warning = '' if error else cart.warnings_text()
         context = {
             'cart_count': cart.total_quantity(),
-            'cart_items': cart.items(),
+            'cart_items': items,
             'cart_subtotal': cart.subtotal(),
             'cart_error': error,
+            'cart_warning': warning,
+            'show_added_toast': not error,
         }
         if request.headers.get('HX-Request') == 'true':
             response = render(request, 'cart/partials/cart_oob.html', context)
@@ -53,7 +61,12 @@ class CartAddView(View):
             return response
         if error:
             return HttpResponseBadRequest(error)
-        return redirect(request.POST.get('next') or request.META.get('HTTP_REFERER') or '/')
+        next_url = safe_next_url(
+            request,
+            request.POST.get('next') or request.META.get('HTTP_REFERER'),
+            fallback='/',
+        )
+        return redirect(next_url)
 
 
 class CartUpdateView(View):
@@ -78,13 +91,13 @@ class CartUpdateView(View):
                     )
                     cart.set_quantity(pk, item_qty - 1)
                 elif qty is not None:
-                    cart.set_quantity(pk, int(qty))
+                    cart.set_quantity(pk, qty)
             error = ''
         except CartError as exc:
             error = str(exc)
-        from decimal import Decimal
 
         items = cart.items()
+        warning = '' if error else cart.warnings_text()
         subtotal = cart.subtotal()
         subtotal_old = sum((item['old_total'] for item in items), Decimal('0'))
         savings = subtotal_old - subtotal
@@ -98,6 +111,7 @@ class CartUpdateView(View):
             'cart_savings': savings,
             'cart_qty_total': cart.total_quantity(),
             'cart_error': error,
+            'cart_warning': warning,
         }
         if request.headers.get('HX-Request') == 'true':
             page = request.POST.get('page')
@@ -139,7 +153,14 @@ class WishlistToggleView(View):
             if variant == 'page' and not added:
                 return render(request, 'cart/partials/wishlist_page_remove.html', context)
             return render(request, 'cart/partials/wishlist_btn.html', context)
-        return redirect(request.META.get('HTTP_REFERER') or 'cart:wishlist_page')
+        next_url = safe_next_url(
+            request,
+            request.META.get('HTTP_REFERER'),
+            fallback='/',
+        )
+        if next_url == '/':
+            return redirect('cart:wishlist_page')
+        return redirect(next_url)
 
 
 class WishlistPageView(TemplateView):

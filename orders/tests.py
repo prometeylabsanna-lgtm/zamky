@@ -215,3 +215,49 @@ class CheckoutTests(TestCase):
         self.assertEqual(Order.objects.count(), 0)
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock, 1)
+
+    def test_order_success_requires_session(self):
+        self._add_to_cart(1)
+        key = 'idem-success-scope'
+        session = self.client.session
+        session['checkout_idempotency'] = key
+        session.save()
+        self.client.post(
+            reverse('orders:checkout') + '?step=checkout',
+            {
+                'first_name': 'Олег',
+                'phone': '0670000001',
+                'delivery_method': 'pickup',
+                'payment_method': 'cod',
+                'idempotency_key': key,
+            },
+        )
+        order = Order.objects.get(idempotency_key=key)
+        ok = self.client.get(reverse('orders:success', args=[order.number]))
+        self.assertEqual(ok.status_code, 302)
+        self.assertIn('step=done', ok['Location'])
+
+        other = Client()
+        denied = other.get(reverse('orders:success', args=[order.number]))
+        self.assertEqual(denied.status_code, 404)
+
+    def test_district_open_redirect_blocked(self):
+        response = self.client.post(
+            reverse('orders:set_district'),
+            {'slug': '', 'next': 'https://evil.example/phish'},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn('evil.example', response['Location'])
+
+    def test_quick_order_blocks_oos(self):
+        self.product.stock = 0
+        self.product.save()
+        response = self.client.post(
+            reverse('orders:quick', args=[self.product.pk]),
+            {'phone': '0670000002', 'quantity': 1},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Order.objects.count(), 0)
+        from orders.models import QuickOrder
+
+        self.assertEqual(QuickOrder.objects.count(), 0)

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n_ui static %}
+{% load i18n_ui static catalog_tags %}
 
 {% block title %}{{ title }} — Каталог{% endblock %}
 
@@ -43,8 +43,8 @@
           {% for id,label in sorts %}
           <li>
             <a class="dropdown__item catalog-sort__item {% if id == current_sort %}is-active{% endif %}"
-               href="?{% for k,v in request.GET.items %}{% if k != 'sort' and k != 'limit' and k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}sort={{ id }}"
-               hx-get="?{% for k,v in request.GET.items %}{% if k != 'sort' and k != 'limit' and k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}sort={{ id }}"
+               href="?{% keep_query 'sort' 'limit' 'page' sort=id %}"
+               hx-get="?{% keep_query 'sort' 'limit' 'page' sort=id %}"
                hx-target="#catalog-grid"
                hx-push-url="true">
               <span>{{ label }}</span>
@@ -143,8 +143,8 @@
       <div class="chips">
         {% for chip in selected_chips %}
         <a class="chip"
-           href="?{% for k,v in request.GET.items %}{% if k == chip.key and v == chip.slug %}{% elif chip.key == 'price' and k == 'price_min' %}{% elif chip.key == 'price' and k == 'price_max' %}{% else %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}"
-           hx-get="?{% for k,v in request.GET.items %}{% if k == chip.key and v == chip.slug %}{% elif chip.key == 'price' and k == 'price_min' %}{% elif chip.key == 'price' and k == 'price_max' %}{% else %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}"
+           href="?{% chip_remove_query chip.key chip.slug %}"
+           hx-get="?{% chip_remove_query chip.key chip.slug %}"
            hx-target="#catalog-grid"
            hx-push-url="true">
           <span>{{ chip.label }}</span>

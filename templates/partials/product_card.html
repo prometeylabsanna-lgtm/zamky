@@ -21,9 +21,10 @@
     </span>
   </div>
   <div class="product-card__title{% if product.stock_status == 'out' %} is-out{% endif %}">{{ product.name|tr }}</div>
-  <div class="product-card__stars">
-    <span>★★★★</span><span class="empty">★</span>
-    <span class="product-card__meta">(2)</span>
+  <div class="product-card__stars" aria-label="{{ product.rating }} / 5">
+    {% for _ in "12345" %}
+      {% if forloop.counter <= product.rating %}<span>★</span>{% else %}<span class="empty">★</span>{% endif %}
+    {% endfor %}
   </div>
   <div class="product-card__foot">
     <div class="product-card__prices">

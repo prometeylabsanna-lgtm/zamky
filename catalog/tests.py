@@ -75,6 +75,20 @@ class CatalogFilterTests(TestCase):
         products = list(response.context['products'])
         self.assertEqual(len(products), 1)
 
+    def test_invalid_price_query_no_500(self):
+        url = reverse('catalog:catalog')
+        response = self.client.get(url, {'price_min': 'abc', 'price_max': '1e999'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('products', response.context)
+
+    def test_sort_keeps_multi_brand_in_links(self):
+        url = reverse('catalog:catalog')
+        response = self.client.get(url, {'brand': ['abaro', 'mottura']})
+        self.assertEqual(response.status_code, 200)
+        body = response.content.decode()
+        self.assertIn('brand=abaro', body)
+        self.assertIn('brand=mottura', body)
+
 
 class PluralGoodsTests(TestCase):
     def test_plural_42_towary(self):

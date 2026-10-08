@@ -232,7 +232,8 @@ class Product(models.Model):
     @property
     def discount_percent(self):
         if self.old_price and self.old_price > self.price:
-            return int(round((1 - float(self.price) / float(self.old_price)) * 100))
+            ratio = (Decimal('1') - (self.price / self.old_price)) * Decimal('100')
+            return int(ratio.quantize(Decimal('1')))
         return 0
 
     @property
@@ -242,9 +243,13 @@ class Product(models.Model):
         return ''
 
     def format_price(self, value=None):
-        v = value if value is not None else self.price
-        n = int(Decimal(v))
-        return f'{n:,}'.replace(',', ' ') + ' ₴'
+        v = Decimal(value if value is not None else self.price).quantize(Decimal('0.01'))
+        if v == v.to_integral_value():
+            n = int(v)
+            return f'{n:,}'.replace(',', ' ') + ' ₴'
+        whole, frac = f'{v:.2f}'.split('.')
+        whole = f'{int(whole):,}'.replace(',', ' ')
+        return f'{whole},{frac} ₴'
 
     @property
     def price_display(self):

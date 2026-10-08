@@ -33,6 +33,33 @@ class CartTests(TestCase):
         response = self.client.post(url, {'quantity': 10})
         self.assertEqual(response.status_code, 400)
 
+    def test_add_invalid_quantity(self):
+        url = reverse('cart:add', args=[self.product.pk])
+        response = self.client.post(url, {'quantity': 'abc'})
+        self.assertEqual(response.status_code, 400)
+
+    def test_add_open_redirect_blocked(self):
+        url = reverse('cart:add', args=[self.product.pk])
+        response = self.client.post(url, {'quantity': 1, 'next': 'https://evil.example/'})
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn('evil.example', response['Location'])
+
+    def test_stock_clamp_sets_warning(self):
+        from django.test import RequestFactory
+
+        from cart.services import CartService
+
+        self.client.post(reverse('cart:add', args=[self.product.pk]), {'quantity': 5})
+        self.product.stock = 2
+        self.product.save()
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.session = self.client.session
+        cart = CartService(request)
+        items = cart.items()
+        self.assertEqual(items[0]['quantity'], 2)
+        self.assertTrue(cart.warnings_text())
+
     def test_update_and_remove(self):
         self.client.post(reverse('cart:add', args=[self.product.pk]), {'quantity': 2})
         self.client.post(

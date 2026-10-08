@@ -69,7 +69,9 @@
 {% endfor %}
 {% if oob_updates %}
 {% if cart_error %}
-<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true">{{ cart_error }}</div>
+<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true" role="alert">{{ cart_error }}</div>
+{% elif cart_warning %}
+<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true" role="alert">{{ cart_warning }}</div>
 {% endif %}
 {% if cart_qty_total is not None %}
 <span id="checkout-count" class="checkout-count" hx-swap-oob="true">{% if cart_qty_total %}{{ cart_qty_total }} {{ cart_qty_total|plural_goods }}{% endif %}</span>

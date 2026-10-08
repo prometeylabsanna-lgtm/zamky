@@ -6,6 +6,7 @@ from django.urls import translate_url
 from django.views import View
 from django.views.generic import TemplateView
 
+from config.redirects import safe_next_url
 from pages.i18n_lib import tr
 
 from . import info_content
@@ -70,7 +71,11 @@ class SetLangView(View):
         if code not in dict(settings.LANGUAGES):
             code = settings.LANGUAGE_CODE
 
-        next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or f'/{code}/'
+        next_url = safe_next_url(
+            request,
+            request.POST.get('next') or request.META.get('HTTP_REFERER'),
+            fallback=f'/{code}/',
+        )
         # translate_url() uses the *current* language as source — do not activate target first.
         try:
             translated = translate_url(next_url, code)
@@ -88,6 +93,7 @@ class SetLangView(View):
                 path = f'/{code}{path if path.startswith("/") else "/" + path}'
             translated = urlunsplit(('', '', path, parts.query, parts.fragment))
 
+        translated = safe_next_url(request, translated, fallback=f'/{code}/')
         response = redirect(translated)
         response.set_cookie(
             settings.LANGUAGE_COOKIE_NAME,

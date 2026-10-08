@@ -74,3 +74,6 @@
     <button type="button" class="btn" data-close-cart>{% t 'Перейти до покупок' %}</button>
   </div>
 {% endif %}
+{% if cart_warning %}
+<div id="cart-toast" class="toast toast--error is-visible" hx-swap-oob="true" role="alert">{{ cart_warning }}</div>
+{% endif %}

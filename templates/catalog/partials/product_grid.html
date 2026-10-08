@@ -1,4 +1,4 @@
-{% load i18n_ui %}
+{% load i18n_ui catalog_tags %}
 {% if products %}
 <div class="product-grid" id="product-grid">
   {% for product in products %}
@@ -9,7 +9,7 @@
 {% with base=request.path %}
 <button type="button"
    class="catalog-more"
-   hx-get="{{ base }}?{% for k,v in request.GET.items %}{% if k != 'limit' and k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}limit={{ next_limit }}"
+   hx-get="{{ base }}?{% keep_query 'limit' 'page' limit=next_limit %}"
    hx-target="#catalog-grid"
    hx-swap="innerHTML"
    hx-push-url="true">{% t 'Завантажити ще' %}</button>

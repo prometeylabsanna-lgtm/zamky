@@ -228,10 +228,12 @@ class CatalogView(ListView):
         if price_hi:
             price_hi = ((price_hi + 9) // 10) * 10
 
-        cur_min = self.request.GET.get('price_min')
-        cur_max = self.request.GET.get('price_max')
-        current_price_min = int(cur_min) if cur_min not in (None, '') else price_lo
-        current_price_max = int(cur_max) if cur_max not in (None, '') else price_hi
+        cur_min = self._decimal(self.request.GET.get('price_min'))
+        cur_max = self._decimal(self.request.GET.get('price_max'))
+        current_price_min = int(cur_min) if cur_min is not None else price_lo
+        current_price_max = int(cur_max) if cur_max is not None else price_hi
+        if current_price_min > current_price_max:
+            current_price_min, current_price_max = current_price_max, current_price_min
 
         filter_groups = []
         filter_attrs = {
