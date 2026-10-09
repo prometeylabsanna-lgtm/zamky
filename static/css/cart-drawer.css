@@ -1,11 +1,17 @@
 .cart-drawer {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 70;
+  width: 100%;
+  max-width: 100%;
   pointer-events: none;
+  overflow: hidden;
+  contain: strict;
 }
 
 .cart-drawer.is-open {
+  display: block;
   pointer-events: auto;
 }
 
@@ -28,20 +34,22 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(520px, 100vw);
+  width: min(520px, 100%);
+  max-width: 100%;
   background: var(--color-bg);
   z-index: 80;
-  display: flex;
+  display: none;
   flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   box-shadow: none;
-  transform: translateX(105%);
+  transform: translateX(100%);
   transition: transform 0.35s var(--ease-slide), box-shadow 0.35s;
 }
 
 .cart-drawer.is-open .cart-drawer__panel {
+  display: flex;
   transform: translateX(0);
   box-shadow: var(--shadow-cart);
 }

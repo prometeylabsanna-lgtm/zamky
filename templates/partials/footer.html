@@ -17,11 +17,18 @@
         <button type="button" class="site-footer__link-btn" data-open-cart>{% t 'Кошик' %}</button>
       </nav>
       <div class="site-footer__contacts">
-        <a href="tel:0670000000">067 00 00 00</a>
-        <a href="tel:0660000000">066 00 00 00</a>
-        <a href="mailto:xxx@gmail.com">xxx@gmail.com</a>
-        <p class="site-footer__meta">{% t 'Пн–Пт 9:00–19:00, Сб 10:00–17:00' %}</p>
-        <p class="site-footer__meta">{% t 'м. Київ, [вулиця, будинок]' %}</p>
+        <div class="site-footer__contacts-col">
+          <a href="tel:0670000000">067 00 00 00</a>
+          <a href="tel:0660000000">066 00 00 00</a>
+          <a href="mailto:xxx@gmail.com">xxx@gmail.com</a>
+        </div>
+        <div class="site-footer__contacts-col site-footer__contacts-col--meta">
+          <p class="site-footer__meta site-footer__meta--hours">
+            <span>{% t 'Пн–Пт 9:00–19:00' %}</span>
+            <span>{% t 'Сб 10:00–17:00' %}</span>
+          </p>
+          <p class="site-footer__meta">{% t 'м. Київ, [вулиця, будинок]' %}</p>
+        </div>
       </div>
     </div>
     <div class="site-footer__line"></div>

@@ -4,8 +4,8 @@
 {% block title %}{{ page_name }} — {% t 'Замки' %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/info.css' %}">
-<link rel="stylesheet" href="{% static 'css/info-form.css' %}">
+<link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/info-form.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}
@@ -69,7 +69,16 @@
         <div class="info-table__row{% if forloop.counter|divisibleby:2 %} is-alt{% endif %}">
           <span>{{ label }}</span>
           {% if value == 'phones' %}
-          <span><a href="tel:0670000000">067 00 00 00</a>, <a href="tel:0660000000">066 00 00 00</a></span>
+          <span class="info-table__phones">
+            <a class="info-table__phone" href="tel:0670000000">067&nbsp;00&nbsp;00&nbsp;00</a><span class="info-table__phones-sep">,</span>
+            <a class="info-table__phone" href="tel:0660000000">066&nbsp;00&nbsp;00&nbsp;00</a>
+          </span>
+          {% elif value == 'hours' %}
+          <span class="info-table__hours">
+            <span>{% t 'Пн–Пт 9:00–19:00' %}</span>
+            <span>{% t 'Сб 10:00–17:00' %}</span>
+            <span>{% t 'Нд — вихідний' %}</span>
+          </span>
           {% elif value == 'email' %}
           <a href="mailto:xxx@gmail.com">xxx@gmail.com</a>
           {% else %}

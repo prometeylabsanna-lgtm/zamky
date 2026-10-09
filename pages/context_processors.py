@@ -53,4 +53,6 @@ def site_context(request):
         'header_menu': menu_payload(),
         'header_catalog_active': url_name in CATALOG_URL_NAMES,
         'js_i18n': js_i18n_dict(),
+        # bump when CSS/JS change so browsers drop stale DevTools cache
+        'asset_v': '20261008t',
     }

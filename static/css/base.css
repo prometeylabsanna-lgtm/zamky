@@ -77,6 +77,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -89,6 +94,23 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   padding-bottom: var(--safe-bottom);
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+.site-header {
+  max-width: 100%;
+  overflow: visible;
+}
+
+.site-main,
+.site-footer,
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 img {
@@ -296,26 +318,28 @@ textarea::placeholder {
 }
 
 .toast {
+  display: none;
   position: fixed;
-  left: 50%;
+  left: 16px;
+  right: 16px;
   bottom: calc(20px + var(--safe-bottom));
-  transform: translateX(-50%);
+  margin: 0 auto;
   z-index: 100;
-  min-width: 240px;
-  max-width: min(90vw, 420px);
+  width: max-content;
+  max-width: min(calc(100% - 32px), 420px);
+  min-width: 0;
   padding: 14px 18px;
+  box-sizing: border-box;
   border-radius: var(--radius-xl);
   background: #111;
   color: #fff;
   font-size: 14px;
   box-shadow: var(--shadow-dropdown);
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s;
 }
 
 .toast.is-visible {
-  opacity: 1;
+  display: block;
 }
 
 .toast--error {

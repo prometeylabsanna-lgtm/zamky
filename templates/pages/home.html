@@ -4,7 +4,7 @@
 {% block title %}{% if district %}{{ district.h1|tr }}{% else %}{% t 'Замки для дверей та меблів — купити в Києві' %}{% endif %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}

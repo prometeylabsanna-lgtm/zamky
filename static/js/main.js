@@ -14,13 +14,14 @@
     if (!drawer) return;
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflowY = 'hidden';
   }
   function closeDrawer() {
     if (!drawer) return;
     drawer.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    document.body.style.overflowY = '';
+    window.scrollTo(0, window.scrollY || 0);
   }
   document.addEventListener('click', function (e) {
     var openBtn = e.target.closest('[data-open-cart]');
@@ -124,7 +125,7 @@
       if (!filters) return;
       filters.classList.add('is-open');
       if (overlay) overlay.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflowY = 'hidden';
     });
   });
   qsa('[data-close-filters]').forEach(function (btn) {
@@ -132,7 +133,7 @@
       if (!filters) return;
       filters.classList.remove('is-open');
       if (overlay) overlay.classList.remove('is-open');
-      document.body.style.overflow = '';
+      document.body.style.overflowY = '';
     });
   });
 

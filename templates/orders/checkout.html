@@ -4,7 +4,7 @@
 {% block title %}{% if step == 'done' %}Дякуємо!{% else %}Оформлення замовлення{% endif %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}
@@ -82,9 +82,9 @@
         <section class="checkout-card">
           <div class="checkout-card__head">
             <h2 class="checkout-card__title"><span class="checkout-card__n">1</span>{% t 'Товари у замовленні' %}</h2>
-            <button type="button" class="checkout-edit" data-open-cart>
+            <button type="button" class="checkout-edit" data-open-cart aria-label="{% t 'Редагувати кошик' %}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path><path d="M13.5 6.5l4 4"></path></svg>
-              Редагувати кошик
+              <span class="checkout-edit__label">{% t 'Редагувати кошик' %}</span>
             </button>
           </div>
           <div id="checkout-items" class="checkout-items">

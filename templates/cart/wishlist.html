@@ -4,7 +4,7 @@
 {% block title %}{% t 'Обране' %} — {% t 'Замки' %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/wishlist.css' %}">
+<link rel="stylesheet" href="{% static 'css/wishlist.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}

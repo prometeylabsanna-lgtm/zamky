@@ -15,6 +15,7 @@
 .info-aside {
   position: static;
   min-width: 0;
+  max-width: 100%;
 }
 
 .info-nav {
@@ -22,11 +23,12 @@
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  flex-wrap: nowrap;
   gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .info-nav::-webkit-scrollbar {
@@ -34,7 +36,9 @@
 }
 
 .info-nav li {
-  flex: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .info-nav a {
@@ -51,8 +55,17 @@
   font-size: 16px;
   font-weight: 400;
   color: var(--color-fg);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   white-space: nowrap;
   transition: border-color 0.2s;
+}
+
+.info-nav a span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info-nav a:hover {
@@ -251,6 +264,44 @@
   color: var(--color-fg);
 }
 
+.info-table__phones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 6px;
+  row-gap: 2px;
+  min-width: 0;
+}
+
+.info-table__phone {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.info-table__phones-sep {
+  margin: 0 -2px 0 0;
+}
+
+.info-table__hours {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.info-table__hours > span {
+  display: block;
+  white-space: nowrap;
+}
+
+@media (max-width: 719px) {
+  .info-table__row {
+    grid-template-columns: minmax(0, 7.2em) minmax(0, 1fr);
+    gap: 8px;
+    padding: 14px 14px;
+  }
+}
+
 .info-table--delivery {
   font-size: 15px;
   line-height: 1.4;
@@ -259,42 +310,63 @@
 .info-table__head,
 .info-table__drow {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
-  gap: 16px;
-  padding: 18px 20px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 0.95fr);
+  column-gap: 10px;
+  row-gap: 0;
+  padding: 16px 16px;
+  align-items: start;
 }
 
 .info-table__head {
-  padding: 14px 20px;
+  padding: 12px 16px;
   background: var(--color-surface);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-muted);
   font-weight: 500;
 }
 
 .info-table__drow {
   border-top: 1px solid var(--color-border-soft);
+  font-size: 14px;
 }
 
 .info-table__drow span:first-child {
   font-weight: 500;
+  min-width: 0;
 }
 
 .info-table__drow span:nth-child(2) {
   color: var(--color-muted-5);
+  min-width: 0;
 }
 
-.info-table__drow span:last-child {
-  text-align: right;
-}
-
-.info-table__head span:last-child,
-.info-table__drow span:last-child {
-  text-align: right;
+.info-table__head span,
+.info-table__drow span {
+  text-align: left;
+  min-width: 0;
 }
 
 .info-table__drow .is-free {
   color: var(--color-success);
+}
+
+@media (max-width: 719px) {
+  .info-table--delivery .info-table__head,
+  .info-table--delivery .info-table__drow {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .info-table--delivery .info-table__drow {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
+  .info-table--delivery .info-table__head {
+    font-size: 11px;
+  }
 }
 
 .info-pay {
@@ -379,7 +451,18 @@
 @media (min-width: 720px) {
   .info-table__head,
   .info-table__drow {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 120px;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr) minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 18px 20px;
+  }
+
+  .info-table__head {
+    padding: 14px 20px;
+    font-size: 13px;
+  }
+
+  .info-table__drow {
+    font-size: 15px;
   }
 }
 

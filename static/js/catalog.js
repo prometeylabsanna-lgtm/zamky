@@ -122,7 +122,7 @@
     var overlay = qs('#filters-overlay');
     if (filters) filters.classList.remove('is-open');
     if (overlay) overlay.classList.remove('is-open');
-    document.body.style.overflow = '';
+    document.body.style.overflowY = '';
   }
 
   function syncSortPrefix() {

@@ -4,7 +4,7 @@
 {% block title %}{{ product.name|tr }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/product.css' %}">
+<link rel="stylesheet" href="{% static 'css/product.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}

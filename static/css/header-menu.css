@@ -22,10 +22,10 @@
 .mega__panel {
   position: absolute;
   top: 96px;
-  left: max(var(--pad-x), calc((100vw - var(--container)) / 2 + var(--pad-x)));
+  left: max(var(--pad-x), calc((100% - var(--container)) / 2 + var(--pad-x)));
   z-index: 60;
   width: 331px;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100% - 32px);
   box-sizing: border-box;
   background: var(--color-bg);
   border-radius: var(--radius-xl);
@@ -199,13 +199,19 @@
 }
 
 .mnav {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 70;
+  width: 100%;
+  max-width: 100%;
   pointer-events: none;
+  overflow: hidden;
+  contain: strict;
 }
 
 .mnav.is-open {
+  display: block;
   pointer-events: auto;
 }
 
@@ -226,22 +232,22 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: min(440px, 100vw);
+  width: min(440px, 100%);
+  max-width: 100%;
   background: var(--color-bg);
   z-index: 80;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  visibility: hidden;
-  transform: translateX(-105%);
-  transition: transform 0.35s var(--ease-slide), visibility 0.35s;
-  display: flex;
+  transform: translateX(-100%);
+  transition: transform 0.35s var(--ease-slide);
+  display: none;
   flex-direction: column;
   padding-bottom: var(--safe-bottom);
 }
 
 .mnav.is-open .mnav__panel {
-  visibility: visible;
+  display: flex;
   transform: translateX(0);
 }
 
@@ -433,6 +439,6 @@
 
 @media (min-width: 1100px) {
   .mega__panel {
-    left: max(var(--pad-x), calc((100vw - var(--container)) / 2 + var(--pad-x)));
+    left: max(var(--pad-x), calc((100% - var(--container)) / 2 + var(--pad-x)));
   }
 }

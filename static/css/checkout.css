@@ -49,22 +49,28 @@ body:has(.checkout-page) .site-footer {
   padding: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: nowrap;
+  gap: 8px;
   font-size: 14px;
   line-height: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .checkout-steps__item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex: none;
+  white-space: nowrap;
 }
 
 .checkout-steps__mark {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--color-muted-2);
+  white-space: nowrap;
 }
 
 .checkout-steps__item.is-done .checkout-steps__mark,
@@ -100,7 +106,7 @@ body:has(.checkout-page) .site-footer {
 }
 
 .checkout-steps__line {
-  width: 32px;
+  width: 24px;
   height: 1px;
   background: var(--color-border-soft);
   flex: none;
@@ -120,9 +126,111 @@ body:has(.checkout-page) .site-footer {
 }
 
 @media (max-width: 719px) {
+  .checkout-steps {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .checkout-steps__item {
+    gap: 6px;
+  }
+
+  .checkout-steps__mark {
+    gap: 5px;
+  }
+
+  .checkout-steps__dot {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .checkout-steps__line {
+    width: 16px;
+  }
+
   .checkout-empty,
   .checkout-done {
     margin-top: 64px;
+  }
+
+  .checkout-card {
+    padding: 20px 16px;
+  }
+
+  .checkout-card__head {
+    gap: 8px;
+  }
+
+  .checkout-card__title {
+    font-size: 17px;
+    gap: 10px;
+    padding-right: 4px;
+  }
+
+  .checkout-card__n {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .checkout-edit {
+    height: 36px;
+    padding: 0 10px;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .checkout-row {
+    grid-template-columns: 64px minmax(0, 1fr) 40px;
+    grid-template-areas:
+      'img info del'
+      'qty sum del';
+    column-gap: 10px;
+    row-gap: 12px;
+    padding: 16px 0;
+  }
+
+  .checkout-row__img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .checkout-row__name {
+    font-size: 14px;
+  }
+
+  .checkout-row__total {
+    font-size: 18px;
+  }
+
+  .checkout-row__del {
+    align-self: start;
+  }
+
+  .checkout-row__sum {
+    justify-self: end;
+    align-self: center;
+  }
+}
+
+@media (max-width: 419px) {
+  .checkout-edit__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .checkout-edit {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
   }
 }
 
@@ -222,18 +330,23 @@ body:has(.checkout-page) .site-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .checkout-card__title {
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 12px;
   font-size: 22px;
-  line-height: 1;
+  line-height: 1.15;
   font-weight: 600;
   letter-spacing: -0.02em;
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: left;
 }
 
 .checkout-card__n {
@@ -260,9 +373,15 @@ body:has(.checkout-page) .site-footer {
   gap: 8px;
   font-size: 14px;
   color: var(--color-fg);
-  flex: none;
+  flex: 0 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+}
+
+.checkout-edit__label {
+  white-space: nowrap;
 }
 
 .checkout-edit:hover {
@@ -283,14 +402,16 @@ body:has(.checkout-page) .site-footer {
 
 .checkout-row {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) auto;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
   grid-template-areas:
     'img info del'
-    'qty qty sum';
-  gap: 16px 24px;
+    'qty sum del';
+  column-gap: 12px;
+  row-gap: 14px;
   align-items: center;
-  padding: 24px 0;
+  padding: 20px 0;
   border-bottom: 1px solid var(--color-border-soft);
+  min-width: 0;
 }
 
 .checkout-row:last-child {
@@ -299,8 +420,8 @@ body:has(.checkout-page) .site-footer {
 
 .checkout-row__img {
   grid-area: img;
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border-radius: var(--radius-xl);
   background: var(--color-surface);
   padding: 8px;
@@ -428,11 +549,12 @@ body:has(.checkout-page) .site-footer {
 .checkout-row__sum {
   grid-area: sum;
   justify-self: end;
+  align-self: center;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
-  min-width: 96px;
+  min-width: 0;
 }
 
 .checkout-row__old {
@@ -454,7 +576,7 @@ body:has(.checkout-page) .site-footer {
 .checkout-row__del {
   grid-area: del;
   justify-self: end;
-  align-self: start;
+  align-self: center;
   width: 40px;
   height: 40px;
   border: 0;

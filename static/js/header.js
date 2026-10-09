@@ -151,7 +151,7 @@
     megaState = { cat: null, sub: null };
     renderMega();
     if (megaBtn) megaBtn.classList.add('is-active');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflowY = 'hidden';
   }
 
   function closeMega() {
@@ -160,7 +160,7 @@
     megaState = { cat: null, sub: null };
     if (megaBtn) megaBtn.classList.remove('is-active');
     if (!qs('.mnav.is-open') && !qs('.cart-drawer.is-open')) {
-      document.body.style.overflow = '';
+      document.body.style.overflowY = '';
     }
   }
 
@@ -248,7 +248,7 @@
     mnav.setAttribute('aria-hidden', 'false');
     mnavState = { cat: null, sub: null };
     renderMnav();
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflowY = 'hidden';
   }
 
   function closeMnav() {
@@ -257,7 +257,8 @@
     mnav.setAttribute('aria-hidden', 'true');
     mnavState = { cat: null, sub: null };
     renderMnav();
-    if (!qs('.cart-drawer.is-open')) document.body.style.overflow = '';
+    if (!qs('.cart-drawer.is-open')) document.body.style.overflowY = '';
+    window.scrollTo(0, window.scrollY || 0);
   }
 
   qsa('[data-open-menu]').forEach(function (btn) {
