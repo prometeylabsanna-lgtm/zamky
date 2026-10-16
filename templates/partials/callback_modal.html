@@ -1,6 +1,6 @@
 {% load i18n_ui %}
 <dialog class="cb-modal" id="callback-modal" aria-labelledby="cb-modal-title">
-  <form class="cb-modal__card" method="post" action="{% url 'pages:callback' %}" id="callback-form" hx-post="{% url 'pages:callback' %}" hx-target="#callback-form-body" hx-swap="innerHTML">
+  <form class="cb-modal__card" method="post" action="{% url 'pages:callback' %}" id="callback-form" data-validate-form novalidate hx-post="{% url 'pages:callback' %}" hx-target="#callback-form-body" hx-swap="innerHTML">
     {% csrf_token %}
     <div class="cb-modal__head">
       <div>

@@ -6,12 +6,12 @@
   <label class="cb-field">
     <span>{{ form.name.label }}</span>
     {{ form.name }}
-    {% if form.name.errors %}<span class="cb-field__err">{{ form.name.errors.0 }}</span>{% endif %}
+    <span class="cb-field__err" data-field-error>{% if form.name.errors %}{{ form.name.errors.0 }}{% endif %}</span>
   </label>
   <label class="cb-field">
     <span>{{ form.phone.label }}</span>
     {{ form.phone }}
-    {% if form.phone.errors %}<span class="cb-field__err">{{ form.phone.errors.0 }}</span>{% endif %}
+    <span class="cb-field__err" data-field-error>{% if form.phone.errors %}{{ form.phone.errors.0 }}{% endif %}</span>
   </label>
   <label class="cb-field install-form__full">
     <span>{{ form.address.label }}</span>

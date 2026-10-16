@@ -86,8 +86,7 @@
       if (files.length < 5) {
         var add = document.createElement('button');
         add.type = 'button';
-        add.className = 'home-photo-drop__btn';
-        add.style.minHeight = '76px';
+        add.className = 'home-photo-previews__add';
         add.textContent = '+';
         add.addEventListener('click', pickFiles);
         previews.appendChild(add);

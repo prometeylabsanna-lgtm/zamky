@@ -7,6 +7,8 @@
   hx-target="#install-form-body"
   hx-swap="innerHTML"
   id="install-form"
+  data-validate-form
+  novalidate
 >
   {% csrf_token %}
   <div id="install-form-body">

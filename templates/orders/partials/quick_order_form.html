@@ -7,9 +7,9 @@
     <label class="pdp-quick__phone">
       <input type="tel" name="phone" required
         data-validate="phone"
-        placeholder="+38 (___) ___ - __ - __"
+        placeholder="+38 (0__) ___ __ __"
         value="{{ phone_value|default:'' }}"
-        autocomplete="tel" inputmode="tel" maxlength="22" autofocus>
+        autocomplete="tel" inputmode="tel" maxlength="32" autofocus>
     </label>
     <span class="field__err" data-field-error>{% if error %}{{ error }}{% endif %}</span>
   </div>

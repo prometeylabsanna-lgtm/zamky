@@ -345,8 +345,12 @@
 
 .home-blog__scroll {
   display: flex;
+  align-items: flex-start;
   gap: 8px;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
   margin: 14px calc(-1 * var(--pad-x)) 0;
   padding: 0 var(--pad-x);
   scroll-snap-type: x mandatory;
@@ -564,3 +568,29 @@
 
 .home-photo-previews__remove {
   position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.home-photo-previews__add {
+  aspect-ratio: 1;
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font: 500 22px var(--font);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}

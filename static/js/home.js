@@ -364,7 +364,13 @@
       var btn = qs('[data-door-id="' + state.door + '"]', root);
       if (!btn) return '';
       var label = qs('.home-door-btn__label', btn);
-      return label ? label.textContent.replace(/\s+/g, ' ').trim().toLowerCase() : '';
+      if (!label) return '';
+      var parts = label.innerHTML.split(/<br\s*\/?>/i).map(function (chunk) {
+        var el = document.createElement('span');
+        el.innerHTML = chunk;
+        return (el.textContent || '').replace(/\s+/g, ' ').trim();
+      }).filter(Boolean);
+      return parts.join(' ').toLowerCase();
     }
 
     function catalogHref() {

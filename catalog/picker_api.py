@@ -41,7 +41,10 @@ def _door_filter(qs, raw):
     q = Q()
     for hint in hints:
         q |= Q(category__name__icontains=hint) | Q(category__parent__name__icontains=hint)
-    return qs.filter(q)
+    matched = qs.filter(q)
+    if matched.exists():
+        return matched
+    return qs
 
 
 def _filter_attr(qs, slug, value):

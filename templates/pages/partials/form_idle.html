@@ -8,12 +8,13 @@
   <div class="cb-modal__fields">
     <label class="cb-field">
       <span>{% t 'Телефон*' %}</span>
-      <input type="tel" name="phone" value="{% if form %}{{ form.phone.value|default:'' }}{% endif %}" placeholder="+38 (___) ___ - __ - __" autocomplete="tel" inputmode="tel" data-validate="phone" required>
-      {% if form and form.phone.errors %}<span class="cb-field__err">{{ form.phone.errors.0 }}</span>{% endif %}
+      <input type="tel" name="phone" value="{% if form %}{{ form.phone.value|default:'' }}{% endif %}" placeholder="+38 (0__) ___ __ __" maxlength="32" autocomplete="tel" inputmode="tel" data-validate="phone" required>
+      <span class="cb-field__err" data-field-error>{% if form and form.phone.errors %}{{ form.phone.errors.0 }}{% endif %}</span>
     </label>
     <label class="cb-field">
       <span>{% t 'Імʼя' %}</span>
-      <input type="text" name="name" value="{% if form %}{{ form.name.value|default:'' }}{% endif %}" placeholder="{% t 'Олександр' %}" autocomplete="name">
+      <input type="text" name="name" value="{% if form %}{{ form.name.value|default:'' }}{% endif %}" placeholder="{% t 'Олександр' %}" autocomplete="name" data-validate="name-optional" maxlength="120">
+      <span class="cb-field__err" data-field-error>{% if form and form.name.errors %}{{ form.name.errors.0 }}{% endif %}</span>
     </label>
     <input type="hidden" name="idempotency_key" value="{% if form and form.idempotency_key.value %}{{ form.idempotency_key.value }}{% else %}{{ callback_idempotency }}{% endif %}" id="callback-idem">
     <button type="submit" class="cb-modal__submit">{% t 'Передзвоніть мені' %}</button>

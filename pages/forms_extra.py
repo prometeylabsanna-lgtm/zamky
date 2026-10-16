@@ -15,17 +15,17 @@ class CallbackForm(forms.Form):
             attrs={
                 'placeholder': 'Олександр',
                 'autocomplete': 'name',
-                'data-validate': 'name',
+                'data-validate': 'name-optional',
             }
         ),
     )
     phone = forms.CharField(
         label=tr_lazy('Телефон*'),
-        max_length=22,
+        max_length=32,
         widget=forms.TextInput(
             attrs={
                 'type': 'tel',
-                'placeholder': '+38 (___) ___ - __ - __',
+                'placeholder': '+38 (0__) ___ __ __',
                 'autocomplete': 'tel',
                 'inputmode': 'tel',
                 'data-validate': 'phone',
@@ -48,11 +48,11 @@ class CallbackForm(forms.Form):
 class PhotoPickForm(forms.Form):
     phone = forms.CharField(
         label=tr_lazy('Телефон*'),
-        max_length=22,
+        max_length=32,
         widget=forms.TextInput(
             attrs={
                 'type': 'tel',
-                'placeholder': '+38 (___) ___ - __ - __',
+                'placeholder': '+38 (0__) ___ __ __',
                 'autocomplete': 'tel',
                 'inputmode': 'tel',
                 'data-validate': 'phone',
@@ -90,11 +90,11 @@ class InstallForm(forms.Form):
     )
     phone = forms.CharField(
         label=tr_lazy('Телефон*'),
-        max_length=22,
+        max_length=32,
         widget=forms.TextInput(
             attrs={
                 'type': 'tel',
-                'placeholder': '+38 (___) ___ - __ - __',
+                'placeholder': '+38 (0__) ___ __ __',
                 'autocomplete': 'tel',
                 'inputmode': 'tel',
                 'data-validate': 'phone',

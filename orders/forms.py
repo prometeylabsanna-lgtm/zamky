@@ -32,10 +32,10 @@ class CheckoutForm(forms.Form):
     )
     phone = forms.CharField(
         label=tr_lazy('Телефон'),
-        max_length=22,
+        max_length=32,
         widget=forms.TextInput(
             attrs={
-                'placeholder': '+38 (___) ___ - __ - __',
+                'placeholder': '+38 (0__) ___ __ __',
                 'type': 'tel',
                 'autocomplete': 'tel',
                 'inputmode': 'tel',

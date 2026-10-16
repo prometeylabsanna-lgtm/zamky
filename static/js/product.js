@@ -273,7 +273,7 @@
       '<div class="pdp-quick__phone-wrap">' +
       '<label class="pdp-quick__phone">' +
       '<input type="tel" name="phone" required data-validate="phone" ' +
-      'placeholder="+38 (___) ___ - __ - __" autocomplete="tel" inputmode="tel" maxlength="22" autofocus>' +
+      'placeholder="+38 (0__) ___ __ __" autocomplete="tel" inputmode="tel" maxlength="32" autofocus>' +
       '</label>' +
       '<span class="field__err" data-field-error></span></div>' +
       '<input type="hidden" name="quantity" value="' +

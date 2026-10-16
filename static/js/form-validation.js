@@ -12,7 +12,7 @@
     required: 'Поле обовʼязкове для заповнення',
     name: 'Імʼя не може містити цифри або спецсимволи. Будь ласка, використовуйте лише букви',
     nameShort: 'Вкажіть імʼя (мінімум 2 літери)',
-    phone: 'Введіть коректний номер мобільного телефону у форматі +380 (XX) XXX-XX-XX',
+    phone: 'Введіть номер у форматі +38 (0XX) XXX XX XX',
     email: 'Некоректний формат email',
     message: 'Напишіть хоча б кілька слів (від 10 символів)',
     consent: 'Потрібна згода на обробку даних',
@@ -47,8 +47,8 @@
     if (a.length < 3) return out;
     out += ')';
     if (b.length) out += ' ' + b;
-    if (c.length) out += ' - ' + c;
-    if (e.length) out += ' - ' + e;
+    if (c.length) out += ' ' + c;
+    if (e.length) out += ' ' + e;
     return out;
   }
 
@@ -71,7 +71,8 @@
       wrap.querySelector('[data-field-error]') ||
       wrap.querySelector('.field__err') ||
       wrap.querySelector('.info-consent__err') ||
-      wrap.querySelector('.pdp-quick__error')
+      wrap.querySelector('.pdp-quick__error') ||
+      wrap.querySelector('.cb-field__err')
     );
   }
 
