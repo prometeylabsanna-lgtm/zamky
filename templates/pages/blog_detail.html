@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static i18n_ui %}
+
+{% block title %}{{ post.title }} — {% t 'Замки' %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
+{% endblock %}
+
+{% block content %}
+<div class="container info-page">
+  <nav class="breadcrumbs">
+    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <a href="{% url 'pages:blog_list' %}">{% t 'Корисне для вибору' %}</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <span>{{ post.title }}</span>
+  </nav>
+  <article class="info-article">
+    <h1 class="info-h1">{{ post.title }}</h1>
+    {% if post.cover %}
+    <figure class="blog-cover">
+      <img src="{{ post.cover.url }}" alt="" loading="lazy" width="960" height="540">
+    </figure>
+    {% endif %}
+    <p class="info-lead">{{ post.excerpt }}</p>
+    <div class="info-body blog-body">{{ post.body|linebreaks }}</div>
+    {% if more_posts %}
+    <h2 class="info-h2 info-h2--section">{% t 'Інші статті' %}</h2>
+    <ul class="blog-list blog-list--compact">
+      {% for p in more_posts %}
+      <li><a href="{% url 'pages:blog_detail' p.slug %}">{{ p.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+</div>
+{% endblock %}

@@ -193,5 +193,38 @@
     showNetToast(netMsg());
   });
 
-  window.Zamky = { openDrawer: openDrawer, closeDrawer: closeDrawer };
+  var cbModal = qs('#callback-modal');
+  function openCallback() {
+    if (!cbModal) return;
+    if (typeof cbModal.showModal === 'function') cbModal.showModal();
+    else cbModal.setAttribute('open', '');
+  }
+  function closeCallback() {
+    if (!cbModal) return;
+    if (typeof cbModal.close === 'function') cbModal.close();
+    else cbModal.removeAttribute('open');
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-open-callback]')) {
+      e.preventDefault();
+      openCallback();
+      return;
+    }
+    if (e.target.closest('[data-close-callback]')) {
+      e.preventDefault();
+      closeCallback();
+    }
+  });
+  if (cbModal) {
+    cbModal.addEventListener('click', function (e) {
+      if (e.target === cbModal) closeCallback();
+    });
+  }
+
+  window.Zamky = {
+    openDrawer: openDrawer,
+    closeDrawer: closeDrawer,
+    openCallback: openCallback,
+    closeCallback: closeCallback,
+  };
 })();

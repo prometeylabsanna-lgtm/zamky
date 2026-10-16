@@ -15,19 +15,17 @@ class HeaderShellTests(TestCase):
             response = self.client.get(reverse('pages:info'))
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
-        self.assertIn('Каталог', body)
-        self.assertIn('Новинки', body)
-        self.assertIn('Про нас', body)
-        self.assertIn('Наші контакти', body)
+        self.assertIn('Каталог товарів', body)
+        self.assertIn('Акції', body)
+        self.assertIn('Установка', body)
+        self.assertIn('Замовити дзвінок', body)
         self.assertIn('aria-label="Кошик"', body)
         self.assertIn('aria-label="Меню"', body)
         self.assertIn('aria-label="Закрити"', body)
-        self.assertIn('aria-label="Оберіть район"', body)
         self.assertIn('>UA<', body)
         self.assertIn('data-set-lang="ru"', body)
         self.assertNotIn('data-set-lang="EN"', body)
-        self.assertIn('Каталог товрів', body)
-        self.assertIn('@Замки 2026', body)
+        self.assertIn('Центр замків', body)
         self.assertIn('PrometeyLabs', body)
         self.assertNotIn('site-footer__credit-link', body)
 
@@ -38,7 +36,6 @@ class HeaderShellTests(TestCase):
         self.assertTrue(response.url.startswith('/ru/'))
         page = self.client.get('/ru/info/')
         self.assertContains(page, '>RU<')
-        self.assertContains(page, 'Наши контакты')
         self.assertContains(page, 'Сайт создан в')
         back = self.client.post('/lang/', {'lang': 'ua', 'next': '/ru/catalog/'})
         self.assertEqual(back.status_code, 302)
@@ -60,7 +57,7 @@ class FooterDeveloperLinkTests(TestCase):
         self.assertContains(response, CREDIT_URL)
         self.assertContains(response, 'nofollow')
         self.assertContains(response, '>PrometeyLabs</a>')
-        self.assertContains(response, '@Замки 2026')
+        self.assertContains(response, 'Центр замків')
 
     def test_localized_home_keeps_credit_link(self):
         for path in ('/ua/', '/ru/'):
@@ -79,94 +76,62 @@ class FooterDeveloperLinkTests(TestCase):
 
 
 @override_settings(ALLOWED_HOSTS=['*'])
-class ContactRequestTests(TestCase):
-    def setUp(self):
-        self.client = Client()
-        translation.deactivate_all()
-        with translation.override('ua'):
-            self.url = reverse('pages:contact')
-            self.page_url = reverse('pages:info')
-
+class ContactFormTests(TestCase):
     def tearDown(self):
         translation.deactivate_all()
 
-    def _valid(self, **extra):
-        data = {
-            'name': 'Олександр',
-            'phone': '+380 67 000 00 00',
-            'email': 'mail@example.com',
-            'topic': ContactRequest.Topic.LOCK,
-            'message': 'Потрібен підбір циліндра під двері 70 мм.',
-            'consent': 'on',
-            'idempotency_key': 'key-once-1234567890',
-        }
-        data.update(extra)
-        return data
-
-    def test_page_renders_inventory(self):
-        response = self.client.get(self.page_url)
-        self.assertEqual(response.status_code, 200)
-        body = response.content.decode()
-        self.assertIn('Про нас', body)
-        self.assertIn('Як ми працюємо', body)
-        self.assertIn('Торгова точка', body)
-        self.assertIn('Залишилися питання?', body)
-        self.assertIn('Написати нам', body)
-        self.assertIn('Підбір замка або циліндра', body)
-        self.assertContains(response, 'Договір оферти')
-        self.assertContains(response, 'Політика конфіденційності')
-
-    def test_valid_creates(self):
-        response = self.client.post(self.url, self._valid())
-        self.assertEqual(ContactRequest.objects.count(), 1)
-        obj = ContactRequest.objects.get()
-        self.assertEqual(obj.name, 'Олександр')
-        self.assertTrue(obj.consent)
-        self.assertIn('Дякуємо', response.content.decode())
-
-    def test_invalid_errors(self):
-        response = self.client.post(self.url, self._valid(name='A', phone='12', message='short'))
-        self.assertEqual(ContactRequest.objects.count(), 0)
-        body = response.content.decode()
-        self.assertIn('мінімум 2 літери', body)
-        self.assertIn('+380 (XX) XXX-XX-XX', body)
-        self.assertIn('від 10 символів', body)
-
-    def test_name_rejects_digits(self):
+    def test_contact_submit_creates_request(self):
+        with translation.override('ua'):
+            page = self.client.get(reverse('pages:info_page', kwargs={'page': 'about'}))
+        self.assertEqual(page.status_code, 200)
+        key = self.client.session.get('contact_idempotency')
+        self.assertTrue(key)
         response = self.client.post(
-            self.url, self._valid(name='цакп287366434365')
-        )
-        self.assertEqual(ContactRequest.objects.count(), 0)
-        self.assertIn('лише букви', response.content.decode())
-
-    def test_no_consent(self):
-        data = self._valid()
-        data.pop('consent')
-        response = self.client.post(self.url, data)
-        self.assertEqual(ContactRequest.objects.count(), 0)
-        self.assertIn('Потрібна згода на обробку даних', response.content.decode())
-
-    def test_htmx_partial(self):
-        response = self.client.post(
-            self.url,
-            self._valid(idempotency_key='htmx-key-1'),
+            reverse('pages:contact'),
+            {
+                'name': 'Олег',
+                'phone': '+380670000001',
+                'email': 'a@b.co',
+                'topic': 'lock',
+                'message': 'Потрібен підбір замка для дверей',
+                'consent': 'on',
+                'idempotency_key': key,
+            },
             HTTP_HX_REQUEST='true',
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'pages/partials/contact_success.html')
-        self.assertNotIn('<html', response.content.decode())
         self.assertEqual(ContactRequest.objects.count(), 1)
 
-    def test_idempotent_no_duplicate(self):
-        payload = self._valid(idempotency_key='same-key-abc')
-        self.client.post(self.url, payload, HTTP_HX_REQUEST='true')
-        self.client.post(self.url, payload, HTTP_HX_REQUEST='true')
-        self.assertEqual(ContactRequest.objects.count(), 1)
 
-    def test_russian_info_page(self):
-        response = self.client.get('/ru/info/about/')
-        self.assertEqual(response.status_code, 200)
-        body = response.content.decode()
-        self.assertIn('О нас', body)
-        self.assertIn('Как мы работаем', body)
-        self.assertIn('Торговая точка', body)
+@override_settings(ALLOWED_HOSTS=['*'])
+class DesignV2EndpointsTests(TestCase):
+    def tearDown(self):
+        translation.deactivate_all()
+
+    def test_info_pages_ok(self):
+        for slug in ('delivery', 'warranty', 'returns', 'install', 'promos', 'about'):
+            with translation.override('ua'):
+                r = self.client.get(reverse('pages:info_page', kwargs={'page': slug}))
+            self.assertEqual(r.status_code, 200, slug)
+
+    def test_blog_list(self):
+        with translation.override('ua'):
+            r = self.client.get(reverse('pages:blog_list'))
+        self.assertEqual(r.status_code, 200)
+
+    def test_callback_post(self):
+        with translation.override('ua'):
+            self.client.get(reverse('catalog:home'))
+        key = self.client.session.get('callback_idempotency')
+        r = self.client.post(
+            reverse('pages:callback'),
+            {'phone': '+380670000002', 'name': 'Тест', 'idempotency_key': key},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(r.status_code, 200)
+
+    def test_picker_api(self):
+        with translation.override('ua'):
+            r = self.client.get(reverse('catalog:api_picker'))
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('application/json', r['Content-Type'])

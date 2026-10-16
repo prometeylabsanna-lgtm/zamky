@@ -1,0 +1,15 @@
+{% load i18n_ui %}
+<form
+  class="install-form"
+  method="post"
+  action="{% url 'pages:install' %}"
+  hx-post="{% url 'pages:install' %}"
+  hx-target="#install-form-body"
+  hx-swap="innerHTML"
+  id="install-form"
+>
+  {% csrf_token %}
+  <div id="install-form-body">
+    {% include 'pages/partials/install_form_fields.html' %}
+  </div>
+</form>

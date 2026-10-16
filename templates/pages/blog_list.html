@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static i18n_ui %}
+
+{% block title %}{% t 'Корисне для вибору' %} — {% t 'Замки' %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
+{% endblock %}
+
+{% block content %}
+<div class="container info-page">
+  <nav class="breadcrumbs">
+    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <span>{% t 'Корисне для вибору' %}</span>
+  </nav>
+  <article class="info-article">
+    <h1 class="info-h1">{% t 'Корисне для вибору' %}</h1>
+    <p class="info-lead">{% t 'Поради з вибору, встановлення та догляду за замками й фурнітурою.' %}</p>
+    <ul class="blog-list">
+      {% for post in posts %}
+      <li class="blog-list__item">
+        <a href="{% url 'pages:blog_detail' post.slug %}" class="blog-list__link">
+          {% if post.cover %}
+          <img class="blog-list__img" src="{{ post.cover.url }}" alt="" loading="lazy" width="320" height="180">
+          {% endif %}
+          <span class="blog-list__title">{{ post.title }}</span>
+          <span class="blog-list__excerpt">{{ post.excerpt }}</span>
+        </a>
+      </li>
+      {% empty %}
+      <li>{% t 'Статті незабаром зʼявляться.' %}</li>
+      {% endfor %}
+    </ul>
+  </article>
+</div>
+{% endblock %}

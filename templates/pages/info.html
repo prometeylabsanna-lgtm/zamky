@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% load static i18n_ui %}
 
-{% block title %}{{ page_name }} — {% t 'Замки' %}{% endblock %}
+{% block title %}{{ page_name }} — {% t 'Центр замків' %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/info-2.css' %}?v={{ asset_v }}">
 <link rel="stylesheet" href="{% static 'css/info-form.css' %}?v={{ asset_v }}">
 {% endblock %}
 
@@ -21,7 +22,7 @@
       <ul class="info-nav">
         {% for key, meta in info_pages.items %}
         <li>
-          <a href="{% url 'pages:info_page' key %}" class="{% if page_key == key %}is-active{% endif %}">
+          <a href="{% if key == 'blog' %}{% url 'pages:blog_list' %}{% else %}{% url 'pages:info_page' key %}{% endif %}" class="{% if page_key == key %}is-active{% endif %}">
             <span>{{ meta.name }}</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
           </a>
@@ -117,6 +118,65 @@
         <li><span>{{ forloop.counter }}</span><span>{{ step }}</span></li>
         {% endfor %}
       </ol>
+      {% endwith %}
+
+      {% elif info_content.layout == 'blocks' %}
+      {% with c=info_content %}
+      <h1 class="info-h1">{{ c.h1 }}</h1>
+      <p class="info-lead">{{ c.lead }}</p>
+      {% for block in c.blocks %}
+        {% if block.type == 'cards' %}
+        <div class="info-cards">
+          {% for item in block.items %}
+          <div class="info-card">
+            {% if item.value %}<span class="info-card__value">{{ item.value }}</span>{% endif %}
+            <span class="info-card__title">{{ item.title }}</span>
+            <span class="info-card__text">{{ item.text }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% elif block.type == 'table' %}
+        {% if block.title %}<h2 class="info-h2 info-h2--block">{{ block.title }}</h2>{% endif %}
+        <div class="info-table">
+          {% for label, value in block.rows %}
+          <div class="info-table__row{% if forloop.counter|divisibleby:2 %} is-alt{% endif %}"><span>{{ label }}</span><span>{{ value }}</span></div>
+          {% endfor %}
+        </div>
+        {% elif block.type == 'steps' %}
+        {% if block.title %}<h2 class="info-h2 info-h2--block">{{ block.title }}</h2>{% endif %}
+        <ol class="info-steps">
+          {% for step in block.items %}
+          <li><span>{{ forloop.counter }}</span><span><strong>{{ step.title }}</strong> — {{ step.text }}</span></li>
+          {% endfor %}
+        </ol>
+        {% elif block.type == 'text' %}
+        {% if block.title %}<h2 class="info-h2 info-h2--block">{{ block.title }}</h2>{% endif %}
+        {% for p in block.paragraphs %}<p class="info-body">{{ p }}</p>{% endfor %}
+        {% if block.bullets %}
+        <ul class="info-bullets">
+          {% for b in block.bullets %}
+          <li><span class="info-bullets__dot"></span><span>{{ b }}</span></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% elif block.type == 'promos' %}
+        <div class="info-promos">
+          {% for item in block.items %}
+          <div class="info-promo">
+            <span class="info-promo__badge">{{ item.badge }}</span>
+            <span class="info-promo__title">{{ item.title }}</span>
+            <span class="info-promo__text">{{ item.text }}</span>
+            <span class="info-promo__until">{{ item.until }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% elif block.type == 'posts' %}
+        <p class="info-body"><a href="{% url 'pages:blog_list' %}">{% t 'Перейти до статей' %}</a></p>
+        {% elif block.type == 'form' %}
+        {% if block.title %}<h2 class="info-h2 info-h2--block" id="install-form-anchor">{{ block.title }}</h2>{% endif %}
+        {% include 'pages/partials/install_form.html' with form=install_form %}
+        {% endif %}
+      {% endfor %}
       {% endwith %}
 
       {% elif page_key == 'offer' %}

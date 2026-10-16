@@ -1,0 +1,26 @@
+{% load i18n_ui %}
+{% if form.non_field_errors %}
+<ul class="info-form-errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+{% endif %}
+<div class="install-form__grid">
+  <label class="cb-field">
+    <span>{{ form.name.label }}</span>
+    {{ form.name }}
+    {% if form.name.errors %}<span class="cb-field__err">{{ form.name.errors.0 }}</span>{% endif %}
+  </label>
+  <label class="cb-field">
+    <span>{{ form.phone.label }}</span>
+    {{ form.phone }}
+    {% if form.phone.errors %}<span class="cb-field__err">{{ form.phone.errors.0 }}</span>{% endif %}
+  </label>
+  <label class="cb-field install-form__full">
+    <span>{{ form.address.label }}</span>
+    {{ form.address }}
+  </label>
+  <label class="cb-field install-form__full">
+    <span>{{ form.comment.label }}</span>
+    {{ form.comment }}
+  </label>
+  {{ form.idempotency_key }}
+</div>
+<button type="submit" class="cb-modal__submit">{% t 'Замовити установку' %}</button>

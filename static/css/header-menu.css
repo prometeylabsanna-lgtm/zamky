@@ -21,7 +21,7 @@
 
 .mega__panel {
   position: absolute;
-  top: 96px;
+  top: 120px;
   left: max(var(--pad-x), calc((100% - var(--container)) / 2 + var(--pad-x)));
   z-index: 60;
   width: 331px;

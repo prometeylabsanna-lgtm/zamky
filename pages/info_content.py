@@ -207,9 +207,17 @@ def privacy():
 
 
 def for_page(key):
-    return {
+    from pages import info_content_2
+
+    handlers = {
         'about': about,
         'delivery': delivery,
         'offer': offer,
         'privacy': privacy,
-    }.get(key, about)()
+        'install': info_content_2.install,
+        'promos': info_content_2.promos,
+        'warranty': info_content_2.warranty,
+        'returns': info_content_2.returns,
+        'blog': info_content_2.blog_list_stub,
+    }
+    return handlers.get(key, about)()

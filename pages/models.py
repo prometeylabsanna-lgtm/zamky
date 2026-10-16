@@ -37,3 +37,21 @@ class ContactRequest(models.Model):
 
     def __str__(self):
         return f'{self.name} · {self.phone}'
+
+
+from pages.models_extra import (  # noqa: E402
+    BlogPost,
+    CallbackRequest,
+    InstallRequest,
+    PhotoPickImage,
+    PhotoPickRequest,
+)
+
+__all__ = [
+    'ContactRequest',
+    'CallbackRequest',
+    'PhotoPickRequest',
+    'PhotoPickImage',
+    'InstallRequest',
+    'BlogPost',
+]

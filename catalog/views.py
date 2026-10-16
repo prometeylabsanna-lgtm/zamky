@@ -1,14 +1,17 @@
 import json
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import Count, Max, Min, Prefetch, Q
+from django.db.models import Count, F, Max, Min, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
 
 from cart.services import WishlistService
 from orders.models import DeliveryDistrict
+from pages.forms_extra import PhotoPickForm
 from pages.i18n_lib import plural_goods, tr
+from pages.models_extra import BlogPost
+from pages.views_extra import _form_with_key
 
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
 
@@ -35,6 +38,64 @@ FILTER_OPEN_DEFAULT = {
 }
 
 PAGE_SIZE = 12
+
+HOME_CATEGORY_SUBS = [
+    'Врізні, накладні, електромеханічні',
+    'Секретність та надійність',
+    'Ручки, петлі, завіси і розетки',
+    'Захист від злому',
+    'Для комфортного закривання',
+    'Кодові замки, домофони, СКУД',
+]
+
+HOME_CATEGORY_IMAGES = [
+    'img/v2/p2_8.png',
+    'img/v2/p2_9.png',
+    'img/v2/p2_10.png',
+    'img/v2/p2_11.png',
+    'img/v2/p2_12.png',
+    'img/v2/p2_13.png',
+]
+
+BLOG_FALLBACK_COVERS = [
+    'img/v2/article1.png',
+    'img/v2/p2_34.png',
+    'img/v2/p2_35.png',
+    'img/v2/p2_36.png',
+]
+
+PICKER_PRICE_BANDS = [
+    'до 1500 ₴',
+    '1500 – 3000 ₴',
+    '3000 – 4500 ₴',
+    'від 4500 ₴',
+]
+
+
+def _home_picker_options():
+    base = Product.objects.filter(is_active=True, catalog_order__lt=500).exclude(
+        sku__startswith='HOME-'
+    )
+    av = AttributeValue.objects.filter(products__in=base)
+    mech = (
+        av.filter(attribute__slug='mech')
+        .order_by('sort_order', 'value')
+        .values('value', 'slug')
+        .distinct()
+    )
+    color = (
+        av.filter(attribute__slug='color')
+        .order_by('sort_order', 'value')
+        .values('value', 'slug')
+        .distinct()
+    )
+    brands = base.exclude(brand='').order_by('brand').values_list('brand', flat=True).distinct()
+    return {
+        'mech': [{'label': row['value'], 'slug': row['slug']} for row in mech],
+        'color': [{'label': row['value'], 'slug': row['slug']} for row in color],
+        'brand': [{'label': b, 'slug': b} for b in brands],
+        'price': [{'label': p, 'slug': p} for p in PICKER_PRICE_BANDS],
+    }
 
 
 class HomeView(TemplateView):
@@ -65,6 +126,13 @@ class HomeView(TemplateView):
                 .order_by('-created_at')
                 .prefetch_related('images')[:8]
             )
+        sales = (
+            Product.objects.filter(is_active=True, old_price__gt=F('price'))
+            .prefetch_related('images')
+            .order_by('catalog_order', 'pk')[:8]
+        )
+        if not sales:
+            sales = hits
 
         district = None
         is_city = False
@@ -77,54 +145,80 @@ class HomeView(TemplateView):
         elif city_slug == 'kyiv' or self.request.path.rstrip('/').endswith('/kyiv'):
             is_city = True
 
-        features = [
+        hero_slides = [
             {
-                'title': tr('Надійні\nзамки'),
-                'text': tr('Перевірені рішення\nдля захисту вашого дом'),
+                'image': f'img/v2/banner{i}.png',
+                'alt': tr('Акція Центр замків'),
+                'url': reverse('catalog:catalog'),
+            }
+            for i in range(1, 5)
+        ]
+        audience = [
+            {
+                'title': tr('Для дому'),
+                'text': tr('Квартири, приватні будинки'),
+                'icon': 'home',
+            },
+            {
+                'title': tr('Для бізнесу'),
+                'text': tr('Офіси, магазини, склади'),
+                'icon': 'biz',
+            },
+            {
+                'title': tr('Для майстрів'),
+                'text': tr('Та будівельних компаній'),
+                'icon': 'tools',
+            },
+            {
+                'title': tr('Максимальна безпека'),
+                'text': tr('Сертифікована продукція'),
                 'icon': 'shield',
             },
-            {
-                'title': tr('Популярні\nбренди'),
-                'text': 'Mottura, Cisa, Elbor, Guardian,\nApecs, Securemme, Kale',
-                'icon': 'award',
-            },
-            {
-                'title': tr('Допомога\nу виборі'),
-                'text': tr('Підберемо замок або\nсерцевину під ваші двері'),
-                'icon': 'chat',
-            },
-            {
-                'title': tr('Доставка\nпо Україні'),
-                'text': tr('Швидко відправляємо\nзамовлення'),
-                'icon': 'pin',
-            },
         ]
-        if district:
-            features = [
-                f
-                if i != 3
-                else {
-                    'title': tr('Доставка\nпо району'),
-                    'text': tr('{note}\nпо {district} району').format(
-                        note=tr(district.delivery_note),
-                        district=tr(district.name_locative),
-                    ),
-                    'icon': 'pin',
+        door_types = [
+            {'id': '0', 'image': 'img/v2/p2_14.png', 'line1': tr('Вхідні'), 'line2': tr('двері')},
+            {'id': '1', 'image': 'img/v2/p2_15.png', 'line1': tr('Міжкімнатні'), 'line2': tr('двері')},
+            {'id': '2', 'image': 'img/v2/p2_16.png', 'line1': tr('Металеві'), 'line2': tr('двері')},
+            {'id': '3', 'image': 'img/v2/p2_17.png', 'line1': tr('Пластикові'), 'line2': tr('двері')},
+            {'id': '4', 'image': 'img/v2/p2_18.png', 'line1': tr('Металеві'), 'line2': tr('електро')},
+        ]
+        blog_posts = BlogPost.objects.filter(is_published=True).order_by(
+            'sort_order', '-created_at'
+        )[:4]
+        cat_list = list(cats)
+        category_cards = []
+        for i, cat in enumerate(cat_list):
+            category_cards.append(
+                {
+                    'category': cat,
+                    'sub': tr(HOME_CATEGORY_SUBS[i])
+                    if i < len(HOME_CATEGORY_SUBS)
+                    else '',
+                    'fallback_image': HOME_CATEGORY_IMAGES[
+                        i if i < len(HOME_CATEGORY_IMAGES) else 0
+                    ],
                 }
-                for i, f in enumerate(features)
-            ]
+            )
 
         ctx.update(
             {
                 'categories': cats,
+                'category_cards': category_cards,
+                'blog_fallback_covers': BLOG_FALLBACK_COVERS,
                 'hits': hits,
                 'news': news,
+                'sales': sales,
+                'hero_slides': hero_slides,
+                'audience': audience,
+                'door_types': door_types,
+                'blog_posts': blog_posts,
+                'photo_pick_form': _form_with_key(self.request, PhotoPickForm, 'photo_pick'),
+                'picker_options': _home_picker_options(),
                 'district': district,
                 'is_city': is_city,
                 'other_districts': DeliveryDistrict.objects.filter(is_active=True).exclude(
                     pk=getattr(district, 'pk', None)
                 ),
-                'features': features,
             }
         )
         return ctx

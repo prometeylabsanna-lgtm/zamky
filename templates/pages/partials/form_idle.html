@@ -1,0 +1,34 @@
+{% load i18n_ui %}
+{% if form_kind == 'callback' or form_id == 'callback-form' %}
+  {% if form and form.non_field_errors %}
+  <ul class="cb-modal__errors">
+    {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  <div class="cb-modal__fields">
+    <label class="cb-field">
+      <span>{% t 'Телефон*' %}</span>
+      <input type="tel" name="phone" value="{% if form %}{{ form.phone.value|default:'' }}{% endif %}" placeholder="+38 (___) ___ - __ - __" autocomplete="tel" inputmode="tel" data-validate="phone" required>
+      {% if form and form.phone.errors %}<span class="cb-field__err">{{ form.phone.errors.0 }}</span>{% endif %}
+    </label>
+    <label class="cb-field">
+      <span>{% t 'Імʼя' %}</span>
+      <input type="text" name="name" value="{% if form %}{{ form.name.value|default:'' }}{% endif %}" placeholder="{% t 'Олександр' %}" autocomplete="name">
+    </label>
+    <input type="hidden" name="idempotency_key" value="{% if form and form.idempotency_key.value %}{{ form.idempotency_key.value }}{% else %}{{ callback_idempotency }}{% endif %}" id="callback-idem">
+    <button type="submit" class="cb-modal__submit">{% t 'Передзвоніть мені' %}</button>
+  </div>
+{% else %}
+  {% if form.non_field_errors %}
+  <ul class="info-form-errors">
+    {% for err in form.non_field_errors %}
+    <li>{{ err }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% for field in form %}
+    {% if field.name != 'idempotency_key' and field.errors %}
+    <p class="info-field-error" data-field="{{ field.name }}">{{ field.errors.0 }}</p>
+    {% endif %}
+  {% endfor %}
+{% endif %}

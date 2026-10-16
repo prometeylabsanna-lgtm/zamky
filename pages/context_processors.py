@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.conf import settings
 
@@ -44,6 +45,9 @@ def site_context(request):
     if request.resolver_match:
         url_name = request.resolver_match.url_name or ''
 
+    cb_key = request.session.get('callback_idempotency') or uuid.uuid4().hex
+    request.session['callback_idempotency'] = cb_key
+
     return {
         'site_city': city,
         'site_districts': districts,
@@ -53,6 +57,7 @@ def site_context(request):
         'header_menu': menu_payload(),
         'header_catalog_active': url_name in CATALOG_URL_NAMES,
         'js_i18n': js_i18n_dict(),
+        'callback_idempotency': cb_key,
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261008t',
+        'asset_v': '20261016v2',
     }

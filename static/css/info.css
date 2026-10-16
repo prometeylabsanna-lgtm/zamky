@@ -536,6 +536,7 @@
   }
 }
 
+
 @supports (-webkit-touch-callout: none) {
   .info-nav {
     -webkit-overflow-scrolling: touch;

@@ -1,0 +1,65 @@
+{% load i18n_ui %}
+<div class="home-photo-modal" id="home-photo-modal" aria-hidden="true" hidden>
+  <div class="home-photo-modal__backdrop" data-photo-close tabindex="-1"></div>
+  <div class="home-photo-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="home-photo-title">
+    <div class="home-photo-modal__head">
+      <div>
+        <h2 id="home-photo-title" class="home-photo-modal__title">{% t 'Підбір за фото' %}</h2>
+        <p class="home-photo-modal__lead">{% t 'Завантажте фото дверей або старого замка — ми підберемо аналог' %}</p>
+      </div>
+      <button type="button" class="home-icon-btn" data-photo-close aria-label="{% t 'Закрити' %}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+      </button>
+    </div>
+    <ul class="home-photo-modal__steps">
+      <li><span class="home-photo-modal__step-n">1</span><span class="home-photo-modal__step-t">{% t 'Сфотографуйте' %}</span><span class="home-photo-modal__step-s">{% t 'Двері, замок або циліндр з торця' %}</span></li>
+      <li><span class="home-photo-modal__step-n">2</span><span class="home-photo-modal__step-t">{% t 'Надішліть нам' %}</span><span class="home-photo-modal__step-s">{% t 'Відповідаємо за 15 хвилин' %}</span></li>
+      <li><span class="home-photo-modal__step-n">3</span><span class="home-photo-modal__step-t">{% t 'Отримайте підбір' %}</span><span class="home-photo-modal__step-s">{% t '2–3 варіанти аналога з цінами' %}</span></li>
+    </ul>
+    <div class="home-photo-modal__body" id="home-photo-body">
+      <form id="home-photo-form" class="home-photo-form" method="post" action="{% url 'pages:photo_pick' %}" enctype="multipart/form-data" data-validate-form novalidate>
+        {% csrf_token %}
+        {{ photo_pick_form.idempotency_key }}
+        <input type="file" name="photos" id="home-photo-files" accept="image/*" multiple hidden>
+        <div class="home-photo-drop" data-photo-drop>
+          <button type="button" class="home-photo-drop__btn" data-photo-pick>
+            <span class="home-photo-drop__icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 4h8l1.5 2.5H21V20H3V6.5h3.5z"></path><circle cx="12" cy="13" r="4" fill="#F97F0C"></circle><circle cx="12" cy="13" r="2.4" fill="#fff"></circle></svg>
+            </span>
+            <span class="home-photo-drop__title">{% t 'Завантажити фото' %}</span>
+            <span class="home-photo-drop__hint">{% t 'Перетягніть сюди або натисніть · до 5 фото' %}</span>
+          </button>
+        </div>
+        <div class="home-photo-previews" data-photo-previews hidden></div>
+        <label class="home-photo-field{% if photo_pick_form.phone.errors %} is-invalid{% endif %}">
+          {{ photo_pick_form.phone }}
+          <span class="home-photo-field__err" data-field-error>{% if photo_pick_form.phone.errors %}{{ photo_pick_form.phone.errors.0 }}{% endif %}</span>
+        </label>
+        <div class="home-photo-channels" role="group" aria-label="{% t 'Канал звʼязку' %}">
+          {% for value, label in photo_pick_form.fields.channel.choices %}
+          <label class="home-photo-channel">
+            <input type="radio" name="channel" value="{{ value }}"{% if photo_pick_form.channel.value == value or forloop.first and not photo_pick_form.channel.value %} checked{% endif %}>
+            <span>{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <p class="home-photo-form__global" data-photo-global></p>
+        <button type="submit" class="home-btn-grad home-photo-form__submit" data-photo-submit>
+          <span>{% t 'Надіслати фото' %}</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg>
+        </button>
+      </form>
+    </div>
+    <div class="home-photo-modal__done" id="home-photo-done" hidden>
+      <span class="home-photo-modal__done-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="m4 12 5 5L20 7"></path></svg>
+      </span>
+      <p class="home-photo-modal__done-title">{% t 'Фото отримали' %}</p>
+      <p class="home-photo-modal__done-text" data-photo-done-msg></p>
+      <div class="home-photo-modal__done-actions">
+        <button type="button" class="home-btn-solid" data-photo-close>{% t 'Готово' %}</button>
+        <button type="button" class="home-btn-soft" data-photo-again>{% t 'Надіслати ще фото' %}</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,58 +1,73 @@
 {% load static i18n_ui %}
 {{ header_menu|json_script:"header-menu-data" }}
-<div class="site-header">
+<div class="site-header" data-site-header>
   <header class="site-header__inner">
-    <div class="header-desktop">
-      <a href="{% url 'catalog:home' %}" class="logo logo--desktop">Logo</a>
-      <nav class="header-nav">
-        <button type="button" class="header-nav__btn{% if header_catalog_active %} is-current{% endif %}" data-open-mega>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
-          <span>{% t 'Каталог' %}</span>
-        </button>
-        <a class="header-nav__link" href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
-        <a class="header-nav__link" href="{% url 'pages:info_page' 'about' %}">{% t 'Про нас' %}</a>
-      </nav>
-      <div class="header-spacer"></div>
-      {% include 'partials/header_district.html' %}
-      {% include 'partials/header_search.html' %}
-      {% include 'partials/header_contacts.html' %}
-      {% include 'partials/header_lang.html' %}
-      <a href="{% url 'cart:wishlist_page' %}" class="wish-btn" aria-label="{% t 'Обране' %}">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"></path></svg>
-        {% include 'cart/partials/wishlist_badge.html' with badge_id='wishlist-badge' %}
-      </a>
-      <button type="button" class="cart-btn" data-open-cart aria-label="{% t 'Кошик' %}">
-        {% include 'partials/icon_cart.html' %}
-        {% include 'cart/partials/badge.html' %}
+    <div class="hdr-top">
+      <button type="button" class="hdr-icon-btn hdr-burger" data-open-menu aria-label="{% t 'Меню' %}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h9"></path></svg>
       </button>
+
+      <a href="{% url 'catalog:home' %}" class="hdr-logo">
+        <img src="{% static 'img/logo.png' %}" alt="{% t 'Центр замків' %}" width="120" height="48">
+      </a>
+
+      <form class="hdr-search hdr-search--inline" action="{% url 'catalog:catalog' %}" method="get" role="search">
+        <input type="search" name="q" placeholder="{% t 'Пошук замків, циліндрів, накладок,брендів...' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search">
+        <button type="submit" class="hdr-search__btn" aria-label="{% t 'Пошук' %}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path fill-rule="evenodd" d="M10.8 2.8a8 8 0 0 1 6.4 12.8l3.6 3.6a1.4 1.4 0 0 1-2 2l-3.6-3.6A8 8 0 1 1 10.8 2.8z"></path></svg>
+        </button>
+      </form>
+
+      <div class="hdr-phone">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.6 2.8c.6-.1 1.2.2 1.5.8l1.5 3.3c.3.6.1 1.3-.4 1.7l-1.6 1.3a12 12 0 0 0 5.5 5.5l1.3-1.6c.4-.5 1.1-.7 1.7-.4l3.3 1.5c.6.3.9.9.8 1.5l-.4 2.4c-.2 1-1 1.7-2 1.7C10.6 20.5 3.5 13.4 3.5 5.2c0-1 .7-1.8 1.7-2z"></path></svg>
+        <div class="hdr-phone__meta">
+          <a href="tel:+380670000000">(067) 000 00 00</a>
+          <span>{% t 'Щоденно 8:00-21:00' %}</span>
+          <button type="button" class="hdr-phone__cb" data-open-callback>{% t 'Замовити дзвінок' %}</button>
+        </div>
+      </div>
+
+      <div class="hdr-actions">
+        {% include 'partials/header_lang.html' with compact=1 %}
+        <a href="{% url 'cart:wishlist_page' %}" class="hdr-icon-btn" aria-label="{% t 'Обране' %}">
+          {% include 'cart/partials/wishlist_badge.html' with badge_id='wishlist-badge' %}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.6c-.3 0-.6-.1-.8-.3C5.6 15.7 2.5 12.8 2.5 8.9 2.5 6 4.7 3.8 7.5 3.8c1.8 0 3.4.9 4.5 2.4 1.1-1.5 2.7-2.4 4.5-2.4 2.8 0 5 2.2 5 5.1 0 3.9-3.1 6.8-8.7 11.4-.2.2-.5.3-.8.3z"></path></svg>
+        </a>
+        <button type="button" class="hdr-icon-btn" data-open-cart aria-label="{% t 'Кошик' %}">
+          {% include 'cart/partials/badge.html' %}
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.5 4.5 6 8M15.5 4.5 18 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M2.5 8.6h19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M4 10h16l-1.6 7.2A3.5 3.5 0 0 1 15 20H9a3.5 3.5 0 0 1-3.4-2.8z" fill="currentColor"></path><path d="M10.3 12.8v3.2M13.7 12.8v3.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"></path></svg>
+        </button>
+      </div>
     </div>
 
-    <div class="header-compact">
-      <div class="header-compact__row">
-        <a href="{% url 'catalog:home' %}" class="logo logo--compact">Logo</a>
-        <nav class="header-nav header-nav--tablet">
-          <a class="header-nav__link" href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
-        </nav>
-        <div class="header-spacer"></div>
-        {% include 'partials/header_lang.html' with compact=1 %}
-        <a href="{% url 'cart:wishlist_page' %}" class="wish-btn" aria-label="{% t 'Обране' %}">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"></path></svg>
-          {% include 'cart/partials/wishlist_badge.html' with badge_id='wishlist-badge-mobile' %}
-        </a>
-        <button type="button" class="cart-btn" data-open-cart aria-label="{% t 'Кошик' %}">
-          {% include 'partials/icon_cart.html' %}
-          {% include 'cart/partials/badge.html' with badge_id='cart-badge-mobile' %}
-        </button>
-        <button type="button" class="header-menu-btn" data-open-menu aria-label="{% t 'Меню' %}">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
-        </button>
-      </div>
-      <div class="header-compact__tools">
-        {% include 'partials/header_search.html' with compact=1 %}
-        {% include 'partials/header_district.html' with compact=1 %}
-        {% include 'partials/header_contacts.html' with compact=1 %}
-      </div>
-    </div>
+    <form class="hdr-search hdr-search--below" action="{% url 'catalog:catalog' %}" method="get" role="search">
+      <input type="search" name="q" placeholder="{% t 'Пошук замків, циліндрів, накладок,брендів...' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search">
+      <button type="submit" class="hdr-search__btn" aria-label="{% t 'Пошук' %}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path fill-rule="evenodd" d="M10.8 2.8a8 8 0 0 1 6.4 12.8l3.6 3.6a1.4 1.4 0 0 1-2 2l-3.6-3.6A8 8 0 1 1 10.8 2.8z"></path></svg>
+      </button>
+    </form>
+
+    <nav class="hdr-nav" aria-label="{% t 'Основна навігація' %}">
+      <button type="button" class="hdr-nav__catalog{% if header_catalog_active %} is-current{% endif %}" data-open-mega>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2.6"></rect><rect x="13" y="3" width="8" height="8" rx="2.6"></rect><rect x="3" y="13" width="8" height="8" rx="2.6"></rect><path d="M17 13.2c.6 0 1.1.5 1.1 1.1v1.6h1.6a1.1 1.1 0 0 1 0 2.2h-1.6v1.6a1.1 1.1 0 0 1-2.2 0v-1.6h-1.6a1.1 1.1 0 0 1 0-2.2h1.6v-1.6c0-.6.5-1.1 1.1-1.1z"></path></svg>
+        <span>{% t 'Каталог товарів' %}</span>
+      </button>
+      {% for c in header_menu %}
+      {% if forloop.counter <= 6 %}
+      <a class="hdr-nav__link" href="{% url 'catalog:catalog' %}?q={{ c.name|urlencode }}">{{ c.name }}</a>
+      {% endif %}
+      {% endfor %}
+      <a class="hdr-nav__promo" href="{% url 'pages:info_page' 'promos' %}">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="hdrPromoG" x1="0" y1="0" x2="1" y2="1"><stop offset=".32" stop-color="#F97F0C"></stop><stop offset="1" stop-color="#FF2E2E"></stop></linearGradient></defs><path d="M12 1l2.4 2.1 3.1-.5.9 3 3 .9-.5 3.1L23 12l-2.1 2.4.5 3.1-3 .9-.9 3-3.1-.5L12 23l-2.4-2.1-3.1.5-.9-3-3-.9.5-3.1L1 12l2.1-2.4-.5-3.1 3-.9.9-3 3.1.5z" fill="url(#hdrPromoG)"></path><path d="M9 15l6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9.3" cy="9.3" r="1.3" fill="#fff"></circle><circle cx="14.7" cy="14.7" r="1.3" fill="#fff"></circle></svg>
+        <span>{% t 'Акції' %}</span>
+      </a>
+      <a class="hdr-nav__install" href="{% url 'pages:info_page' 'install' %}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="2" y="3" width="13" height="7" rx="2"></rect><path d="M15 5h3l3-2v7l-3-2h-3z"></path><path d="M6 10h5l-1 4H7z"></path><rect x="6.5" y="14" width="4" height="7" rx="1"></rect></svg>
+        <span>{% t 'Установка' %}</span>
+      </a>
+    </nav>
   </header>
   {% include 'partials/header_mega.html' %}
 </div>
+
+{% include 'partials/callback_modal.html' %}

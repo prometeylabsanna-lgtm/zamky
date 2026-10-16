@@ -3,7 +3,9 @@
   <div class="mnav__backdrop" data-close-menu></div>
   <nav class="mnav__panel" aria-label="{% t 'Меню' %}">
     <div class="mnav__head">
-      <a href="{% url 'catalog:home' %}" class="logo logo--compact">Logo</a>
+      <a href="{% url 'catalog:home' %}" class="hdr-logo">
+        <img src="{% static 'img/logo.png' %}" alt="{% t 'Центр замків' %}" width="96" height="40">
+      </a>
       <button type="button" class="mnav__close" data-close-menu aria-label="{% t 'Закрити' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
       </button>
@@ -27,20 +29,24 @@
           </li>
           {% endfor %}
         </ul>
+        <div class="mnav__links mnav__links--grid">
+          <a href="{% url 'pages:info_page' 'promos' %}">{% t 'Акції' %}</a>
+          <a href="{% url 'pages:info_page' 'install' %}">{% t 'Установка' %}</a>
+        </div>
         <div class="mnav__links">
-          <a href="{% url 'catalog:home' %}#new">{% t 'Новинки' %}</a>
           <a href="{% url 'cart:wishlist_page' %}">{% t 'Обране' %}</a>
-          <a href="{% url 'pages:info_page' 'about' %}">{% t 'Про нас' %}</a>
-          <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка і оплата' %}</a>
-          <a href="{% url 'pages:info_page' 'contacts' %}">{% t 'Контакти' %}</a>
+          <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка та оплата' %}</a>
+          <a href="{% url 'pages:info_page' 'warranty' %}">{% t 'Гарантія' %}</a>
+          <a href="{% url 'pages:blog_list' %}">{% t 'Корисне для вибору' %}</a>
           <a class="mnav__links--muted" href="{% url 'pages:info_page' 'offer' %}">{% t 'Публічна оферта' %}</a>
           <a class="mnav__links--muted" href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
         </div>
         <div class="mnav__phones">
-          <span class="mnav__phones-label">{% t 'Наші контакти' %}</span>
-          <a href="tel:0670000000">067 00 00 00</a>
-          <a href="tel:0660000000">066 00 00 00</a>
-          <a class="mnav__mail" href="mailto:xxx@gmail.com">xxx@gmail.com</a>
+          <span class="mnav__phones-label">{% t 'Контакти' %}</span>
+          <a href="tel:+380670000000">(067) 000 00 00</a>
+          <span class="mnav__hours">{% t 'Щоденно 8:00-21:00' %}</span>
+          <a class="mnav__mail" href="mailto:info@centrzamkiv.ua">info@centrzamkiv.ua</a>
+          <button type="button" class="mnav__cb" data-open-callback data-close-menu>{% t 'Замовити дзвінок' %}</button>
         </div>
         <div class="mnav__langs">
           <button type="button" class="mnav__lang {% if site_lang == 'UA' %}is-active{% endif %}" data-set-lang="ua">UA</button>

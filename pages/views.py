@@ -16,11 +16,26 @@ from .models import ContactRequest
 INFO_PAGES = {
     'about': {'name': 'Про нас'},
     'delivery': {'name': 'Доставка і оплата'},
+    'warranty': {'name': 'Гарантія'},
+    'returns': {'name': 'Обмін та повернення'},
+    'install': {'name': 'Установка'},
+    'promos': {'name': 'Акції'},
+    'blog': {'name': 'Корисне для вибору'},
     'offer': {'name': 'Публічна оферта'},
     'privacy': {'name': 'Політика конфіденційності'},
 }
 
-INFO_NAV = ('about', 'delivery', 'offer', 'privacy')
+INFO_NAV = (
+    'about',
+    'delivery',
+    'warranty',
+    'returns',
+    'install',
+    'promos',
+    'blog',
+    'offer',
+    'privacy',
+)
 
 LANG_ALIASES = {
     'UA': 'ua',
@@ -127,6 +142,11 @@ class InfoView(TemplateView):
                 'form': ctx.get('form') or _new_form(self.request),
             }
         )
+        if page_key == 'install' and 'install_form' not in ctx:
+            from pages.views_extra import _form_with_key
+            from pages.forms_extra import InstallForm
+
+            ctx['install_form'] = _form_with_key(self.request, InstallForm, 'install')
         return ctx
 
 
