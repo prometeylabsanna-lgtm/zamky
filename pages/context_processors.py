@@ -59,5 +59,5 @@ def site_context(request):
         'js_i18n': js_i18n_dict(),
         'callback_idempotency': cb_key,
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261016v2',
+        'asset_v': '20261016v3',
     }

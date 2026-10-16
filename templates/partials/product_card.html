@@ -1,5 +1,5 @@
 {% load i18n_ui static %}
-<a href="{{ product.get_absolute_url }}" class="product-card{% if compact %} product-card--compact{% endif %}">
+<a href="{{ product.get_absolute_url }}" class="product-card{% if compact %} product-card--compact{% endif %}{% if home_card %} product-card--home{% endif %}">
   <div class="product-card__img{% if product.stock_status == 'out' %} is-out{% endif %}">
     {% with img=product.primary_image %}
       {% if img %}

@@ -335,6 +335,19 @@
     width: 220px;
   }
 
+  .product-card--home .product-card__img {
+    height: 170px;
+  }
+
+  .product-card--home .product-card__price {
+    font-size: 20px;
+  }
+
+  .product-card--home .product-card__cart {
+    width: 48px;
+    height: 48px;
+  }
+
   .home-popular__track {
     gap: 12px;
   }
@@ -495,6 +508,18 @@
 
   .home-popular__item {
     width: 240px;
+  }
+
+  .home-popular__item > a.product-card {
+    padding: 14px;
+  }
+
+  .product-card--home .product-card__img {
+    height: 190px;
+  }
+
+  .product-card--home .product-card__price {
+    font-size: 22px;
   }
 
   .home-blog {

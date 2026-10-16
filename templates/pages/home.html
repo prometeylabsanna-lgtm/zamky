@@ -176,21 +176,21 @@
     <div class="home-popular__panel is-active" data-pop-panel="hits">
       <div class="home-popular__track ic-scroll" data-pop-track>
         {% for product in hits %}
-        <div class="home-popular__item">{% include 'partials/product_card.html' with eager=True %}</div>
+        <div class="home-popular__item">{% include 'partials/product_card.html' with eager=True home_card=True %}</div>
         {% endfor %}
       </div>
     </div>
     <div class="home-popular__panel" data-pop-panel="news" hidden>
       <div class="home-popular__track ic-scroll" data-pop-track>
         {% for product in news %}
-        <div class="home-popular__item">{% include 'partials/product_card.html' %}</div>
+        <div class="home-popular__item">{% include 'partials/product_card.html' with home_card=True %}</div>
         {% endfor %}
       </div>
     </div>
     <div class="home-popular__panel" data-pop-panel="sales" hidden>
       <div class="home-popular__track ic-scroll" data-pop-track>
         {% for product in sales %}
-        <div class="home-popular__item">{% include 'partials/product_card.html' %}</div>
+        <div class="home-popular__item">{% include 'partials/product_card.html' with home_card=True %}</div>
         {% endfor %}
       </div>
     </div>
