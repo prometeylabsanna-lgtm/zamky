@@ -19,7 +19,7 @@ _STATIC_CONTENT = re.compile(
     r"""\{\%\s*static\s+['\"]img/(?!icons/|vendor/)([^'\"]+)['\"]"""
 )
 _ARIA_ALLOW = re.compile(
-    r"(aria-label|placeholder|alt)=|data-theme-toggle|Breadcrumbs|role="
+    r"(aria-label|placeholder|alt)=|Breadcrumbs|role="
 )
 
 # UI-chrome, не маркетинговий контент сторінки (warn, не blocker)

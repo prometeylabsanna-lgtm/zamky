@@ -26,9 +26,9 @@ SURFACES: dict[str, dict] = {
     "site.theme": {
         "mode": "tokens",
         "note": (
-            "visitor toggle data-theme light/dark (localStorage zamky_theme); "
-            "light: білий+#f97f0c+#ffc400; dark: #0a0a0a+#f97f0c+#ffc400; "
-            "ActiveTheme brand override — окремо (не в цьому гейті)"
+            "лише Unfold-адмінка (вбудований light/dark toggle); "
+            "публічний сайт — без теми, дизайн не чіпаємо; "
+            "brand COLORS primary #f97f0c у UNFOLD"
         ),
     },
     "home.hero": {
@@ -104,7 +104,7 @@ PIPELINE_STATUS = {
     "G2": "embedded_in_manifest",
     "G3": "pass",
     "G4": "pass_home_header_footer_product",
-    "G5": "pass_visitor_theme_toggle",
+    "G5": "pass_admin_unfold_theme_only",
     "G6": "pass_mediaitem",
     "G7": "pass_seed_parity",
     "G8": "pass_blockers_0_warns_debt",

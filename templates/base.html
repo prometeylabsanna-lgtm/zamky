@@ -1,21 +1,9 @@
 {% load static i18n_ui %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'ua' }}" data-asset-v="{{ asset_v }}" data-theme="light">
+<html lang="{{ LANGUAGE_CODE|default:'ua' }}" data-asset-v="{{ asset_v }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script>
-    (function () {
-      try {
-        var t = localStorage.getItem('zamky_theme');
-        if (t === 'dark' || t === 'light') {
-          document.documentElement.setAttribute('data-theme', t);
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-        }
-      } catch (e) {}
-    })();
-  </script>
   <title>{% block title %}{% t 'Центр замків' %}{% endblock %}</title>
   {% if site_settings and site_settings.favicon %}
   <link rel="icon" href="{{ site_settings.favicon.url }}" sizes="any">
@@ -29,7 +17,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ asset_v }}">
-  <link rel="stylesheet" href="{% static 'css/theme-dark.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/header.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/header-search.css' %}?v={{ asset_v }}">
@@ -60,7 +47,6 @@
   {% include 'partials/header_mnav.html' %}
   <div id="cart-toast" class="toast" aria-live="polite"></div>
   <script src="{% static 'vendor/htmx.min.js' %}?v={{ asset_v }}"></script>
-  <script src="{% static 'js/theme.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/header.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/search.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/main.js' %}?v={{ asset_v }}"></script>

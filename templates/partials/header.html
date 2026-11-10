@@ -35,7 +35,6 @@
       </div>
 
       <div class="hdr-actions">
-        {% include 'partials/header_theme.html' %}
         {% include 'partials/header_lang.html' with compact=1 %}
         <a href="{% url 'cart:wishlist_page' %}" class="hdr-icon-btn" aria-label="{% t 'Обране' %}">
           {% include 'cart/partials/wishlist_badge.html' with badge_id='wishlist-badge' %}
