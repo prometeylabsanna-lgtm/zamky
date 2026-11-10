@@ -48,6 +48,8 @@ urlpatterns += i18n_patterns(
     prefix_default_language=True,
 )
 
-if settings.DEBUG:
+# Media з /tmp на Vercel; локально — лише в DEBUG.
+if settings.DEBUG or getattr(settings, 'IS_VERCEL', False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

@@ -1,12 +1,28 @@
+import os
 from pathlib import Path
 
 from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+# Vercel free preview: без Project Env. Прод на DO — тільки через env.
+IS_VERCEL = bool(os.environ.get('VERCEL'))
+
+SECRET_KEY = config(
+    'SECRET_KEY',
+    default='vercel-demo-insecure-key-replace-on-digitalocean',
+)
+DEBUG = config('DEBUG', default=IS_VERCEL, cast=bool)
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,.vercel.app',
+    cast=Csv(),
+)
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='https://*.vercel.app',
+    cast=Csv(),
+)
 
 INSTALLED_APPS = [
     'unfold',
@@ -59,10 +75,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# На Vercel файлова система read-only; SQLite лише в /tmp (дані злітають після cold start).
+_DB_NAME = Path('/tmp/zamky.sqlite3') if IS_VERCEL else (BASE_DIR / 'db.sqlite3')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': _DB_NAME,
     }
 }
 
@@ -125,7 +143,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = Path('/tmp/zamky-media') if IS_VERCEL else (BASE_DIR / 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
