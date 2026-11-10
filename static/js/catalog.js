@@ -149,10 +149,30 @@
     }
   }
 
+  function applyHashTitle() {
+    var raw = location.hash ? location.hash.slice(1) : '';
+    if (!raw) return;
+    var titleText;
+    try {
+      titleText = decodeURIComponent(raw);
+    } catch (err) {
+      return;
+    }
+    if (!titleText) return;
+    var title = qs('.page-title');
+    var crumb = qs('.breadcrumbs span:last-child');
+    if (title) title.textContent = titleText;
+    if (crumb) crumb.textContent = titleText;
+    document.title = titleText + ' — Каталог';
+  }
+
   initCatalog(document);
+  applyHashTitle();
+  window.addEventListener('hashchange', applyHashTitle);
   window.addEventListener('resize', syncSortPrefix);
   document.body.addEventListener('htmx:afterSwap', function (e) {
     initCatalog(document);
+    applyHashTitle();
     if (e.detail && e.detail.target && e.detail.target.id === 'catalog-grid') {
       closeFilters();
     }

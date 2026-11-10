@@ -92,6 +92,12 @@
     return pref + '/catalog/';
   }
 
+  function goCatalog(title) {
+    var url = catalogUrl();
+    if (title) url += '#' + encodeURIComponent(title);
+    location.href = url;
+  }
+
   function renderMega() {
     if (!mega) return;
     var cat = megaState.cat != null ? menuData[megaState.cat] : null;
@@ -186,6 +192,14 @@
       if (subBtn) {
         megaState.sub = Number(subBtn.getAttribute('data-mega-sub'));
         renderMega();
+        return;
+      }
+      var leafBtn = e.target.closest('[data-mega-leaf]');
+      if (leafBtn && megaState.cat != null && megaState.sub != null) {
+        var leafCat = menuData[megaState.cat];
+        var leafSub = leafCat && leafCat.subs[megaState.sub];
+        var leafName = leafSub && leafSub.leaves[Number(leafBtn.getAttribute('data-mega-leaf'))];
+        if (leafName) goCatalog(leafName);
       }
     });
   }
@@ -280,6 +294,14 @@
       if (subBtn) {
         mnavState.sub = Number(subBtn.getAttribute('data-mnav-sub'));
         renderMnav();
+        return;
+      }
+      var leafBtn = e.target.closest('[data-mnav-leaf]');
+      if (leafBtn && mnavState.cat != null && mnavState.sub != null) {
+        var mCat = menuData[mnavState.cat];
+        var mSub = mCat && mCat.subs[mnavState.sub];
+        var mLeaf = mSub && mSub.leaves[Number(leafBtn.getAttribute('data-mnav-leaf'))];
+        if (mLeaf) goCatalog(mLeaf);
         return;
       }
       var back = e.target.closest('[data-mnav-back]');

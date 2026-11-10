@@ -145,6 +145,17 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = Path('/tmp/zamky-media') if IS_VERCEL else (BASE_DIR / 'media')
 
+# На Vercel media з /tmp нестабільні між інстансами — демо-фото з static/ через CDN.
+if IS_VERCEL:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'config.storage.StaticRefStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
