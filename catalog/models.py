@@ -168,16 +168,16 @@ class Product(models.Model):
     description = models.TextField('Опис', blank=True)
     description_ru = models.TextField('Опис (RU)', blank=True, default='')
     name_ru = models.CharField('Назва (RU)', max_length=300, blank=True, default='')
-    seo_title = models.CharField('SEO title', max_length=200, blank=True, default='')
-    seo_title_ru = models.CharField('SEO title (RU)', max_length=200, blank=True, default='')
+    seo_title = models.CharField('SEO заголовок', max_length=200, blank=True, default='')
+    seo_title_ru = models.CharField('SEO заголовок (RU)', max_length=200, blank=True, default='')
     seo_description = models.CharField(
-        'SEO description', max_length=320, blank=True, default=''
+        'SEO опис', max_length=320, blank=True, default=''
     )
     seo_description_ru = models.CharField(
-        'SEO description (RU)', max_length=320, blank=True, default=''
+        'SEO опис (RU)', max_length=320, blank=True, default=''
     )
-    canonical_url = models.CharField('Canonical URL', max_length=512, blank=True, default='')
-    og_image = models.ImageField('OG image', upload_to='products/og/', blank=True, null=True)
+    canonical_url = models.CharField('Канонічний URL', max_length=512, blank=True, default='')
+    og_image = models.ImageField('OG зображення', upload_to='products/og/', blank=True, null=True)
     attributes = models.ManyToManyField(
         AttributeValue,
         through='ProductAttribute',
@@ -276,8 +276,17 @@ class Product(models.Model):
 
 
 class ProductAttribute(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_attributes')
-    attribute_value = models.ForeignKey(AttributeValue, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='product_attributes',
+        verbose_name='Товар',
+    )
+    attribute_value = models.ForeignKey(
+        AttributeValue,
+        on_delete=models.CASCADE,
+        verbose_name='Значення атрибута',
+    )
 
     class Meta:
         verbose_name = 'Характеристика товару'

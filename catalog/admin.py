@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 
+from pages.admin_mixins import DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin
+
 from .models import (
     Attribute,
     AttributeGroup,
@@ -18,6 +20,8 @@ class AttributeValueInline(TabularInline):
     model = AttributeValue
     extra = 1
     tab = True
+    verbose_name = 'Значення атрибута'
+    verbose_name_plural = 'Значення атрибутів'
 
 
 class ProductImageInline(TabularInline):
@@ -26,6 +30,8 @@ class ProductImageInline(TabularInline):
     tab = True
     fields = ('preview', 'image', 'alt', 'sort_order', 'is_primary')
     readonly_fields = ('preview',)
+    verbose_name = 'Зображення товару'
+    verbose_name_plural = 'Зображення товарів'
 
     @admin.display(description='Превʼю')
     def preview(self, obj):
@@ -46,6 +52,8 @@ class ProductAttributeInline(TabularInline):
     extra = 1
     autocomplete_fields = ('attribute_value',)
     tab = True
+    verbose_name = 'Характеристика'
+    verbose_name_plural = 'Характеристики'
 
 
 class ProductVariantInline(TabularInline):
@@ -63,10 +71,12 @@ class ProductVariantInline(TabularInline):
     )
     show_change_link = True
     tab = True
+    verbose_name = 'Варіант'
+    verbose_name_plural = 'Варіанти'
 
 
 @admin.register(Category)
-class CategoryAdmin(ModelAdmin):
+class CategoryAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'parent', 'sort_order', 'is_active')
     list_filter = ('is_active', 'parent')
     search_fields = ('name', 'slug')
@@ -74,14 +84,14 @@ class CategoryAdmin(ModelAdmin):
 
 
 @admin.register(AttributeGroup)
-class AttributeGroupAdmin(ModelAdmin):
+class AttributeGroupAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'sort_order')
     search_fields = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Attribute)
-class AttributeAdmin(ModelAdmin):
+class AttributeAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'group', 'filterable', 'sort_order')
     list_filter = ('filterable', 'group')
     search_fields = ('name', 'slug')
@@ -91,7 +101,7 @@ class AttributeAdmin(ModelAdmin):
 
 
 @admin.register(AttributeValue)
-class AttributeValueAdmin(ModelAdmin):
+class AttributeValueAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('value', 'attribute', 'slug', 'sort_order')
     list_filter = ('attribute',)
     search_fields = ('value', 'slug')
@@ -99,7 +109,7 @@ class AttributeValueAdmin(ModelAdmin):
 
 
 @admin.register(ProductFamily)
-class ProductFamilyAdmin(ModelAdmin):
+class ProductFamilyAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'brand')
     search_fields = ('name', 'slug', 'brand')
     prepopulated_fields = {'slug': ('name',)}
@@ -107,22 +117,18 @@ class ProductFamilyAdmin(ModelAdmin):
 
 
 @admin.register(Product)
-class ProductAdmin(ModelAdmin):
+class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelAdmin):
     list_display = (
-        'thumb',
         'name',
         'sku',
-        'family',
-        'color_label',
-        'size_mm',
         'category',
         'price',
         'stock',
-        'catalog_order',
         'is_active',
         'is_hit',
         'is_new',
     )
+    list_display_links = ('name', 'sku')
     list_filter = (
         'is_active',
         'is_hit',
@@ -200,23 +206,9 @@ class ProductAdmin(ModelAdmin):
         css = {'all': ('css/admin/lang_tabs.css',)}
         js = ('js/admin/lang_tabs.js',)
 
-    @admin.display(description='')
-    def thumb(self, obj):
-        img = obj.images.filter(is_primary=True).first() or obj.images.first()
-        if not img or not img.image:
-            return '—'
-        try:
-            return format_html(
-                '<img src="{}" alt="" style="width:40px;height:40px;'
-                'object-fit:cover;border-radius:4px">',
-                img.image.url,
-            )
-        except Exception:
-            return '—'
-
 
 @admin.register(ProductImage)
-class ProductImageAdmin(ModelAdmin):
+class ProductImageAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('preview', 'product', 'sort_order', 'is_primary', 'alt')
     list_filter = ('is_primary',)
     search_fields = ('product__name', 'product__sku', 'alt')

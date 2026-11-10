@@ -1,0 +1,20 @@
+{% load i18n %}
+
+{% with choices.0 as choice %}
+<div class="zamky-filter__inner zamky-filter__inner--date">
+  <span class="zamky-filter__label">
+    {% if has_label and label %}{{ label }}{% else %}{{ title }}{% endif %}
+  </span>
+  <div class="zamky-filter__dates">
+    {% for field in choice.form %}
+      <div class="zamky-filter__date-field{% if field.errors %} errors{% endif %}">
+        {{ field }}
+        {% include "unfold/helpers/form_errors.html" with errors=field.errors %}
+      </div>
+      {% if not forloop.last %}
+        <span class="zamky-filter__dates-sep" aria-hidden="true">—</span>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endwith %}

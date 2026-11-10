@@ -1,0 +1,15 @@
+{% load i18n %}
+
+{% with choices.0 as choice %}
+<div class="zamky-filter__inner zamky-filter__inner--select">
+  {% for field in choice.form %}
+    {% if field.label %}
+      <label class="zamky-filter__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% endif %}
+    <div class="zamky-filter__control{% if field.errors %} errors{% endif %}">
+      {{ field }}
+      {% include "unfold/helpers/form_errors.html" with errors=field.errors %}
+    </div>
+  {% endfor %}
+</div>
+{% endwith %}

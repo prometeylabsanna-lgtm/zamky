@@ -1,12 +1,12 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 
+from pages.admin_mixins import TopDropdownFiltersMixin
 from pages.admin_site_content_proxies import (
     SingletonModelAdminMixin,
     register_site_content_section_admins,
 )
-from django.utils.html import format_html
-
 from pages.models import ContactRequest
 from pages.models_cms import SiteSettings
 from pages.models_extra import (
@@ -20,7 +20,7 @@ from pages.models_media import MediaItem
 
 
 @admin.register(MediaItem)
-class MediaItemAdmin(ModelAdmin):
+class MediaItemAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("preview", "title", "media_type", "alt_text", "file_size", "created_at")
     list_filter = ("media_type", "created_at")
     search_fields = ("title", "alt_text", "alt_text_ru", "file")
@@ -102,7 +102,7 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
 
 
 @admin.register(ContactRequest)
-class ContactRequestAdmin(ModelAdmin):
+class ContactRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = (
         "name",
         "phone",
@@ -118,7 +118,7 @@ class ContactRequestAdmin(ModelAdmin):
 
 
 @admin.register(CallbackRequest)
-class CallbackRequestAdmin(ModelAdmin):
+class CallbackRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("name", "phone", "processed", "created_at")
     list_filter = ("processed", "created_at")
     search_fields = ("name", "phone", "idempotency_key")
@@ -132,7 +132,7 @@ class PhotoPickImageInline(TabularInline):
 
 
 @admin.register(PhotoPickRequest)
-class PhotoPickRequestAdmin(ModelAdmin):
+class PhotoPickRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("phone", "channel", "processed", "created_at")
     list_filter = ("channel", "processed", "created_at")
     search_fields = ("phone", "note", "idempotency_key")
@@ -141,7 +141,7 @@ class PhotoPickRequestAdmin(ModelAdmin):
 
 
 @admin.register(InstallRequest)
-class InstallRequestAdmin(ModelAdmin):
+class InstallRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("name", "phone", "address", "processed", "created_at")
     list_filter = ("processed", "created_at")
     search_fields = ("name", "phone", "address", "comment", "idempotency_key")
@@ -149,7 +149,7 @@ class InstallRequestAdmin(ModelAdmin):
 
 
 @admin.register(BlogPost)
-class BlogPostAdmin(ModelAdmin):
+class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("title", "slug", "is_published", "sort_order", "created_at")
     list_filter = ("is_published", "created_at")
     search_fields = ("title", "slug", "excerpt", "body")

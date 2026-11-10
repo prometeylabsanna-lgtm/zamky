@@ -1,0 +1,168 @@
+/* Unfold UX: топ-фільтри + компактний changelist (патерн Vartis). */
+
+.zamky-changelist-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  margin-bottom: 1rem;
+  padding: 12px;
+  border: 1px solid rgb(229 231 235);
+  border-radius: 0.5rem;
+  background: rgb(255 255 255);
+}
+
+html.dark .zamky-changelist-toolbar {
+  border-color: rgb(55 65 81);
+  background: transparent;
+}
+
+.zamky-changelist-toolbar #toolbar {
+  margin: 0;
+  flex: 0 1 18rem;
+  min-width: min(100%, 14rem);
+}
+
+.zamky-changelist-toolbar #toolbar > form > div {
+  width: 100%;
+  min-height: 42px;
+}
+
+.zamky-filters-row {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  margin: 0;
+  min-width: 0;
+}
+
+.zamky-filter {
+  flex: 0 1 14rem;
+  min-width: min(100%, 11rem);
+  margin: 0;
+}
+
+.zamky-filter__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.zamky-filter__label {
+  display: block;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgb(17 24 39);
+}
+
+html.dark .zamky-filter__label {
+  color: rgb(243 244 246);
+}
+
+.zamky-filter__control,
+.zamky-filter__date-field {
+  margin: 0;
+  min-width: 0;
+}
+
+.zamky-filter__control select,
+.zamky-filter__control .admin-autocomplete,
+.zamky-filter__control .select2-container {
+  width: 100%;
+  min-width: 0;
+}
+
+.zamky-filter__control .select2-container .select2-selection--single {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.zamky-filter__dates {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.zamky-filter__dates-sep {
+  flex: 0 0 auto;
+  color: rgb(156 163 175);
+  font-weight: 600;
+}
+
+.zamky-filter__date-field {
+  flex: 1 1 0;
+  min-width: 7.5rem;
+}
+
+.zamky-filter__date-field input {
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+}
+
+.zamky-filter__inner--date {
+  min-width: min(100%, 18rem);
+}
+
+/* Товари: без горизонтального скролу таблиці */
+.app-catalog.model-product #changelist .results {
+  overflow-x: visible;
+}
+
+.app-catalog.model-product #result_list {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.app-catalog.model-product #result_list th,
+.app-catalog.model-product #result_list td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-catalog.model-product #result_list th.field-stock,
+.app-catalog.model-product #result_list td.field-stock {
+  width: 5.5rem;
+}
+
+.app-catalog.model-product #result_list th.field-price,
+.app-catalog.model-product #result_list td.field-price {
+  width: 6rem;
+}
+
+.app-catalog.model-product #result_list th.field-is_active,
+.app-catalog.model-product #result_list th.field-is_hit,
+.app-catalog.model-product #result_list th.field-is_new,
+.app-catalog.model-product #result_list td.field-is_active,
+.app-catalog.model-product #result_list td.field-is_hit,
+.app-catalog.model-product #result_list td.field-is_new {
+  width: 4.5rem;
+  white-space: normal;
+}
+
+@media (max-width: 767px) {
+  .zamky-changelist-toolbar {
+    align-items: stretch;
+  }
+
+  .zamky-changelist-toolbar #toolbar,
+  .zamky-filter {
+    flex: 1 1 100%;
+  }
+
+  .zamky-filter__dates {
+    flex-wrap: wrap;
+  }
+
+  .zamky-filter__date-field {
+    flex: 1 1 calc(50% - 16px);
+  }
+}

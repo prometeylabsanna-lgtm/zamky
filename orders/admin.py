@@ -1,6 +1,8 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
+from pages.admin_mixins import TopDropdownFiltersMixin
+
 from .models import DeliveryDistrict, Order, OrderItem, QuickOrder
 
 
@@ -10,10 +12,12 @@ class OrderItemInline(TabularInline):
     readonly_fields = ('product', 'product_name', 'sku', 'unit_price', 'quantity', 'line_total')
     can_delete = False
     tab = True
+    verbose_name = 'Позиція'
+    verbose_name_plural = 'Позиції'
 
 
 @admin.register(DeliveryDistrict)
-class DeliveryDistrictAdmin(ModelAdmin):
+class DeliveryDistrictAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'short', 'delivery_note', 'is_active', 'sort_order')
     list_filter = ('is_active',)
     search_fields = ('name', 'slug', 'short')
@@ -21,7 +25,7 @@ class DeliveryDistrictAdmin(ModelAdmin):
 
 
 @admin.register(QuickOrder)
-class QuickOrderAdmin(ModelAdmin):
+class QuickOrderAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('phone', 'name', 'product', 'quantity', 'status', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('phone', 'name', 'product__sku', 'product__name')
@@ -29,7 +33,7 @@ class QuickOrderAdmin(ModelAdmin):
 
 
 @admin.register(Order)
-class OrderAdmin(ModelAdmin):
+class OrderAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = (
         'number',
         'status',

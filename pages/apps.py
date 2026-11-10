@@ -4,6 +4,7 @@ from django.apps import AppConfig
 class PagesConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'pages'
+    verbose_name = 'Сторінки'
 
     def ready(self):
         # Proxy CMS-моделі мають бути імпортовані для admin/migrations.

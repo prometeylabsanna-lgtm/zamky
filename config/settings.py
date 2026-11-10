@@ -36,10 +36,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django.forms',
-    'catalog',
-    'cart',
-    'orders',
-    'pages',
+    'catalog.apps.CatalogConfig',
+    'cart.apps.CartConfig',
+    'orders.apps.OrdersConfig',
+    'pages.apps.PagesConfig',
 ]
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'config.middleware.AdminUkrainianLocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -227,6 +228,9 @@ UNFOLD = {
             '950': '67 20 7',
         },
     },
+    'STYLES': [
+        '/static/css/admin/zamky_unfold.css',
+    ],
     'SIDEBAR': {
         'show_search': True,
         'show_all_applications': False,
