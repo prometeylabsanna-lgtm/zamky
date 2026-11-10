@@ -8,7 +8,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_FLAG = Path('/tmp/.zamky_bootstrapped_v3')
+_FLAG = Path('/tmp/.zamky_bootstrapped_v4')
 
 
 def bootstrap_if_needed() -> None:
@@ -20,21 +20,13 @@ def bootstrap_if_needed() -> None:
     from django.contrib.auth import get_user_model
     from django.core.management import call_command
 
-    from catalog.models import Product, ProductImage
-
     logger.info('Vercel bootstrap: migrate')
     call_command('migrate', interactive=False, run_syncdb=True)
 
-    need_seed = not Product.objects.exists()
-    if not need_seed:
-        sample = ProductImage.objects.first()
-        # Старі записи з /media/... — пересіяти на static/img/...
-        if sample is None or not str(sample.image.name).startswith('img/'):
-            need_seed = True
-
-    if need_seed:
-        logger.info('Vercel bootstrap: seed_demo')
-        call_command('seed_demo')
+    # Завжди повний seed: товари + ProductAttribute (brand/country/color/mech),
+    # інакше на «теплій» SQLite у /tmp лишаються товари без фільтрів (counts=0).
+    logger.info('Vercel bootstrap: seed_demo')
+    call_command('seed_demo')
 
     User = get_user_model()
     if not User.objects.filter(username='admin').exists():

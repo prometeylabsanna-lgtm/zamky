@@ -412,6 +412,7 @@ class Command(BaseCommand):
                             )
                         ),
                     )
+                    # Фільтри сайдбару каталогу (FILTER_TITLES): обовʼязкові для вітрини.
                     attr_pairs = [
                         ('brand', B['b']),
                         ('country', B['country']),

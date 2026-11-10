@@ -127,6 +127,14 @@ class SeedDemoTests(TestCase):
             8,
         )
 
+    def test_seed_catalog_products_have_sidebar_filters(self):
+        call_command('seed_demo')
+        required = ('brand', 'country', 'color', 'mech')
+        for product in self._catalog_qs().prefetch_related('attributes__attribute'):
+            slugs = {av.attribute.slug for av in product.attributes.all()}
+            for slug in required:
+                self.assertIn(slug, slugs, f'{product.sku} missing filter {slug}')
+
         from django.utils import translation
 
         with translation.override('ua'):
