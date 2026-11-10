@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from django.urls import reverse_lazy
-
 from pages.site_content_registry_base import ContentSection
 from pages.site_content_registry_home import CONTENT_SECTIONS_HOME
 from pages.site_content_registry_pages import CONTENT_SECTIONS_PAGES
@@ -74,10 +72,11 @@ def _section_group_title(section: ContentSection) -> str:
 
 
 def _section_to_item(section: ContentSection) -> dict:
+    # Рядок, не reverse_lazy: Vercel серіалізує settings у JSON до AppRegistry.
     return {
         "title": _sidebar_item_title(section),
         "icon": section.sidebar_icon,
-        "link": reverse_lazy(f"admin:pages_{section.admin_model_name}_changelist"),
+        "link": f"/admin/pages/{section.admin_model_name}/",
     }
 
 
