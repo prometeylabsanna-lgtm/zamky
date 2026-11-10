@@ -294,6 +294,11 @@
   white-space: nowrap;
 }
 
+.info-table__value {
+  min-width: 0;
+  line-height: 1.45;
+}
+
 @media (max-width: 719px) {
   .info-table__row {
     grid-template-columns: minmax(0, 7.2em) minmax(0, 1fr);

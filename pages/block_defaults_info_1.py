@@ -32,8 +32,8 @@ def _common_head(page: str, title: str, lead: str) -> None:
     _reg(page, f"{page}_section_visible", "Показувати сторінку", "1", kind="inline")
     _reg(page, f"{page}_title", "Заголовок", title, kind="inline")
     _reg(page, f"{page}_lead", "Лід", lead)
-    _reg(page, f"{page}_seo_title", "SEO title", title, kind="inline")
-    _reg(page, f"{page}_seo_description", "SEO description", lead)
+    _reg(page, f"{page}_seo_title", "SEO — заголовок", title, kind="inline")
+    _reg(page, f"{page}_seo_description", "SEO — опис", lead)
 
 
 # --- about ---
@@ -89,11 +89,22 @@ _reg("about", "about_shop_title", "Торгова точка — заголов�
 _reg("about", "about_row_1_label", "Рядок 1 — назва", "Адреса", kind="inline")
 _reg("about", "about_row_1_value", "Рядок 1 — значення", "м. Київ, [вулиця, будинок]", kind="inline")
 _reg("about", "about_row_2_label", "Рядок 2 — назва", "Графік роботи", kind="inline")
-_reg("about", "about_row_2_value", "Рядок 2 — значення (hours / текст)", "hours", kind="inline")
+_reg(
+    "about",
+    "about_row_2_value",
+    "Рядок 2 — значення",
+    "Пн–Пт 9:00–19:00\nСб 10:00–17:00\nНд — вихідний",
+)
 _reg("about", "about_row_3_label", "Рядок 3 — назва", "Телефони", kind="inline")
-_reg("about", "about_row_3_value", "Рядок 3 — значення (phones / текст)", "phones", kind="inline")
+_reg(
+    "about",
+    "about_row_3_value",
+    "Рядок 3 — значення",
+    "067 00 00 00, 066 00 00 00",
+    kind="inline",
+)
 _reg("about", "about_row_4_label", "Рядок 4 — назва", "Email", kind="inline")
-_reg("about", "about_row_4_value", "Рядок 4 — значення (email / текст)", "email", kind="inline")
+_reg("about", "about_row_4_value", "Рядок 4 — значення", "xxx@gmail.com", kind="inline")
 
 # --- delivery ---
 _common_head(

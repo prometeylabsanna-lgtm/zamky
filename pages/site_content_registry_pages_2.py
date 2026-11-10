@@ -322,7 +322,7 @@ CONTENT_SECTIONS_PAGES_2: tuple[ContentSection, ...] = (
     ContentSection(
         slug="infoconsult",
         page_slug="site",
-        title="Інфо — консультація",
+        title="Консультація в меню інфо",
         sidebar_icon="support_agent",
         preview_url="/ua/info/about/",
         blocks=_b(
@@ -343,7 +343,7 @@ CONTENT_SECTIONS_PAGES_2: tuple[ContentSection, ...] = (
                 ),
             ),
         ),
-        sidebar_title="Консультація (інфо)",
+        sidebar_title="Консультація в меню інфо",
     ),
     ContentSection(
         slug="chrome",

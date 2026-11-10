@@ -70,7 +70,7 @@ _PROMOS = (
     ("-10%", "Кодові замки", "Знижка 10% на кодові та біометричні замки", "До 15.11.2026"),
 )
 for i, (badge, title, text, until) in enumerate(_PROMOS, start=1):
-    _reg("promos", f"promos_item_{i}_badge", f"Акція {i} — бейдж", badge, kind="inline")
+    _reg("promos", f"promos_item_{i}_badge", f"Акція {i} — плашка", badge, kind="inline")
     _reg("promos", f"promos_item_{i}_title", f"Акція {i} — заголовок", title, kind="inline")
     _reg("promos", f"promos_item_{i}_text", f"Акція {i} — текст", text)
     _reg("promos", f"promos_item_{i}_until", f"Акція {i} — термін", until, kind="inline")
@@ -208,22 +208,22 @@ _common_head(
 _reg(
     "site",
     "info_consult_hint",
-    "Інфо — консультація (підпис)",
+    "Підпис",
     "Потрібна консультація?",
     kind="inline",
 )
-_reg("site", "info_consult_phone", "Інфо — консультація (телефон)", "067 00 00 00", kind="inline")
+_reg("site", "info_consult_phone", "Телефон", "067 00 00 00", kind="inline")
 _reg(
     "site",
     "info_consult_hours",
-    "Інфо — консультація (графік)",
+    "Графік",
     "Пн–Сб, 9:00–19:00",
     kind="inline",
 )
 _reg(
     "site",
     "info_consult_cta",
-    "Інфо — консультація (кнопка)",
+    "Текст кнопки",
     "Написати нам",
     kind="inline",
 )

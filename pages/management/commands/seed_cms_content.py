@@ -84,18 +84,24 @@ class Command(BaseCommand):
                 created_blocks += 1
                 continue
             dirty_fields: list[str] = []
-            if not (block.label or "").strip():
-                block.label = get_block_label(page, key)
+            wanted_label = get_block_label(page, key)
+            if (block.label or "").strip() != wanted_label:
+                block.label = wanted_label
                 dirty_fields.append("label")
-            # Залити поточні тексти сайту в порожні поля (не перезаписувати ручні правки).
-            if ua_default and not (block.text_html or "").strip():
-                block.text_html = ua_default
-                dirty_fields.append("text_html")
+            current_ua = (block.text_html or "").strip()
+            # Залити дефолт у порожні поля; також замінити старі службові маркери.
+            legacy_tokens = {"hours", "phones", "email"}
+            if ua_default and (
+                not current_ua or current_ua.lower() in legacy_tokens
+            ):
+                if current_ua != ua_default:
+                    block.text_html = ua_default
+                    dirty_fields.append("text_html")
             if ru_default and not (block.text_html_ru or "").strip():
                 block.text_html_ru = ru_default
                 dirty_fields.append("text_html_ru")
             if dirty_fields:
-                block.save(update_fields=dirty_fields)
+                block.save(update_fields=list(dict.fromkeys(dirty_fields)))
                 filled_blocks += 1
 
         hero_created = ensure_default_hero_slides()

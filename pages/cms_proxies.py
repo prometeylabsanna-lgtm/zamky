@@ -132,8 +132,8 @@ class BlogBodySettings(SiteSettings):
 class SiteInfoConsultSettings(SiteSettings):
     class Meta:
         proxy = True
-        verbose_name = "Консультація (інфо)"
-        verbose_name_plural = "Консультація (інфо)"
+        verbose_name = "Консультація в меню інфо"
+        verbose_name_plural = "Консультація в меню інфо"
 
 
 class CatalogChromeSettings(SiteSettings):
