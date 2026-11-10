@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 
+from pages.admin_image_preview import admin_image_preview
 from pages.admin_mixins import DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin
 
 from .admin_product_actions import PRODUCT_ACTIONS
@@ -23,6 +23,8 @@ class AttributeValueInline(TabularInline):
     tab = True
     verbose_name = 'Значення атрибута'
     verbose_name_plural = 'Значення атрибутів'
+    readonly_fields = ('slug',)
+    fields = ('value', 'slug', 'sort_order')
 
 
 class ProductImageInline(TabularInline):
@@ -36,16 +38,7 @@ class ProductImageInline(TabularInline):
 
     @admin.display(description='Превʼю')
     def preview(self, obj):
-        if obj.pk and obj.image:
-            try:
-                return format_html(
-                    '<img src="{}" alt="" style="max-width:72px;max-height:72px;'
-                    'object-fit:cover;border-radius:6px">',
-                    obj.image.url,
-                )
-            except Exception:
-                return '—'
-        return '—'
+        return admin_image_preview(getattr(obj, 'image', None), max_size=72)
 
 
 class ProductAttributeInline(TabularInline):
@@ -78,17 +71,35 @@ class ProductVariantInline(TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(TopDropdownFiltersMixin, ModelAdmin):
-    list_display = ('name', 'slug', 'parent', 'sort_order', 'is_active')
+    list_display = ('logo_thumb', 'name', 'slug', 'parent', 'sort_order', 'is_active')
     list_filter = ('is_active', 'parent')
     search_fields = ('name', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('slug', 'logo_preview')
+    fields = (
+        'name',
+        'slug',
+        'parent',
+        'logo_preview',
+        'logo',
+        'icon',
+        'sort_order',
+        'is_active',
+    )
+
+    @admin.display(description='')
+    def logo_thumb(self, obj):
+        return admin_image_preview(getattr(obj, 'logo', None), max_size=40)
+
+    @admin.display(description='Превʼю логотипу')
+    def logo_preview(self, obj):
+        return admin_image_preview(getattr(obj, 'logo', None), max_size=96)
 
 
 @admin.register(AttributeGroup)
 class AttributeGroupAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'sort_order')
     search_fields = ('name', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('slug',)
 
 
 @admin.register(Attribute)
@@ -96,8 +107,8 @@ class AttributeAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'group', 'filterable', 'sort_order')
     list_filter = ('filterable', 'group')
     search_fields = ('name', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
     autocomplete_fields = ('group',)
+    readonly_fields = ('slug',)
     inlines = [AttributeValueInline]
 
 
@@ -107,13 +118,14 @@ class AttributeValueAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_filter = ('attribute',)
     search_fields = ('value', 'slug')
     autocomplete_fields = ('attribute',)
+    readonly_fields = ('slug',)
 
 
 @admin.register(ProductFamily)
 class ProductFamilyAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'brand')
     search_fields = ('name', 'slug', 'brand')
-    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('slug',)
     inlines = [ProductVariantInline]
 
 
@@ -139,8 +151,8 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         'color_label',
     )
     search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
-    prepopulated_fields = {'slug': ('name',)}
     autocomplete_fields = ('category', 'family')
+    readonly_fields = ('slug', 'og_preview', 'created_at', 'updated_at')
     inlines = [ProductImageInline, ProductAttributeInline]
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
     actions = PRODUCT_ACTIONS
@@ -182,6 +194,8 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
                     'size_mm',
                     'size_a',
                     'size_b',
+                    'created_at',
+                    'updated_at',
                 ),
             },
         ),
@@ -207,6 +221,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
                     'seo_description',
                     'seo_description_ru',
                     'canonical_url',
+                    'og_preview',
                     'og_image',
                 ),
             },
@@ -217,6 +232,10 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         css = {'all': ('css/admin/lang_tabs.css',)}
         js = ('js/admin/lang_tabs.js',)
 
+    @admin.display(description='Превʼю OG')
+    def og_preview(self, obj):
+        return admin_image_preview(getattr(obj, 'og_image', None), max_size=160)
+
 
 @admin.register(ProductImage)
 class ProductImageAdmin(TopDropdownFiltersMixin, ModelAdmin):
@@ -224,16 +243,8 @@ class ProductImageAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_filter = ('is_primary',)
     search_fields = ('product__name', 'product__sku', 'alt')
     readonly_fields = ('preview',)
+    fields = ('preview', 'product', 'image', 'alt', 'sort_order', 'is_primary')
 
     @admin.display(description='Превʼю')
     def preview(self, obj):
-        if obj.image:
-            try:
-                return format_html(
-                    '<img src="{}" alt="" style="max-width:80px;max-height:80px;'
-                    'object-fit:cover;border-radius:6px">',
-                    obj.image.url,
-                )
-            except Exception:
-                return '—'
-        return '—'
+        return admin_image_preview(getattr(obj, 'image', None), max_size=80)

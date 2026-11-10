@@ -1,0 +1,65 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin/recent_actions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="recent-actions-page">
+  <header class="recent-actions-page__head">
+    <h1 class="recent-actions-page__title">Недавні дії</h1>
+    <p class="recent-actions-page__hint">
+      Останні зміни в адмінці{% if not request.user.is_superuser %} (лише ваші){% endif %}.
+    </p>
+  </header>
+
+  {% if admin_log %}
+    <div class="recent-actions-page__panel">
+      <ul class="recent-actions-page__ul">
+        {% for entry in admin_log %}
+          <li class="recent-actions-page__item {% if entry.is_addition %}is-add{% elif entry.is_change %}is-change{% elif entry.is_deletion %}is-delete{% endif %}">
+            <span class="recent-actions-page__icon material-symbols-outlined" aria-hidden="true">
+              {% if entry.is_addition %}add{% elif entry.is_change %}edit{% else %}delete{% endif %}
+            </span>
+            <div class="recent-actions-page__body">
+              <div class="recent-actions-page__row">
+                <span class="recent-actions-page__object">
+                  {% if entry.is_deletion or not entry.get_admin_url %}
+                    {{ entry.object_repr }}
+                  {% else %}
+                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                  {% endif %}
+                </span>
+                <span class="recent-actions-page__type">
+                  ({% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% else %}Невідомий тип{% endif %})
+                </span>
+              </div>
+              <div class="recent-actions-page__meta">
+                <time datetime="{{ entry.action_time|date:'c' }}">{{ entry.action_time }}</time>
+                {% if request.user.is_superuser and entry.user_id %}
+                  <span>· {{ entry.user.get_username }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <div class="recent-actions-page__empty" role="status">
+      <div class="recent-actions-page__empty-icon" aria-hidden="true">
+        <span class="material-symbols-outlined">history</span>
+      </div>
+      <h2 class="recent-actions-page__empty-title">Поки немає записаних дій</h2>
+      <p class="recent-actions-page__empty-text">
+        Тут з’являться додавання, зміни та видалення об’єктів після роботи в адмінці.
+      </p>
+      <a href="{% url 'admin:index' %}" class="recent-actions-page__empty-link">
+        На головну адмінки
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

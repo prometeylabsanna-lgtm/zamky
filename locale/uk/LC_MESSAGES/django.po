@@ -1,4 +1,213 @@
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\\n"
-"Language: uk\\n"
+"Project-Id-Version: Zamky Admin\n"
+"Report-Msgid-Bugs-To: \n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=((n%10==1 && n%100!=11) ? 0 : ((n%10 >= 2 && n%10 <=4 && (n%100 < 12 || n%100 > 14)) ? 1 : ((n%10 == 0 || (n%10 >= 5 && n%10 <=9)) || (n%100 >= 11 && n%100 <= 14)) ? 2 : 3));\n"
+
+msgid "Select action"
+msgstr "Оберіть дію"
+
+msgid "Select action to run"
+msgstr "Оберіть дію для виконання"
+
+msgid "Run"
+msgstr "Виконати"
+
+msgid "Run the selected action"
+msgstr "Виконати обрану дію"
+
+msgid "Go"
+msgstr "Вперед"
+
+msgid "Clear selection"
+msgstr "Очистити вибір"
+
+msgid "Click here to select the objects across all pages"
+msgstr "Натисніть, щоб обрати об’єкти на всіх сторінках"
+
+#, python-format
+msgid "Select all %(total_count)s %(module_name)s"
+msgstr "Обрати всі %(total_count)s %(module_name)s"
+
+#, python-format
+msgid "%(sel)s of %(cnt)s selected"
+msgstr "Обрано %(sel)s з %(cnt)s"
+
+#, python-format
+msgid "All %(total_count)s selected"
+msgstr "Обрано всі %(total_count)s"
+
+msgid "Delete selected objects"
+msgstr "Видалити вибрані об’єкти"
+
+msgid "Delete selected"
+msgstr "Видалити вибрані"
+
+msgid "Are you sure?"
+msgstr "Ви впевнені?"
+
+msgid "Yes, I’m sure"
+msgstr "Так, я впевнений"
+
+msgid "No, take me back"
+msgstr "Ні, повернутися"
+
+msgid "Cancel"
+msgstr "Скасувати"
+
+msgid "Save"
+msgstr "Зберегти"
+
+msgid "Save and add another"
+msgstr "Зберегти і додати ще"
+
+msgid "Save and continue editing"
+msgstr "Зберегти і продовжити редагування"
+
+msgid "Delete"
+msgstr "Видалити"
+
+msgid "History"
+msgstr "Історія"
+
+msgid "View on site"
+msgstr "Переглянути на сайті"
+
+msgid "Add"
+msgstr "Додати"
+
+msgid "Change"
+msgstr "Змінити"
+
+msgid "View"
+msgstr "Перегляд"
+
+msgid "Filter"
+msgstr "Фільтр"
+
+msgid "Search"
+msgstr "Пошук"
+
+msgid "All"
+msgstr "Всі"
+
+msgid "Yes"
+msgstr "Так"
+
+msgid "No"
+msgstr "Ні"
+
+msgid "Choose file to upload"
+msgstr "Оберіть файл для завантаження"
+
+msgid "Choose File"
+msgstr "Обрати файл"
+
+msgid "Currently"
+msgstr "Зараз"
+
+msgid "Change:"
+msgstr "Змінити:"
+
+msgid "Clear"
+msgstr "Очистити"
+
+msgid "This item will be deleted."
+msgstr "Цей елемент буде видалено."
+
+msgid "Welcome back to"
+msgstr "З поверненням до"
+
+msgid "Return to site"
+msgstr "На сайт"
+
+msgid "Log in"
+msgstr "Увійти"
+
+msgid "Log out"
+msgstr "Вийти"
+
+msgid "Username"
+msgstr "Ім’я користувача"
+
+msgid "Password"
+msgstr "Пароль"
+
+msgid "Light"
+msgstr "Світла"
+
+msgid "Dark"
+msgstr "Темна"
+
+msgid "System"
+msgstr "Системна"
+
+msgid "Home"
+msgstr "Головна"
+
+msgid "Recent actions"
+msgstr "Недавні дії"
+
+msgid "My actions"
+msgstr "Мої дії"
+
+msgid "None available"
+msgstr "Немає доступних"
+
+msgid "Unknown content"
+msgstr "Невідомий вміст"
+
+msgid "Show counts"
+msgstr "Показати кількість"
+
+msgid "Hide counts"
+msgstr "Приховати кількість"
+
+msgid "Remove"
+msgstr "Прибрати"
+
+msgid "Add another %(verbose_name)s"
+msgstr "Додати ще %(verbose_name)s"
+
+msgid "Delete?"
+msgstr "Видалити?"
+
+msgid "Type to search"
+msgstr "Введіть запит для пошуку"
+
+msgid "Search apps and models..."
+msgstr "Пошук розділів і моделей..."
+
+msgid "No results found"
+msgstr "Нічого не знайдено"
+
+msgid "Filters"
+msgstr "Фільтри"
+
+msgid "Apply filters"
+msgstr "Застосувати фільтри"
+
+msgid "Clear all filters"
+msgstr "Очистити всі фільтри"
+
+msgid "Select value"
+msgstr "Оберіть значення"
+
+msgid "Select"
+msgstr "Обрати"
+
+msgid "Idempotency key"
+msgstr "Ключ ідемпотентності"
+
+msgid "Created at"
+msgstr "Створено"
+
+msgid "Updated at"
+msgstr "Оновлено"
+
+msgid "Slug"
+msgstr "Слаг"

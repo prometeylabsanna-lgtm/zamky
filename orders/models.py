@@ -6,7 +6,7 @@ from django.utils import timezone
 
 
 class DeliveryDistrict(models.Model):
-    slug = models.SlugField('Slug', max_length=120, unique=True)
+    slug = models.SlugField('Слаг', max_length=120, unique=True)
     name = models.CharField('Назва', max_length=200)
     short = models.CharField('Коротка', max_length=100)
     name_locative = models.CharField('Місцевий відмінок', max_length=200, blank=True)
@@ -24,6 +24,18 @@ class DeliveryDistrict(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from pages.slug_utils import ensure_unique_slug
+
+            self.slug = ensure_unique_slug(
+                DeliveryDistrict,
+                self.name or self.short,
+                instance_pk=self.pk,
+                fallback='district',
+            )
+        super().save(*args, **kwargs)
 
 
 class Order(models.Model):
@@ -81,13 +93,13 @@ class Order(models.Model):
     delivery_price = models.DecimalField('Доставка', max_digits=10, decimal_places=2, default=Decimal('0'))
     total = models.DecimalField('Разом', max_digits=12, decimal_places=2, default=Decimal('0'))
     idempotency_key = models.CharField(
-        'Idempotency key',
+        'Ключ ідемпотентності',
         max_length=64,
         unique=True,
         db_index=True,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField('Створено', auto_now_add=True)
+    updated_at = models.DateTimeField('Оновлено', auto_now=True)
 
     class Meta:
         verbose_name = 'Замовлення'
@@ -155,7 +167,7 @@ class QuickOrder(models.Model):
         choices=Status.choices,
         default=Status.NEW,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField('Створено', auto_now_add=True)
 
     class Meta:
         verbose_name = 'Швидке замовлення'

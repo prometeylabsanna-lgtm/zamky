@@ -248,6 +248,11 @@ UNFOLD = {
                         'icon': 'photo_library',
                         'link': _admin_link('pages/mediaitem/'),
                     },
+                    {
+                        'title': 'Недавні дії',
+                        'icon': 'history',
+                        'link': '/admin/recent-actions/',
+                    },
                 ],
             },
             *_content_sidebar_groups(),

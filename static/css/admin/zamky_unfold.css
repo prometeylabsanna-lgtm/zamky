@@ -17,17 +17,34 @@ html.dark .zamky-changelist-toolbar {
   background: transparent;
 }
 
-/* Пошук і фільтри в одному wrap — без «дірки» зліва */
+/* Пошук на одній лінії з інпутами фільтрів (псевдо-лейбл = висота підпису) */
 .zamky-changelist-toolbar #toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin: 0;
   flex: 0 1 13rem;
   min-width: min(100%, 11rem);
   order: 0;
 }
 
+.zamky-changelist-toolbar #toolbar::before {
+  content: '\00a0';
+  display: block;
+  min-height: 2.5em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.zamky-changelist-toolbar #toolbar > form {
+  margin: 0;
+}
+
 .zamky-changelist-toolbar #toolbar > form > div {
   width: 100%;
   min-height: 42px;
+  box-sizing: border-box;
 }
 
 .zamky-filters-row {
@@ -174,6 +191,24 @@ html.dark .zamky-filter__label {
 .app-catalog.model-product #result_list td.field-is_new {
   width: 4.5rem;
   white-space: normal;
+}
+
+/* Прибрати віджет «Недавні дії» з дашборду — є окрема сторінка в меню */
+#content-main #recent-actions-module,
+#content #recent-actions-module {
+  display: none;
+}
+
+/* Перемикач теми в меню користувача — іконка й текст на одній лінії */
+.zamky-theme-switch__btn {
+  min-height: 2rem;
+}
+
+.zamky-theme-switch__label {
+  display: inline-block;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 @media (max-width: 767px) {

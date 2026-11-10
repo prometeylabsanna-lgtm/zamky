@@ -2,12 +2,12 @@ from decimal import Decimal
 
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
+from pages.slug_utils import ensure_unique_slug
 
 
 class Category(models.Model):
     name = models.CharField('Назва', max_length=200)
-    slug = models.SlugField('Slug', max_length=220, unique=True)
+    slug = models.SlugField('Слаг', max_length=220, unique=True)
     parent = models.ForeignKey(
         'self',
         verbose_name='Батьківська',
@@ -36,13 +36,9 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base = slugify(self.name) or 'category'
-            slug = base
-            i = 1
-            while Category.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f'{base}-{i}'
-                i += 1
-            self.slug = slug
+            self.slug = ensure_unique_slug(
+                Category, self.name, instance_pk=self.pk, fallback='category'
+            )
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -51,7 +47,7 @@ class Category(models.Model):
 
 class AttributeGroup(models.Model):
     name = models.CharField('Назва', max_length=120)
-    slug = models.SlugField('Slug', max_length=140, unique=True)
+    slug = models.SlugField('Слаг', max_length=140, unique=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
@@ -62,10 +58,17 @@ class AttributeGroup(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = ensure_unique_slug(
+                AttributeGroup, self.name, instance_pk=self.pk, fallback='group'
+            )
+        super().save(*args, **kwargs)
+
 
 class Attribute(models.Model):
     name = models.CharField('Назва', max_length=120)
-    slug = models.SlugField('Slug', max_length=140, unique=True)
+    slug = models.SlugField('Слаг', max_length=140, unique=True)
     group = models.ForeignKey(
         AttributeGroup,
         verbose_name='Група',
@@ -85,6 +88,13 @@ class Attribute(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = ensure_unique_slug(
+                Attribute, self.name, instance_pk=self.pk, fallback='attr'
+            )
+        super().save(*args, **kwargs)
+
 
 class AttributeValue(models.Model):
     attribute = models.ForeignKey(
@@ -94,7 +104,7 @@ class AttributeValue(models.Model):
         verbose_name='Атрибут',
     )
     value = models.CharField('Значення', max_length=200)
-    slug = models.SlugField('Slug', max_length=220)
+    slug = models.SlugField('Слаг', max_length=220)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
@@ -106,10 +116,22 @@ class AttributeValue(models.Model):
     def __str__(self):
         return f'{self.attribute.name}: {self.value}'
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            extra = {'attribute_id': self.attribute_id} if self.attribute_id else None
+            self.slug = ensure_unique_slug(
+                AttributeValue,
+                self.value,
+                instance_pk=self.pk,
+                extra_filter=extra,
+                fallback='value',
+            )
+        super().save(*args, **kwargs)
+
 
 class ProductFamily(models.Model):
     name = models.CharField('Назва', max_length=200)
-    slug = models.SlugField('Slug', max_length=220, unique=True)
+    slug = models.SlugField('Слаг', max_length=220, unique=True)
     brand = models.CharField('Бренд', max_length=100, blank=True)
     description = models.TextField('Опис', blank=True)
     short_description = models.TextField('Короткий опис', blank=True)
@@ -121,6 +143,13 @@ class ProductFamily(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = ensure_unique_slug(
+                ProductFamily, self.name, instance_pk=self.pk, fallback='family'
+            )
+        super().save(*args, **kwargs)
 
 
 class Product(models.Model):
@@ -139,7 +168,7 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
     )
     name = models.CharField('Назва', max_length=300)
-    slug = models.SlugField('Slug', max_length=320, unique=True)
+    slug = models.SlugField('Слаг', max_length=320, unique=True)
     sku = models.CharField('Артикул', max_length=64, unique=True)
     price = models.DecimalField('Ціна', max_digits=10, decimal_places=2)
     old_price = models.DecimalField(
@@ -184,8 +213,8 @@ class Product(models.Model):
         related_name='products',
         blank=True,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField('Створено', auto_now_add=True)
+    updated_at = models.DateTimeField('Оновлено', auto_now=True)
 
     class Meta:
         verbose_name = 'Товар'
@@ -197,13 +226,12 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base = slugify(self.name) or slugify(self.sku) or 'product'
-            slug = base
-            i = 1
-            while Product.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f'{base}-{i}'
-                i += 1
-            self.slug = slug
+            self.slug = ensure_unique_slug(
+                Product,
+                self.name or self.sku or 'product',
+                instance_pk=self.pk,
+                fallback='product',
+            )
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

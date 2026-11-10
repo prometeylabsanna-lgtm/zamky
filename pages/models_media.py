@@ -27,9 +27,9 @@ class MediaItem(models.Model):
     title = models.CharField("Назва", max_length=255, blank=True, default="")
     alt_text = models.CharField("Alt", max_length=255, blank=True, default="")
     alt_text_ru = models.CharField("Alt (RU)", max_length=255, blank=True, default="")
-    width = models.PositiveIntegerField(null=True, blank=True, editable=False)
-    height = models.PositiveIntegerField(null=True, blank=True, editable=False)
-    file_size = models.PositiveIntegerField(default=0, editable=False)
+    width = models.PositiveIntegerField("Ширина", null=True, blank=True, editable=False)
+    height = models.PositiveIntegerField("Висота", null=True, blank=True, editable=False)
+    file_size = models.PositiveIntegerField("Розмір файлу", default=0, editable=False)
     content_hash = models.CharField(
         "SHA-256", max_length=64, blank=True, default="", db_index=True, editable=False
     )
@@ -41,7 +41,7 @@ class MediaItem(models.Model):
         editable=False,
         related_name="uploaded_media",
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField("Створено", auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)

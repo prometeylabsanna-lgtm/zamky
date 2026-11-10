@@ -1,8 +1,9 @@
 from django.contrib import admin
-from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 
+from pages.admin_image_preview import admin_image_preview
 from pages.admin_mixins import TopDropdownFiltersMixin
+from pages.admin_recent_actions import patch_admin_urls
 from pages.admin_site_content_proxies import (
     SingletonModelAdminMixin,
     register_site_content_section_admins,
@@ -17,6 +18,8 @@ from pages.models_extra import (
     PhotoPickRequest,
 )
 from pages.models_media import MediaItem
+
+patch_admin_urls()
 
 
 @admin.register(MediaItem)
@@ -41,15 +44,8 @@ class MediaItemAdmin(TopDropdownFiltersMixin, ModelAdmin):
 
     @admin.display(description="Превʼю")
     def preview(self, obj):
-        if obj.pk and obj.media_type == MediaItem.MediaType.IMAGE and obj.file:
-            try:
-                return format_html(
-                    '<img src="{}" alt="" style="max-width:96px;max-height:96px;'
-                    'object-fit:cover;border-radius:8px">',
-                    obj.file.url,
-                )
-            except Exception:
-                return "—"
+        if obj.pk and obj.media_type == MediaItem.MediaType.IMAGE:
+            return admin_image_preview(obj.file, max_size=96)
         return "—"
 
     def save_model(self, request, obj, form, change):
@@ -60,10 +56,11 @@ class MediaItemAdmin(TopDropdownFiltersMixin, ModelAdmin):
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
+    readonly_fields = ("logo_preview", "favicon_preview")
     fieldsets = (
         (
             "Основне",
-            {"fields": ("site_name", "logo", "favicon")},
+            {"fields": ("site_name", "logo_preview", "logo", "favicon_preview", "favicon")},
         ),
         (
             "Контакти",
@@ -100,6 +97,14 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
         css = {"all": ("css/admin/lang_tabs.css",)}
         js = ("js/admin/lang_tabs.js",)
 
+    @admin.display(description="Превʼю логотипу")
+    def logo_preview(self, obj):
+        return admin_image_preview(getattr(obj, "logo", None), max_size=120)
+
+    @admin.display(description="Превʼю favicon")
+    def favicon_preview(self, obj):
+        return admin_image_preview(getattr(obj, "favicon", None), max_size=64)
+
 
 @admin.register(ContactRequest)
 class ContactRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
@@ -128,7 +133,14 @@ class CallbackRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
 class PhotoPickImageInline(TabularInline):
     model = PhotoPickImage
     extra = 0
-    readonly_fields = ("created_at",)
+    fields = ("preview", "image", "created_at")
+    readonly_fields = ("preview", "created_at")
+    verbose_name = "Фото"
+    verbose_name_plural = "Зображення"
+
+    @admin.display(description="Превʼю")
+    def preview(self, obj):
+        return admin_image_preview(getattr(obj, "image", None), max_size=96)
 
 
 @admin.register(PhotoPickRequest)
@@ -150,11 +162,30 @@ class InstallRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
 
 @admin.register(BlogPost)
 class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
-    list_display = ("title", "slug", "is_published", "sort_order", "created_at")
+    list_display = ("cover_thumb", "title", "slug", "is_published", "sort_order", "created_at")
     list_filter = ("is_published", "created_at")
     search_fields = ("title", "slug", "excerpt", "body")
-    prepopulated_fields = {"slug": ("title",)}
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("slug", "cover_preview", "created_at", "updated_at")
+    fields = (
+        "title",
+        "slug",
+        "cover_preview",
+        "cover",
+        "excerpt",
+        "body",
+        "is_published",
+        "sort_order",
+        "created_at",
+        "updated_at",
+    )
+
+    @admin.display(description="")
+    def cover_thumb(self, obj):
+        return admin_image_preview(getattr(obj, "cover", None), max_size=48)
+
+    @admin.display(description="Превʼю обкладинки")
+    def cover_preview(self, obj):
+        return admin_image_preview(getattr(obj, "cover", None), max_size=180)
 
 
 register_site_content_section_admins()

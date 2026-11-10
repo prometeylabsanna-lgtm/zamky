@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.text import slugify
+from pages.slug_utils import ensure_unique_slug
 
 
 class CallbackRequest(models.Model):
@@ -7,7 +7,7 @@ class CallbackRequest(models.Model):
     phone = models.CharField('Телефон', max_length=32)
     processed = models.BooleanField('Опрацьовано', default=False)
     idempotency_key = models.CharField(
-        'Idempotency key',
+        'Ключ ідемпотентності',
         max_length=64,
         unique=True,
         db_index=True,
@@ -40,7 +40,7 @@ class PhotoPickRequest(models.Model):
     note = models.TextField('Примітка', blank=True)
     processed = models.BooleanField('Опрацьовано', default=False)
     idempotency_key = models.CharField(
-        'Idempotency key',
+        'Ключ ідемпотентності',
         max_length=64,
         unique=True,
         db_index=True,
@@ -82,7 +82,7 @@ class InstallRequest(models.Model):
     comment = models.TextField('Коментар', blank=True)
     processed = models.BooleanField('Опрацьовано', default=False)
     idempotency_key = models.CharField(
-        'Idempotency key',
+        'Ключ ідемпотентності',
         max_length=64,
         unique=True,
         db_index=True,
@@ -100,7 +100,7 @@ class InstallRequest(models.Model):
 
 class BlogPost(models.Model):
     title = models.CharField('Заголовок', max_length=300)
-    slug = models.SlugField('Slug', max_length=320, unique=True)
+    slug = models.SlugField('Слаг', max_length=320, unique=True)
     excerpt = models.TextField('Короткий опис')
     body = models.TextField('Текст')
     cover = models.ImageField('Обкладинка', upload_to='blog/', blank=True)
@@ -119,11 +119,7 @@ class BlogPost(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            base = slugify(self.title) or 'post'
-            slug = base
-            i = 1
-            while BlogPost.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f'{base}-{i}'
-                i += 1
-            self.slug = slug
+            self.slug = ensure_unique_slug(
+                BlogPost, self.title, instance_pk=self.pk, fallback='post'
+            )
         super().save(*args, **kwargs)

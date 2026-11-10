@@ -23,7 +23,7 @@ class ContactRequest(models.Model):
     consent = models.BooleanField('Згода', default=False)
     processed = models.BooleanField('Опрацьовано', default=False)
     idempotency_key = models.CharField(
-        'Idempotency key',
+        'Ключ ідемпотентності',
         max_length=64,
         unique=True,
         db_index=True,

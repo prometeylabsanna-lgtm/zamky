@@ -21,7 +21,7 @@ class DeliveryDistrictAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('name', 'slug', 'short', 'delivery_note', 'is_active', 'sort_order')
     list_filter = ('is_active',)
     search_fields = ('name', 'slug', 'short')
-    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('slug',)
 
 
 @admin.register(QuickOrder)
