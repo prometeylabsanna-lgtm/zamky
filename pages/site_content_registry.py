@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from django.urls import reverse_lazy
+
 from pages.site_content_registry_base import ContentSection
 from pages.site_content_registry_home import CONTENT_SECTIONS_HOME
 from pages.site_content_registry_pages import CONTENT_SECTIONS_PAGES

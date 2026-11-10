@@ -187,6 +187,31 @@ UNFOLD = {
     'SITE_TITLE': 'Замки',
     'SITE_HEADER': 'Замки — адмінка',
     'SITE_SYMBOL': 'lock',
+    # Plain paths — Vercel JSON-сериалізує settings (без reverse/static callables).
+    'SITE_FAVICONS': [
+        {
+            'rel': 'icon',
+            'href': '/static/img/favicon.ico',
+            'sizes': 'any',
+        },
+        {
+            'rel': 'icon',
+            'type': 'image/png',
+            'sizes': '32x32',
+            'href': '/static/img/favicon-32x32.png',
+        },
+        {
+            'rel': 'icon',
+            'type': 'image/png',
+            'sizes': '16x16',
+            'href': '/static/img/favicon-16x16.png',
+        },
+        {
+            'rel': 'apple-touch-icon',
+            'sizes': '180x180',
+            'href': '/static/img/apple-touch-icon.png',
+        },
+    ],
     'COLORS': {
         'primary': {
             '50': '255 247 237',

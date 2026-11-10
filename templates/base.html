@@ -17,6 +17,14 @@
     })();
   </script>
   <title>{% block title %}{% t 'Центр замків' %}{% endblock %}</title>
+  {% if site_settings and site_settings.favicon %}
+  <link rel="icon" href="{{ site_settings.favicon.url }}" sizes="any">
+  {% else %}
+  <link rel="icon" href="{% static 'img/favicon.ico' %}?v={{ asset_v }}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32x32.png' %}?v={{ asset_v }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16x16.png' %}?v={{ asset_v }}">
+  {% endif %}
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}?v={{ asset_v }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
