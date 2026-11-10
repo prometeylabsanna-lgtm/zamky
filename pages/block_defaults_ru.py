@@ -46,15 +46,40 @@ BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
     ("catalog", "catalog_title"): "Каталог",
     ("catalog", "catalog_empty"): "Товары не найдены",
     ("catalog", "catalog_filters_title"): "Фильтры",
-    ("about", "about_title"): "О нас",
-    ("delivery", "delivery_title"): "Доставка и оплата",
-    ("warranty", "warranty_title"): "Гарантия",
-    ("returns", "returns_title"): "Обмен и возврат",
-    ("install", "install_title"): "Установка",
-    ("promos", "promos_title"): "Акции",
-    ("offer", "offer_title"): "Публичная оферта",
-    ("privacy", "privacy_title"): "Политика конфиденциальности",
 }
+
+
+def _fill_info_ru_from_map() -> None:
+    """RU для інфо-полів: з RU_MAP за UA-дефолтом (якщо є переклад)."""
+    from pages.block_defaults import BLOCK_DEFAULTS
+    from pages.translations import RU_MAP
+
+    info_pages = {
+        "about",
+        "delivery",
+        "warranty",
+        "returns",
+        "install",
+        "promos",
+        "offer",
+        "privacy",
+        "blog",
+    }
+    for (page, key), ua in BLOCK_DEFAULTS.items():
+        if page not in info_pages and not (
+            page == "site" and key.startswith("info_consult_")
+        ):
+            continue
+        if (page, key) in BLOCK_DEFAULTS_RU:
+            continue
+        if not ua or key.endswith("_visible"):
+            continue
+        mapped = RU_MAP.get(ua)
+        if mapped:
+            BLOCK_DEFAULTS_RU[(page, key)] = mapped
+
+
+_fill_info_ru_from_map()
 
 
 def get_block_default_ru(page: str, key: str) -> str:

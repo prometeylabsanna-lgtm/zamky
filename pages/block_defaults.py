@@ -156,45 +156,15 @@ STATIC_FALLBACKS: dict[tuple[str, str], str] = {}
 IMAGE_KEYS: set[tuple[str, str]] = set()
 URL_KEYS: set[tuple[str, str]] = set()
 
-_INFO_PAGES = (
-    "about",
-    "delivery",
-    "warranty",
-    "returns",
-    "install",
-    "promos",
-    "offer",
-    "privacy",
-)
-_INFO_TITLES = {
-    "about": "Про нас",
-    "delivery": "Доставка і оплата",
-    "warranty": "Гарантія",
-    "returns": "Обмін та повернення",
-    "install": "Установка",
-    "promos": "Акції",
-    "offer": "Публічна оферта",
-    "privacy": "Політика конфіденційності",
-}
+# Інфосторінки: структуровані поля (картки / таблиці / кроки).
+from pages import block_defaults_info_1 as _info1  # noqa: E402
+from pages import block_defaults_info_2 as _info2  # noqa: E402,F401
 
-for _page in _INFO_PAGES:
-    BLOCK_LABELS[(_page, f"{_page}_section_visible")] = "Показувати сторінку"
-    BLOCK_LABELS[(_page, f"{_page}_title")] = "Заголовок"
-    BLOCK_LABELS[(_page, f"{_page}_lead")] = "Лід"
-    BLOCK_LABELS[(_page, f"{_page}_body")] = "Текст сторінки"
-    BLOCK_LABELS[(_page, f"{_page}_seo_title")] = "SEO title"
-    BLOCK_LABELS[(_page, f"{_page}_seo_description")] = "SEO description"
-    BLOCK_DEFAULTS[(_page, f"{_page}_section_visible")] = "1"
-    BLOCK_DEFAULTS[(_page, f"{_page}_title")] = _INFO_TITLES[_page]
-    BLOCK_DEFAULTS[(_page, f"{_page}_lead")] = ""
-    BLOCK_DEFAULTS[(_page, f"{_page}_body")] = ""
-    BLOCK_DEFAULTS[(_page, f"{_page}_seo_title")] = _INFO_TITLES[_page]
-    BLOCK_DEFAULTS[(_page, f"{_page}_seo_description")] = ""
-    INLINE_KEYS.add((_page, f"{_page}_title"))
-    INLINE_KEYS.add((_page, f"{_page}_seo_title"))
-    MULTILINE_KEYS.add((_page, f"{_page}_lead"))
-    MULTILINE_KEYS.add((_page, f"{_page}_seo_description"))
-    RICHTEXT_KEYS.add((_page, f"{_page}_body"))
+BLOCK_LABELS.update(_info1.LABELS)
+BLOCK_DEFAULTS.update(_info1.DEFAULTS)
+INLINE_KEYS.update(_info1.INLINE)
+MULTILINE_KEYS.update(_info1.MULTILINE)
+RICHTEXT_KEYS.update(_info1.RICHTEXT)
 
 
 def get_block_label(page: str, key: str) -> str:

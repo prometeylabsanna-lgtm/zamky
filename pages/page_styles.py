@@ -34,6 +34,7 @@ _INFO_SLUG_TO_PAGE = {
     "promos": SiteBlock.Page.PROMOS,
     "offer": SiteBlock.Page.OFFER,
     "privacy": SiteBlock.Page.PRIVACY,
+    "blog": SiteBlock.Page.BLOG,
 }
 
 
@@ -90,6 +91,8 @@ def resolve_page_key(request) -> str | None:
     if url_name in {"info", "info_page"}:
         raw = (match.kwargs or {}).get("page", "about")
         return _INFO_SLUG_TO_PAGE.get(str(raw), SiteBlock.Page.ABOUT)
+    if url_name == "blog_list":
+        return SiteBlock.Page.BLOG
     return None
 
 

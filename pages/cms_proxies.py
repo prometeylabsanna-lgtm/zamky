@@ -122,6 +122,20 @@ class PrivacyBodySettings(SiteSettings):
         verbose_name_plural = "Політика конфіденційності"
 
 
+class BlogBodySettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Корисне для вибору"
+        verbose_name_plural = "Корисне для вибору"
+
+
+class SiteInfoConsultSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Консультація (інфо)"
+        verbose_name_plural = "Консультація (інфо)"
+
+
 class CatalogChromeSettings(SiteSettings):
     class Meta:
         proxy = True

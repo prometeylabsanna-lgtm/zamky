@@ -45,6 +45,8 @@ _SECTION_MODELS = (
     (cms_proxies.PromosBodySettings, "promos", "body"),
     (cms_proxies.OfferBodySettings, "offer", "body"),
     (cms_proxies.PrivacyBodySettings, "privacy", "body"),
+    (cms_proxies.BlogBodySettings, "blog", "body"),
+    (cms_proxies.SiteInfoConsultSettings, "site", "infoconsult"),
     (cms_proxies.CatalogChromeSettings, "catalog", "chrome"),
 )
 

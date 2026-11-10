@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% load static i18n_ui %}
 
-{% block title %}{% t 'Корисне для вибору' %} — {% t 'Замки' %}{% endblock %}
+{% block title %}{{ blog_title|default:page_name }} — {% t 'Замки' %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/info-2.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}
@@ -12,26 +13,50 @@
   <nav class="breadcrumbs">
     <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <span>{% t 'Корисне для вибору' %}</span>
+    <span>{{ blog_title|default:page_name }}</span>
   </nav>
-  <article class="info-article">
-    <h1 class="info-h1">{% t 'Корисне для вибору' %}</h1>
-    <p class="info-lead">{% t 'Поради з вибору, встановлення та догляду за замками й фурнітурою.' %}</p>
-    <ul class="blog-list">
-      {% for post in posts %}
-      <li class="blog-list__item">
-        <a href="{% url 'pages:blog_detail' post.slug %}" class="blog-list__link">
-          {% if post.cover %}
-          <img class="blog-list__img" src="{{ post.cover.url }}" alt="" loading="lazy" width="320" height="180">
-          {% endif %}
-          <span class="blog-list__title">{{ post.title }}</span>
-          <span class="blog-list__excerpt">{{ post.excerpt }}</span>
-        </a>
-      </li>
-      {% empty %}
-      <li>{% t 'Статті незабаром зʼявляться.' %}</li>
-      {% endfor %}
-    </ul>
-  </article>
+
+  <div class="info-layout">
+    <aside class="info-aside">
+      <ul class="info-nav">
+        {% for key, meta in info_pages.items %}
+        <li>
+          <a href="{% if key == 'blog' %}{% url 'pages:blog_list' %}{% else %}{% url 'pages:info_page' key %}{% endif %}" class="{% if page_key == key %}is-active{% endif %}">
+            <span>{{ meta.name }}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if info_consult %}
+      <div class="info-consult">
+        <span class="info-consult__hint">{{ info_consult.hint }}</span>
+        <a href="tel:{{ info_consult.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="info-consult__phone">{{ info_consult.phone }}</a>
+        <span class="info-consult__hours">{{ info_consult.hours }}</span>
+        <a href="{% url 'pages:info_page' 'about' %}#form" class="info-consult__btn">{{ info_consult.cta }}</a>
+      </div>
+      {% endif %}
+    </aside>
+
+    <article class="info-article">
+      <h1 class="info-h1">{{ blog_title }}</h1>
+      <p class="info-lead">{{ blog_lead }}</p>
+      <ul class="blog-list">
+        {% for post in posts %}
+        <li class="blog-list__item">
+          <a href="{% url 'pages:blog_detail' post.slug %}" class="blog-list__link">
+            {% if post.cover %}
+            <img class="blog-list__img" src="{{ post.cover.url }}" alt="" loading="lazy" width="320" height="180">
+            {% endif %}
+            <span class="blog-list__title">{{ post.title }}</span>
+            <span class="blog-list__excerpt">{{ post.excerpt }}</span>
+          </a>
+        </li>
+        {% empty %}
+        <li>{% t 'Статті незабаром зʼявляться.' %}</li>
+        {% endfor %}
+      </ul>
+    </article>
+  </div>
 </div>
 {% endblock %}

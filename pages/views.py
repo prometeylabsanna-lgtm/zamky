@@ -9,7 +9,8 @@ from django.views.generic import TemplateView
 from config.redirects import safe_next_url
 from pages.i18n_lib import tr
 
-from . import info_content
+from pages import info_cms
+
 from .forms import ContactForm
 from .models import ContactRequest
 
@@ -132,12 +133,16 @@ class InfoView(TemplateView):
             key: {'name': tr(INFO_PAGES[key]['name'])}
             for key in INFO_NAV
         }
+        lang = (getattr(self.request, 'LANGUAGE_CODE', None) or 'ua')[:2].lower()
+        if lang == 'uk':
+            lang = 'ua'
         ctx.update(
             {
                 'page_key': page_key,
                 'page_name': tr(INFO_PAGES[page_key]['name']),
                 'info_pages': pages,
-                'info_content': info_content.for_page(page_key),
+                'info_content': info_cms.for_page(page_key, lang=lang),
+                'info_consult': info_cms.info_consult(lang=lang),
                 'scroll_form': raw == 'contacts',
                 'form': ctx.get('form') or _new_form(self.request),
             }

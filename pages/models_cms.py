@@ -75,6 +75,7 @@ class SiteBlock(models.Model):
         PROMOS = "promos", "Акції"
         OFFER = "offer", "Оферта"
         PRIVACY = "privacy", "Політика"
+        BLOG = "blog", "Блог"
         CATALOG = "catalog", "Каталог"
         PRODUCT = "product", "Товар"
         CART = "cart", "Кошик"

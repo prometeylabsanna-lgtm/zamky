@@ -204,6 +204,31 @@ class BlogListView(ListView):
     def get_queryset(self):
         return BlogPost.objects.filter(is_published=True).order_by('sort_order', '-created_at')
 
+    def get_context_data(self, **kwargs):
+        from pages import info_cms
+        from pages.views import INFO_NAV, INFO_PAGES
+        from pages.i18n_lib import tr
+
+        ctx = super().get_context_data(**kwargs)
+        lang = (getattr(self.request, 'LANGUAGE_CODE', None) or 'ua')[:2].lower()
+        if lang == 'uk':
+            lang = 'ua'
+        content = info_cms.for_page('blog', lang=lang)
+        ctx.update(
+            {
+                'page_key': 'blog',
+                'page_name': content.get('h1') or tr(INFO_PAGES['blog']['name']),
+                'info_pages': {
+                    key: {'name': tr(INFO_PAGES[key]['name'])} for key in INFO_NAV
+                },
+                'info_content': content,
+                'info_consult': info_cms.info_consult(lang=lang),
+                'blog_title': content.get('h1', ''),
+                'blog_lead': content.get('lead', ''),
+            }
+        )
+        return ctx
+
 
 class BlogDetailView(DetailView):
     model = BlogPost

@@ -30,10 +30,10 @@
         {% endfor %}
       </ul>
       <div class="info-consult">
-        <span class="info-consult__hint">{% t 'Потрібна консультація?' %}</span>
-        <a href="tel:0670000000" class="info-consult__phone">067 00 00 00</a>
-        <span class="info-consult__hours">{% t 'Пн–Сб, 9:00–19:00' %}</span>
-        <a href="#form" class="info-consult__btn" data-to-form>{% t 'Написати нам' %}</a>
+        <span class="info-consult__hint">{{ info_consult.hint }}</span>
+        <a href="tel:{{ info_consult.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="info-consult__phone">{{ info_consult.phone }}</a>
+        <span class="info-consult__hours">{{ info_consult.hours }}</span>
+        <a href="#form" class="info-consult__btn" data-to-form>{{ info_consult.cta }}</a>
       </div>
     </aside>
 

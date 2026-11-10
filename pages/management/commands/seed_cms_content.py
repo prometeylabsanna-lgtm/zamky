@@ -65,23 +65,38 @@ class Command(BaseCommand):
                 self.stdout.write("SiteSettings вже є")
 
         created_blocks = 0
+        filled_blocks = 0
+        from pages.block_defaults_ru import get_block_default_ru
+
         for page, key in all_registry_block_keys():
+            ua_default = get_block_default(page, key)
+            ru_default = get_block_default_ru(page, key)
             defaults = {
                 "label": get_block_label(page, key),
                 "content_type": get_block_content_type(page, key),
-                "text_html": get_block_default(page, key),
+                "text_html": ua_default,
+                "text_html_ru": ru_default,
             }
-            try:
-                from pages.block_defaults_ru import get_block_default_ru
-
-                defaults["text_html_ru"] = get_block_default_ru(page, key)
-            except Exception:
-                pass
-            _, created = SiteBlock.objects.get_or_create(
+            block, created = SiteBlock.objects.get_or_create(
                 page=page, key=key, defaults=defaults
             )
             if created:
                 created_blocks += 1
+                continue
+            dirty_fields: list[str] = []
+            if not (block.label or "").strip():
+                block.label = get_block_label(page, key)
+                dirty_fields.append("label")
+            # Залити поточні тексти сайту в порожні поля (не перезаписувати ручні правки).
+            if ua_default and not (block.text_html or "").strip():
+                block.text_html = ua_default
+                dirty_fields.append("text_html")
+            if ru_default and not (block.text_html_ru or "").strip():
+                block.text_html_ru = ru_default
+                dirty_fields.append("text_html_ru")
+            if dirty_fields:
+                block.save(update_fields=dirty_fields)
+                filled_blocks += 1
 
         hero_created = ensure_default_hero_slides()
         from pages.page_styles import ensure_all_page_styles
@@ -90,8 +105,8 @@ class Command(BaseCommand):
         clear_site_blocks_cache()
         self.stdout.write(
             self.style.SUCCESS(
-                f"SiteBlock +{created_blocks}, HeroSlide +{hero_created}, "
-                f"PageStyle +{styles_created}"
+                f"SiteBlock +{created_blocks} filled {filled_blocks}, "
+                f"HeroSlide +{hero_created}, PageStyle +{styles_created}"
             )
         )
         report = collect_parity()
