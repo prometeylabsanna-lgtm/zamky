@@ -11,8 +11,11 @@
         <img src="{% static 'img/logo.png' %}" alt="{% t 'Центр замків' %}" width="120" height="48">
       </a>
 
-      <form class="hdr-search hdr-search--inline" action="{% url 'catalog:catalog' %}" method="get" role="search">
-        <input type="search" name="q" placeholder="{% t 'Пошук замків, циліндрів, накладок,брендів...' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search">
+      <form class="hdr-search hdr-search--inline" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form>
+        <div class="hdr-search__field">
+          <input type="search" name="q" placeholder="{% t 'Пошук замків, циліндрів, накладок,брендів...' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search" data-search-input>
+          <div class="hdr-search__suggest" data-search-suggest hidden></div>
+        </div>
         <button type="submit" class="hdr-search__btn" aria-label="{% t 'Пошук' %}">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path fill-rule="evenodd" d="M10.8 2.8a8 8 0 0 1 6.4 12.8l3.6 3.6a1.4 1.4 0 0 1-2 2l-3.6-3.6A8 8 0 1 1 10.8 2.8z"></path></svg>
         </button>
@@ -40,8 +43,11 @@
       </div>
     </div>
 
-    <form class="hdr-search hdr-search--below" action="{% url 'catalog:catalog' %}" method="get" role="search">
-      <input type="search" name="q" placeholder="{% t 'Пошук замків, циліндрів, накладок,брендів...' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search">
+    <form class="hdr-search hdr-search--below" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form>
+      <div class="hdr-search__field">
+        <input type="search" name="q" placeholder="{% t 'Пошук замків, циліндрів, накладок,брендів...' %}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search" data-search-input>
+        <div class="hdr-search__suggest" data-search-suggest hidden></div>
+      </div>
       <button type="submit" class="hdr-search__btn" aria-label="{% t 'Пошук' %}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path fill-rule="evenodd" d="M10.8 2.8a8 8 0 0 1 6.4 12.8l3.6 3.6a1.4 1.4 0 0 1-2 2l-3.6-3.6A8 8 0 1 1 10.8 2.8z"></path></svg>
       </button>

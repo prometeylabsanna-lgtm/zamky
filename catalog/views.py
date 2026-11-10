@@ -14,6 +14,7 @@ from pages.models_extra import BlogPost
 from pages.views_extra import _form_with_key
 
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
+from .search import filter_queryset_by_query
 
 SORT_MAP = {
     'default': ('catalog_order', 'name'),
@@ -246,8 +247,7 @@ class CatalogView(ListView):
             qs = qs.filter(Q(category=self.category) | Q(category__parent=self.category))
 
         q = self.request.GET.get('q', '').strip()
-        if q:
-            qs = qs.filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(brand__icontains=q))
+        self._search_q = q
 
         sku = self.request.GET.get('sku', '').strip()
         if sku:
@@ -265,7 +265,15 @@ class CatalogView(ListView):
         if price_max is not None:
             qs = qs.filter(price__lte=price_max)
 
+        # Fuzzy/кирилиця після інших фільтрів; порядок релевантності, якщо немає явного sort.
         sort = self.request.GET.get('sort', 'default')
+        if q:
+            qs = filter_queryset_by_query(qs, q)
+            if sort and sort != 'default':
+                ordering = SORT_MAP.get(sort, SORT_MAP['default'])
+                return qs.order_by(*ordering).distinct()
+            return qs.distinct()
+
         ordering = SORT_MAP.get(sort, SORT_MAP['default'])
         return qs.distinct().order_by(*ordering)
 
