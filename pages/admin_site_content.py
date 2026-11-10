@@ -11,6 +11,7 @@ from unfold.widgets import UnfoldAdminFileFieldWidget, UnfoldBooleanWidget
 from pages.admin_guidelines import help_for_key, help_for_section
 from pages.admin_hero_slides import build_hero_slide_formset
 from pages.admin_site_content_widgets import (
+    CmsAdminColorWidget,
     CmsAdminTextInputWidget,
     CmsAdminTextareaWidget,
     CmsTinyMCEWidget,
@@ -26,6 +27,8 @@ from pages.block_defaults import (
     is_visibility_key,
 )
 from pages.models_cms import SITE_BLOCKS_CACHE_KEY, SiteBlock, SiteSettings
+from pages.models_page_style import PageStyle
+from pages.page_styles import clean_color
 from pages.site_content_registry import get_section
 
 
@@ -73,8 +76,33 @@ class SitePageContentForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.section = section
         self.blocks = blocks or {}
+        self._page_style = None
         if not section:
             return
+
+        style = PageStyle.for_page(section.page_slug)
+        self._page_style = style
+        self.fields["style_background"] = forms.CharField(
+            required=False,
+            label="Колір фону",
+            initial=(style.background_color or "").strip() or PageStyle.DEFAULT_BACKGROUND,
+            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_BACKGROUND),
+            help_text=f"За замовчуванням: {PageStyle.DEFAULT_BACKGROUND}",
+        )
+        self.fields["style_text"] = forms.CharField(
+            required=False,
+            label="Колір шрифту",
+            initial=(style.text_color or "").strip() or PageStyle.DEFAULT_TEXT,
+            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_TEXT),
+            help_text=f"За замовчуванням: {PageStyle.DEFAULT_TEXT}",
+        )
+        self.fields["style_accent"] = forms.CharField(
+            required=False,
+            label="Колір підсвітки",
+            initial=(style.accent_color or "").strip() or PageStyle.DEFAULT_ACCENT,
+            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_ACCENT),
+            help_text=f"За замовчуванням: {PageStyle.DEFAULT_ACCENT}",
+        )
 
         if section.visibility_key:
             block = self.blocks.get(section.visibility_key)
@@ -154,6 +182,24 @@ class SitePageContentForm(forms.Form):
                 widget=ru_widget,
             )
 
+    def clean_style_background(self):
+        return clean_color(
+            self.cleaned_data.get("style_background", ""),
+            default=PageStyle.DEFAULT_BACKGROUND,
+        )
+
+    def clean_style_text(self):
+        return clean_color(
+            self.cleaned_data.get("style_text", ""),
+            default=PageStyle.DEFAULT_TEXT,
+        )
+
+    def clean_style_accent(self):
+        return clean_color(
+            self.cleaned_data.get("style_accent", ""),
+            default=PageStyle.DEFAULT_ACCENT,
+        )
+
     def save(self):
         section = self.section
         if section.visibility_key:
@@ -191,6 +237,13 @@ class SitePageContentForm(forms.Form):
                 block.text_html = value or ""
                 block.save(update_fields=["link_url", "content_type", "text_html"])
 
+        if self._page_style is not None:
+            style = self._page_style
+            style.background_color = self.cleaned_data.get("style_background", "")
+            style.text_color = self.cleaned_data.get("style_text", "")
+            style.accent_color = self.cleaned_data.get("style_accent", "")
+            style.save()
+
         cache.delete(SITE_BLOCKS_CACHE_KEY)
 
 
@@ -225,6 +278,18 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
             hero_formset = build_hero_slide_formset()
 
     field_groups = []
+    style_fields = []
+    for fname in ("style_background", "style_text", "style_accent"):
+        if fname in form.fields:
+            style_fields.append(
+                {
+                    "field": form[fname],
+                    "field_ru": None,
+                    "preview_url": "",
+                    "preview_fallback": False,
+                }
+            )
+
     for group in section.field_groups:
         bound = []
         for key in group.keys:
@@ -288,6 +353,12 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
         "section_hint": help_for_section(section.page_slug, section.slug),
         "form": form,
         "field_groups": field_groups,
+        "style_fields": style_fields,
+        "style_defaults": {
+            "background": PageStyle.DEFAULT_BACKGROUND,
+            "text": PageStyle.DEFAULT_TEXT,
+            "accent": PageStyle.DEFAULT_ACCENT,
+        },
         "blocks_map": blocks,
         "hero_formset": hero_formset,
         "opts": SiteSettings._meta,

@@ -81,8 +81,8 @@ class Attribute(models.Model):
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
-        verbose_name = 'Атрибут'
-        verbose_name_plural = 'Атрибути'
+        verbose_name = 'Фільтр каталогу'
+        verbose_name_plural = 'Фільтри каталогу'
         ordering = ['sort_order', 'name']
 
     def __str__(self):
@@ -108,8 +108,8 @@ class AttributeValue(models.Model):
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
-        verbose_name = 'Значення атрибута'
-        verbose_name_plural = 'Значення атрибутів'
+        verbose_name = 'Значення фільтра'
+        verbose_name_plural = 'Значення фільтрів'
         ordering = ['sort_order', 'value']
         unique_together = [('attribute', 'slug')]
 
@@ -317,8 +317,8 @@ class ProductAttribute(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Характеристика товару'
-        verbose_name_plural = 'Характеристики товарів'
+        verbose_name = 'Фільтр товару'
+        verbose_name_plural = 'Фільтри товару'
         unique_together = [('product', 'attribute_value')]
 
     def __str__(self):

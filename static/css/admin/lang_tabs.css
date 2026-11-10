@@ -78,6 +78,10 @@ html.dark .admin-lang-tabs__btn.is-active,
   display: none;
 }
 
+[data-admin-panel][hidden] {
+  display: none;
+}
+
 /* CMS: UA/RU під вкладками — одна колонка */
 .site-content-editor__pair {
   display: grid;

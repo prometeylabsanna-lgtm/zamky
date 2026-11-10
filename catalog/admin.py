@@ -12,7 +12,6 @@ from .models import (
     Category,
     Product,
     ProductAttribute,
-    ProductFamily,
     ProductImage,
 )
 
@@ -21,8 +20,8 @@ class AttributeValueInline(TabularInline):
     model = AttributeValue
     extra = 1
     tab = True
-    verbose_name = 'Значення атрибута'
-    verbose_name_plural = 'Значення атрибутів'
+    verbose_name = 'Значення фільтра'
+    verbose_name_plural = 'Значення фільтрів'
     readonly_fields = ('slug',)
     fields = ('value', 'slug', 'sort_order')
 
@@ -46,27 +45,8 @@ class ProductAttributeInline(TabularInline):
     extra = 1
     autocomplete_fields = ('attribute_value',)
     tab = True
-    verbose_name = 'Характеристика'
-    verbose_name_plural = 'Характеристики'
-
-
-class ProductVariantInline(TabularInline):
-    model = Product
-    fk_name = 'family'
-    extra = 0
-    fields = (
-        'sku',
-        'color_code',
-        'color_label',
-        'size_mm',
-        'price',
-        'stock',
-        'is_active',
-    )
-    show_change_link = True
-    tab = True
-    verbose_name = 'Варіант'
-    verbose_name_plural = 'Варіанти'
+    verbose_name = 'Значення фільтра'
+    verbose_name_plural = 'Фільтри товару'
 
 
 @admin.register(Category)
@@ -121,14 +101,6 @@ class AttributeValueAdmin(TopDropdownFiltersMixin, ModelAdmin):
     readonly_fields = ('slug',)
 
 
-@admin.register(ProductFamily)
-class ProductFamilyAdmin(TopDropdownFiltersMixin, ModelAdmin):
-    list_display = ('name', 'slug', 'brand')
-    search_fields = ('name', 'slug', 'brand')
-    readonly_fields = ('slug',)
-    inlines = [ProductVariantInline]
-
-
 @admin.register(Product)
 class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelAdmin):
     list_display = (
@@ -151,7 +123,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         'color_label',
     )
     search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
-    autocomplete_fields = ('category', 'family')
+    autocomplete_fields = ('category',)
     readonly_fields = ('slug', 'og_preview', 'created_at', 'updated_at')
     inlines = [ProductImageInline, ProductAttributeInline]
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
@@ -177,7 +149,6 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
                     'slug',
                     'sku',
                     'category',
-                    'family',
                     'brand',
                     'price',
                     'old_price',

@@ -273,17 +273,12 @@ UNFOLD = {
                         'link': _admin_link('catalog/category/'),
                     },
                     {
-                        'title': 'Сімʼї товарів',
-                        'icon': 'widgets',
-                        'link': _admin_link('catalog/productfamily/'),
-                    },
-                    {
-                        'title': 'Фасети',
+                        'title': 'Фільтри каталогу',
                         'icon': 'tune',
                         'link': _admin_link('catalog/attribute/'),
                     },
                     {
-                        'title': 'Значення фасетів',
+                        'title': 'Значення фільтрів',
                         'icon': 'label',
                         'link': _admin_link('catalog/attributevalue/'),
                     },

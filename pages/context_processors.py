@@ -8,6 +8,7 @@ from orders.models import DeliveryDistrict
 from pages.cms_content import get_block_text, get_site_blocks_map
 from pages.i18n_lib import js_i18n_dict, site_lang_code, tr
 from pages.models_cms import SiteSettings
+from pages.page_styles import get_page_style_vars
 
 CATALOG_URL_NAMES = {'product', 'catalog', 'category'}
 
@@ -88,6 +89,14 @@ def site_context(request):
         'header_catalog_active': url_name in CATALOG_URL_NAMES,
         'js_i18n': js_i18n_dict(),
         'callback_idempotency': cb_key,
+        'page_style': _safe_page_style(request),
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261110v11',
+        'asset_v': '20261110v12',
     }
+
+
+def _safe_page_style(request):
+    try:
+        return get_page_style_vars(request)
+    except Exception:
+        return {"bg": "", "text": "", "accent": ""}

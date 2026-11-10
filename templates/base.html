@@ -26,6 +26,21 @@
   <link rel="stylesheet" href="{% static 'css/cart-drawer.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/product-card.css' %}?v={{ asset_v }}">
+  {% if page_style.bg or page_style.text or page_style.accent %}
+  <style id="page-style-vars">
+    :root {
+      {% if page_style.bg %}--color-bg: {{ page_style.bg }};{% endif %}
+      {% if page_style.text %}--color-fg: {{ page_style.text }};{% endif %}
+      {% if page_style.accent %}
+      --color-accent: {{ page_style.accent }};
+      --color-accent-border: {{ page_style.accent }};
+      --color-border-hover: {{ page_style.accent }};
+      --color-star: {{ page_style.accent }};
+      --color-warning: {{ page_style.accent }};
+      {% endif %}
+    }
+  </style>
+  {% endif %}
   {% block extra_css %}{% endblock %}
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

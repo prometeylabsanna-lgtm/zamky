@@ -84,10 +84,14 @@ class Command(BaseCommand):
                 created_blocks += 1
 
         hero_created = ensure_default_hero_slides()
+        from pages.page_styles import ensure_all_page_styles
+
+        styles_created = ensure_all_page_styles()
         clear_site_blocks_cache()
         self.stdout.write(
             self.style.SUCCESS(
-                f"SiteBlock +{created_blocks}, HeroSlide +{hero_created}"
+                f"SiteBlock +{created_blocks}, HeroSlide +{hero_created}, "
+                f"PageStyle +{styles_created}"
             )
         )
         report = collect_parity()

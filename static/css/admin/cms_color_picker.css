@@ -1,0 +1,96 @@
+/* Color picker для вкладки «Оформлення» */
+
+.zamky-cms-colorpick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.zamky-cms-colorpick__swatch {
+  position: relative;
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  cursor: pointer;
+  flex: 0 0 auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zamky-cms-colorpick__circle {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.zamky-cms-colorpick__native {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+
+.zamky-cms-colorpick__hex {
+  min-height: 44px;
+  min-width: 7rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.zamky-cms-colorpick__default,
+.zamky-cms-style-reset {
+  min-height: 44px;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.zamky-cms-style-reset {
+  margin: 0.25rem 0 0.75rem;
+  font-weight: 600;
+}
+
+.site-content-editor__style-hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--color-font-subtle-light, #6b7280);
+}
+
+@media (max-width: 767px) {
+  .zamky-cms-colorpick {
+    width: 100%;
+  }
+
+  .zamky-cms-colorpick__hex {
+    flex: 1 1 auto;
+  }
+}
+
+html.dark .zamky-cms-colorpick__hex,
+.dark .zamky-cms-colorpick__hex,
+html.dark .zamky-cms-colorpick__default,
+.dark .zamky-cms-colorpick__default,
+html.dark .zamky-cms-style-reset,
+.dark .zamky-cms-style-reset {
+  border-color: rgba(156, 163, 175, 0.45);
+}

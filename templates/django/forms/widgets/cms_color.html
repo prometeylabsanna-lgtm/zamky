@@ -1,0 +1,13 @@
+<div class="zamky-cms-colorpick" data-cms-colorpick data-default-color="{{ widget.default_color }}">
+  <label class="zamky-cms-colorpick__swatch" title="Обрати колір">
+    <span class="zamky-cms-colorpick__circle" style="background: {{ widget.value }}" data-cms-color-circle aria-hidden="true"></span>
+    <input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %} data-cms-color-native class="zamky-cms-colorpick__native" aria-label="Пікер кольору">
+  </label>
+  <input type="text" class="zamky-cms-colorpick__hex" data-cms-color-hex maxlength="7" spellcheck="false" autocomplete="off" value="{{ widget.value }}" aria-label="HEX">
+  <button
+    type="button"
+    class="zamky-cms-colorpick__default"
+    data-cms-color-default
+    title="Повернути дефолтний колір"
+  >Дефолт</button>
+</div>

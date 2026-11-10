@@ -10,6 +10,7 @@
   "use strict";
 
   var STORAGE_KEY = "zamky_admin_lang";
+  var PANEL_KEY = "zamky_admin_panel";
   var ROOT_ATTR = "data-admin-lang-root";
 
   function isRuName(name) {
@@ -120,7 +121,40 @@
     return hasRu;
   }
 
+  function hasStylePanel(root) {
+    return !!root.querySelector("[data-admin-panel='style']");
+  }
+
+  function applyPanel(root, panel) {
+    var showStyle = panel === "style";
+    root.querySelectorAll("[data-admin-panel]").forEach(function (node) {
+      var isStyle = node.getAttribute("data-admin-panel") === "style";
+      if (showStyle) {
+        node.hidden = !isStyle;
+      } else {
+        node.hidden = isStyle;
+      }
+    });
+    root.querySelectorAll("[data-admin-panel-tab]").forEach(function (btn) {
+      var active = btn.getAttribute("data-admin-panel-tab") === panel;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+      btn.setAttribute("tabindex", active ? "0" : "-1");
+    });
+    root.querySelectorAll("[data-admin-lang-tab]").forEach(function (btn) {
+      if (showStyle) {
+        btn.classList.remove("is-active");
+        btn.setAttribute("aria-selected", "false");
+        btn.setAttribute("tabindex", "-1");
+      }
+    });
+  }
+
   function applyLang(root, lang) {
+    applyPanel(root, "content");
+    try {
+      window.localStorage.setItem(PANEL_KEY, "content");
+    } catch (err) {}
     root.querySelectorAll("[data-admin-lang]").forEach(function (node) {
       // Ніколи не ховаємо цілий рядок tabular-інлайну
       if (node.tagName === "TR" || node.tagName === "TBODY") {
@@ -142,32 +176,72 @@
     });
   }
 
-  function buildTabs(root, initial) {
+  function buildTabs(root, initial, opts) {
     if (root.querySelector(".admin-lang-tabs")) return;
+    opts = opts || {};
+    var withLang = !!opts.withLang;
+    var withStyle = !!opts.withStyle;
+    if (!withLang && !withStyle) return;
+
     var tabs = document.createElement("div");
     tabs.className = "admin-lang-tabs";
     tabs.setAttribute("role", "tablist");
-    tabs.setAttribute("aria-label", "Мова текстів");
+    tabs.setAttribute("aria-label", "Мова та оформлення");
 
-    ["uk", "ru"].forEach(function (lang) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "admin-lang-tabs__btn" + (lang === initial ? " is-active" : "");
-      btn.setAttribute("role", "tab");
-      btn.setAttribute("data-admin-lang-tab", lang);
-      btn.setAttribute("aria-selected", lang === initial ? "true" : "false");
-      btn.textContent = lang === "uk" ? "UA" : "RU";
-      btn.addEventListener("click", function () {
-        try {
-          window.localStorage.setItem(STORAGE_KEY, lang);
-        } catch (err) {}
-        applyLang(root, lang);
-        document.dispatchEvent(
-          new CustomEvent("admin-lang-changed", { detail: { lang: lang, root: root } })
-        );
+    if (withLang) {
+      ["uk", "ru"].forEach(function (lang) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "admin-lang-tabs__btn" + (lang === initial ? " is-active" : "");
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("data-admin-lang-tab", lang);
+        btn.setAttribute("aria-selected", lang === initial ? "true" : "false");
+        btn.textContent = lang === "uk" ? "UA" : "RU";
+        btn.addEventListener("click", function () {
+          try {
+            window.localStorage.setItem(STORAGE_KEY, lang);
+            window.localStorage.setItem(PANEL_KEY, "content");
+          } catch (err) {}
+          applyLang(root, lang);
+          document.dispatchEvent(
+            new CustomEvent("admin-lang-changed", { detail: { lang: lang, root: root } })
+          );
+        });
+        tabs.appendChild(btn);
       });
-      tabs.appendChild(btn);
-    });
+    } else if (withStyle) {
+      var contentBtn = document.createElement("button");
+      contentBtn.type = "button";
+      contentBtn.className = "admin-lang-tabs__btn is-active";
+      contentBtn.setAttribute("role", "tab");
+      contentBtn.setAttribute("data-admin-panel-tab", "content");
+      contentBtn.setAttribute("aria-selected", "true");
+      contentBtn.textContent = "Контент";
+      contentBtn.addEventListener("click", function () {
+        try {
+          window.localStorage.setItem(PANEL_KEY, "content");
+        } catch (err) {}
+        applyPanel(root, "content");
+      });
+      tabs.appendChild(contentBtn);
+    }
+
+    if (withStyle) {
+      var styleBtn = document.createElement("button");
+      styleBtn.type = "button";
+      styleBtn.className = "admin-lang-tabs__btn";
+      styleBtn.setAttribute("role", "tab");
+      styleBtn.setAttribute("data-admin-panel-tab", "style");
+      styleBtn.setAttribute("aria-selected", "false");
+      styleBtn.textContent = "Оформлення";
+      styleBtn.addEventListener("click", function () {
+        try {
+          window.localStorage.setItem(PANEL_KEY, "style");
+        } catch (err) {}
+        applyPanel(root, "style");
+      });
+      tabs.appendChild(styleBtn);
+    }
 
     var form = root.matches("form") ? root : root.querySelector("form");
     var mount = form || root;
@@ -192,14 +266,29 @@
     return "uk";
   }
 
+  function readPanel() {
+    try {
+      var saved = window.localStorage.getItem(PANEL_KEY);
+      if (saved === "style" || saved === "content") return saved;
+    } catch (err) {}
+    return "content";
+  }
+
   function initRoot(root) {
     if (!root || root.getAttribute(ROOT_ATTR) === "1") return;
-    var hasRu = markPairs(root);
-    if (!hasRu && !root.querySelector("[data-admin-lang=ru]")) return;
+    var hasRu = markPairs(root) || !!root.querySelector("[data-admin-lang=ru]");
+    var withStyle = hasStylePanel(root);
+    if (!hasRu && !withStyle) return;
     root.setAttribute(ROOT_ATTR, "1");
     var lang = readLang();
-    buildTabs(root, lang);
-    applyLang(root, lang);
+    buildTabs(root, lang, { withLang: hasRu, withStyle: withStyle });
+    if (withStyle && readPanel() === "style") {
+      applyPanel(root, "style");
+    } else if (hasRu) {
+      applyLang(root, lang);
+    } else {
+      applyPanel(root, "content");
+    }
   }
 
   function refreshAfterFormset(row) {

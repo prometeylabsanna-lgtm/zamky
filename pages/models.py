@@ -48,6 +48,7 @@ from pages.models_extra import (  # noqa: E402
     PhotoPickRequest,
 )
 from pages.models_media import MediaItem  # noqa: E402
+from pages.models_page_style import PageStyle  # noqa: E402
 
 __all__ = [
     'ContactRequest',
@@ -60,4 +61,5 @@ __all__ = [
     'SiteBlock',
     'HeroSlide',
     'MediaItem',
+    'PageStyle',
 ]
