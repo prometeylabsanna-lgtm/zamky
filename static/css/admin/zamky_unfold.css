@@ -3,7 +3,7 @@
 .zamky-changelist-toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px 12px;
   margin-bottom: 1rem;
   padding: 12px;
@@ -48,8 +48,10 @@ html.dark .zamky-changelist-toolbar {
 }
 
 .zamky-filter__label {
-  display: block;
+  display: flex;
+  align-items: flex-end;
   margin: 0;
+  min-height: 2.5em;
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.25;
@@ -71,12 +73,32 @@ html.dark .zamky-filter__label {
 .zamky-filter__control .select2-container {
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
 }
 
+/* Фіксована висота — focus/open Unfold (border-b-0 + outline) більше не «опускає» поле */
 .zamky-filter__control .select2-container .select2-selection--single {
+  box-sizing: border-box;
+  height: 42px;
   min-height: 42px;
   display: flex;
   align-items: center;
+  border-bottom-width: 1px;
+}
+
+.zamky-filter__control .select2-container.select2-container--focus,
+.zamky-filter__control .select2-container.select2-container--open {
+  outline: none;
+}
+
+.zamky-filter__control .select2-container--focus .select2-selection--single,
+.zamky-filter__control .select2-container--open .select2-selection--single {
+  box-sizing: border-box;
+  height: 42px;
+  min-height: 42px;
+  border-bottom-width: 1px;
+  outline: 2px solid rgb(249 127 12);
+  outline-offset: -2px;
 }
 
 .zamky-filter__dates {
@@ -122,6 +144,16 @@ html.dark .zamky-filter__label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Чекбокс масових дій — не стискати в 0 при table-layout:fixed */
+.app-catalog.model-product #result_list th.action-checkbox-column,
+.app-catalog.model-product #result_list td.action-checkbox {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
 }
 
 .app-catalog.model-product #result_list th.field-stock,

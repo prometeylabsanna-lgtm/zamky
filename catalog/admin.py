@@ -136,8 +136,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         'is_new',
         'category',
         'brand',
-        'family',
-        'color_code',
+        'color_label',
     )
     search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
     prepopulated_fields = {'slug': ('name',)}
