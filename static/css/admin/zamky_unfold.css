@@ -1,5 +1,50 @@
 /* Unfold UX: топ-фільтри + компактний changelist (патерн Vartis). */
 
+/* Бренд-градієнт іконки: #FF8008 → #FF4B2B */
+:root {
+  --zamky-orange-top: #ff8008;
+  --zamky-orange-bot: #ff4b2b;
+  --zamky-orange-grad: linear-gradient(180deg, var(--zamky-orange-top) 0%, var(--zamky-orange-bot) 100%);
+}
+
+/* Primary-кнопки / активні акценти — градієнт як на іконці */
+button[type="submit"].bg-primary-600,
+a.bg-primary-600,
+.bg-primary-600.submit-row,
+#changelist-actions,
+.changelist-actions .bg-primary-600,
+a.bg-primary-600.text-white,
+button.bg-primary-600 {
+  background-image: var(--zamky-orange-grad);
+  background-color: var(--zamky-orange-bot);
+  border-color: transparent;
+}
+
+button[type="submit"].bg-primary-600:hover,
+a.bg-primary-600:hover,
+button.bg-primary-600:hover {
+  filter: brightness(1.05);
+}
+
+/* Активний пункт сайдбару */
+nav a.bg-primary-600,
+.sidebar a.bg-primary-600 {
+  background-image: var(--zamky-orange-grad);
+}
+
+/* Focus outline селектів фільтрів */
+.zamky-filter__control .select2-container--focus .select2-selection--single,
+.zamky-filter__control .select2-container--open .select2-selection--single {
+  outline-color: var(--zamky-orange-top);
+}
+
+/* Посилання primary */
+.text-primary-600,
+a.text-primary-600 {
+  color: var(--zamky-orange-bot);
+}
+
+
 .zamky-changelist-toolbar {
   display: flex;
   flex-wrap: wrap;
