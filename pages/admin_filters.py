@@ -92,6 +92,12 @@ class ZamkyRelatedDropdownFilter(ValueMixin, DropdownMixin, admin.RelatedFieldLi
 
 
 class ZamkyAllValuesDropdownFilter(ValueMixin, DropdownMixin, admin.AllValuesFieldListFilter):
+    def queryset(self, request: HttpRequest, queryset: QuerySet) -> QuerySet | None:
+        # Порожній select («Всі») у GET дає brand= → Django шукав би "" і обнуляв видачу.
+        if self.value() not in EMPTY_VALUES:
+            return super().queryset(request, queryset)
+        return queryset
+
     def choices(self, changelist: ChangeList) -> Iterator:
         choices = [self.all_option] if self.all_option else []
         for val in self.lookup_choices:

@@ -4,6 +4,7 @@ from unfold.admin import ModelAdmin, TabularInline
 
 from pages.admin_mixins import DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin
 
+from .admin_product_actions import PRODUCT_ACTIONS
 from .models import (
     Attribute,
     AttributeGroup,
@@ -143,6 +144,17 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
     autocomplete_fields = ('category', 'family')
     inlines = [ProductImageInline, ProductAttributeInline]
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
+    actions = PRODUCT_ACTIONS
+    actions_on_top = True
+    actions_on_bottom = True
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            func, name, _desc = actions['delete_selected']
+            actions['delete_selected'] = (func, name, 'Видалити вибрані')
+        return actions
+
     fieldsets = (
         (
             'Основне',

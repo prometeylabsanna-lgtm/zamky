@@ -2,7 +2,7 @@
 
 {% with horizontal_filters=cl|unfold_horizontal_filters %}
     {% if horizontal_filters|length > 0 %}
-        <form method="get" class="zamky-filters-row" oninput="this.submit()">
+        <form method="get" class="zamky-filters-row" id="zamky-filters-form">
             {% preserve_filters "horizontal" %}
 
             {% for spec in horizontal_filters %}
@@ -11,5 +11,25 @@
                 </div>
             {% endfor %}
         </form>
+        <script>
+          (function () {
+            var form = document.getElementById('zamky-filters-form');
+            if (!form || form.dataset.bound) return;
+            form.dataset.bound = '1';
+            form.addEventListener('change', function () {
+              var params = new URLSearchParams();
+              Array.prototype.forEach.call(form.elements, function (el) {
+                if (!el.name || el.disabled) return;
+                if (el.tagName === 'SELECT' || el.type === 'text' || el.type === 'hidden' || el.type === 'search' || el.type === 'date') {
+                  var v = el.value;
+                  if (v === null || v === '') return;
+                  params.append(el.name, v);
+                }
+              });
+              var qs = params.toString();
+              window.location = form.getAttribute('action') || (window.location.pathname + (qs ? '?' + qs : ''));
+            });
+          })();
+        </script>
     {% endif %}
 {% endwith %}
