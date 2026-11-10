@@ -6,7 +6,7 @@
         <a href="{% url 'catalog:home' %}" class="site-footer__logo">
           <img src="{% static 'img/logo-footer.png' %}" alt="{% t 'Центр замків' %}" width="150" height="48">
         </a>
-        <p class="site-footer__about">{% t 'Магазин, встановлення та сервіс замків, циліндрів і дверної фурнітури. Київ та область, доставка по всій Україні.' %}</p>
+        <p class="site-footer__about">{% if cms_footer_about_text %}{{ cms_footer_about_text }}{% else %}{% t 'Магазин, встановлення та сервіс замків, циліндрів і дверної фурнітури. Київ та область, доставка по всій Україні.' %}{% endif %}</p>
         <div class="site-footer__social">
           <a href="#" aria-label="Telegram" class="site-footer__soc">
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"></circle><path d="M5.4 11.7 16.9 7.3c.5-.2 1 .1.8.9l-2 9.3c-.1.6-.5.8-1 .5l-3-2.2-1.5 1.4c-.2.2-.3.3-.6.3l.2-3.1 5.6-5c.2-.2 0-.3-.4-.1L8.1 13.7l-3-.9c-.6-.2-.6-.6.3-1.1z" fill="#000"></path></svg>
@@ -20,8 +20,8 @@
         </div>
       </div>
 
-      <nav class="site-footer__col" aria-label="{% t 'Каталог' %}">
-        <span class="site-footer__h">{% t 'Каталог' %}</span>
+      <nav class="site-footer__col" aria-label="{{ cms_footer_catalog_title }}">
+        <span class="site-footer__h">{{ cms_footer_catalog_title }}</span>
         {% for c in header_menu %}
         {% if forloop.counter <= 6 %}
         <a href="{% url 'catalog:catalog' %}?q={{ c.name|urlencode }}">{{ c.name }}</a>
@@ -29,8 +29,8 @@
         {% endfor %}
       </nav>
 
-      <nav class="site-footer__col" aria-label="{% t 'Покупцям' %}">
-        <span class="site-footer__h">{% t 'Покупцям' %}</span>
+      <nav class="site-footer__col" aria-label="{{ cms_footer_info_title }}">
+        <span class="site-footer__h">{{ cms_footer_info_title }}</span>
         <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка та оплата' %}</a>
         <a href="{% url 'pages:info_page' 'warranty' %}">{% t 'Гарантія' %}</a>
         <a href="{% url 'pages:info_page' 'returns' %}">{% t 'Обмін та повернення' %}</a>
@@ -40,18 +40,26 @@
       </nav>
 
       <div class="site-footer__col site-footer__col--contacts">
-        <span class="site-footer__h">{% t 'Контакти' %}</span>
+        <span class="site-footer__h">{{ cms_footer_contacts_title }}</span>
+        {% if site_settings and site_settings.phone_raw %}
+        <a class="site-footer__tel" href="tel:{{ site_settings.phone_raw }}">{{ site_settings.phone }}</a>
+        {% else %}
         <a class="site-footer__tel" href="tel:+380670000000">(067) 000 00 00</a>
-        <span class="site-footer__muted">{% t 'Щоденно 8:00-21:00' %}</span>
+        {% endif %}
+        <span class="site-footer__muted">{% if site_settings and site_settings.work_hours %}{% if cms_lang == 'ru' and site_settings.work_hours_ru %}{{ site_settings.work_hours_ru }}{% else %}{{ site_settings.work_hours }}{% endif %}{% else %}{% t 'Щоденно 8:00-21:00' %}{% endif %}</span>
+        {% if site_settings and site_settings.email %}
+        <a class="site-footer__muted" href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>
+        {% else %}
         <a class="site-footer__muted" href="mailto:info@centrzamkiv.ua">info@centrzamkiv.ua</a>
-        <span class="site-footer__muted">{% t 'м. Київ' %}</span>
+        {% endif %}
+        <span class="site-footer__muted">{% if site_settings and site_settings.address %}{% if cms_lang == 'ru' and site_settings.address_ru %}{{ site_settings.address_ru }}{% else %}{{ site_settings.address }}{% endif %}{% else %}{% t 'м. Київ' %}{% endif %}</span>
         <button type="button" class="site-footer__cb" data-open-callback>{% t 'Замовити дзвінок' %}</button>
       </div>
     </div>
 
     <div class="site-footer__line"></div>
     <div class="site-footer__bottom">
-      <p class="site-footer__copy">© 2026 {% t 'Центр замків' %}. {% t 'Всі права захищені.' %}</p>
+      <p class="site-footer__copy">{% if cms_footer_copyright %}{{ cms_footer_copyright }}{% else %}© 2026 {% t 'Центр замків' %}. {% t 'Всі права захищені.' %}{% endif %}</p>
       <div class="site-footer__legal">
         <a href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
         <a href="{% url 'pages:info_page' 'offer' %}">{% t 'Публічна оферта' %}</a>

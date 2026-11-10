@@ -28,6 +28,9 @@ def bootstrap_if_needed() -> None:
     logger.info('Vercel bootstrap: seed_demo')
     call_command('seed_demo')
 
+    logger.info('Vercel bootstrap: seed_cms_content')
+    call_command('seed_cms_content')
+
     User = get_user_model()
     if not User.objects.filter(username='admin').exists():
         logger.info('Vercel bootstrap: create superuser admin')

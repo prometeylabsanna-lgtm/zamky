@@ -39,6 +39,7 @@ class ContactRequest(models.Model):
         return f'{self.name} · {self.phone}'
 
 
+from pages.models_cms import HeroSlide, SiteBlock, SiteSettings  # noqa: E402
 from pages.models_extra import (  # noqa: E402
     BlogPost,
     CallbackRequest,
@@ -46,6 +47,7 @@ from pages.models_extra import (  # noqa: E402
     PhotoPickImage,
     PhotoPickRequest,
 )
+from pages.models_media import MediaItem  # noqa: E402
 
 __all__ = [
     'ContactRequest',
@@ -54,4 +56,8 @@ __all__ = [
     'PhotoPickImage',
     'InstallRequest',
     'BlogPost',
+    'SiteSettings',
+    'SiteBlock',
+    'HeroSlide',
+    'MediaItem',
 ]

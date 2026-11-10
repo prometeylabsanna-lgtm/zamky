@@ -18,10 +18,10 @@
   -webkit-overflow-scrolling: touch;
   padding: 6px;
   box-sizing: border-box;
-  background: #fff;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-dropdown);
 }
 
 .dropdown__panel--lang {
@@ -46,7 +46,7 @@
   padding: 0 12px;
   border: 0;
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: space-between;

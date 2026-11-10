@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n_ui static %}
+{% load i18n_ui static cms_tags %}
 
 {% block title %}{% if district %}{{ district.h1|tr }}{% else %}{% t 'Замки для дверей та меблів — купити в Києві' %}{% endif %}{% endblock %}
 
@@ -25,11 +25,16 @@
   </nav>
   {% endif %}
 
+  {% if show_hero %}
   <section class="home-hero" data-hero aria-roledescription="carousel">
     <div class="home-hero__track">
       {% for slide in hero_slides %}
       <a href="{{ slide.url }}" class="home-hero__slide{% if forloop.first %} is-active{% endif %}" data-hero-slide aria-label="{{ slide.alt }}">
+        {% if slide.image_url %}
+        <img src="{{ slide.image_url }}" alt="{{ slide.alt }}"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+        {% else %}
         <img src="{% static slide.image %}" alt="{{ slide.alt }}"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+        {% endif %}
       </a>
       {% endfor %}
     </div>
@@ -47,7 +52,9 @@
       {% endfor %}
     </div>
   </section>
+  {% endif %}
 
+  {% if show_audience %}
   <section class="home-audience" aria-label="{% t 'Для кого' %}">
     {% for card in audience %}
     <article class="home-audience__card">
@@ -69,8 +76,10 @@
     </article>
     {% endfor %}
   </section>
+  {% endif %}
 
-  <section class="home-categories" aria-label="{% t 'Категорії' %}">
+  {% if show_categories %}
+  <section class="home-categories" aria-label="{{ categories_title|default:'Категорії' }}">
     <div class="home-categories__scroll ic-scroll">
       {% for card in category_cards %}
       {% with c=card.category %}
@@ -96,11 +105,13 @@
       {% endfor %}
     </div>
   </section>
+  {% endif %}
 
+  {% if show_picker %}
   <section class="home-picker" id="picker" data-picker data-picker-api="{% url 'catalog:api_picker' %}">
-    <h2 class="home-v2__h2">{% t 'Швидкий підбір замка' %}</h2>
-    <p class="home-v2__sub">{% t 'Вкажіть параметри, ми покажемо моделі' %}</p>
-    <h3 class="home-picker__step">{% t '1. Для яких дверей шукаєте замок?' %}</h3>
+    <h2 class="home-v2__h2">{{ picker_title }}</h2>
+    <p class="home-v2__sub">{{ picker_lead }}</p>
+    <h3 class="home-picker__step">{{ picker_step1 }}</h3>
     <div class="home-picker__doors ic-scroll">
       {% for d in door_types %}
       <button type="button" class="home-door-btn{% if forloop.first %} is-active{% endif %}" data-door-id="{{ d.id }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">
@@ -114,7 +125,7 @@
       </button>
       {% endfor %}
     </div>
-    <h3 class="home-picker__step home-picker__step--2">{% t '2. Уточніть параметри' %}</h3>
+    <h3 class="home-picker__step home-picker__step--2">{{ picker_step2 }}</h3>
     <div class="home-picker__filters">
       <div class="home-filter" data-filter="mech">
         <button type="button" class="home-filter__toggle" aria-expanded="false">
@@ -145,24 +156,26 @@
         <div class="home-filter__menu" hidden></div>
       </div>
       <button type="button" class="home-btn-grad home-picker__submit" data-picker-show>
-        <span>{% t 'Показати замки' %}</span>
+        <span>{{ picker_submit }}</span>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg>
       </button>
     </div>
     <div id="picker-results" class="home-picker__results" hidden></div>
     <div class="home-picker__photo">
-      <p class="home-picker__photo-text">{% t 'Не знайшли потрібне? Надішліть фото — підберемо аналог за 15 хвилин.' %}</p>
-      <button type="button" class="home-btn-outline" data-photo-open>{% t 'Підбір за фото' %}</button>
+      <p class="home-picker__photo-text">{{ picker_photo_text }}</p>
+      <button type="button" class="home-btn-outline" data-photo-open>{{ picker_photo_cta }}</button>
     </div>
   </section>
+  {% endif %}
 
+  {% if show_popular %}
   <section class="home-popular" data-home-popular>
-    <h2 class="home-v2__h2">{% t 'Популярні товари' %}</h2>
+    <h2 class="home-v2__h2">{{ popular_title }}</h2>
     <div class="home-popular__head">
       <div class="home-popular__tabs ic-scroll" role="tablist">
-        <button type="button" class="home-popular__tab is-active" role="tab" aria-selected="true" data-pop-tab="hits">{% t 'Хіти продажу' %}</button>
-        <button type="button" class="home-popular__tab" role="tab" aria-selected="false" data-pop-tab="news">{% t 'Новинки' %}</button>
-        <button type="button" class="home-popular__tab" role="tab" aria-selected="false" data-pop-tab="sales">{% t 'Знижки' %}</button>
+        <button type="button" class="home-popular__tab is-active" role="tab" aria-selected="true" data-pop-tab="hits">{{ popular_tab_hits }}</button>
+        <button type="button" class="home-popular__tab" role="tab" aria-selected="false" data-pop-tab="news">{{ popular_tab_news }}</button>
+        <button type="button" class="home-popular__tab" role="tab" aria-selected="false" data-pop-tab="sales">{{ popular_tab_sales }}</button>
       </div>
       <div class="home-popular__arrows">
         <button type="button" class="home-icon-btn" data-pop-prev aria-label="{% t 'Назад' %}">
@@ -195,9 +208,11 @@
       </div>
     </div>
   </section>
+  {% endif %}
 
-  <section class="home-blog" aria-label="{% t 'Блог' %}">
-    <h2 class="home-v2__h2">{% t 'Корисне для вибору' %}</h2>
+  {% if show_blog %}
+  <section class="home-blog" aria-label="{{ blog_title }}">
+    <h2 class="home-v2__h2">{{ blog_title }}</h2>
     <div class="home-blog__scroll ic-scroll">
       {% for post in blog_posts %}
       {% cycle 'img/v2/article1.png' 'img/v2/p2_34.png' 'img/v2/p2_35.png' 'img/v2/p2_36.png' as blog_cover silent %}
@@ -219,7 +234,7 @@
       <a href="{% url 'pages:blog_list' %}" class="home-blog-card">
         <img class="home-blog-card__img" src="{% static cover %}" alt="" loading="lazy">
         <span class="home-blog-card__foot">
-          <span class="home-blog-card__title">{% t 'Корисні статті про замки' %}</span>
+          <span class="home-blog-card__title">{{ blog_more_label }}</span>
           <span class="home-blog-card__go" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg>
           </span>
@@ -229,8 +244,9 @@
       {% endfor %}
     </div>
   </section>
+  {% endif %}
 
-  {% if district %}
+  {% if district and show_district %}
   <section class="home-district" aria-label="{% t 'Інформація про район' %}">
     <div class="home-district__grid">
       <div class="home-district__seo">
@@ -246,7 +262,7 @@
         </div>
       </div>
       <div class="home-district__others">
-        <h3>{% t 'Інші райони Києва' %}</h3>
+        <h3>{{ district_others_title }}</h3>
         <div class="home-district__list">
           {% for o in other_districts %}
           <a href="{% url 'catalog:district' o.slug %}">

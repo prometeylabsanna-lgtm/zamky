@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --color-bg: #fff;
   --color-fg: #505050;
   --color-muted: #aeaeae;
@@ -17,8 +18,10 @@
   --color-accent-soft: #fff1e4;
   --color-accent-border: #f97f0c;
   --color-accent-end: #ff2e2e;
-  --color-grad: linear-gradient(90deg, #f97f0c 32%, #ff2e2e 100%);
-  --color-grad-135: linear-gradient(135deg, #f97f0c 32%, #ff2e2e 100%);
+  --color-yellow: #ffc400;
+  --color-yellow-soft: #fff8db;
+  --color-grad: linear-gradient(90deg, #f97f0c 32%, #ffc400 100%);
+  --color-grad-135: linear-gradient(135deg, #f97f0c 32%, #ffc400 100%);
   --color-success: #2fb54a;
   --color-success-bg: #e3f8e8;
   --color-warning: #f97f0c;
@@ -191,7 +194,7 @@ textarea::placeholder {
 }
 
 .btn--ghost {
-  background: #fff;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   color: var(--color-fg);
 }
@@ -211,7 +214,7 @@ textarea::placeholder {
   box-sizing: border-box;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background: #fff;
+  background: var(--color-bg);
   color: var(--color-accent);
   font-size: 13.3333px;
   font-weight: 400;
@@ -224,7 +227,7 @@ textarea::placeholder {
 .btn--icon:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
-  background: #fff;
+  background: var(--color-bg);
 }
 
 .breadcrumbs {

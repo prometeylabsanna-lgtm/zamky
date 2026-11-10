@@ -164,7 +164,20 @@ class Product(models.Model):
     size_a = models.PositiveIntegerField('Розмір A', null=True, blank=True)
     size_b = models.PositiveIntegerField('Розмір B', null=True, blank=True)
     short_description = models.TextField('Короткий опис', blank=True)
+    short_description_ru = models.TextField('Короткий опис (RU)', blank=True, default='')
     description = models.TextField('Опис', blank=True)
+    description_ru = models.TextField('Опис (RU)', blank=True, default='')
+    name_ru = models.CharField('Назва (RU)', max_length=300, blank=True, default='')
+    seo_title = models.CharField('SEO title', max_length=200, blank=True, default='')
+    seo_title_ru = models.CharField('SEO title (RU)', max_length=200, blank=True, default='')
+    seo_description = models.CharField(
+        'SEO description', max_length=320, blank=True, default=''
+    )
+    seo_description_ru = models.CharField(
+        'SEO description (RU)', max_length=320, blank=True, default=''
+    )
+    canonical_url = models.CharField('Canonical URL', max_length=512, blank=True, default='')
+    og_image = models.ImageField('OG image', upload_to='products/og/', blank=True, null=True)
     attributes = models.ManyToManyField(
         AttributeValue,
         through='ProductAttribute',

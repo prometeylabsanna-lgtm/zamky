@@ -146,36 +146,9 @@ class HomeView(TemplateView):
         elif city_slug == 'kyiv' or self.request.path.rstrip('/').endswith('/kyiv'):
             is_city = True
 
-        hero_slides = [
-            {
-                'image': f'img/v2/banner{i}.png',
-                'alt': tr('Акція Центр замків'),
-                'url': reverse('catalog:catalog'),
-            }
-            for i in range(1, 5)
-        ]
-        audience = [
-            {
-                'title': tr('Для дому'),
-                'text': tr('Квартири, приватні будинки'),
-                'icon': 'home',
-            },
-            {
-                'title': tr('Для бізнесу'),
-                'text': tr('Офіси, магазини, склади'),
-                'icon': 'biz',
-            },
-            {
-                'title': tr('Для майстрів'),
-                'text': tr('Та будівельних компаній'),
-                'icon': 'tools',
-            },
-            {
-                'title': tr('Максимальна безпека'),
-                'text': tr('Сертифікована продукція'),
-                'icon': 'shield',
-            },
-        ]
+        from pages.home_cms import build_home_cms
+
+        cms = build_home_cms(self.request)
         door_types = [
             {'id': '0', 'image': 'img/v2/p2_14.png', 'line1': tr('Вхідні'), 'line2': tr('двері')},
             {'id': '1', 'image': 'img/v2/p2_15.png', 'line1': tr('Міжкімнатні'), 'line2': tr('двері')},
@@ -189,12 +162,15 @@ class HomeView(TemplateView):
         cat_list = list(cats)
         category_cards = []
         for i, cat in enumerate(cat_list):
+            sub = ''
+            if i < len(cms['category_subs']) and cms['category_subs'][i]:
+                sub = cms['category_subs'][i]
+            elif i < len(HOME_CATEGORY_SUBS):
+                sub = tr(HOME_CATEGORY_SUBS[i])
             category_cards.append(
                 {
                     'category': cat,
-                    'sub': tr(HOME_CATEGORY_SUBS[i])
-                    if i < len(HOME_CATEGORY_SUBS)
-                    else '',
+                    'sub': sub,
                     'fallback_image': HOME_CATEGORY_IMAGES[
                         i if i < len(HOME_CATEGORY_IMAGES) else 0
                     ],
@@ -209,8 +185,6 @@ class HomeView(TemplateView):
                 'hits': hits,
                 'news': news,
                 'sales': sales,
-                'hero_slides': hero_slides,
-                'audience': audience,
                 'door_types': door_types,
                 'blog_posts': blog_posts,
                 'photo_pick_form': _form_with_key(self.request, PhotoPickForm, 'photo_pick'),
@@ -222,6 +196,7 @@ class HomeView(TemplateView):
                 ),
             }
         )
+        ctx.update(cms)
         return ctx
 
 

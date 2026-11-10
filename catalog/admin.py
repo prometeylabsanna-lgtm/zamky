@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 
 from .models import (
@@ -23,6 +24,21 @@ class ProductImageInline(TabularInline):
     model = ProductImage
     extra = 1
     tab = True
+    fields = ('preview', 'image', 'alt', 'sort_order', 'is_primary')
+    readonly_fields = ('preview',)
+
+    @admin.display(description='Превʼю')
+    def preview(self, obj):
+        if obj.pk and obj.image:
+            try:
+                return format_html(
+                    '<img src="{}" alt="" style="max-width:72px;max-height:72px;'
+                    'object-fit:cover;border-radius:6px">',
+                    obj.image.url,
+                )
+            except Exception:
+                return '—'
+        return '—'
 
 
 class ProductAttributeInline(TabularInline):
@@ -93,6 +109,7 @@ class ProductFamilyAdmin(ModelAdmin):
 @admin.register(Product)
 class ProductAdmin(ModelAdmin):
     list_display = (
+        'thumb',
         'name',
         'sku',
         'family',
@@ -106,16 +123,114 @@ class ProductAdmin(ModelAdmin):
         'is_hit',
         'is_new',
     )
-    list_filter = ('is_active', 'is_hit', 'is_new', 'category', 'brand', 'family', 'color_code')
-    search_fields = ('name', 'sku', 'brand', 'color_label')
+    list_filter = (
+        'is_active',
+        'is_hit',
+        'is_new',
+        'category',
+        'brand',
+        'family',
+        'color_code',
+    )
+    search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
     prepopulated_fields = {'slug': ('name',)}
     autocomplete_fields = ('category', 'family')
     inlines = [ProductImageInline, ProductAttributeInline]
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
+    fieldsets = (
+        (
+            'Основне',
+            {
+                'classes': ('tab',),
+                'fields': (
+                    'name',
+                    'name_ru',
+                    'slug',
+                    'sku',
+                    'category',
+                    'family',
+                    'brand',
+                    'price',
+                    'old_price',
+                    'stock',
+                    'catalog_order',
+                    'rating',
+                    'is_active',
+                    'is_hit',
+                    'is_new',
+                    'color_code',
+                    'color_label',
+                    'finish',
+                    'cover',
+                    'size_mm',
+                    'size_a',
+                    'size_b',
+                ),
+            },
+        ),
+        (
+            'Опис',
+            {
+                'classes': ('tab',),
+                'fields': (
+                    'short_description',
+                    'short_description_ru',
+                    'description',
+                    'description_ru',
+                ),
+            },
+        ),
+        (
+            'SEO',
+            {
+                'classes': ('tab',),
+                'fields': (
+                    'seo_title',
+                    'seo_title_ru',
+                    'seo_description',
+                    'seo_description_ru',
+                    'canonical_url',
+                    'og_image',
+                ),
+            },
+        ),
+    )
+
+    class Media:
+        css = {'all': ('css/admin/lang_tabs.css',)}
+        js = ('js/admin/lang_tabs.js',)
+
+    @admin.display(description='')
+    def thumb(self, obj):
+        img = obj.images.filter(is_primary=True).first() or obj.images.first()
+        if not img or not img.image:
+            return '—'
+        try:
+            return format_html(
+                '<img src="{}" alt="" style="width:40px;height:40px;'
+                'object-fit:cover;border-radius:4px">',
+                img.image.url,
+            )
+        except Exception:
+            return '—'
 
 
 @admin.register(ProductImage)
 class ProductImageAdmin(ModelAdmin):
-    list_display = ('product', 'sort_order', 'is_primary')
+    list_display = ('preview', 'product', 'sort_order', 'is_primary', 'alt')
     list_filter = ('is_primary',)
-    search_fields = ('product__name', 'product__sku')
+    search_fields = ('product__name', 'product__sku', 'alt')
+    readonly_fields = ('preview',)
+
+    @admin.display(description='Превʼю')
+    def preview(self, obj):
+        if obj.image:
+            try:
+                return format_html(
+                    '<img src="{}" alt="" style="max-width:80px;max-height:80px;'
+                    'object-fit:cover;border-radius:6px">',
+                    obj.image.url,
+                )
+            except Exception:
+                return '—'
+        return '—'

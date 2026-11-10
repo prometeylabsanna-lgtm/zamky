@@ -35,11 +35,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.forms',
     'catalog',
     'cart',
     'orders',
     'pages',
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -158,10 +161,27 @@ if IS_VERCEL:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# G7: у prod без static content fallback. Dev/Vercel-демо — дозволено.
+CMS_ALLOW_STATIC_FALLBACK = config(
+    'CMS_ALLOW_STATIC_FALLBACK',
+    default=DEBUG or IS_VERCEL,
+    cast=bool,
+)
+
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_SAVE_EVERY_REQUEST = False
 
 DISTRICTS_JSON = BASE_DIR / 'config' / 'districts.json'
+
+def _content_sidebar_groups():
+    from pages.site_content_registry import build_content_sidebar_groups
+
+    return build_content_sidebar_groups()
+
+
+def _admin_link(suffix: str):
+    return f'/admin/{suffix.lstrip("/")}'
+
 
 UNFOLD = {
     'SITE_TITLE': 'Замки',
@@ -169,17 +189,125 @@ UNFOLD = {
     'SITE_SYMBOL': 'lock',
     'COLORS': {
         'primary': {
-            '50': '255 250 235',
-            '100': '255 243 204',
-            '200': '255 231 163',
-            '300': '255 214 102',
-            '400': '255 196 0',
-            '500': '240 184 0',
-            '600': '217 163 0',
-            '700': '179 134 0',
-            '800': '140 105 0',
-            '900': '102 76 0',
-            '950': '64 48 0',
+            '50': '255 247 237',
+            '100': '255 237 213',
+            '200': '254 215 170',
+            '300': '253 186 116',
+            '400': '251 146 60',
+            '500': '249 127 12',
+            '600': '234 88 12',
+            '700': '194 65 12',
+            '800': '154 52 18',
+            '900': '124 45 18',
+            '950': '67 20 7',
         },
+    },
+    'SIDEBAR': {
+        'show_search': True,
+        'show_all_applications': False,
+        'navigation': [
+            {
+                'title': 'Налаштування',
+                'items': [
+                    {
+                        'title': 'Контакти та SEO',
+                        'icon': 'settings',
+                        'link': _admin_link('pages/sitesettings/'),
+                    },
+                    {
+                        'title': 'Медіатека',
+                        'icon': 'photo_library',
+                        'link': _admin_link('pages/mediaitem/'),
+                    },
+                ],
+            },
+            *_content_sidebar_groups(),
+            {
+                'title': 'Каталог',
+                'separator': True,
+                'collapsible': True,
+                'items': [
+                    {
+                        'title': 'Товари',
+                        'icon': 'inventory_2',
+                        'link': _admin_link('catalog/product/'),
+                    },
+                    {
+                        'title': 'Категорії',
+                        'icon': 'category',
+                        'link': _admin_link('catalog/category/'),
+                    },
+                    {
+                        'title': 'Сімʼї товарів',
+                        'icon': 'widgets',
+                        'link': _admin_link('catalog/productfamily/'),
+                    },
+                    {
+                        'title': 'Фасети',
+                        'icon': 'tune',
+                        'link': _admin_link('catalog/attribute/'),
+                    },
+                    {
+                        'title': 'Значення фасетів',
+                        'icon': 'label',
+                        'link': _admin_link('catalog/attributevalue/'),
+                    },
+                ],
+            },
+            {
+                'title': 'Замовлення',
+                'separator': True,
+                'collapsible': True,
+                'items': [
+                    {
+                        'title': 'Замовлення',
+                        'icon': 'shopping_cart',
+                        'link': _admin_link('orders/order/'),
+                    },
+                    {
+                        'title': 'Швидкі замовлення',
+                        'icon': 'bolt',
+                        'link': _admin_link('orders/quickorder/'),
+                    },
+                    {
+                        'title': 'Райони доставки',
+                        'icon': 'map',
+                        'link': _admin_link('orders/deliverydistrict/'),
+                    },
+                ],
+            },
+            {
+                'title': 'Заявки',
+                'separator': True,
+                'collapsible': True,
+                'items': [
+                    {
+                        'title': 'Контакти',
+                        'icon': 'mail',
+                        'link': _admin_link('pages/contactrequest/'),
+                    },
+                    {
+                        'title': 'Передзвоніть',
+                        'icon': 'call',
+                        'link': _admin_link('pages/callbackrequest/'),
+                    },
+                    {
+                        'title': 'Монтаж',
+                        'icon': 'build',
+                        'link': _admin_link('pages/installrequest/'),
+                    },
+                    {
+                        'title': 'Підбір за фото',
+                        'icon': 'photo_camera',
+                        'link': _admin_link('pages/photopickrequest/'),
+                    },
+                    {
+                        'title': 'Блог',
+                        'icon': 'article',
+                        'link': _admin_link('pages/blogpost/'),
+                    },
+                ],
+            },
+        ],
     },
 }

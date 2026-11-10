@@ -1,0 +1,95 @@
+{% load static %}
+{{ hero_formset.management_form }}
+<fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900" data-hero-slides>
+  <legend class="text-font-important-light dark:text-font-important-dark">Слайди банера</legend>
+  <p class="site-content-editor__hint">
+    Кожен слайд: фото, alt (UA/RU) і посилання. Порядок — перетягуванням.
+  </p>
+
+  <div class="hero-slides" data-hero-list>
+    {% for form in hero_formset %}
+      <div class="hero-slide-row" data-hero-row>
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="hero-slide-row__handle" data-hero-handle draggable="true" title="Перетягнути">⋮⋮</div>
+        <div class="hero-slide-row__preview">
+          {% if form.instance.media and form.instance.media.file %}
+            <img src="{{ form.instance.media.file.url }}" alt="" width="160" height="90" loading="lazy">
+          {% elif form.instance.image %}
+            <img src="{{ form.instance.image.url }}" alt="" width="160" height="90" loading="lazy">
+          {% elif form.instance.static_fallback %}
+            <img src="{% static form.instance.static_fallback %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
+          {% else %}
+            <img src="{% static 'img/v2/banner1.png' %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
+          {% endif %}
+        </div>
+        <div class="hero-slide-row__fields">
+          <div class="site-content-editor__field" data-admin-lang="uk">
+            <label>{{ form.alt_text.label }}</label>
+            {{ form.alt_text }}
+          </div>
+          <div class="site-content-editor__field" data-admin-lang="ru">
+            <label>{{ form.alt_text_ru.label }}</label>
+            {{ form.alt_text_ru }}
+          </div>
+          <div class="site-content-editor__field">
+            <label>{{ form.media.label }}</label>
+            {{ form.media }}
+          </div>
+          <div class="site-content-editor__field">
+            <label>{{ form.image.label }}</label>
+            {{ form.image }}
+          </div>
+          <div class="site-content-editor__field">
+            <label>{{ form.link_url.label }}</label>
+            {{ form.link_url }}
+          </div>
+          <div class="hero-slide-row__meta">
+            <label>{{ form.is_active }} {{ form.is_active.label }}</label>
+            {% if form.DELETE %}<label>{{ form.DELETE }} Видалити</label>{% endif %}
+          </div>
+          {% if form.non_field_errors %}<div class="site-content-editor__error">{{ form.non_field_errors }}</div>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <template data-hero-empty>
+    <div class="hero-slide-row" data-hero-row>
+      {% with form=hero_formset.empty_form %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="hero-slide-row__handle" data-hero-handle draggable="true" title="Перетягнути">⋮⋮</div>
+        <div class="hero-slide-row__preview">
+          <img src="{% static 'img/v2/banner1.png' %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
+        </div>
+        <div class="hero-slide-row__fields">
+          <div class="site-content-editor__field" data-admin-lang="uk">
+            <label>{{ form.alt_text.label }}</label>
+            {{ form.alt_text }}
+          </div>
+          <div class="site-content-editor__field" data-admin-lang="ru">
+            <label>{{ form.alt_text_ru.label }}</label>
+            {{ form.alt_text_ru }}
+          </div>
+          <div class="site-content-editor__field">
+            <label>{{ form.media.label }}</label>
+            {{ form.media }}
+          </div>
+          <div class="site-content-editor__field">
+            <label>{{ form.image.label }}</label>
+            {{ form.image }}
+          </div>
+          <div class="site-content-editor__field">
+            <label>{{ form.link_url.label }}</label>
+            {{ form.link_url }}
+          </div>
+          <div class="hero-slide-row__meta">
+            <label>{{ form.is_active }} {{ form.is_active.label }}</label>
+            {% if form.DELETE %}<label>{{ form.DELETE }} Видалити</label>{% endif %}
+          </div>
+        </div>
+      {% endwith %}
+    </div>
+  </template>
+
+  <button type="button" class="site-content-editor__add" data-hero-add>Додати слайд</button>
+</fieldset>

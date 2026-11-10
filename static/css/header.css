@@ -50,7 +50,7 @@
   height: 40px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-bg);
   color: var(--color-accent);
   display: grid;
   place-items: center;
@@ -131,7 +131,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   overflow: visible;
-  background: #fff;
+  background: var(--color-bg);
 }
 
 .hdr-search--inline {
@@ -184,7 +184,7 @@
   color: var(--color-fg);
   text-decoration: none;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-bg);
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
@@ -233,7 +233,7 @@
 }
 
 .cb-modal__card {
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -355,7 +355,7 @@
     min-width: 44px;
     border: 1px solid var(--color-border);
     border-radius: 6px;
-    background: #fff;
+    background: var(--color-bg);
     padding: 0 10px;
   }
 }
