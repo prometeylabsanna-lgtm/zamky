@@ -225,7 +225,30 @@
   }
 
   .home-hero {
+    display: block;
+    aspect-ratio: 2576 / 1261;
     margin-top: 20px;
+  }
+
+  .home-hero__stage {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    flex: none;
+  }
+
+  .home-hero__stage::before {
+    content: none;
+    display: none;
+    padding: 0;
+  }
+
+  .home-hero__slide img {
+    object-position: left center;
+  }
+
+  .home-hero__cta {
+    display: none;
   }
 
   .home-hero__nav {
