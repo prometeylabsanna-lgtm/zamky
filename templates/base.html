@@ -1,10 +1,10 @@
-{% load static i18n_ui %}
+{% load static i18n_ui marketing_tags %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'ua' }}" data-asset-v="{{ asset_v }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}{% t 'Центр замків' %}{% endblock %}</title>
+  <title>{% seo_title %}{% block title %}{% endblock %}{% endseo_title %}</title>{% seo_head %}{% tracking_head %}
   {% if site_settings and site_settings.favicon %}
   <link rel="icon" href="{{ site_settings.favicon.url }}" sizes="any">
   {% else %}
@@ -43,7 +43,7 @@
   {% endif %}
   {% block extra_css %}{% endblock %}
 </head>
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>{% tracking_body %}
   {{ js_i18n|json_script:"js-i18n" }}
   <script>
     (function () {

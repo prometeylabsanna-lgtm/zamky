@@ -80,17 +80,8 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
             "Соцмережі",
             {"fields": ("instagram_url", "telegram_url", "facebook_url")},
         ),
-        (
-            "SEO за замовчуванням",
-            {
-                "fields": (
-                    "meta_title",
-                    "meta_title_ru",
-                    "meta_description",
-                    "meta_description_ru",
-                )
-            },
-        ),
+        # SEO за замовчуванням перенесено в «Маркетинг → SEO-налаштування»
+        # (marketing/0002 копіює значення). Поля meta_* лишаються в БД, не видалені.
     )
 
     class Media:

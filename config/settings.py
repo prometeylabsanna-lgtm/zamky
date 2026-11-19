@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'cart.apps.CartConfig',
     'orders.apps.OrdersConfig',
     'pages.apps.PagesConfig',
+    'marketing.apps.MarketingConfig',
 ]
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
@@ -240,7 +241,7 @@ UNFOLD = {
                 'title': 'Налаштування',
                 'items': [
                     {
-                        'title': 'Контакти та SEO',
+                        'title': 'Контакти та бренд',
                         'icon': 'settings',
                         'link': _admin_link('pages/sitesettings/'),
                     },
@@ -253,6 +254,28 @@ UNFOLD = {
                         'title': 'Недавні дії',
                         'icon': 'history',
                         'link': '/admin/recent-actions/',
+                    },
+                ],
+            },
+            {
+                'title': 'Маркетинг',
+                'separator': True,
+                'collapsible': True,
+                'items': [
+                    {
+                        'title': 'Товарні фіди',
+                        'icon': 'rss_feed',
+                        'link': _admin_link('marketing/productfeed/'),
+                    },
+                    {
+                        'title': 'SEO-налаштування',
+                        'icon': 'travel_explore',
+                        'link': _admin_link('marketing/seosettings/'),
+                    },
+                    {
+                        'title': 'Пікселі та лічильники',
+                        'icon': 'monitoring',
+                        'link': _admin_link('marketing/trackingsettings/'),
                     },
                 ],
             },

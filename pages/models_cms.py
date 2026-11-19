@@ -1,9 +1,16 @@
 """CMS-моделі: SiteSettings, SiteBlock, HeroSlide."""
 
 from django.core.cache import cache
+from django.core.validators import RegexValidator
 from django.db import models
 
 SITE_BLOCKS_CACHE_KEY = "zamky_site_blocks_v1"
+
+# Посилання кнопки: відносне /… (не //), якір #…, https://… або tel:…
+cta_url_validator = RegexValidator(
+    regex=r"^(/(?!/)[^\s]*|#[^\s]*|https://[^\s]+|tel:\+?[0-9()\- ]{3,32})$",
+    message="Дозволено: /шлях, #якір, https://… або tel:+380…",
+)
 
 
 class SiteSettings(models.Model):
@@ -159,6 +166,42 @@ class HeroSlide(models.Model):
         blank=True,
         default="",
         help_text="Шлях у static/, якщо немає upload",
+    )
+    cta_primary_label = models.CharField(
+        "Кнопка 1: текст (UA)",
+        max_length=60,
+        blank=True,
+        default="",
+        help_text="Порожньо = «Перейти до каталогу».",
+    )
+    cta_primary_label_ru = models.CharField(
+        "Кнопка 1: текст (RU)", max_length=60, blank=True, default=""
+    )
+    cta_primary_url = models.CharField(
+        "Кнопка 1: посилання",
+        max_length=512,
+        blank=True,
+        default="",
+        validators=[cta_url_validator],
+        help_text="Порожньо = каталог. Формат: /шлях, #якір, https://… або tel:…",
+    )
+    cta_secondary_label = models.CharField(
+        "Кнопка 2: текст (UA)",
+        max_length=60,
+        blank=True,
+        default="",
+        help_text="Порожньо = «Підібрати замок за 2 хв».",
+    )
+    cta_secondary_label_ru = models.CharField(
+        "Кнопка 2: текст (RU)", max_length=60, blank=True, default=""
+    )
+    cta_secondary_url = models.CharField(
+        "Кнопка 2: посилання",
+        max_length=512,
+        blank=True,
+        default="",
+        validators=[cta_url_validator],
+        help_text="Порожньо = блок підбору (#picker). Формат: /шлях, #якір, https://… або tel:…",
     )
 
     def resolved_image_url(self) -> str | None:

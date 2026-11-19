@@ -137,6 +137,15 @@
   flex: 0 0 auto;
 }
 
+/* Набір кнопок слайда: не ламає flex-розкладку .home-hero__cta; JS показує активний */
+.home-hero__cta-set {
+  display: contents;
+}
+
+.home-hero__cta-set[hidden] {
+  display: none;
+}
+
 .home-hero__cta-link {
   flex: 1 1 148px;
   max-width: 100%;

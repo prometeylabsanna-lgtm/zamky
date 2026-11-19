@@ -299,3 +299,32 @@
   }
 }
 
+
+/* Кнопки банера (CTA) у рядку слайда */
+.hero-slide-row__cta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.hero-slide-row__cta-title {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.hero-slide-row__cta-help {
+  margin: 0.25rem 0 0;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 1023px) {
+  .hero-slide-row__cta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

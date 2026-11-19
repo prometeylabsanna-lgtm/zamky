@@ -44,6 +44,11 @@ class HeroSlideView:
     url: str
     image: str
     image_url: str | None
+    # Порожні значення = шаблон підставляє поточні тексти/посилання (фолбек).
+    cta_primary_label: str = ""
+    cta_primary_url: str = ""
+    cta_secondary_label: str = ""
+    cta_secondary_url: str = ""
 
 
 def _pick(lang: str, ua: str, ru: str) -> str:
@@ -112,6 +117,14 @@ def get_hero_slides(lang: str = "ua") -> list[HeroSlideView]:
                 url=row.link_url or "/ua/catalog/",
                 image=static_image,
                 image_url=image_url,
+                cta_primary_label=_pick(
+                    lang, row.cta_primary_label, row.cta_primary_label_ru
+                ).strip(),
+                cta_primary_url=(row.cta_primary_url or "").strip(),
+                cta_secondary_label=_pick(
+                    lang, row.cta_secondary_label, row.cta_secondary_label_ru
+                ).strip(),
+                cta_secondary_url=(row.cta_secondary_url or "").strip(),
             )
         )
     return result

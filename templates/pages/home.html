@@ -54,6 +54,19 @@
       </button>
     </div>
     <div class="home-hero__cta">
+      {% for slide in hero_slides %}
+      <div class="home-hero__cta-set" data-hero-cta{% if not forloop.first %} hidden{% endif %}>
+        <a class="home-hero__cta-link home-hero__cta-link--primary" href="{% if slide.cta_primary_url %}{{ slide.cta_primary_url }}{% else %}{% url 'catalog:catalog' %}{% endif %}">
+          <span>{% if slide.cta_primary_label %}{{ slide.cta_primary_label }}{% else %}{% t 'Перейти до каталогу' %}{% endif %}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        {% if slide.cta_secondary_url %}
+        <a class="home-hero__cta-link home-hero__cta-link--ghost" href="{{ slide.cta_secondary_url }}">{% if slide.cta_secondary_label %}{{ slide.cta_secondary_label }}{% else %}{% t 'Підібрати замок за 2 хв' %}{% endif %}</a>
+        {% elif show_picker %}
+        <a class="home-hero__cta-link home-hero__cta-link--ghost" href="#picker">{% if slide.cta_secondary_label %}{{ slide.cta_secondary_label }}{% else %}{% t 'Підібрати замок за 2 хв' %}{% endif %}</a>
+        {% endif %}
+      </div>
+      {% empty %}
       <a class="home-hero__cta-link home-hero__cta-link--primary" href="{% url 'catalog:catalog' %}">
         <span>{% t 'Перейти до каталогу' %}</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
@@ -61,6 +74,7 @@
       {% if show_picker %}
       <a class="home-hero__cta-link home-hero__cta-link--ghost" href="#picker">{% t 'Підібрати замок за 2 хв' %}</a>
       {% endif %}
+      {% endfor %}
     </div>
   </section>
   {% endif %}

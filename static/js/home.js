@@ -34,6 +34,7 @@
     if (!root) return;
     var slides = qsa('[data-hero-slide]', root);
     var dots = qsa('[data-hero-dot]', root);
+    var ctas = qsa('[data-hero-cta]', root);
     if (!slides.length) return;
     var index = 0;
     var timer;
@@ -45,6 +46,9 @@
       });
       dots.forEach(function (d, di) {
         d.classList.toggle('is-active', di === index);
+      });
+      ctas.forEach(function (c, ci) {
+        c.hidden = ci !== index;
       });
     }
 

@@ -37,6 +37,8 @@ urlpatterns = [
     path('lang/', SetLangView.as_view(), name='set_lang'),
     path('uk/', LegacyUkRedirectView.as_view()),
     path('uk/<path:rest>', LegacyUkRedirectView.as_view()),
+    # Маркетинг: фіди та robots.txt — поза i18n_patterns (стабільні URL).
+    path('', include('marketing.urls')),
     path('', root_redirect),
 ]
 
