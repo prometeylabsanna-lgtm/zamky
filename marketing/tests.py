@@ -40,14 +40,14 @@ class FeedTestBase(TestCase):
         self.root = Category.objects.create(name="Замки", slug="locks")
         self.child = Category.objects.create(name="Циліндри", slug="cyl", parent=self.root)
         self.other = Category.objects.create(name="Інше", slug="other")
-        self.p1 = self._product("SKU-1", "Замок A&B <Pro>", Decimal("1234.5"), cat=self.child, stock=5, brand="ABARO")
+        self.p1 = self._product("SKU-1", "Замок A&B «Pro»", Decimal("1234.5"), cat=self.child, stock=5, brand="ABARO")
         self.feed = ProductFeed.objects.create(
             name="G", feed_type="google", slug="g-test", is_enabled=True, shop_name="Центр замків"
         )
 
-    def _product(self, sku, name, price, cat=None, stock=1, old_price=None, image=True, brand=""):
+    def _product(self, sku, name, price, cat=None, stock=1, old_price=None, image=True, brand="", slug=None):
         p = Product.objects.create(
-            category=cat or self.root, name=name, slug=sku.lower(), sku=sku, price=price,
+            category=cat or self.root, name=name, slug=slug or sku.lower(), sku=sku, price=price,
             old_price=old_price, stock=stock, brand=brand,
             description="<p>Опис &amp; <b>деталі</b></p>",
         )
@@ -66,8 +66,8 @@ class GoogleFeedTests(FeedTestBase):
         self.assertEqual(root.tag, "rss")
         item = root.find("channel/item")
         self.assertEqual(item.findtext(G + "id"), "SKU-1")
-        self.assertEqual(item.findtext(G + "title"), "Замок A&B <Pro>")
-        self.assertIn(b"A&amp;B &lt;Pro&gt;", payload.body)
+        self.assertEqual(item.findtext(G + "title"), "Замок A&B «Pro»")
+        self.assertIn(b"A&amp;B", payload.body)
         self.assertEqual(item.findtext(G + "description"), "Опис & деталі")
         self.assertEqual(item.findtext(G + "price"), "1234.50 UAH")
         self.assertEqual(item.findtext(G + "availability"), "in_stock")
@@ -79,6 +79,15 @@ class GoogleFeedTests(FeedTestBase):
         self.assertIsNone(item.find(G + "gtin"))
         self.assertEqual(item.findtext(G + "identifier_exists"), "no")
         self.assertIsNone(item.find(G + "shipping"))
+
+    def test_title_strips_html(self):
+        self.p1.name = "Замок <b>A&amp;B</b> <script>x</script>"
+        self.p1.save()
+        root, payload = self._xml()
+        self.assertEqual(root.find("channel/item").findtext(G + "title"), "Замок A&B x")
+        self.assertNotIn(b"<b>", payload.body)
+        self.assertNotIn(b"<script>", payload.body)
+        self.assertNotIn(b"&lt;b&gt;", payload.body)
 
     def test_sale_price_when_old_price_higher(self):
         self.p1.old_price = Decimal("1500")
@@ -185,6 +194,72 @@ class PromFeedTests(FeedTestBase):
         self.assertEqual(offer.findtext("vendor"), "ABARO")
         self.assertEqual(offer.findtext("vendorCode"), "SKU-1")
         self.assertEqual(offer.findtext("quantity_in_stock"), "5")
+        self.assertIsNone(offer.find("price_old"))
+        self.assertIsNone(offer.find("discount"))
+
+    def test_price_old_only_when_on_sale_and_in_stock(self):
+        self.p1.old_price = Decimal("1500")
+        self.p1.save()
+        feed = ProductFeed.objects.create(
+            name="P", feed_type="prom", slug="p-price-old", is_enabled=True, shop_name="Центр замків"
+        )
+        root, payload = self._xml(feed)
+        offer = root.find("shop/offers/offer")
+        self.assertEqual(offer.get("available"), "true")
+        self.assertEqual(offer.findtext("price"), "1234.50")
+        self.assertEqual(offer.findtext("price_old"), "1500.00")
+        self.assertIsNone(offer.find("discount"))
+        self.assertNotIn(b"<discount", payload.body)
+
+    def test_no_price_old_when_out_of_stock(self):
+        self.p1.old_price = Decimal("1500")
+        self.p1.stock = 0
+        self.p1.save()
+        feed = ProductFeed.objects.create(
+            name="P", feed_type="prom", slug="p-oos", is_enabled=True, shop_name="Центр замків"
+        )
+        root, _ = self._xml(feed)
+        offer = root.find("shop/offers/offer")
+        self.assertEqual(offer.get("available"), "false")
+        self.assertEqual(offer.findtext("price"), "1234.50")
+        self.assertIsNone(offer.find("price_old"))
+        self.assertIsNone(offer.find("discount"))
+
+    def test_vendorcode_omitted_when_sku_invalid(self):
+        long_sku = "SKU-" + "X" * 22  # 26 символів, у Prom ліміт 25
+        bad_chars = "SKU@HASH"
+        self._product(long_sku, "Довгий артикул", Decimal("10"), brand="ABARO", slug="sku-too-long")
+        self._product(bad_chars, "Заборонені символи", Decimal("10"), brand="ABARO", slug="sku-bad-chars")
+        self._product("ОК-Артикул_1/2.", "Валідний артикул", Decimal("10"), brand="ABARO", slug="sku-ok-ua")
+        feed = ProductFeed.objects.create(
+            name="P", feed_type="prom", slug="p-vendor", is_enabled=True, shop_name="Центр замків"
+        )
+        root, payload = self._xml(feed)
+        offers = {o.get("id"): o for o in root.findall("shop/offers/offer")}
+        self.assertIn(long_sku, offers)
+        self.assertIn(bad_chars, offers)
+        self.assertIsNone(offers[long_sku].find("vendorCode"))
+        self.assertIsNone(offers[bad_chars].find("vendorCode"))
+        self.assertEqual(offers["SKU-1"].findtext("vendorCode"), "SKU-1")
+        self.assertEqual(offers["ОК-Артикул_1/2."].findtext("vendorCode"), "ОК-Артикул_1/2.")
+        feed.refresh_from_db()
+        self.assertEqual(feed.last_warnings, {"vendorcode_invalid": 2})
+        self.assertEqual(payload.warnings, {"vendorcode_invalid": 2})
+
+    def test_prom_vendorcode_warning_visible_in_admin(self):
+        from django.contrib.auth import get_user_model
+
+        self._product("SKU#" + "Y" * 24, "Поганий артикул", Decimal("10"), slug="sku-hash-long")
+        feed = ProductFeed.objects.create(
+            name="P", feed_type="prom", slug="p-admin-warn", is_enabled=True, shop_name="Центр замків"
+        )
+        self._xml(feed)
+        user = get_user_model().objects.create_superuser("cms", "cms@example.com", "pass")
+        self.client.force_login(user)
+        html = self.client.get(f"/admin/marketing/productfeed/{feed.pk}/change/", follow=True).content.decode()
+        self.assertIn("vendorCode пропущено", html)
+        list_html = self.client.get("/admin/marketing/productfeed/", follow=True).content.decode()
+        self.assertIn(">1<", list_html)
 
     def test_seeded_feeds_disabled(self):
         from marketing.seed import seed_marketing

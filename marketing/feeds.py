@@ -31,6 +31,8 @@ MAX_TITLE = 150
 MAX_DESCRIPTION = 5000
 MAX_ADDITIONAL_IMAGES = 10
 GTIN_RE = re.compile(r"^(\d{8}|\d{12}|\d{13}|\d{14})$")
+# Артикул Prom: до 25 символів; цифри, латиниця, кирилиця, -_./ і пробіл.
+PROM_VENDOR_CODE_RE = re.compile(r"^[0-9A-Za-z\u0400-\u04FF\-_./ ]{1,25}$")
 _WS_RE = re.compile(r"\s+")
 # Символи, заборонені в XML 1.0 (керівні, крім \t \n \r).
 _XML_BAD_RE = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f]")
@@ -67,6 +69,7 @@ class FeedResult:
     excluded: int
     reasons: dict[str, int]
     categories: dict[int, Category]
+    warnings: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -77,6 +80,7 @@ class FeedPayload:
     included: int
     excluded: int
     reasons: dict[str, int]
+    warnings: dict[str, int] = field(default_factory=dict)
 
 
 # ---------- helpers ----------
@@ -102,6 +106,14 @@ def money(value) -> Decimal:
 
 def format_price(value: Decimal, currency: str) -> str:
     return f"{money(value)} {currency}"
+
+
+def prom_vendor_code(sku: str) -> str | None:
+    """Повертає sku, якщо він підходить як vendorCode Prom, інакше None."""
+    value = sku or ""
+    if PROM_VENDOR_CODE_RE.fullmatch(value):
+        return value
+    return None
 
 
 def clean_text(value: str, limit: int, *, strip_html: bool = True) -> str:
@@ -232,7 +244,7 @@ def collect_items(feed: ProductFeed, base_url: str) -> FeedResult:
             items.append(
                 FeedItem(
                     id=p.sku,
-                    title=clean_text(p.name, MAX_TITLE, strip_html=False),
+                    title=clean_text(p.name, MAX_TITLE),
                     description=clean_text(
                         p.description or p.short_description or p.name, MAX_DESCRIPTION
                     ),
@@ -357,6 +369,14 @@ def build_yml(feed: ProductFeed, result: FeedResult, base_url: str) -> bytes:
         _sub(offer, "url", it.link)
         current = it.sale_price if it.sale_price is not None else it.price
         _sub(offer, "price", str(money(current)))
+        # <price_old> лише коли стара ціна вища за продажну і товар у наявності.
+        # <discount> не виводимо: у Prom він має пріоритет над старою ціною.
+        if (
+            it.sale_price is not None
+            and it.availability == "in_stock"
+            and it.price > it.sale_price
+        ):
+            _sub(offer, "price_old", str(money(it.price)))
         _sub(offer, "currencyId", it.currency)
         _sub(offer, "categoryId", str(it.category_id))
         for pic in [it.image_link, *it.additional_image_links]:
@@ -364,7 +384,9 @@ def build_yml(feed: ProductFeed, result: FeedResult, base_url: str) -> bytes:
         _sub(offer, "name", it.title)
         if it.brand:
             _sub(offer, "vendor", it.brand)
-        _sub(offer, "vendorCode", it.id)
+        vendor_code = prom_vendor_code(it.id)
+        if vendor_code is not None:
+            _sub(offer, "vendorCode", vendor_code)
         desc = _sub(offer, "description")
         desc.text = _cdata(it.description)
         for name, value in it.params:
@@ -373,9 +395,15 @@ def build_yml(feed: ProductFeed, result: FeedResult, base_url: str) -> bytes:
     return etree.tostring(root, xml_declaration=True, encoding="UTF-8", pretty_print=True)
 
 
+def _prom_warnings(items: list[FeedItem]) -> dict[str, int]:
+    n = sum(1 for it in items if prom_vendor_code(it.id) is None)
+    return {"vendorcode_invalid": n} if n else {}
+
+
 def render_feed(feed: ProductFeed, base_url: str) -> tuple[bytes, FeedResult]:
     result = collect_items(feed, base_url)
     if feed.feed_type == ProductFeed.FeedType.PROM:
+        result.warnings = _prom_warnings(result.items)
         body = build_yml(feed, result, base_url)
     else:
         body = build_rss(feed, result, base_url)
@@ -402,6 +430,7 @@ def get_feed_payload(feed: ProductFeed, base_url: str, *, force: bool = False) -
         included=result.included,
         excluded=result.excluded,
         reasons=result.reasons,
+        warnings=result.warnings,
     )
     cache.set(key, payload, max(1, min(6, feed.cache_hours or 3)) * 3600)
     # Статистика для адмінки; update() не чіпає updated_at → кеш-ключ стабільний.
@@ -410,5 +439,6 @@ def get_feed_payload(feed: ProductFeed, base_url: str, *, force: bool = False) -
         last_included=payload.included,
         last_excluded=payload.excluded,
         last_excluded_reasons=payload.reasons,
+        last_warnings=payload.warnings,
     )
     return payload

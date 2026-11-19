@@ -105,6 +105,9 @@ class ProductFeed(models.Model):
     last_excluded_reasons = models.JSONField(
         "Причини виключення", default=dict, blank=True, editable=False
     )
+    last_warnings = models.JSONField(
+        "Попередження генерації", default=dict, blank=True, editable=False
+    )
     created_at = models.DateTimeField("Створено", auto_now_add=True)
     updated_at = models.DateTimeField("Оновлено", auto_now=True)
 

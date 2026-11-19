@@ -1,6 +1,6 @@
 # Товарні фіди — контракт (Zamky)
 
-Статус: чернетка CMS 2026-11-19, на узгодження з Integrations. Код: `marketing/feeds.py`, `marketing/views.py`.
+Статус: правки за рев'ю Integrations 2026-11-19 (`price_old`, vendorCode, strip_html у title). Код: `marketing/feeds.py`, `marketing/views.py`.
 
 ## URL і доступ
 
@@ -19,7 +19,7 @@
 
 ## Модель `marketing.ProductFeed`
 
-`name`, `feed_type` (google | facebook | prom), `slug`, `is_enabled` (дефолт False — усі три сід-фіди вимкнені, Prom теж), `access_token`, `shop_name`, `company_name`, `currency` (UAH/USD/EUR), `only_in_stock`, `categories` (M2M, порожньо = весь каталог, підкатегорії включаються), `cache_hours`, статистика `last_generated_at/last_included/last_excluded/last_excluded_reasons`.
+`name`, `feed_type` (google | facebook | prom), `slug`, `is_enabled` (дефолт False — усі три сід-фіди вимкнені, Prom теж), `access_token`, `shop_name`, `company_name`, `currency` (UAH/USD/EUR), `only_in_stock`, `categories` (M2M, порожньо = весь каталог, підкатегорії включаються), `cache_hours`, статистика `last_generated_at/last_included/last_excluded/last_excluded_reasons/last_warnings`.
 `marketing.FeedCategoryMapping`: `feed`, `category`, `google_product_category` (числовий ID; береться найближчий мапінг вгору по дереву).
 
 Каталог (`catalog.Product/Category`) лише читається; схема каталогу не змінювалась.
@@ -48,7 +48,7 @@
 | g: поле | джерело | правило |
 |---|---|---|
 | `id` | `Product.sku` | стабільний, не залежить від назви/slug |
-| `title` | `Product.name` (UA) | ≤ 150 символів, plain text (XML-екранування lxml) |
+| `title` | `Product.name` (UA) | ≤ 150 символів, strip HTML, unescape, згорнуті пробіли, plain text (XML-екранування lxml) |
 | `description` | `description` → `short_description` → `name` | strip HTML, unescape, згорнуті пробіли, ≤ 5000 |
 | `link` | домен + `/ua/product/<slug>/` | абсолютний; https, якщо домен https |
 | `image_link` | перше ProductImage (sort_order, id) | абсолютний |
@@ -74,23 +74,37 @@ yml_catalog@date="YYYY-MM-DD HH:MM" (Europe/Kyiv)
   shop/currencies/currency@id=<currency>@rate=1
   shop/categories/category@id@parentId (лише категорії товарів фіду + предки)
   shop/offers/offer@id=<sku>@available=true|false
-    url, price (поточна ціна продажу, Decimal 0.01), currencyId, categoryId,
-    picture ×N (до 11), name, vendor, vendorCode=<sku>,
+    url,
+    price (ціна продажу, Decimal 0.01; якщо old_price > price — знижена ціна),
+    price_old (лише коли old_price > price І available="true"; інакше тег відсутній.
+      Для товару не в наявності Prom не застосовує знижку. Тег <discount> не виводиться —
+      у Prom він має пріоритет над старою ціною),
+    currencyId, categoryId,
+    picture ×N (до 11), name, vendor,
+    vendorCode (sku, лише якщо артикул сумісний з Prom: ≤25 символів; цифри, кирилиця,
+      латиниця, -_./ і пробіл; інакше тег пропускається, offer@id лишається sku,
+      товар рахується як попередження в адмінці фіду),
     description (CDATA, plain text), param@name ×N (фільтри каталогу), quantity_in_stock
 ```
 
+`offer@id` може містити дефіси: Prom не обмежує формат чи довжину id, лише унікальність і стабільність.
+
 ## Що не виводиться ніколи
 
-Закупівельна ціна, постачальник, внутрішні поля (stock виводиться лише як `quantity_in_stock` у Prom), токени.
+Закупівельна ціна, постачальник, внутрішні поля (stock виводиться лише як `quantity_in_stock` у Prom), токени. Тег `<discount>` у Prom YML не виводиться.
 
-## Відкриті питання для Integrations / DB
+## Обмеження каталогу і відкриті питання для Integrations / DB
+
+Обмеження поточного каталогу (не баг фіду):
+- полів `gtin` і `mpn` немає → `identifier_exists=no` для всіх товарів (sku ніколи не підставляється як gtin/mpn);
+- поля закупівельної ціни немає → фільтр `below_purchase_price` зараз не спрацьовує (хук `getattr(product, "purchase_price")` на майбутнє, коли зʼявиться поле).
 
 - [ ] Поля `gtin` (EAN), `mpn`, `purchase_price` у каталозі — зона DB; після появи фід підхопить їх без змін (через `getattr`).
-- [ ] Prom: `offer@id` = sku (з дефісами) — чи ок для Prom, чи потрібен числовий id; чи потрібен `oldprice`.
+- [x] Prom: `offer@id` = sku (зокрема з дефісами) — ок. Стара ціна — `<price_old>` (див. секцію Prom). Джерело: https://support.prom.ua/hc/uk/articles/360004963538
 - [ ] Google `availability`: використано `in_stock`/`out_of_stock` (з підкресленням, як у вимогах).
 - [ ] Мова фіду: UA (назви з БД). RU-фід за потреби — окремий тип/поле `language`.
 - [ ] `google_product_category` ID для категорій сайту — заповнити мапінг.
 
 ## Перевірка
 
-`python manage.py generate_feeds --include-disabled --output /tmp/feeds --base-url https://… && xmllint --noout /tmp/feeds/*.xml` — 2026-11-19 локально: 3 фіди × 62 товари, xmllint OK. Тести: `marketing/tests.py` (екранування, ціна/валюта, sale_price, виключення, identifier_exists, фільтри, 404/token/ETag, кеш, YML).
+`python manage.py generate_feeds --include-disabled --output /tmp/feeds --base-url https://… && xmllint --noout /tmp/feeds/*.xml`. Тести: `marketing/tests.py` (екранування, strip HTML у title, ціна/валюта, sale_price, Prom `price_old`, vendorCode/попередження, виключення, identifier_exists, фільтри, 404/token/ETag, кеш, YML).

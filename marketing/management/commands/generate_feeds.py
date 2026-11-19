@@ -39,6 +39,8 @@ class Command(BaseCommand):
             payload = get_feed_payload(feed, base, force=True)
             count += 1
             line = f"{feed.slug} [{feed.feed_type}]: у фіді {payload.included}, виключено {payload.excluded} {payload.reasons}"
+            if payload.warnings:
+                line += f" попередження {payload.warnings}"
             if out_dir:
                 path = out_dir / f"{feed.slug}.xml"
                 path.write_bytes(payload.body)

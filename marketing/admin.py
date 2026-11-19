@@ -19,6 +19,9 @@ REASON_LABELS = {
     "no_image": "без фото",
     "no_link": "без посилання",
 }
+WARNING_LABELS = {
+    "vendorcode_invalid": "SKU не підходить як артикул Prom (vendorCode пропущено, offer@id лишився)",
+}
 
 
 class SingletonAdmin(ModelAdmin):
@@ -45,7 +48,7 @@ class FeedCategoryMappingInline(TabularInline):
 
 @admin.register(ProductFeed)
 class ProductFeedAdmin(ModelAdmin):
-    list_display = ("name", "feed_type", "is_enabled", "public_url", "last_included", "excluded_display", "last_generated_at")
+    list_display = ("name", "feed_type", "is_enabled", "public_url", "last_included", "excluded_display", "warnings_display", "last_generated_at")
     list_filter = ("feed_type", "is_enabled")
     search_fields = ("name", "slug")
     filter_horizontal = ("categories",)
@@ -80,6 +83,11 @@ class ProductFeedAdmin(ModelAdmin):
     def excluded_display(self, obj):
         return obj.last_excluded
 
+    @admin.display(description="Попередження")
+    def warnings_display(self, obj):
+        total = sum((obj.last_warnings or {}).values())
+        return total or "—"
+
     @admin.display(description="Статистика останньої генерації")
     def stats(self, obj):
         if not obj or not obj.last_generated_at:
@@ -88,11 +96,17 @@ class ProductFeedAdmin(ModelAdmin):
         reasons = format_html_join(
             "", "<li>{}: {}</li>", ((REASON_LABELS.get(k, k), n) for k, n in rows)
         )
+        warn_rows = [(k, n) for k, n in sorted((obj.last_warnings or {}).items()) if n]
+        warnings = format_html_join(
+            "", "<li>{}: {}</li>", ((WARNING_LABELS.get(k, k), n) for k, n in warn_rows)
+        )
+        warn_block = format_html("<p>Попередження:</p><ul>{}</ul>", warnings) if warn_rows else ""
         return format_html(
-            "<p>У фіді: <b>{}</b>, виключено: <b>{}</b></p><ul>{}</ul>",
+            "<p>У фіді: <b>{}</b>, виключено: <b>{}</b></p><ul>{}</ul>{}",
             obj.last_included,
             obj.last_excluded,
             reasons,
+            warn_block,
         )
 
     def save_model(self, request, obj, form, change):
@@ -106,9 +120,11 @@ class ProductFeedAdmin(ModelAdmin):
         base = resolve_base_url(request)
         for feed in queryset:
             payload = get_feed_payload(feed, base, force=True)
+            warn_n = sum((payload.warnings or {}).values())
+            extra = f" Попередження: {warn_n}." if warn_n else ""
             self.message_user(
                 request,
-                f"{feed.name}: у фіді {payload.included}, виключено {payload.excluded}.",
+                f"{feed.name}: у фіді {payload.included}, виключено {payload.excluded}.{extra}",
                 messages.SUCCESS,
             )
 
