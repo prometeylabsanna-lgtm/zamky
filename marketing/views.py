@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import secrets
 
+from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotModified
 from django.shortcuts import get_object_or_404
 from django.urls import NoReverseMatch, reverse
@@ -48,7 +49,8 @@ def robots_txt(request):
     base = (seo.primary_domain or "").rstrip("/") or f"{request.scheme}://{request.get_host()}"
     # Глобальний noindex працює через <meta name="robots"> на кожній сторінці,
     # а не через Disallow: / (інакше бот не побачить noindex і URL лишаться в індексі).
-    lines = ["User-agent: *", "Disallow: /admin/"]
+    admin_path = settings.ADMIN_URL.strip("/")
+    lines = ["User-agent: *", f"Disallow: /{admin_path}/"]
     extra = [ln.strip() for ln in (seo.robots_extra or "").splitlines() if ln.strip()]
     if extra:
         lines.append("")

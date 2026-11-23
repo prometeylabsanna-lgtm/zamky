@@ -2,13 +2,17 @@ from django.conf import settings
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.shortcuts import redirect
 from django.urls import include, path
 from django.utils.translation import get_language
 from django.views import View
 
 from pages.views import SetLangView
+
+
+def healthz(_request):
+    return HttpResponse('ok')
 
 
 def root_redirect(request):
@@ -33,7 +37,8 @@ class LegacyUkRedirectView(View):
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('healthz/', healthz),
+    path(settings.ADMIN_URL, admin.site.urls),
     path('lang/', SetLangView.as_view(), name='set_lang'),
     path('uk/', LegacyUkRedirectView.as_view()),
     path('uk/<path:rest>', LegacyUkRedirectView.as_view()),

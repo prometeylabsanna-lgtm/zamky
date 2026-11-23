@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import Iterable
 
-from django.urls import reverse_lazy
-
 from pages.site_content_registry_base import ContentSection
 from pages.site_content_registry_home import CONTENT_SECTIONS_HOME
 from pages.site_content_registry_pages import CONTENT_SECTIONS_PAGES
@@ -75,21 +73,24 @@ def _section_group_title(section: ContentSection) -> str:
     return "Інше"
 
 
-def _section_to_item(section: ContentSection) -> dict:
-    # Рядок, не reverse_lazy: Vercel серіалізує settings у JSON до AppRegistry.
+def _section_to_item(section: ContentSection, admin_prefix: str = "admin/") -> dict:
+    # Рядок, не reverse: Vercel серіалізує settings у JSON до AppRegistry.
+    prefix = admin_prefix.strip("/")
     return {
         "title": _sidebar_item_title(section),
         "icon": section.sidebar_icon,
-        "link": f"/admin/pages/{section.admin_model_name}/",
+        "link": f"/{prefix}/pages/{section.admin_model_name}/",
     }
 
 
-def build_content_sidebar_groups() -> list[dict]:
+def build_content_sidebar_groups(admin_prefix: str = "admin/") -> list[dict]:
     buckets: dict[str, list[dict]] = {title: [] for title, _ in _SIDEBAR_GROUPS}
     buckets["Інше"] = []
 
     for section in CONTENT_SECTIONS:
-        buckets[_section_group_title(section)].append(_section_to_item(section))
+        buckets[_section_group_title(section)].append(
+            _section_to_item(section, admin_prefix)
+        )
 
     groups: list[dict] = []
     first = True

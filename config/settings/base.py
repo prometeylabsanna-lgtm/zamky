@@ -1,28 +1,13 @@
-import os
 from pathlib import Path
 
-from decouple import Csv, config
+from decouple import config
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Vercel free preview: без Project Env. Прод на DO — тільки через env.
-IS_VERCEL = bool(os.environ.get('VERCEL'))
-
-SECRET_KEY = config(
-    'SECRET_KEY',
-    default='vercel-demo-insecure-key-replace-on-digitalocean',
-)
-DEBUG = config('DEBUG', default=IS_VERCEL, cast=bool)
-ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,.vercel.app',
-    cast=Csv(),
-)
-CSRF_TRUSTED_ORIGINS = config(
-    'CSRF_TRUSTED_ORIGINS',
-    default='https://*.vercel.app',
-    cast=Csv(),
-)
+_admin_path = config('ADMIN_URL', default='admin').strip().strip('/')
+if not _admin_path:
+    _admin_path = 'admin'
+ADMIN_URL = f'{_admin_path}/'
 
 INSTALLED_APPS = [
     'unfold',
@@ -79,15 +64,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
-# На Vercel файлова система read-only; SQLite лише в /tmp (дані злітають після cold start).
-_DB_NAME = Path('/tmp/zamky.sqlite3') if IS_VERCEL else (BASE_DIR / 'db.sqlite3')
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': _DB_NAME,
-    }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -148,41 +124,24 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = Path('/tmp/zamky-media') if IS_VERCEL else (BASE_DIR / 'media')
-
-# На Vercel media з /tmp нестабільні між інстансами — демо-фото з static/ через CDN.
-if IS_VERCEL:
-    STORAGES = {
-        'default': {
-            'BACKEND': 'config.storage.StaticRefStorage',
-        },
-        'staticfiles': {
-            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
-        },
-    }
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# G7: у prod без static content fallback. Dev/Vercel-демо — дозволено.
-CMS_ALLOW_STATIC_FALLBACK = config(
-    'CMS_ALLOW_STATIC_FALLBACK',
-    default=DEBUG or IS_VERCEL,
-    cast=bool,
-)
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_SAVE_EVERY_REQUEST = False
 
 DISTRICTS_JSON = BASE_DIR / 'config' / 'districts.json'
 
+
 def _content_sidebar_groups():
     from pages.site_content_registry import build_content_sidebar_groups
 
-    return build_content_sidebar_groups()
+    return build_content_sidebar_groups(admin_prefix=ADMIN_URL)
 
 
 def _admin_link(suffix: str):
-    return f'/admin/{suffix.lstrip("/")}'
+    return f'/{ADMIN_URL.strip("/")}/{suffix.lstrip("/")}'
 
 
 UNFOLD = {
@@ -253,7 +212,7 @@ UNFOLD = {
                     {
                         'title': 'Недавні дії',
                         'icon': 'history',
-                        'link': '/admin/recent-actions/',
+                        'link': _admin_link('recent-actions/'),
                     },
                 ],
             },
