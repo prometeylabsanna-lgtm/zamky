@@ -132,8 +132,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 8px;
-  padding: 12px;
+  gap: 10px;
+  padding: 14px 12px;
   flex: 0 0 auto;
 }
 
@@ -147,23 +147,27 @@
 }
 
 .home-hero__cta-link {
-  flex: 1 1 148px;
+  flex: 1 1 0;
   max-width: 100%;
-  min-width: 148px;
-  min-height: 48px;
+  min-width: 0;
+  min-height: 52px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 10px 12px;
   border: 0;
   border-radius: var(--radius-md);
   color: #fff;
-  font: 500 15px/1.2 var(--font);
+  font: 500 16px/1.2 var(--font);
   text-align: center;
   text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   touch-action: manipulation;
 }
 
