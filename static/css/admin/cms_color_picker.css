@@ -2,16 +2,18 @@
 
 .zamky-cms-colorpick {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.5rem;
+  width: max-content;
+  max-width: 100%;
 }
 
 .zamky-cms-colorpick__swatch {
   position: relative;
   display: block;
-  width: 44px;
-  height: 44px;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 999px;
   overflow: hidden;
   border: 1px solid rgba(128, 128, 128, 0.45);
@@ -33,33 +35,46 @@
   opacity: 0;
   width: 100%;
   height: 100%;
+  max-width: none;
   cursor: pointer;
   border: 0;
   padding: 0;
 }
 
+.site-content-editor__field input[type="text"].zamky-cms-colorpick__hex,
 .zamky-cms-colorpick__hex {
-  min-height: 44px;
-  min-width: 7rem;
-  padding: 0.35rem 0.6rem;
+  display: block;
+  flex: 0 0 7.25rem;
+  width: 7.25rem;
+  min-width: 7.25rem;
+  max-width: 7.25rem;
+  min-height: 2.5rem;
+  height: 2.5rem;
+  padding: 0.25rem 0.55rem;
   border: 1px solid rgba(128, 128, 128, 0.45);
   border-radius: 0.5rem;
   background: transparent;
   color: inherit;
-  font-size: 15px;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   box-sizing: border-box;
 }
 
 .zamky-cms-colorpick__default,
 .zamky-cms-style-reset {
-  min-height: 44px;
-  padding: 0.35rem 0.75rem;
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+  height: 2.5rem;
+  padding: 0.25rem 0.75rem;
   border: 1px solid rgba(128, 128, 128, 0.45);
   border-radius: 0.5rem;
   background: transparent;
   color: inherit;
   cursor: pointer;
   font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -76,13 +91,46 @@
   color: var(--color-font-subtle-light, #6b7280);
 }
 
+.site-content-editor__field--color {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+
+.site-content-editor__field--color > label {
+  flex: 0 0 8.25rem;
+  margin: 0;
+}
+
+.site-content-editor__field--color .zamky-cms-colorpick {
+  flex: 0 1 auto;
+}
+
+.site-content-editor__field--color .site-content-editor__help,
+.site-content-editor__field--color .site-content-editor__error {
+  flex: 1 1 100%;
+  margin: 0;
+}
+
 @media (max-width: 767px) {
   .zamky-cms-colorpick {
-    width: 100%;
+    flex-wrap: nowrap;
   }
 
+  .site-content-editor__field--color > label {
+    flex: 1 1 100%;
+  }
+
+  .site-content-editor__field input[type="text"].zamky-cms-colorpick__hex,
   .zamky-cms-colorpick__hex {
-    flex: 1 1 auto;
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 800px) and (max-width: 1023px) {
+  .site-content-editor__field--color > label {
+    flex-basis: 7.5rem;
   }
 }
 

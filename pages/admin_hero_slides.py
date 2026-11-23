@@ -28,7 +28,7 @@ class HeroSlideForm(forms.ModelForm):
             "is_active",
         )
         widgets = {
-            "image": UnfoldAdminFileFieldWidget(),
+            "image": UnfoldAdminFileFieldWidget(attrs={"accept": "image/*"}),
             "alt_text": CmsAdminTextInputWidget(),
             "alt_text_ru": CmsAdminTextInputWidget(),
             "link_url": CmsAdminTextInputWidget(),
@@ -41,6 +41,13 @@ class HeroSlideForm(forms.ModelForm):
             "sort_order": forms.HiddenInput(),
             "is_active": UnfoldBooleanWidget(),
         }
+
+    def cta_columns(self):
+        names = (
+            ("cta_primary_label", "cta_primary_label_ru", "cta_primary_url"),
+            ("cta_secondary_label", "cta_secondary_label_ru", "cta_secondary_url"),
+        )
+        return [[self[name] for name in col] for col in names]
 
     def clean(self):
         cleaned = super().clean()
@@ -55,6 +62,13 @@ class HeroSlideForm(forms.ModelForm):
 
 
 class HeroSlideBaseFormSet(BaseModelFormSet):
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        delete = form.fields.get("DELETE")
+        if delete is not None:
+            delete.widget = UnfoldBooleanWidget()
+            delete.label = "Видалити"
+
     def save(self, commit=True):
         super().save(commit=False)
         for obj in self.deleted_objects:

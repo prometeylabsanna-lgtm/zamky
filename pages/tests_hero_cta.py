@@ -75,3 +75,21 @@ class HeroCtaTests(TestCase):
         good.save()
         self.s1.refresh_from_db()
         self.assertEqual(self.s1.cta_primary_label, "Нова кнопка")
+
+    def test_admin_hero_cta_columns_and_checks(self):
+        from django.contrib.auth import get_user_model
+        from django.test import Client
+        from django.urls import reverse
+
+        User = get_user_model()
+        User.objects.create_superuser("heroadmin", "hero@example.com", "pass12345")
+        client = Client()
+        client.force_login(User.objects.get(username="heroadmin"))
+        url = reverse("admin:pages_homeherosettings_changelist")
+        response = client.get(url)
+        if response.status_code == 302:
+            response = client.get(response["Location"])
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "hero-slide-row__cta-col")
+        self.assertContains(response, "hero-slide-row__check")
+        self.assertContains(response, "js/admin/image_preview.js")

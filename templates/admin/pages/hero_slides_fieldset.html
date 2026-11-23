@@ -45,18 +45,22 @@
           </div>
           <div class="hero-slide-row__cta" data-hero-cta-fields>
             <p class="hero-slide-row__cta-title">Кнопки під банером (мобільний). Порожнє поле = поточний текст / посилання.</p>
-            {% for field in form %}{% if field.name|slice:":4" == "cta_" %}
-            <div class="site-content-editor__field"{% if field.name|slice:"-3:" == "_ru" %} data-admin-lang="ru"{% elif "label" in field.name %} data-admin-lang="uk"{% endif %}>
-              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}<p class="hero-slide-row__cta-help">{{ field.help_text }}</p>{% endif %}
-              {% if field.errors %}<div class="site-content-editor__error">{{ field.errors }}</div>{% endif %}
+            {% for col in form.cta_columns %}
+            <div class="hero-slide-row__cta-col">
+              {% for field in col %}
+              <div class="site-content-editor__field"{% if field.name|slice:"-3:" == "_ru" %} data-admin-lang="ru"{% elif "label" in field.name %} data-admin-lang="uk"{% endif %}>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="hero-slide-row__cta-help">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<div class="site-content-editor__error">{{ field.errors }}</div>{% endif %}
+              </div>
+              {% endfor %}
             </div>
-            {% endif %}{% endfor %}
+            {% endfor %}
           </div>
           <div class="hero-slide-row__meta">
-            <label>{{ form.is_active }} {{ form.is_active.label }}</label>
-            {% if form.DELETE %}<label>{{ form.DELETE }} Видалити</label>{% endif %}
+            <label class="hero-slide-row__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+            {% if form.DELETE %}<label class="hero-slide-row__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
           </div>
           {% if form.non_field_errors %}<div class="site-content-editor__error">{{ form.non_field_errors }}</div>{% endif %}
         </div>
@@ -95,18 +99,22 @@
           </div>
           <div class="hero-slide-row__cta" data-hero-cta-fields>
             <p class="hero-slide-row__cta-title">Кнопки під банером (мобільний). Порожнє поле = поточний текст / посилання.</p>
-            {% for field in form %}{% if field.name|slice:":4" == "cta_" %}
-            <div class="site-content-editor__field"{% if field.name|slice:"-3:" == "_ru" %} data-admin-lang="ru"{% elif "label" in field.name %} data-admin-lang="uk"{% endif %}>
-              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-              {{ field }}
-              {% if field.help_text %}<p class="hero-slide-row__cta-help">{{ field.help_text }}</p>{% endif %}
-              {% if field.errors %}<div class="site-content-editor__error">{{ field.errors }}</div>{% endif %}
+            {% for col in form.cta_columns %}
+            <div class="hero-slide-row__cta-col">
+              {% for field in col %}
+              <div class="site-content-editor__field"{% if field.name|slice:"-3:" == "_ru" %} data-admin-lang="ru"{% elif "label" in field.name %} data-admin-lang="uk"{% endif %}>
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="hero-slide-row__cta-help">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<div class="site-content-editor__error">{{ field.errors }}</div>{% endif %}
+              </div>
+              {% endfor %}
             </div>
-            {% endif %}{% endfor %}
+            {% endfor %}
           </div>
           <div class="hero-slide-row__meta">
-            <label>{{ form.is_active }} {{ form.is_active.label }}</label>
-            {% if form.DELETE %}<label>{{ form.DELETE }} Видалити</label>{% endif %}
+            <label class="hero-slide-row__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+            {% if form.DELETE %}<label class="hero-slide-row__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
           </div>
         </div>
       {% endwith %}

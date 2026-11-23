@@ -86,15 +86,23 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
 
     class Media:
         css = {"all": ("css/admin/lang_tabs.css",)}
-        js = ("js/admin/lang_tabs.js",)
+        js = ("js/admin/lang_tabs.js", "js/admin/image_preview.js")
 
     @admin.display(description="Превʼю логотипу")
     def logo_preview(self, obj):
-        return admin_image_preview(getattr(obj, "logo", None), max_size=120)
+        return admin_image_preview(
+            getattr(obj, "logo", None),
+            max_size=120,
+            fallback_static="img/logo.png",
+        )
 
     @admin.display(description="Превʼю favicon")
     def favicon_preview(self, obj):
-        return admin_image_preview(getattr(obj, "favicon", None), max_size=64)
+        return admin_image_preview(
+            getattr(obj, "favicon", None),
+            max_size=64,
+            fallback_static="img/favicon-32x32.png",
+        )
 
 
 @admin.register(ContactRequest)

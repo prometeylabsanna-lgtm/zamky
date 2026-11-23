@@ -244,16 +244,83 @@ html.dark .zamky-filter__label {
   display: none;
 }
 
-/* Перемикач теми в меню користувача — іконка й текст на одній лінії */
+/* Превʼю зображень у change-формі (логотип / favicon / обкладинки) */
+.admin-img-preview {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.admin-img-preview img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+html.dark .admin-img-preview img {
+  border-color: #374151;
+  background: #111827;
+}
+
+/* Перемикач теми в меню користувача: Світла / Темна / Системна в один ряд */
+.zamky-theme-switch {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.125rem;
+  margin: 0 0 0.25rem;
+  padding: 0.25rem 0.375rem 0.5rem;
+  min-width: 0;
+}
+
 .zamky-theme-switch__btn {
-  min-height: 2rem;
+  display: inline-flex;
+  flex: 0 1 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 2.25rem;
+  margin: 0;
+  padding: 0.25rem 0.35rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.zamky-theme-switch__btn .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1;
+  width: 16px;
+  height: 16px;
 }
 
 .zamky-theme-switch__label {
   display: inline-block;
-  font-size: 0.8125rem;
-  line-height: 1.25;
+  font-size: 0.75rem;
+  line-height: 1.2;
   white-space: nowrap;
+}
+
+.zamky-theme-switch__btn.is-active,
+.zamky-theme-switch__btn.text-primary-600 {
+  color: rgb(234 88 12);
+}
+
+.zamky-theme-switch__btn:hover {
+  background: rgb(243 244 246);
+}
+
+html.dark .zamky-theme-switch__btn:hover {
+  background: rgb(55 65 81);
 }
 
 @media (max-width: 767px) {

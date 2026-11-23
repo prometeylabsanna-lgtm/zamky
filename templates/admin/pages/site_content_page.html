@@ -92,7 +92,7 @@
         </button>
         {% for item in style_fields %}
           {% with field=item.field %}
-          <div class="site-content-editor__field">
+          <div class="site-content-editor__field site-content-editor__field--color">
             <label class="text-font-important-light dark:text-font-important-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
             {% if field.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{{ field.help_text }}</p>{% endif %}
@@ -117,6 +117,7 @@
   {{ block.super }}
   <script src="{% static 'js/admin/lang_tabs.js' %}" defer></script>
   <script src="{% static 'js/admin/cms_color_picker.js' %}" defer></script>
+  <script src="{% static 'js/admin/image_preview.js' %}" defer></script>
   {% if hero_formset %}
     <script src="{% static 'js/admin/hero_slides.js' %}" defer></script>
   {% endif %}

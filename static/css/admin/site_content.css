@@ -183,17 +183,37 @@
   border-radius: 0.35rem;
 }
 
-.hero-slide-row__cta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
 .hero-slide-row__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  align-items: center;
+  gap: 1rem 1.5rem;
   margin-top: 0.75rem;
+}
+
+.hero-slide-row__check {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  min-height: 1.5rem;
+  line-height: 1.3;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.hero-slide-row__check input[type="checkbox"] {
+  display: inline-block;
+  margin: 0;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+}
+
+.hero-slide-row__check span {
+  display: inline-block;
 }
 
 @media (max-width: 767px) {
@@ -205,10 +225,6 @@
     width: 100%;
     height: auto;
     max-height: 160px;
-  }
-
-  .hero-slide-row__cta {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -300,11 +316,12 @@
 }
 
 
-/* Кнопки банера (CTA) у рядку слайда */
+/* Кнопки банера (CTA) у рядку слайда — дві колонки однакової висоти */
 .hero-slide-row__cta {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem 1rem;
+  align-items: start;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px dashed #e5e7eb;
@@ -317,8 +334,31 @@
   font-size: 0.875rem;
 }
 
+.hero-slide-row__cta-col {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  align-content: start;
+}
+
+.hero-slide-row__cta-col .site-content-editor__field {
+  margin-top: 0;
+}
+
+.hero-slide-row__cta-col input[type="text"],
+.hero-slide-row__cta-col input[type="url"] {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 2.75rem;
+  height: 2.75rem;
+  box-sizing: border-box;
+}
+
 .hero-slide-row__cta-help {
   margin: 0.25rem 0 0;
+  min-height: 1.1rem;
   color: #6b7280;
   font-size: 0.75rem;
 }
@@ -326,5 +366,12 @@
 @media (max-width: 1023px) {
   .hero-slide-row__cta {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-slide-row__cta-col input[type="text"],
+  .hero-slide-row__cta-col input[type="url"] {
+    font-size: 16px;
   }
 }
