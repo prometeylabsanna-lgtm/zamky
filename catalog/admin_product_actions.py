@@ -5,6 +5,10 @@ from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
 from django.shortcuts import redirect, render
 from django.utils.translation import ngettext
 
+from catalog.admin_parent_cascade import (
+    CategoryParentCascadeWidget,
+    build_parent_cascade_tree,
+)
 from catalog.models import Category
 
 
@@ -102,6 +106,10 @@ def change_category(modeladmin, request, queryset):
                 )
         return redirect(f'admin:{opts.app_label}_{opts.model_name}_changelist')
 
+    widget = CategoryParentCascadeWidget(
+        tree=build_parent_cascade_tree(),
+        allow_empty=False,
+    )
     context = {
         **modeladmin.admin_site.each_context(request),
         'title': 'Змінити категорію',
@@ -109,8 +117,10 @@ def change_category(modeladmin, request, queryset):
         'opts': opts,
         'action_checkbox_name': ACTION_CHECKBOX_NAME,
         'selected': selected,
-        'categories': Category.objects.order_by('sort_order', 'name'),
-        'media': modeladmin.media,
+        'category_widget': widget.render(
+            'category', None, attrs={'id': 'id_category'}
+        ),
+        'media': modeladmin.media + widget.media,
     }
     return render(request, 'admin/catalog/change_category.html', context)
 

@@ -5,7 +5,7 @@
       {% if not forloop.first %}
       <span class="filter-nav-crumbs__sep" aria-hidden="true">/</span>
       {% endif %}
-      {% if crumb.url and not forloop.last %}
+      {% if crumb.url %}
       <a class="filter-nav-crumbs__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
       {% else %}
       <span class="filter-nav-crumbs__current">{{ crumb.title }}</span>

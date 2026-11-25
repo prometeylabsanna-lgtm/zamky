@@ -1,6 +1,11 @@
+.form-row.field-color_code.is-core-hidden,
+div.field-color_code.is-core-hidden {
+  display: none;
+}
+
 .product-filter-heading {
   margin: 1.35rem 0 0.45rem;
-  padding: 0;
+  padding: 0 1.25rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -8,17 +13,37 @@
   color: var(--color-font-subtle-light, #6b7280);
 }
 
-[class*="field-spec_attr_"] {
-  max-width: 42rem;
+fieldset.product-specs-tab > .leading-relaxed,
+fieldset.product-specs-tab > div.leading-relaxed {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
-[class*="field-spec_attr_"] select {
+[class*="field-spec_attr_"] {
+  max-width: 42rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  box-sizing: border-box;
+}
+
+[class*="field-spec_attr_"] select,
+.field-rating select,
+.field-reviews_count input,
+.field-warranty_months input {
   min-height: 48px;
   width: 100%;
   font-size: 16px;
 }
 
 @media (max-width: 768px) {
+  .product-filter-heading,
+  fieldset.product-specs-tab > .leading-relaxed,
+  fieldset.product-specs-tab > div.leading-relaxed,
+  [class*="field-spec_attr_"] {
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  }
+
   [class*="field-spec_attr_"] {
     max-width: none;
   }

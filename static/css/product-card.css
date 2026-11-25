@@ -136,6 +136,15 @@ a.product-card:focus-visible {
   letter-spacing: 0;
 }
 
+.product-card__score {
+  margin-left: 6px;
+  color: var(--color-fg);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
 .product-card__meta {
   margin-left: 8px;
   color: var(--color-meta);

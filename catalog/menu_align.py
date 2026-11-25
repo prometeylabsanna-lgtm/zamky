@@ -343,10 +343,10 @@ def _cylinder_target(product):
 
 
 def repair_cylinder_products():
-    from catalog.models import Product
+    from catalog.db_compat import product_qs
 
     moved = 0
-    qs = Product.objects.select_related('category').prefetch_related(
+    qs = product_qs().select_related('category').prefetch_related(
         'product_attributes__attribute_value__attribute'
     )
     for product in qs:
@@ -362,12 +362,12 @@ def repair_cylinder_products():
 
 
 def reassign_products_to_menu():
-    from catalog.models import Product
+    from catalog.db_compat import product_qs
 
     allowed = _allowed_ids()
     moved = 0
     if allowed:
-        qs = Product.objects.select_related('category')
+        qs = product_qs().select_related('category')
         for product in qs:
             if _is_cylinder_product(product):
                 continue

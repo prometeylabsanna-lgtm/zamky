@@ -3,8 +3,8 @@ from django.db import migrations
 
 def reassign_leaves(apps, schema_editor):
     from catalog.category_tree import resolve_leaf_category
-    from catalog.models import Product
 
+    Product = apps.get_model('catalog', 'Product')
     qs = Product.objects.select_related('category').prefetch_related(
         'attributes__attribute'
     )

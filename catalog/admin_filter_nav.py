@@ -1,4 +1,4 @@
-from urllib.parse import urlencode, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from django.db.models import Count
 from django.http import HttpResponseRedirect
@@ -17,6 +17,27 @@ VALUES_NAME = 'admin:catalog_attributevalue_changelist'
 
 def _hub_url():
     return reverse(HUB_NAME)
+
+
+def _attribute_id_from_url(raw_url):
+    if not raw_url:
+        return ''
+    return (parse_qs(urlparse(raw_url).query).get('attribute') or [''])[0].strip()
+
+
+def bound_attribute_id(request, obj=None):
+    if obj is not None and getattr(obj, 'attribute_id', None):
+        return obj.attribute_id
+    raw = (request.POST.get('attribute') or request.GET.get('attribute') or '').strip()
+    if not raw:
+        raw = _attribute_id_from_url(
+            request.POST.get('next') or request.GET.get('next') or ''
+        )
+    if not raw:
+        raw = _attribute_id_from_url(request.META.get('HTTP_REFERER') or '')
+    if raw.isdigit() and Attribute.objects.filter(pk=int(raw)).exists():
+        return int(raw)
+    return None
 
 
 def _values_list_url():
@@ -55,7 +76,7 @@ def _with_next(url, next_url):
     return f'{url}{sep}{urlencode({"next": next_url})}'
 
 
-def build_filter_nav_context(attribute_id='', group_id=''):
+def build_filter_nav_context(attribute_id='', group_id='', hide_add=False):
     crumbs = [{'title': 'Фільтри', 'url': _hub_url()}]
     selected_group = None
     selected_attr = None
@@ -113,7 +134,14 @@ def build_filter_nav_context(attribute_id='', group_id=''):
                         'url': _group_url(gkey),
                     }
                 )
-            crumbs.append({'title': selected_attr.name, 'url': None})
+            crumbs.append(
+                {
+                    'title': selected_attr.name,
+                    'url': (
+                        _attribute_url(gkey, selected_attr.pk) if hide_add else None
+                    ),
+                }
+            )
             add_url = _with_next(
                 f'{reverse("admin:catalog_attributevalue_add")}?attribute={selected_attr.pk}',
                 _attribute_url(gkey, selected_attr.pk),
@@ -156,6 +184,12 @@ def build_filter_nav_context(attribute_id='', group_id=''):
         'filters': 'Оберіть фільтр або додайте новий у цю групу.',
         'values': 'Редагуйте значення, додайте або видаліть.',
     }[level]
+    empty = ''
+    if level == 'values':
+        empty = 'У цього фільтра ще немає значень.'
+    if hide_add:
+        add_url = ''
+        add_label = ''
     return {
         'filter_nav_level': level,
         'filter_nav_items': items,
@@ -165,6 +199,7 @@ def build_filter_nav_context(attribute_id='', group_id=''):
         'filter_nav_attribute': selected_attr,
         'filter_nav_add_url': add_url,
         'filter_nav_add_label': add_label,
+        'filter_nav_empty': empty,
         'title': title,
     }
 
@@ -174,6 +209,21 @@ class FilterTreeReturnMixin:
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         context['filter_tree_next'] = _safe_next(request)
+        attr_id = ''
+        group_id = (request.GET.get('group') or '').strip()
+        model = getattr(self, 'model', None)
+        if model is AttributeValue:
+            found = bound_attribute_id(request, obj)
+            attr_id = str(found or '')
+            if obj is not None and obj.attribute_id and obj.attribute.group_id:
+                group_id = _group_key(obj.attribute.group)
+        elif model is Attribute and obj is not None:
+            group_id = _group_key(obj.group)
+        elif model is AttributeGroup:
+            group_id = ''
+        context.update(
+            build_filter_nav_context(attr_id, group_id, hide_add=True)
+        )
         return super().render_change_form(
             request, context, add=add, change=change, form_url=form_url, obj=obj
         )
@@ -232,7 +282,7 @@ class FilterTreeMixin:
         initial = super().get_changeform_initial_data(request)
         group_id = (request.GET.get('group') or '').strip()
         if group_id.isdigit():
-            initial['group'] = group_id
+            initial['group'] = int(group_id)
             siblings = Attribute.objects.filter(group_id=int(group_id))
         else:
             siblings = Attribute.objects.filter(group__isnull=True)
@@ -280,7 +330,7 @@ class FilterValuesNavMixin:
         initial = super().get_changeform_initial_data(request)
         attribute_id = (request.GET.get('attribute') or '').strip()
         if attribute_id.isdigit():
-            initial['attribute'] = attribute_id
+            initial['attribute'] = int(attribute_id)
             siblings = AttributeValue.objects.filter(attribute_id=int(attribute_id))
         else:
             siblings = AttributeValue.objects.none()

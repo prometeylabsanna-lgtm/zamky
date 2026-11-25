@@ -15,12 +15,20 @@
     </h2>
 
     <p class="mb-6 text-center">
-        За цим запитом немає результатів.
+        {% if filter_nav_empty %}
+            {{ filter_nav_empty }}
+        {% else %}
+            За цим запитом немає результатів.
+        {% endif %}
     </p>
 
-    {% if has_add_permission or cl.has_filters %}
+    {% if has_add_permission or cl.has_filters or filter_nav_add_url %}
         <div class="flex flex-col gap-4 justify-center w-full lg:flex-row">
-            {% if has_add_permission %}
+            {% if filter_nav_add_url %}
+                <a href="{{ filter_nav_add_url }}" class="filter-nav-empty-add bg-primary-600 flex flex-row font-medium gap-2 items-center justify-center px-3 py-2 rounded-default text-white w-full lg:w-auto">
+                    <span class="material-symbols-outlined text-white -ml-0.5 rtl:ml-0 rtl:-mr-0.5">add</span> {{ filter_nav_add_label|default:title }}
+                </a>
+            {% elif has_add_permission %}
                 <a href="{% add_preserved_filters add_url is_popup to_field %}" class="bg-primary-600 flex flex-row font-medium gap-2 items-center h-[38px] justify-center px-3 py-2 rounded-default text-white w-full lg:w-auto">
                     <span class="material-symbols-outlined text-white -ml-0.5 rtl:ml-0 rtl:-mr-0.5">add</span> {{ title }}
                 </a>

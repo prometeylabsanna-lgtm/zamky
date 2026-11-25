@@ -3,12 +3,19 @@
 import re
 
 from django import forms
+from django.db.models import Count
 from unfold.widgets import UnfoldAdminSelectWidget
 
+from .admin_parent_cascade import (
+    CategoryParentCascadeWidget,
+    build_parent_cascade_tree,
+)
+from .category_tree import cylinder_category_ids, product_needs_core_color
 from .models import Attribute, AttributeValue, Product, ProductAttribute
 
 SPEC_FIELD_PREFIX = 'spec_attr_'
 SKIP_SPEC_SLUGS = frozenset({'sku-attr'})
+RATING_CHOICES = tuple((n, f'{n}.0') for n in range(1, 6))
 
 
 def spec_field_name(attr_pk):
@@ -19,6 +26,8 @@ def product_spec_attributes():
     return (
         Attribute.objects.select_related('group')
         .exclude(slug__in=SKIP_SPEC_SLUGS)
+        .annotate(_value_count=Count('values'))
+        .filter(_value_count__gt=0)
         .order_by('group__sort_order', 'sort_order', 'name')
     )
 
@@ -129,3 +138,40 @@ class ProductAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         add_spec_fields(self, self.instance)
+        category = self.fields.get('category')
+        if category is not None:
+            category.widget = CategoryParentCascadeWidget(
+                tree=build_parent_cascade_tree(),
+                allow_empty=False,
+            )
+            category.help_text = (
+                'Корінь, далі підкатегорія, далі листок — як у меню каталогу.'
+            )
+        color = self.fields.get('color_code')
+        if color is not None and self.instance.pk and not product_needs_core_color(
+            self.instance
+        ):
+            self.fields.pop('color_code')
+        elif color is not None:
+            color.help_text = (
+                'Лише для циліндрів. Кружечки на сторінці товару та в кошику.'
+            )
+            color.widget.attrs['data-cylinder-ids'] = ','.join(
+                str(pk) for pk in sorted(cylinder_category_ids())
+            )
+        rating = self.fields.get('rating')
+        if rating is not None:
+            self.fields['rating'] = forms.TypedChoiceField(
+                label=rating.label,
+                choices=RATING_CHOICES,
+                coerce=int,
+                required=True,
+                help_text='Зірки в картці цього товару на сайті.',
+                widget=UnfoldAdminSelectWidget(),
+            )
+        reviews = self.fields.get('reviews_count')
+        if reviews is not None:
+            reviews.help_text = 'Біля зірок. 0 — рядок відгуків ховається.'
+        warranty = self.fields.get('warranty_months')
+        if warranty is not None:
+            warranty.help_text = '0 — не показувати гарантію на картці.'

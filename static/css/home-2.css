@@ -296,7 +296,8 @@
 }
 
 .product-card--home .product-card__stars {
-  display: none;
+  display: flex;
+  margin-top: 8px;
 }
 
 .product-card--home .badge--in {

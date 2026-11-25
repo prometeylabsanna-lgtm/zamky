@@ -193,11 +193,11 @@ def _attach_img(product, rel_path):
 
 
 def park_legacy_vitrine():
-    from catalog.models import Product
+    from catalog.db_compat import product_qs
 
     keep = mockup_sku_set()
     parked = 0
-    qs = Product.objects.filter(catalog_order__lt=500).exclude(sku__startswith='HOME-')
+    qs = product_qs().filter(catalog_order__lt=500).exclude(sku__startswith='HOME-')
     for product in qs:
         if product.sku in keep:
             continue
@@ -216,7 +216,11 @@ def _rename_filter_titles():
 
 
 def sync_mockup_products():
+    from catalog.db_compat import missing_product_columns, product_qs
     from catalog.models import Product, ProductAttribute
+
+    if missing_product_columns():
+        return
 
     ensure_category_tree()
     _rename_filter_titles()
@@ -242,7 +246,7 @@ def sync_mockup_products():
             'size_b': b,
             'short_description': f'{spec["type_name"]} {spec["brand"]}.',
         }
-        product = Product.objects.filter(sku=spec['sku']).first()
+        product = product_qs().filter(sku=spec['sku']).first()
         if product is None:
             product = Product.objects.create(
                 sku=spec['sku'],

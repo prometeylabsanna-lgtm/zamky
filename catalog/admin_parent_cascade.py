@@ -51,9 +51,10 @@ class CategoryParentCascadeWidget(Widget):
         css = {'all': ('css/admin/category_parent_cascade.css',)}
         js = ('js/admin/category_parent_cascade.js',)
 
-    def __init__(self, attrs=None, tree=None):
+    def __init__(self, attrs=None, tree=None, allow_empty=True):
         super().__init__(attrs)
         self.tree = tree if tree is not None else []
+        self.allow_empty = allow_empty
 
     def format_value(self, value):
         if value in (None, ''):
@@ -71,4 +72,5 @@ class CategoryParentCascadeWidget(Widget):
         widget['tree_id'] = f'{field_id}_tree'
         widget['value'] = self.format_value(value)
         widget['name'] = name
+        widget['allow_empty'] = self.allow_empty
         return context

@@ -87,6 +87,16 @@ class ProductPageTests(TestCase):
         self.assertContains(response, 'Швидке замовлення в 1 клік')
         self.assertContains(response, 'Загальне')
         self.assertContains(response, self.product.sku)
+        self.assertContains(response, 'Гарантія 12 місяців')
+        self.assertNotContains(response, 'відгук')
+
+    def test_product_reviews_and_warranty_from_fields(self):
+        self.product.reviews_count = 2
+        self.product.warranty_months = 24
+        self.product.save(update_fields=['reviews_count', 'warranty_months'])
+        page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
+        self.assertContains(page, '· 2 відгуки')
+        self.assertContains(page, 'Гарантія 24 місяці')
 
     def test_variant_context(self):
         response = self.client.get(reverse('catalog:product', args=[self.product.slug]))
@@ -281,6 +291,16 @@ class ProductAdminColorTests(TestCase):
     def tearDown(self):
         translation.deactivate_all()
 
+    def test_admin_category_cascade(self):
+        url = reverse('admin:catalog_product_change', args=[self.product.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'data-parent-cascade')
+        self.assertContains(page, 'data-cascade-required')
+        self.assertContains(page, 'data-cascade-toggle')
+        self.assertContains(page, 'data-cascade-col="3"')
+        self.assertNotContains(page, 'admin-autocomplete')
+
     def test_admin_color_dropdown(self):
         url = reverse('admin:catalog_product_change', args=[self.product.pk])
         page = self.client.get(url)
@@ -290,6 +310,22 @@ class ProductAdminColorTests(TestCase):
         self.assertContains(page, '>Нікель<')
         self.assertContains(page, '>Чорний<')
         self.assertNotContains(page, 'Код кольору')
+
+    def test_admin_hides_core_color_outside_cylinders(self):
+        locks = Category.objects.create(name='Замки', slug='locks-admin-color')
+        other = Product.objects.create(
+            category=locks,
+            name='Замок без серцевини',
+            slug='lock-no-core',
+            sku='LOCK-NO-CORE',
+            price=Decimal('200'),
+        )
+        page = self.client.get(
+            reverse('admin:catalog_product_change', args=[other.pk])
+        )
+        self.assertEqual(page.status_code, 200)
+        self.assertNotContains(page, 'id="id_color_code"')
+        self.assertNotContains(page, 'Колір серцевини')
 
     def test_admin_description_tinymce(self):
         url = reverse('admin:catalog_product_change', args=[self.product.pk])
@@ -306,6 +342,9 @@ class ProductAdminColorTests(TestCase):
         sku_attr = Attribute.objects.create(
             name='Артикул', slug='sku-attr', group=group, filterable=False
         )
+        empty = Attribute.objects.create(
+            name='новий', slug='empty-filter', filterable=True
+        )
         url = reverse('admin:catalog_product_change', args=[self.product.pk])
         page = self.client.get(url)
         self.assertContains(page, f'name="spec_attr_{keys.pk}"')
@@ -315,6 +354,11 @@ class ProductAdminColorTests(TestCase):
         self.assertNotContains(page, 'Оздоблення')
         self.assertNotContains(page, 'data-attr-master')
         self.assertNotContains(page, f'name="spec_attr_{sku_attr.pk}"')
+        self.assertNotContains(page, f'name="spec_attr_{empty.pk}"')
+        self.assertContains(page, 'name="rating"')
+        self.assertContains(page, 'Рейтинг')
+        self.assertContains(page, 'name="reviews_count"')
+        self.assertContains(page, 'name="warranty_months"')
         self.assertNotContains(page, 'id="id_cover"')
         self.assertNotContains(page, 'id="id_size_mm"')
         self.assertNotContains(page, 'id="id_family"')
@@ -408,6 +452,16 @@ class FilterValuesNavTests(TestCase):
         bounced = self.client.get(values_url)
         self.assertEqual(bounced.status_code, 302)
 
+    def test_empty_values_add_keeps_attribute(self):
+        AttributeValue.objects.filter(attribute=self.attr).delete()
+        values_url = reverse('admin:catalog_attributevalue_changelist')
+        page = self.client.get(
+            values_url, {'group': self.group.pk, 'attribute': self.attr.pk}
+        )
+        add_url = reverse('admin:catalog_attributevalue_add')
+        self.assertContains(page, f'{add_url}?attribute={self.attr.pk}')
+        self.assertContains(page, 'Додати значення')
+
     def test_sort_order_starts_at_one(self):
         first = AttributeValue.objects.get(slug='3030-nav')
         self.assertEqual(first.sort_order, 1)
@@ -434,6 +488,73 @@ class FilterValuesNavTests(TestCase):
         )
         self.assertEqual(other.sort_order, 1)
 
+    def test_add_filter_form_uses_group_and_values(self):
+        url = reverse('admin:catalog_attribute_add')
+        page = self.client.get(url, {'group': self.group.pk})
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, f'value="{self.group.pk}"')
+        self.assertContains(page, self.group.name)
+        self.assertNotContains(page, 'name="values-0-value"')
+        self.assertContains(page, self.group.name)
+        self.assertNotContains(page, 'admin-autocomplete')
+        self.assertNotContains(page, '_popup=1')
+        self.assertNotContains(page, 'Додати ще одну Фільтр')
+
+    def test_add_value_form_hides_attribute(self):
+        url = reverse('admin:catalog_attributevalue_add')
+        bounced = self.client.get(url)
+        self.assertEqual(bounced.status_code, 302)
+        values_url = reverse('admin:catalog_attributevalue_changelist')
+        from_list = self.client.get(
+            url,
+            HTTP_REFERER=f'{values_url}?group={self.group.pk}&attribute={self.attr.pk}',
+        )
+        self.assertEqual(from_list.status_code, 200)
+        page = self.client.get(url, {'attribute': self.attr.pk})
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'type="hidden"')
+        self.assertContains(page, 'name="attribute"')
+        self.assertContains(page, f'value="{self.attr.pk}"')
+        self.assertContains(page, self.attr.name)
+        self.assertContains(page, self.group.name)
+        self.assertNotContains(page, '---------')
+        self.assertNotContains(page, 'admin-autocomplete')
+
+    def test_add_filter_opens_values_list(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.test import RequestFactory
+
+        from catalog.admin import AttributeAdmin
+        from catalog.models import Attribute as Attr
+
+        created = Attr.objects.create(
+            name='Новий фільтр тест', group=self.group, sort_order=1
+        )
+        req = RequestFactory().post('/')
+        req.user = self.user
+        response = AttributeAdmin(Attr, AdminSite()).response_post_save_add(
+            req, created
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f'attribute={created.pk}', response['Location'])
+
+    def test_add_value_returns_to_filter_list(self):
+        from django.contrib.admin.sites import AdminSite
+        from django.test import RequestFactory
+
+        from catalog.admin import AttributeValueAdmin
+
+        created = AttributeValue.objects.create(
+            attribute=self.attr, value='Нове', slug='nove-nav'
+        )
+        req = RequestFactory().post('/')
+        req.user = self.user
+        response = AttributeValueAdmin(
+            AttributeValue, AdminSite()
+        ).response_post_save_add(req, created)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f'attribute={self.attr.pk}', response['Location'])
+
     def test_add_value_form_initial_order(self):
         from django.contrib import admin
         from django.test import RequestFactory
@@ -446,4 +567,4 @@ class FilterValuesNavTests(TestCase):
             AttributeValue, admin.site
         ).get_changeform_initial_data(request)
         self.assertEqual(initial['sort_order'], 2)
-        self.assertEqual(initial['attribute'], str(self.attr.pk))
+        self.assertEqual(initial['attribute'], self.attr.pk)

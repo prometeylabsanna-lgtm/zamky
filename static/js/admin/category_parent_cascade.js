@@ -53,6 +53,7 @@
     var col3 = root.querySelector("[data-cascade-col='3']");
     if (!hidden || !toggle || !panel || !col1 || !col2 || !col3) return;
 
+    var allowEmpty = !root.hasAttribute("data-cascade-required");
     var state = { l1: null, l2: null, l3: null };
 
     function pathNodes() {
@@ -67,10 +68,13 @@
       var nodes = pathNodes();
       var last = nodes[nodes.length - 1];
       hidden.value = last ? String(last.id) : "";
+      hidden.dispatchEvent(new Event("change", { bubbles: true }));
       if (label) {
         label.textContent = last
           ? nodes.map(function (n) { return n.name; }).join(" / ")
-          : "—";
+          : allowEmpty
+            ? "—"
+            : "Оберіть категорію";
       }
     }
 
@@ -118,7 +122,7 @@
     }
 
     function paint() {
-      paintList(col1, tree, state.l1 && state.l1.id, true);
+      paintList(col1, tree, state.l1 && state.l1.id, allowEmpty);
       var kids = state.l1 ? state.l1.children || [] : [];
       col2.hidden = !kids.length;
       if (kids.length) paintList(col2, kids, state.l2 && state.l2.id, false);

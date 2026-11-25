@@ -194,3 +194,15 @@
     display: none;
   }
 }
+
+.form-row.field-attribute:has(input[type="hidden"]),
+div.field-attribute:has(input[type="hidden"]) {
+  display: none;
+}
+
+a.filter-nav-empty-add {
+  min-height: 48px;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}

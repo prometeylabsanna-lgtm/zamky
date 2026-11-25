@@ -1,4 +1,4 @@
-<div class="parent-cascade" data-parent-cascade>
+<div class="parent-cascade" data-parent-cascade{% if not widget.allow_empty %} data-cascade-required{% endif %}>
   {{ widget.tree_json|json_script:widget.tree_id }}
   <input type="hidden"
          name="{{ widget.name }}"

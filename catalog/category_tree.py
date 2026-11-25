@@ -169,6 +169,31 @@ def subtree_ids(root_id):
     return out
 
 
+CORE_COLOR_ROOT = 'Циліндри'
+
+
+def cylinder_category_ids():
+    from catalog.models import Category
+
+    ids = []
+    for root in Category.objects.filter(name=CORE_COLOR_ROOT):
+        ids.extend(subtree_ids(root.pk))
+    return frozenset(ids)
+
+
+def product_needs_core_color(product):
+    if product is None:
+        return False
+    if (getattr(product, 'color_code', None) or '').strip():
+        return True
+    if getattr(product, 'family_id', None):
+        return True
+    category = getattr(product, 'category', None)
+    if category is None:
+        return False
+    return category.pk in cylinder_category_ids()
+
+
 def category_path_label(category):
     names = [category.name]
     seen = set()

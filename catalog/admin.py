@@ -1,5 +1,8 @@
+from django import forms
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from unfold.admin import ModelAdmin, TabularInline
+from unfold.widgets import UnfoldAdminSelectWidget, UnfoldAdminTextInputWidget
 
 from pages.admin_image_preview import admin_image_preview
 from pages.admin_mixins import DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin
@@ -17,10 +20,14 @@ from .admin_filter_nav import (
     FilterTreeMixin,
     FilterTreeReturnMixin,
     FilterValuesNavMixin,
+    _attribute_url,
+    _group_key,
     _hub_url,
+    bound_attribute_id,
 )
 from .admin_product_actions import PRODUCT_ACTIONS
 from .admin_product_filters import ProductAdminForm, spec_fieldset_fields
+from .category_tree import product_needs_core_color
 from .models import (
     Attribute,
     AttributeGroup,
@@ -31,14 +38,19 @@ from .models import (
 )
 
 
-class AttributeValueInline(TabularInline):
-    model = AttributeValue
-    extra = 1
-    tab = True
-    verbose_name = 'Значення фільтра'
-    verbose_name_plural = 'Значення фільтрів'
-    readonly_fields = ('slug',)
-    fields = ('value', 'value_ru', 'slug', 'sort_order')
+def _plain_fk_select():
+    return UnfoldAdminSelectWidget()
+
+
+def _no_related_menu(field):
+    widget = getattr(field, 'widget', None)
+    while widget is not None:
+        widget.can_add_related = False
+        widget.can_change_related = False
+        widget.can_delete_related = False
+        widget.can_view_related = False
+        widget = getattr(widget, 'widget', None)
+    return field
 
 
 class ProductImageInline(TabularInline):
@@ -158,7 +170,12 @@ class AttributeGroupAdmin(FilterTreeReturnMixin, TopDropdownFiltersMixin, ModelA
         return redirect(_hub_url())
 
     class Media:
-        css = {'all': ('css/admin/lang_tabs.css',)}
+        css = {
+            'all': (
+                'css/admin/lang_tabs.css',
+                'css/admin/filter_values_nav.css',
+            )
+        }
         js = ('js/admin/lang_tabs.js',)
 
 
@@ -169,11 +186,32 @@ class AttributeAdmin(
     list_display = ('name', 'slug', 'group', 'filterable', 'sort_order')
     list_filter = ('filterable', 'group')
     search_fields = ('name', 'name_ru', 'slug')
-    autocomplete_fields = ('group',)
     readonly_fields = ('slug',)
-    inlines = [AttributeValueInline]
     fields = ('name', 'name_ru', 'slug', 'group', 'filterable', 'sort_order')
     show_add_link = False
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'group':
+            kwargs['widget'] = _plain_fk_select()
+        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        return _no_related_menu(field)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in {'name', 'name_ru'}:
+            kwargs['widget'] = UnfoldAdminTextInputWidget(
+                attrs={'autocomplete': 'off'}
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        group = form.base_fields.get('group')
+        if group is not None:
+            _no_related_menu(group)
+        return form
+
+    def response_post_save_add(self, request, obj):
+        return HttpResponseRedirect(_attribute_url(_group_key(obj.group), obj.pk))
 
     class Media:
         css = {
@@ -192,10 +230,50 @@ class AttributeValueAdmin(
     list_display = ('value', 'attribute', 'slug', 'sort_order')
     list_filter = ()
     search_fields = ('value', 'value_ru', 'slug')
-    autocomplete_fields = ('attribute',)
     readonly_fields = ('slug',)
     fields = ('attribute', 'value', 'value_ru', 'slug', 'sort_order')
     show_add_link = False
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name in {'value', 'value_ru'}:
+            kwargs['widget'] = UnfoldAdminTextInputWidget(
+                attrs={'autocomplete': 'off'}
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def add_view(self, request, form_url='', extra_context=None):
+        if request.method == 'GET' and bound_attribute_id(request) is None:
+            return HttpResponseRedirect(_hub_url())
+        return super().add_view(request, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+        attr_id = bound_attribute_id(request, obj)
+        if attr_id:
+            obj.attribute_id = attr_id
+        super().save_model(request, obj, form, change)
+
+    def response_post_save_add(self, request, obj):
+        return HttpResponseRedirect(
+            _attribute_url(_group_key(obj.attribute.group), obj.attribute_id)
+        )
+
+    def response_post_save_change(self, request, obj):
+        return HttpResponseRedirect(
+            _attribute_url(_group_key(obj.attribute.group), obj.attribute_id)
+        )
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        field = form.base_fields.get('attribute')
+        attr_id = bound_attribute_id(request, obj)
+        if field is not None and attr_id:
+            field.widget = forms.HiddenInput()
+            field.initial = attr_id
+            field.label = ''
+            field.help_text = ''
+        elif field is not None:
+            _no_related_menu(field)
+        return form
 
     class Media:
         css = {
@@ -229,7 +307,6 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         'color_code',
     )
     search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
-    autocomplete_fields = ('category',)
     readonly_fields = ('slug', 'og_preview', 'created_at', 'updated_at')
     inlines = [ProductImageInline]
     form = ProductAdminForm
@@ -263,6 +340,9 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
                     'is_active',
                     'is_hit',
                     'is_new',
+                    'rating',
+                    'reviews_count',
+                    'warranty_months',
                     'color_code',
                     'created_at',
                     'updated_at',
@@ -301,9 +381,20 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
             'all': (
                 'css/admin/lang_tabs.css',
                 'css/admin/product_filters.css',
+                'css/admin/category_parent_cascade.css',
             )
         }
-        js = ('js/admin/lang_tabs.js', 'js/admin/product_spec_filters.js')
+        js = (
+            'js/admin/lang_tabs.js',
+            'js/admin/product_spec_filters.js',
+            'js/admin/category_parent_cascade.js',
+            'js/admin/product_core_color.js',
+        )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'category':
+            kwargs['widget'] = CategoryParentCascadeWidget(allow_empty=False)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         from django.contrib.admin.utils import flatten_fieldsets
@@ -312,14 +403,21 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         return super().get_form(request, obj, change, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
-        fieldsets = list(self.fieldsets)
+        fieldsets = []
+        for title, opts in self.fieldsets:
+            opts = dict(opts)
+            fields = tuple(opts.get('fields', ()))
+            if obj is not None and not product_needs_core_color(obj):
+                fields = tuple(name for name in fields if name != 'color_code')
+            opts['fields'] = fields
+            fieldsets.append((title, opts))
         spec_fields = spec_fieldset_fields()
         if spec_fields:
             fieldsets.append(
                 (
                     'Характеристики',
                     {
-                        'classes': ('tab',),
+                        'classes': ('tab', 'product-specs-tab'),
                         'description': (
                             'Кожен фільтр — список уже створених значень. '
                             'Нові варіанти додавайте в «Фільтри».'

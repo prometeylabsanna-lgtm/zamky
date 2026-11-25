@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.urls import reverse
-from pages.slug_utils import ensure_unique_slug
+from pages.slug_utils import ensure_unique_slug, should_rebuild_slug
 
 from .filter_sort import apply_auto_sort_order
 
@@ -195,8 +195,8 @@ class AttributeValue(models.Model):
         return localized_text(self.value, self.value_ru)
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            extra = {'attribute_id': self.attribute_id} if self.attribute_id else None
+        extra = {'attribute_id': self.attribute_id} if self.attribute_id else None
+        if should_rebuild_slug(self.value, self.slug, 'value'):
             self.slug = ensure_unique_slug(
                 AttributeValue,
                 self.value,
@@ -303,6 +303,8 @@ class Product(models.Model):
     is_new = models.BooleanField('Новинка', default=False)
     catalog_order = models.PositiveIntegerField('Порядок у каталозі', default=0, db_index=True)
     rating = models.PositiveSmallIntegerField('Рейтинг', default=4)
+    reviews_count = models.PositiveIntegerField('Кількість відгуків', default=0)
+    warranty_months = models.PositiveSmallIntegerField('Гарантія, місяців', default=12)
     brand = models.CharField('Бренд', max_length=100, blank=True)
     color_code = models.CharField(
         'Колір серцевини',
@@ -406,6 +408,18 @@ class Product(models.Model):
             ratio = (Decimal('1') - (self.price / self.old_price)) * Decimal('100')
             return int(ratio.quantize(Decimal('1')))
         return 0
+
+    @property
+    def reviews_label(self):
+        from catalog.product_meta import reviews_label as _reviews_label
+
+        return _reviews_label(self.reviews_count)
+
+    @property
+    def warranty_label(self):
+        from catalog.product_meta import warranty_label as _warranty_label
+
+        return _warranty_label(self.warranty_months)
 
     @property
     def size_label(self):

@@ -1,5 +1,7 @@
 .form-row.field-parent,
-div.field-parent {
+div.field-parent,
+.form-row.field-category,
+div.field-category {
   overflow: visible;
 }
 
@@ -150,7 +152,13 @@ html.dark .parent-cascade__panel {
   }
 }
 
-@media (max-width: 767px) {
+.related-widget-wrapper:has(.parent-cascade) {
+  display: block;
+  overflow: visible;
+  max-width: 52rem;
+}
+
+@media (max-width: 1023px) {
   .parent-cascade {
     max-width: none;
   }

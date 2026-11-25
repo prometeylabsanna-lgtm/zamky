@@ -23,15 +23,17 @@
       {% endif %}
       <span class="pdp-meta__sep" aria-hidden="true"></span>
       <a href="#reviews" class="pdp-rating">
-        <span class="pdp-stars"><span class="pdp-stars__on">★★★★</span><span class="pdp-stars__off">★</span></span>
-        <span class="pdp-rating__score">4.0</span>
-        <span>{% t '· 2 відгуки' %}</span>
+        <span class="pdp-stars">{% for _ in "12345" %}{% if forloop.counter <= product.rating %}<span class="pdp-stars__on">★</span>{% else %}<span class="pdp-stars__off">★</span>{% endif %}{% endfor %}</span>
+        <span class="pdp-rating__score">{{ product.rating }}.0</span>
+        {% if product.reviews_label %}<span>{{ product.reviews_label }}</span>{% endif %}
       </a>
+      {% if product.warranty_label %}
       <span class="pdp-meta__sep" aria-hidden="true"></span>
       <span class="pdp-warranty">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 7.9-7 9.3-4-1.4-7-4.9-7-9.3V5.8L12 3z"></path><path d="M9 12l2 2 4-4"></path></svg>
-        {% t 'Гарантія 12 місяців' %}
+        {{ product.warranty_label }}
       </span>
+      {% endif %}
     </div>
 
     <div class="pdp-divider"></div>
