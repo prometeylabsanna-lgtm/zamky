@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.db.models import Case, F, IntegerField, Value, When
 
-from pages.header_nav import _catalog_q, localize_href
+from pages.header_nav import _nav_url, localize_href
 from pages.models_footer import FooterNavLink
 
 GROUP_WEIGHT = {
@@ -23,52 +23,52 @@ FOOTER_NAV_GROUPS: tuple[tuple[str, str], ...] = (
 
 DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
     {
-        "key": "cat-cyl",
-        "group": FooterNavLink.Group.CATALOG,
-        "name": "Серцевини (циліндри)",
-        "name_ru": "Сердцевины (цилиндры)",
-        "url": _catalog_q("Серцевини (циліндри)"),
-        "sort_order": 0,
-    },
-    {
         "key": "cat-locks",
         "group": FooterNavLink.Group.CATALOG,
         "name": "Замки",
         "name_ru": "Замки",
-        "url": _catalog_q("Замки"),
+        "category": "Замки",
         "sort_order": 1,
     },
     {
-        "key": "cat-high-security",
+        "key": "cat-cyl",
         "group": FooterNavLink.Group.CATALOG,
-        "name": "Замки підвищеного захисту",
-        "name_ru": "Замки повышенной защиты",
-        "url": _catalog_q("Замки підвищеного захисту"),
+        "name": "Циліндри",
+        "name_ru": "Цилиндры",
+        "category": "Циліндри",
         "sort_order": 2,
     },
     {
-        "key": "cat-mottura",
+        "key": "cat-hardware",
         "group": FooterNavLink.Group.CATALOG,
-        "name": "Mottura",
-        "name_ru": "Mottura",
-        "url": _catalog_q("Mottura"),
+        "name": "Дверна фурнітура",
+        "name_ru": "Дверная фурнитура",
+        "category": "Дверна фурнітура",
         "sort_order": 3,
     },
     {
-        "key": "cat-cisa",
+        "key": "cat-plates",
         "group": FooterNavLink.Group.CATALOG,
-        "name": "Cisa",
-        "name_ru": "Cisa",
-        "url": _catalog_q("Cisa"),
+        "name": "Броненакладки",
+        "name_ru": "Броненакладки",
+        "category": "Броненакладки",
         "sort_order": 4,
     },
     {
-        "key": "cat-elbor",
+        "key": "cat-closers",
         "group": FooterNavLink.Group.CATALOG,
-        "name": "Elbor",
-        "name_ru": "Elbor",
-        "url": _catalog_q("Elbor"),
+        "name": "Дотягувачі",
+        "name_ru": "Доводчики",
+        "category": "Дотягувачі",
         "sort_order": 5,
+    },
+    {
+        "key": "cat-access",
+        "group": FooterNavLink.Group.CATALOG,
+        "name": "Контроль доступу",
+        "name_ru": "Контроль доступа",
+        "category": "Контроль доступу",
+        "sort_order": 6,
     },
     {
         "key": "info-about",
@@ -76,7 +76,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Про нас",
         "name_ru": "О нас",
         "url": "/ua/info/about/",
-        "sort_order": 0,
+        "sort_order": 1,
     },
     {
         "key": "info-delivery",
@@ -84,7 +84,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Доставка та оплата",
         "name_ru": "Доставка и оплата",
         "url": "/ua/info/delivery/",
-        "sort_order": 1,
+        "sort_order": 2,
     },
     {
         "key": "info-warranty",
@@ -92,7 +92,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Гарантія",
         "name_ru": "Гарантия",
         "url": "/ua/info/warranty/",
-        "sort_order": 2,
+        "sort_order": 3,
     },
     {
         "key": "info-returns",
@@ -100,7 +100,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Обмін та повернення",
         "name_ru": "Обмен и возврат",
         "url": "/ua/info/returns/",
-        "sort_order": 3,
+        "sort_order": 4,
     },
     {
         "key": "info-install",
@@ -108,7 +108,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Установка",
         "name_ru": "Установка",
         "url": "/ua/info/install/",
-        "sort_order": 4,
+        "sort_order": 5,
     },
     {
         "key": "info-promos",
@@ -116,7 +116,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Акції",
         "name_ru": "Акции",
         "url": "/ua/info/promos/",
-        "sort_order": 5,
+        "sort_order": 6,
     },
     {
         "key": "info-blog",
@@ -124,7 +124,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Корисне для вибору",
         "name_ru": "Полезное для выбора",
         "url": "/ua/info/blog/",
-        "sort_order": 6,
+        "sort_order": 7,
     },
     {
         "key": "legal-privacy",
@@ -132,7 +132,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Політика конфіденційності",
         "name_ru": "Политика конфиденциальности",
         "url": "/ua/info/privacy/",
-        "sort_order": 0,
+        "sort_order": 1,
     },
     {
         "key": "legal-offer",
@@ -140,7 +140,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Публічна оферта",
         "name_ru": "Публичная оферта",
         "url": "/ua/info/offer/",
-        "sort_order": 1,
+        "sort_order": 2,
     },
     {
         "key": "action-callback",
@@ -148,7 +148,7 @@ DEFAULT_FOOTER_NAV: tuple[dict[str, object], ...] = (
         "name": "Замовити дзвінок",
         "name_ru": "Заказать звонок",
         "url": "",
-        "sort_order": 0,
+        "sort_order": 1,
     },
 )
 
@@ -163,16 +163,38 @@ def footer_nav_queryset():
     ).order_by("group_weight", "sort_order", "pk")
 
 
+def _footer_url(item: dict[str, object]) -> str:
+    return _nav_url(item) if item.get("category") else str(item.get("url") or "")
+
+
 def _create_footer_link(item: dict[str, object]) -> FooterNavLink:
     return FooterNavLink.objects.create(
         key=item["key"],
         group=item["group"],
         name=item["name"],
         name_ru=item["name_ru"],
-        url=item["url"],
+        url=_footer_url(item),
         sort_order=item["sort_order"],
         is_active=True,
     )
+
+
+def sync_default_footer_nav() -> int:
+    keep = {item["key"] for item in DEFAULT_FOOTER_NAV}
+    for item in DEFAULT_FOOTER_NAV:
+        FooterNavLink.objects.update_or_create(
+            key=item["key"],
+            defaults={
+                "group": item["group"],
+                "name": item["name"],
+                "name_ru": item["name_ru"],
+                "url": _footer_url(item),
+                "sort_order": item["sort_order"],
+                "is_active": True,
+            },
+        )
+    FooterNavLink.objects.exclude(key__in=keep).delete()
+    return len(DEFAULT_FOOTER_NAV)
 
 
 def _ensure_info_about_link() -> int:
@@ -182,7 +204,7 @@ def _ensure_info_about_link() -> int:
     FooterNavLink.objects.filter(group=FooterNavLink.Group.INFO).update(
         sort_order=F("sort_order") + 1
     )
-    _create_footer_link({**spec, "sort_order": 0})
+    _create_footer_link({**spec, "sort_order": 1})
     return 1
 
 

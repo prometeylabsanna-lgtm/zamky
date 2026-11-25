@@ -1,0 +1,19 @@
+{% if filter_nav_crumbs %}
+<nav class="filter-nav-crumbs" aria-label="Навігація фільтрів">
+  <div class="filter-nav-crumbs__path">
+    {% for crumb in filter_nav_crumbs %}
+      {% if not forloop.first %}
+      <span class="filter-nav-crumbs__sep" aria-hidden="true">/</span>
+      {% endif %}
+      {% if crumb.url and not forloop.last %}
+      <a class="filter-nav-crumbs__link" href="{{ crumb.url }}">{{ crumb.title }}</a>
+      {% else %}
+      <span class="filter-nav-crumbs__current">{{ crumb.title }}</span>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% if filter_nav_add_url %}
+  <a class="filter-nav-crumbs__add" href="{{ filter_nav_add_url }}">{{ filter_nav_add_label }}</a>
+  {% endif %}
+</nav>
+{% endif %}

@@ -1,0 +1,23 @@
+<div class="parent-cascade" data-parent-cascade>
+  {{ widget.tree_json|json_script:widget.tree_id }}
+  <input type="hidden"
+         name="{{ widget.name }}"
+         value="{{ widget.value }}"
+         {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %}
+         data-cascade-value>
+  <button type="button" class="parent-cascade__toggle" data-cascade-toggle aria-expanded="false">
+    <span data-cascade-label>—</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 6.5L8 10.5 12 6.5"></path></svg>
+  </button>
+  <div class="parent-cascade__panel" data-cascade-panel hidden>
+    <button type="button" class="parent-cascade__back" data-cascade-back hidden>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
+      Назад
+    </button>
+    <div class="parent-cascade__cols">
+      <div class="parent-cascade__col" data-cascade-col="1"></div>
+      <div class="parent-cascade__col" data-cascade-col="2" hidden></div>
+      <div class="parent-cascade__col" data-cascade-col="3" hidden></div>
+    </div>
+  </div>
+</div>

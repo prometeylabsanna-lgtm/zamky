@@ -55,6 +55,9 @@ class DeliveryDistrict(models.Model):
                 instance_pk=self.pk,
                 fallback='district',
             )
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(self, DeliveryDistrict.objects.all())
         super().save(*args, **kwargs)
 
 

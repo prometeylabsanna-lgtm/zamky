@@ -69,7 +69,7 @@ def _seed_from_auto() -> int:
             _, was_created = HomePopularProduct.objects.get_or_create(
                 tab=tab,
                 product=product,
-                defaults={"sort_order": index, "is_active": True},
+                defaults={"sort_order": index + 1, "is_active": True},
             )
             if was_created:
                 created += 1

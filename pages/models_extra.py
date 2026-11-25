@@ -131,4 +131,7 @@ class BlogPost(models.Model):
         self.title = clean_legal_fragment(self.title)
         self.excerpt = clean_legal_fragment(self.excerpt)
         self.body = sanitize_legal_html(self.body)
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(self, BlogPost.objects.all())
         super().save(*args, **kwargs)

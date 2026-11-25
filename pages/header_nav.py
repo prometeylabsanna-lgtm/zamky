@@ -11,62 +11,80 @@ def _catalog_q(query: str) -> str:
     return f"/ua/catalog/?q={query.replace(' ', '+')}"
 
 
+def category_href(name: str) -> str:
+    from catalog.models import Category
+
+    cat = Category.objects.filter(
+        name=name, parent__isnull=True, is_active=True
+    ).first()
+    if cat is not None:
+        return cat.get_absolute_url()
+    return "/ua/catalog/"
+
+
+def _nav_url(item: dict[str, object]) -> str:
+    category = str(item.get("category") or "").strip()
+    if category:
+        return category_href(category)
+    return str(item.get("url") or "")
+
+
 DEFAULT_HEADER_NAV: tuple[dict[str, object], ...] = (
-    {
-        "key": "cyl",
-        "name": "Серцевини (циліндри)",
-        "name_ru": "Сердцевины (цилиндры)",
-        "url": _catalog_q("Серцевини (циліндри)"),
-        "sort_order": 0,
-    },
     {
         "key": "locks",
         "name": "Замки",
         "name_ru": "Замки",
-        "url": _catalog_q("Замки"),
+        "category": "Замки",
         "sort_order": 1,
     },
     {
-        "key": "high-security",
-        "name": "Замки підвищеного захисту",
-        "name_ru": "Замки повышенной защиты",
-        "url": _catalog_q("Замки підвищеного захисту"),
+        "key": "cyl",
+        "name": "Циліндри",
+        "name_ru": "Цилиндры",
+        "category": "Циліндри",
         "sort_order": 2,
     },
     {
-        "key": "mottura",
-        "name": "Mottura",
-        "name_ru": "Mottura",
-        "url": _catalog_q("Mottura"),
+        "key": "hardware",
+        "name": "Дверна фурнітура",
+        "name_ru": "Дверная фурнитура",
+        "category": "Дверна фурнітура",
         "sort_order": 3,
     },
     {
-        "key": "cisa",
-        "name": "Cisa",
-        "name_ru": "Cisa",
-        "url": _catalog_q("Cisa"),
+        "key": "plates",
+        "name": "Броненакладки",
+        "name_ru": "Броненакладки",
+        "category": "Броненакладки",
         "sort_order": 4,
     },
     {
-        "key": "elbor",
-        "name": "Elbor",
-        "name_ru": "Elbor",
-        "url": _catalog_q("Elbor"),
+        "key": "closers",
+        "name": "Дотягувачі",
+        "name_ru": "Доводчики",
+        "category": "Дотягувачі",
         "sort_order": 5,
+    },
+    {
+        "key": "access",
+        "name": "Контроль доступу",
+        "name_ru": "Контроль доступа",
+        "category": "Контроль доступу",
+        "sort_order": 6,
     },
     {
         "key": "promos",
         "name": "Акції",
         "name_ru": "Акции",
         "url": "/ua/info/promos/",
-        "sort_order": 6,
+        "sort_order": 7,
     },
     {
         "key": "install",
         "name": "Установка",
         "name_ru": "Установка",
         "url": "/ua/info/install/",
-        "sort_order": 7,
+        "sort_order": 8,
     },
 )
 
@@ -95,21 +113,33 @@ def nav_style(url: str, key: str = "") -> str:
     return "link"
 
 
+def _write_header_link(item: dict[str, object]) -> HeaderNavLink:
+    url = _nav_url(item)
+    obj, _created = HeaderNavLink.objects.update_or_create(
+        key=item["key"],
+        defaults={
+            "name": item["name"],
+            "name_ru": item["name_ru"],
+            "url": url,
+            "sort_order": item["sort_order"],
+            "is_active": True,
+        },
+    )
+    return obj
+
+
+def sync_default_header_nav() -> int:
+    keep = {item["key"] for item in DEFAULT_HEADER_NAV}
+    for item in DEFAULT_HEADER_NAV:
+        _write_header_link(item)
+    HeaderNavLink.objects.exclude(key__in=keep).delete()
+    return len(DEFAULT_HEADER_NAV)
+
+
 def ensure_default_header_nav() -> int:
     if HeaderNavLink.objects.exists():
         return 0
-    created = 0
-    for item in DEFAULT_HEADER_NAV:
-        HeaderNavLink.objects.create(
-            key=item["key"],
-            name=item["name"],
-            name_ru=item["name_ru"],
-            url=item["url"],
-            sort_order=item["sort_order"],
-            is_active=True,
-        )
-        created += 1
-    return created
+    return sync_default_header_nav()
 
 
 def get_header_nav_links(lang: str = "ua") -> list[dict[str, str]]:

@@ -1,0 +1,172 @@
+.form-row.field-parent,
+div.field-parent {
+  overflow: visible;
+}
+
+.parent-cascade {
+  position: relative;
+  max-width: 52rem;
+  z-index: 30;
+}
+
+.parent-cascade__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 12px;
+  background: inherit;
+  color: inherit;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.parent-cascade.is-open .parent-cascade__toggle {
+  border-color: #f97f0c;
+}
+
+.parent-cascade__toggle span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parent-cascade__panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 12px;
+  background-color: var(--color-base-50, #fff);
+}
+
+html.dark .parent-cascade__panel {
+  background-color: var(--color-base-800, #1c1c1c);
+}
+
+.parent-cascade__cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.parent-cascade__panel.is-l2 .parent-cascade__cols {
+  grid-template-columns: 1fr 1fr;
+}
+
+.parent-cascade__panel.is-l3 .parent-cascade__cols {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.parent-cascade__col {
+  min-width: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-right: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.parent-cascade__col:last-child,
+.parent-cascade__col[hidden] {
+  border-right: 0;
+}
+
+.parent-cascade__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.parent-cascade__row.is-active,
+.parent-cascade__row:hover,
+.parent-cascade__row:focus-visible {
+  color: #f97f0c;
+}
+
+.parent-cascade__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.parent-cascade__arrow {
+  flex: 0 0 auto;
+  opacity: 0.55;
+}
+
+.parent-cascade__back {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 15px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .parent-cascade__toggle,
+  .parent-cascade__row,
+  .parent-cascade__back {
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 767px) {
+  .parent-cascade {
+    max-width: none;
+  }
+
+  .parent-cascade__panel.is-l2 .parent-cascade__cols,
+  .parent-cascade__panel.is-l3 .parent-cascade__cols {
+    grid-template-columns: 1fr;
+  }
+
+  .parent-cascade__panel.is-l2 .parent-cascade__col[data-cascade-col="1"],
+  .parent-cascade__panel.is-l3 .parent-cascade__col[data-cascade-col="1"],
+  .parent-cascade__panel.is-l3 .parent-cascade__col[data-cascade-col="2"] {
+    display: none;
+  }
+
+  .parent-cascade__back:not([hidden]) {
+    display: inline-flex;
+  }
+}

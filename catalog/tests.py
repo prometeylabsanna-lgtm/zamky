@@ -37,6 +37,7 @@ class CatalogFilterTests(TestCase):
         )
         ProductAttribute.objects.create(product=self.p1, attribute_value=self.av_abaro)
         ProductAttribute.objects.create(product=self.p1, attribute_value=self.av_brass)
+        self.listing_url = reverse('catalog:category', args=[self.cat.slug])
 
     def test_pages_ok(self):
         for name, args in [
@@ -50,7 +51,7 @@ class CatalogFilterTests(TestCase):
             self.assertEqual(response.status_code, 200, name)
 
     def test_brand_filter(self):
-        url = reverse('catalog:catalog')
+        url = self.listing_url
         response = self.client.get(url, {'brand': 'abaro'})
         self.assertEqual(response.status_code, 200)
         products = list(response.context['products'])
@@ -58,31 +59,31 @@ class CatalogFilterTests(TestCase):
         self.assertEqual(products[0].sku, 'ABR-1')
 
     def test_price_filter(self):
-        url = reverse('catalog:catalog')
+        url = self.listing_url
         response = self.client.get(url, {'price_min': 1000, 'price_max': 2000})
         products = list(response.context['products'])
         self.assertEqual(len(products), 1)
         self.assertEqual(products[0].sku, 'MOT-1')
 
     def test_sort_cheap(self):
-        url = reverse('catalog:catalog')
+        url = self.listing_url
         response = self.client.get(url, {'sort': 'cheap'})
         products = list(response.context['products'])
         self.assertEqual(products[0].sku, 'ABR-1')
 
     def test_sku_filter(self):
-        response = self.client.get(reverse('catalog:catalog'), {'sku': 'MOT'})
+        response = self.client.get(self.listing_url, {'sku': 'MOT'})
         products = list(response.context['products'])
         self.assertEqual(len(products), 1)
 
     def test_invalid_price_query_no_500(self):
-        url = reverse('catalog:catalog')
+        url = self.listing_url
         response = self.client.get(url, {'price_min': 'abc', 'price_max': '1e999'})
         self.assertEqual(response.status_code, 200)
         self.assertIn('products', response.context)
 
     def test_sort_keeps_multi_brand_in_links(self):
-        url = reverse('catalog:catalog')
+        url = self.listing_url
         response = self.client.get(url, {'brand': ['abaro', 'mottura']})
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
@@ -158,13 +159,13 @@ class SeedDemoTests(TestCase):
     def test_seed_demo_42_max_1690_idempotent(self):
         call_command('seed_demo')
         qs = self._catalog_qs()
-        self.assertEqual(qs.count(), 42)
-        self.assertEqual(qs.aggregate(hi=Max('price'))['hi'], Decimal('1690.00'))
+        self.assertEqual(qs.count(), 84)
+        self.assertEqual(qs.aggregate(hi=Max('price'))['hi'], Decimal('5470.00'))
 
         call_command('seed_demo')
         qs2 = self._catalog_qs()
-        self.assertEqual(qs2.count(), 42)
-        self.assertEqual(qs2.aggregate(hi=Max('price'))['hi'], Decimal('1690.00'))
+        self.assertEqual(qs2.count(), 84)
+        self.assertEqual(qs2.aggregate(hi=Max('price'))['hi'], Decimal('5470.00'))
         self.assertEqual(
             Product.objects.filter(sku__startswith='HOME-HIT-').count(),
             8,
@@ -187,5 +188,5 @@ class SeedDemoTests(TestCase):
         with translation.override('ua'):
             response = self.client.get(reverse('catalog:catalog'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['count_label'], '42 товари')
-        self.assertEqual(response.context['price_hi'], 1690)
+        self.assertEqual(response.context['count_label'], 'Знайдено 84 товари')
+        self.assertEqual(response.context['price_hi'], 5470)

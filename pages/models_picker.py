@@ -46,6 +46,12 @@ class PickerDoor(models.Model):
             b = self.label_line2.strip()
         return f"{a} {b}".strip() or self.code
 
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(self, PickerDoor.objects.all())
+        super().save(*args, **kwargs)
+
     def line1(self, lang: str = "ua") -> str:
         if lang == "ru" and self.label_line1_ru.strip():
             return self.label_line1_ru
@@ -96,6 +102,12 @@ class PickerFilter(models.Model):
             return self.label_ru
         return self.label
 
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(self, PickerFilter.objects.all())
+        super().save(*args, **kwargs)
+
 
 class PickerFilterOption(models.Model):
     filter = models.ForeignKey(
@@ -134,3 +146,11 @@ class PickerFilterOption(models.Model):
         if lang == "ru" and self.label_ru.strip():
             return self.label_ru
         return self.label
+
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(
+            self, PickerFilterOption.objects.filter(filter_id=self.filter_id)
+        )
+        super().save(*args, **kwargs)

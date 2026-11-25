@@ -100,7 +100,7 @@ class HeroSlideBaseFormSet(BaseModelFormSet):
         super().save(commit=False)
         for obj in self.deleted_objects:
             obj.delete()
-        order = 0
+        order = 1
         saved = []
         for form in self.forms:
             if not hasattr(form, "cleaned_data") or form.cleaned_data.get("DELETE"):

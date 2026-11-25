@@ -41,3 +41,11 @@ class HomePopularProduct(models.Model):
     def __str__(self) -> str:
         name = getattr(self.product, "name", "") or self.product_id
         return f"{self.get_tab_display()}: {name}"
+
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(
+            self, HomePopularProduct.objects.filter(tab=self.tab)
+        )
+        super().save(*args, **kwargs)

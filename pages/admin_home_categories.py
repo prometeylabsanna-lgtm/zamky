@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from django import forms
 from django.contrib import messages
-from django.db.models import Max
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from unfold.widgets import UnfoldAdminFileFieldWidget, UnfoldBooleanWidget
@@ -89,11 +88,9 @@ def _preview_url(cat: Category | None, index: int) -> tuple[str, bool]:
 
 
 def _next_sort_order() -> int:
-    current = (
-        Category.objects.filter(parent__isnull=True).aggregate(m=Max("sort_order"))["m"]
-        or 0
-    )
-    return current + 1
+    from catalog.filter_sort import next_sort_order
+
+    return next_sort_order(Category.objects.filter(parent__isnull=True))
 
 
 def home_categories_section_view(request, model_admin=None):

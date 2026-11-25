@@ -144,6 +144,30 @@ def _admin_link(suffix: str):
     return f'/{ADMIN_URL.strip("/")}/{suffix.lstrip("/")}'
 
 
+def _admin_nav_active(suffix: str):
+    """Лише цей розділ: /attribute/ не чіпає /attributegroup/."""
+    base = _admin_link(suffix).rstrip('/')
+
+    def _is_active(request):
+        path = (getattr(request, 'path', None) or '').rstrip('/')
+        if path == base:
+            return True
+        if not path.startswith(base):
+            return False
+        return path[len(base) :].startswith('/')
+
+    return _is_active
+
+
+def _admin_nav_active_any(*suffixes):
+    checks = [_admin_nav_active(suffix) for suffix in suffixes]
+
+    def _is_active(request):
+        return any(fn(request) for fn in checks)
+
+    return _is_active
+
+
 UNFOLD = {
     'SITE_TITLE': 'Замки',
     'SITE_HEADER': 'Замки — адмінка',
@@ -250,14 +274,19 @@ UNFOLD = {
                         'link': _admin_link('catalog/category/'),
                     },
                     {
-                        'title': 'Фільтри каталогу',
+                        'title': 'Фільтри',
                         'icon': 'tune',
                         'link': _admin_link('catalog/attribute/'),
+                        'active': _admin_nav_active_any(
+                            'catalog/attribute/',
+                            'catalog/attributegroup/',
+                            'catalog/attributevalue/',
+                        ),
                     },
                     {
-                        'title': 'Значення фільтрів',
-                        'icon': 'label',
-                        'link': _admin_link('catalog/attributevalue/'),
+                        'title': 'Сімʼї',
+                        'icon': 'account_tree',
+                        'link': _admin_link('catalog/productfamily/'),
                     },
                 ],
             },

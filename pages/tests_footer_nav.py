@@ -33,7 +33,7 @@ class FooterNavCmsTests(TestCase):
         self.assertContains(page, "Колонка «Інформація»")
         self.assertContains(page, "Юридичні посилання")
         self.assertContains(page, "Кнопка дзвінка")
-        self.assertContains(page, "Серцевини (циліндри)")
+        self.assertContains(page, "Циліндри")
         self.assertContains(page, "Замовити дзвінок")
         self.assertNotContains(page, "Підвал — про нас (заголовок)")
 
@@ -53,13 +53,13 @@ class FooterNavCmsTests(TestCase):
         self.assertIn("Замовити дзвінок", body)
 
     def test_hidden_catalog_link_not_in_footer(self):
-        FooterNavLink.objects.filter(key="cat-elbor").update(is_active=False)
+        FooterNavLink.objects.filter(key="cat-cyl").update(is_active=False)
         with translation.override("ua"):
             page = self.client.get("/ua/")
         footer = page.content.decode()
         start = footer.index('id="footer"')
         chunk = footer[start : footer.index("</footer>", start)]
-        self.assertNotIn(">Elbor</a>", chunk)
+        self.assertNotIn(">Циліндри</a>", chunk)
 
     def test_ru_callback_and_legal(self):
         rows = get_footer_nav("ru")
@@ -108,5 +108,5 @@ class FooterNavCmsTests(TestCase):
         self.assertEqual(about.name, "Про нас")
         self.assertEqual(about.name_ru, "О нас")
         self.assertEqual(about.url, "/ua/info/about/")
-        self.assertEqual(about.sort_order, 0)
+        self.assertEqual(about.sort_order, 1)
         self.assertEqual(ensure_default_footer_nav(), 0)

@@ -149,6 +149,13 @@ class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
     class Media:
         js = ("js/admin/image_preview.js",)
 
+    def get_changeform_initial_data(self, request):
+        from catalog.filter_sort import next_sort_order
+
+        initial = super().get_changeform_initial_data(request)
+        initial["sort_order"] = next_sort_order(BlogPost.objects.all())
+        return initial
+
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name == "body":
             kwargs["widget"] = CmsTinyMCEWidget(

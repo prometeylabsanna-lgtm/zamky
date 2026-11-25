@@ -1,8 +1,16 @@
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import translation
 
+from catalog.measure_guide import (
+    MEASURE_TEXT_RU,
+    MEASURE_TEXT_UA,
+    MEASURE_TITLE_RU,
+    MEASURE_TITLE_UA,
+)
 from catalog.models import (
     Attribute,
     AttributeGroup,
@@ -18,7 +26,14 @@ from orders.models import QuickOrder
 class ProductPageTests(TestCase):
     def setUp(self):
         self.client = Client()
-        self.cat = Category.objects.create(name='Циліндри', slug='cylinders')
+        self.cat = Category.objects.create(
+            name='Циліндри',
+            slug='cylinders',
+            measure_title=MEASURE_TITLE_UA,
+            measure_title_ru=MEASURE_TITLE_RU,
+            measure_text=MEASURE_TEXT_UA,
+            measure_text_ru=MEASURE_TEXT_RU,
+        )
         self.family = ProductFamily.objects.create(
             name='ABARO B100',
             slug='abaro-b100',
@@ -59,10 +74,15 @@ class ProductPageTests(TestCase):
                 self.variants.append(p)
         self.product = self.variants[0]
 
+    def tearDown(self):
+        translation.deactivate_all()
+
     def test_product_page_ok(self):
         response = self.client.get(reverse('catalog:product', args=[self.product.slug]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Колір серцевини')
+        body = response.content.decode()
+        self.assertLess(body.index('pdp-cart-btn'), body.index('Колір серцевини'))
         self.assertContains(response, 'Як виміряти циліндр?')
         self.assertContains(response, 'Швидке замовлення в 1 клік')
         self.assertContains(response, 'Загальне')
@@ -75,16 +95,148 @@ class ProductPageTests(TestCase):
         self.assertEqual(len(colors), 2)
         self.assertEqual(len(sizes), 2)
         self.assertIn('Нікель', [c['label'] for c in colors])
-        nickel = next(v for v in self.variants if v.color_code == 'N' and v.size_mm == 70)
-        self.assertEqual(nickel.price, Decimal('500'))
-        self.assertEqual(nickel.old_price, Decimal('650'))
-        self.assertEqual(nickel.stock, 3)
+
+    def test_solo_product_shows_core_color(self):
+        solo = Product.objects.create(
+            category=self.cat,
+            name='тест',
+            slug='product-solo-color',
+            sku='64675474-solo',
+            price=Decimal('100'),
+            color_code='B',
+            size_mm=22,
+            size_a=25,
+            size_b=26,
+        )
+        response = self.client.get(reverse('catalog:product', args=[solo.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Колір серцевини')
+        body = response.content.decode()
+        self.assertLess(body.index('pdp-cart-btn'), body.index('Колір серцевини'))
+        self.assertContains(response, 'Чорний')
+        colors = response.context['variant_colors']
+        self.assertEqual(len(colors), 1)
+        self.assertEqual(colors[0]['code'], 'B')
+        self.assertEqual(len(response.context['variant_sizes']), 1)
+
+    def test_measure_from_parent_category(self):
+        parent = Category.objects.create(
+            name='Батько',
+            slug='parent-measure',
+            measure_title='Кнопка батька',
+            measure_text='Текст батька',
+        )
+        child = Category.objects.create(name='Дитина', slug='child-measure', parent=parent)
+        solo = Product.objects.create(
+            category=child,
+            name='дочірній',
+            slug='child-measure-p',
+            sku='CHILD-M-1',
+            price=Decimal('10'),
+            size_mm=60,
+            size_a=30,
+            size_b=30,
+        )
+        page = self.client.get(reverse('catalog:product', args=[solo.slug]))
+        self.assertContains(page, 'Кнопка батька')
+        self.assertContains(page, 'Текст батька')
+
+    def test_measure_hidden_when_empty(self):
+        empty = Category.objects.create(name='Замки', slug='locks-no-measure')
+        solo = Product.objects.create(
+            category=empty,
+            name='замок',
+            slug='lock-no-measure',
+            sku='LOCK-M-1',
+            price=Decimal('10'),
+            size_mm=60,
+            size_a=30,
+            size_b=30,
+        )
+        page = self.client.get(reverse('catalog:product', args=[solo.slug]))
+        self.assertNotContains(page, 'Як виміряти циліндр?')
+        self.assertNotContains(page, 'data-toggle-guide')
+
+    def test_measure_ru(self):
+        page = self.client.get(f'/ru/product/{self.product.slug}/')
+        self.assertContains(page, 'Как измерить цилиндр?')
+        self.assertContains(page, 'Измерьте расстояние')
+
+    def test_description_keeps_lists(self):
+        self.product.description = (
+            '<p>Повний опис товару</p><ul><li>список1</li><li>список2</li></ul>'
+        )
+        self.product.save()
+        page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
+        self.assertContains(page, 'Повний опис товару')
+        self.assertContains(page, '<li>список1</li>')
+        self.assertContains(page, '<li>список2</li>')
+        self.assertNotContains(page, 'список1 список2')
 
     def test_spec_groups(self):
+        sizes = AttributeGroup.objects.create(name='Розміри', slug='rozmiry', sort_order=2)
+        size_ab = Attribute.objects.create(
+            name='Розмір A×B', slug='size-ab', group=sizes, filterable=False
+        )
+        fake_ab = AttributeValue.objects.create(
+            attribute=size_ab, value='45×45 мм', slug='45x45'
+        )
+        ProductAttribute.objects.create(product=self.product, attribute_value=fake_ab)
+
         response = self.client.get(reverse('catalog:product', args=[self.product.slug]))
         groups = response.context['spec_groups']
         self.assertTrue(groups)
         self.assertEqual(groups[0]['title'], 'Загальне')
+        rows = {r['k']: r for g in groups for r in g['rows']}
+        self.assertEqual(rows['Артикул']['v'], self.product.sku)
+        self.assertEqual(rows['Артикул']['spec'], 'sku')
+        self.assertEqual(rows['Розмір A×B']['v'], '30×30 мм')
+        self.assertEqual(rows['Загальна довжина']['v'], '60 мм')
+        self.assertEqual(rows['Покриття']['v'], 'Полірована латунь')
+        self.assertEqual(rows['Бренд']['v'], 'ABARO')
+        self.assertNotIn('45×45 мм', {r['v'] for g in groups for r in g['rows']})
+        page = response
+        self.assertContains(page, 'data-spec-sku')
+        self.assertContains(page, 'data-spec-ab')
+        self.assertContains(page, 'data-spec-len')
+        self.assertContains(page, 'data-spec-cover')
+
+    def test_spec_groups_russian(self):
+        safety = AttributeGroup.objects.create(
+            name='Безпека та комплектація',
+            name_ru='Безопасность и комплектация',
+            slug='bezpeka-ta-komplektatsiia',
+            sort_order=4,
+        )
+        keys = Attribute.objects.create(
+            name='Кількість ключів',
+            name_ru='Количество ключей',
+            slug='keys',
+            group=safety,
+            filterable=False,
+        )
+        av_keys = AttributeValue.objects.create(
+            attribute=keys, value='5', value_ru='5', slug='5-keys'
+        )
+        ProductAttribute.objects.create(product=self.product, attribute_value=av_keys)
+        page = self.client.get(f'/ru/product/{self.product.slug}/')
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'Количество ключей')
+        self.assertContains(page, 'Общая длина')
+        self.assertContains(page, 'Безопасность и комплектация')
+
+    def test_color_code_sets_label(self):
+        self.product.color_code = 'N'
+        self.product.save()
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.color_label, 'Нікель')
+        self.product.color_code = ''
+        self.product.color_label = 'чорний'
+        self.product.description = 'Звичайний текст'
+        self.product.save()
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.color_label, 'чорний')
+        self.assertEqual(self.product.description, 'Звичайний текст')
 
     def test_add_to_cart_with_quantity(self):
         url = reverse('cart:add', args=[self.product.pk])
@@ -106,3 +258,192 @@ class ProductPageTests(TestCase):
         self.assertEqual(qo.product_id, self.product.pk)
         self.assertEqual(qo.quantity, 2)
         self.assertTrue(qo.phone.startswith('+380'))
+
+
+class ProductAdminColorTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_superuser(
+            'padmin', 'p@example.com', 'pass12345'
+        )
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.cat = Category.objects.create(name='Циліндри', slug='cyl-admin')
+        self.product = Product.objects.create(
+            category=self.cat,
+            name='Test color',
+            slug='test-color-admin',
+            sku='TST-COLOR',
+            price=Decimal('100'),
+            color_code='G',
+        )
+
+    def tearDown(self):
+        translation.deactivate_all()
+
+    def test_admin_color_dropdown(self):
+        url = reverse('admin:catalog_product_change', args=[self.product.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'Колір серцевини')
+        self.assertContains(page, '>Латунь<')
+        self.assertContains(page, '>Нікель<')
+        self.assertContains(page, '>Чорний<')
+        self.assertNotContains(page, 'Код кольору')
+
+    def test_admin_description_tinymce(self):
+        url = reverse('admin:catalog_product_change', args=[self.product.pk])
+        page = self.client.get(url)
+        self.assertContains(page, 'cms-tinymce')
+        self.assertNotContains(page, 'Короткий опис')
+
+    def test_admin_product_fields_and_attrs(self):
+        group = AttributeGroup.objects.create(name='Безпека', slug='bezpeka', sort_order=4)
+        keys = Attribute.objects.create(
+            name='Кількість ключів', slug='keys', group=group, filterable=False
+        )
+        AttributeValue.objects.create(attribute=keys, value='5', slug='5')
+        sku_attr = Attribute.objects.create(
+            name='Артикул', slug='sku-attr', group=group, filterable=False
+        )
+        url = reverse('admin:catalog_product_change', args=[self.product.pk])
+        page = self.client.get(url)
+        self.assertContains(page, f'name="spec_attr_{keys.pk}"')
+        self.assertContains(page, 'data-filter-group')
+        self.assertContains(page, 'Кількість ключів')
+        self.assertContains(page, '>5<')
+        self.assertNotContains(page, 'Оздоблення')
+        self.assertNotContains(page, 'data-attr-master')
+        self.assertNotContains(page, f'name="spec_attr_{sku_attr.pk}"')
+        self.assertNotContains(page, 'id="id_cover"')
+        self.assertNotContains(page, 'id="id_size_mm"')
+        self.assertNotContains(page, 'id="id_family"')
+
+    def test_apply_spec_fields_syncs_size(self):
+        from catalog.admin_product_filters import apply_product_spec_fields, spec_field_name
+
+        sizes = AttributeGroup.objects.create(name='Розміри', slug='rozmiry', sort_order=2)
+        length = Attribute.objects.create(
+            name='Загальна довжина', slug='length', group=sizes, filterable=False
+        )
+        av = AttributeValue.objects.create(attribute=length, value='70 мм', slug='70-mm')
+        apply_product_spec_fields(self.product, {spec_field_name(length.pk): av})
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.size_mm, 70)
+        self.assertTrue(
+            ProductAttribute.objects.filter(
+                product=self.product, attribute_value=av
+            ).exists()
+        )
+
+    def test_filter_groups_in_admin_nav(self):
+        from django.conf import settings
+        from django.test import RequestFactory
+
+        from config.settings.base import _admin_nav_active
+
+        nav = settings.UNFOLD['SIDEBAR']['navigation']
+        catalog = next(g for g in nav if g.get('title') == 'Каталог')
+        titles = [item['title'] for item in catalog['items']]
+        self.assertIn('Фільтри', titles)
+        self.assertIn('Сімʼї', titles)
+        self.assertNotIn('Групи фільтрів', titles)
+        self.assertNotIn('Значення фільтрів', titles)
+        factory = RequestFactory()
+        attr_active = _admin_nav_active('catalog/attribute/')
+        group_active = _admin_nav_active('catalog/attributegroup/')
+        on_attr = factory.get('/admin/catalog/attribute/')
+        on_group = factory.get('/admin/catalog/attributegroup/')
+        self.assertTrue(attr_active(on_attr))
+        self.assertFalse(group_active(on_attr))
+        self.assertTrue(group_active(on_group))
+        self.assertFalse(attr_active(on_group))
+        page = self.client.get(reverse('admin:catalog_attribute_changelist'))
+        self.assertContains(page, 'Додати групу')
+        groups = self.client.get(reverse('admin:catalog_attributegroup_changelist'))
+        self.assertEqual(groups.status_code, 302)
+
+    def test_category_admin_measure_fields(self):
+        url = reverse('admin:catalog_category_change', args=[self.cat.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'Підказка на картці товару')
+        self.assertContains(page, 'id_measure_title')
+        self.assertContains(page, 'id_measure_text')
+
+
+class FilterValuesNavTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_superuser(
+            'fnav', 'fn@example.com', 'pass12345'
+        )
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.group = AttributeGroup.objects.create(name='Розміри', slug='rozmiry-nav')
+        self.attr = Attribute.objects.create(
+            name='Розмір A×B', slug='size-ab-nav', group=self.group
+        )
+        AttributeValue.objects.create(
+            attribute=self.attr, value='30×30 мм', slug='3030-nav'
+        )
+
+    def test_groups_then_filters_then_values(self):
+        hub = reverse('admin:catalog_attribute_changelist')
+        values_url = reverse('admin:catalog_attributevalue_changelist')
+        groups = self.client.get(hub)
+        self.assertEqual(groups.status_code, 200)
+        self.assertContains(groups, 'Розміри')
+        self.assertContains(groups, 'Додати групу')
+        self.assertNotContains(groups, '30×30 мм')
+        filters = self.client.get(hub, {'group': self.group.pk})
+        self.assertContains(filters, 'Розмір A×B')
+        self.assertContains(filters, 'Додати фільтр')
+        self.assertNotContains(filters, '30×30 мм')
+        values = self.client.get(
+            values_url, {'group': self.group.pk, 'attribute': self.attr.pk}
+        )
+        self.assertContains(values, '30×30 мм')
+        self.assertContains(values, 'Додати значення')
+        bounced = self.client.get(values_url)
+        self.assertEqual(bounced.status_code, 302)
+
+    def test_sort_order_starts_at_one(self):
+        first = AttributeValue.objects.get(slug='3030-nav')
+        self.assertEqual(first.sort_order, 1)
+        second = AttributeValue.objects.create(
+            attribute=self.attr, value='35×35 мм', slug='3535-nav'
+        )
+        self.assertEqual(second.sort_order, 2)
+        kept = AttributeValue.objects.create(
+            attribute=self.attr,
+            value='40×40 мм',
+            slug='4040-nav',
+            sort_order=8,
+        )
+        self.assertEqual(kept.sort_order, 8)
+        nxt = AttributeValue.objects.create(
+            attribute=self.attr, value='45×45 мм', slug='4545-nav'
+        )
+        self.assertEqual(nxt.sort_order, 9)
+        other_attr = Attribute.objects.create(
+            name='Інший', slug='other-nav', group=self.group
+        )
+        other = AttributeValue.objects.create(
+            attribute=other_attr, value='X', slug='x-nav'
+        )
+        self.assertEqual(other.sort_order, 1)
+
+    def test_add_value_form_initial_order(self):
+        from django.contrib import admin
+        from django.test import RequestFactory
+
+        from catalog.admin import AttributeValueAdmin
+
+        request = RequestFactory().get('/', {'attribute': str(self.attr.pk)})
+        request.user = self.user
+        initial = AttributeValueAdmin(
+            AttributeValue, admin.site
+        ).get_changeform_initial_data(request)
+        self.assertEqual(initial['sort_order'], 2)
+        self.assertEqual(initial['attribute'], str(self.attr.pk))

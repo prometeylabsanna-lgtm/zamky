@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/admin/filter_values_nav.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="filter-nav">
+  {% include "admin/catalog/filter_values_crumbs.html" %}
+  <p class="filter-nav__hint">{{ filter_nav_hint }}</p>
+  {% if filter_nav_items %}
+  <div class="filter-nav__list">
+    {% for item in filter_nav_items %}
+    <div class="filter-nav__row">
+      {% if item.mark and item.edit_url %}
+      <a class="filter-nav__thumb" href="{{ item.edit_url }}" title="Змінити іконку">
+        {% if item.lock %}
+          {% include 'partials/icon_lock.html' with kind=item.lock size=28 %}
+        {% elif item.logo_url %}
+          <img src="{{ item.logo_url }}" alt="" width="40" height="32">
+        {% else %}
+          <span class="material-symbols-outlined" aria-hidden="true">image</span>
+        {% endif %}
+      </a>
+      {% endif %}
+      <a class="filter-nav__item" href="{{ item.url }}">
+        <span class="filter-nav__name">{{ item.name }}</span>
+        <span class="filter-nav__meta">{{ item.meta }}</span>
+        <span class="material-symbols-outlined filter-nav__chevron" aria-hidden="true">chevron_right</span>
+      </a>
+      {% if item.edit_url %}
+      <a class="filter-nav__edit" href="{{ item.edit_url }}" title="Редагувати">
+        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+        <span class="filter-nav__edit-label">Змінити</span>
+      </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="filter-nav__empty">Тут ще порожньо — додайте перший запис.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -113,7 +113,7 @@ DEFAULT_HERO_SLIDES = (
         "cta_primary_light": True,
         "show_features": False,
         "show_brands": False,
-        "sort_order": 3,
+        "sort_order": 4,
     },
 )
 

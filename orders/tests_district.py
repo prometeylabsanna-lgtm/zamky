@@ -18,14 +18,14 @@ class DistrictOthersTitleTests(TestCase):
             others_title="Інші райони Києва",
             others_title_ru="Другие районы Киева",
             is_active=True,
-            sort_order=0,
+            sort_order=1,
         )
         DeliveryDistrict.objects.create(
             slug="pechersk",
             name="Печерський",
             short="Печерськ",
             is_active=True,
-            sort_order=1,
+            sort_order=2,
         )
         User = get_user_model()
         self.user = User.objects.create_superuser(

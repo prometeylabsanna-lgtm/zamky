@@ -53,3 +53,11 @@ class FooterNavLink(models.Model):
             return False
         raw = (self.url or "").strip()
         return raw in {"", "#", "#callback"}
+
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(
+            self, FooterNavLink.objects.filter(group=self.group)
+        )
+        super().save(*args, **kwargs)

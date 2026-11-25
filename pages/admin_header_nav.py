@@ -99,7 +99,7 @@ class HeaderNavLinkBaseFormSet(BaseModelFormSet):
                     fallback="nav",
                 )
             order = form.cleaned_data.get("sort_order")
-            obj.sort_order = index if order is None else int(order)
+            obj.sort_order = (index + 1) if not order else int(order)
             if commit:
                 obj.save()
             saved.append(obj)

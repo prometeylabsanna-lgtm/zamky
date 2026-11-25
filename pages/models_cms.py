@@ -258,6 +258,12 @@ class HeroSlide(models.Model):
     def __str__(self):
         return self.alt_text or f"Слайд {self.pk}"
 
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(self, HeroSlide.objects.all())
+        super().save(*args, **kwargs)
+
 
 def clear_site_blocks_cache() -> None:
     cache.delete(SITE_BLOCKS_CACHE_KEY)

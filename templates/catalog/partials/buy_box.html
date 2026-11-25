@@ -36,50 +36,6 @@
 
     <div class="pdp-divider"></div>
 
-    {% if variant_colors %}
-    <div class="pdp-option">
-      <div class="pdp-option__label">{% t 'Колір серцевини:' %} <span data-color-name>{{ product.color_label|tr }}</span></div>
-      <div class="pdp-swatches" data-color-group>
-        {% for c in variant_colors %}
-        <button type="button"
-          class="pdp-swatch{% if c.code == current_color %} is-active{% endif %}"
-          data-color="{{ c.code }}"
-          aria-label="{{ c.label }}"
-          title="{{ c.label }}">
-          <img src="{{ c.img }}" alt="">
-        </button>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    {% if variant_sizes %}
-    <div class="pdp-option">
-      <div class="pdp-option__head">
-        <span class="pdp-option__label">{% t 'Розмір A×B, мм:' %} <span data-size-name>{{ product.size_label }}</span></span>
-        <button type="button" class="pdp-guide-btn" data-toggle-guide>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1.5"></rect><path d="M6.5 8v3M10.5 8v4M14.5 8v3M18.5 8v4"></path></svg>
-          {% t 'Як виміряти циліндр?' %}
-        </button>
-      </div>
-      <div class="pdp-sizes" data-size-group>
-        {% for s in variant_sizes %}
-        <button type="button"
-          class="pdp-size{% if s.len == current_size %} is-active{% endif %}"
-          data-size="{{ s.len }}">
-          <span class="pdp-size__label">{{ s.label }}</span>
-          <span class="pdp-size__sub" data-size-sub>{{ s.len }} мм</span>
-        </button>
-        {% endfor %}
-      </div>
-      <div class="pdp-guide" data-guide hidden>
-        Виміряйте відстань від центру отвору під кріпильний гвинт до зовнішнього (A) і внутрішнього (B) краю дверного полотна разом з накладками. Сума A і B — загальна довжина циліндра.
-      </div>
-    </div>
-    {% endif %}
-
-    <div class="pdp-divider"></div>
-
     <div class="pdp-price-row">
       <div class="pdp-price">
         <div class="pdp-price__old-row">
@@ -126,6 +82,58 @@
         {% t 'Швидке замовлення в 1 клік' %}
       </button>
     </div>
+
+    {% if variant_colors or variant_sizes %}
+    <div class="pdp-divider"></div>
+    {% endif %}
+
+    {% if variant_colors %}
+    <div class="pdp-option">
+      <div class="pdp-option__label">{% t 'Колір серцевини:' %} <span data-color-name>{{ product.color_label|tr }}</span></div>
+      <div class="pdp-swatches" data-color-group>
+        {% for c in variant_colors %}
+        <button type="button"
+          class="pdp-swatch{% if c.code == current_color %} is-active{% endif %}{% if not c.img %} pdp-swatch--tone{% endif %}"
+          data-color="{{ c.code }}"
+          aria-label="{{ c.label }}"
+          title="{{ c.label }}">
+          {% if c.img %}
+          <img src="{{ c.img }}" alt="">
+          {% endif %}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if variant_sizes %}
+    <div class="pdp-option">
+      <div class="pdp-option__head">
+        <span class="pdp-option__label">{% t 'Розмір A×B, мм:' %} <span data-size-name>{{ product.size_label }}</span></span>
+        {% if measure_title %}
+        <button type="button" class="pdp-guide-btn" data-toggle-guide>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1.5"></rect><path d="M6.5 8v3M10.5 8v4M14.5 8v3M18.5 8v4"></path></svg>
+          {{ measure_title }}
+        </button>
+        {% endif %}
+      </div>
+      <div class="pdp-sizes" data-size-group>
+        {% for s in variant_sizes %}
+        <button type="button"
+          class="pdp-size{% if s.len == current_size %} is-active{% endif %}"
+          data-size="{{ s.len }}">
+          <span class="pdp-size__label">{{ s.label }}</span>
+          <span class="pdp-size__sub" data-size-sub>{{ s.len }} мм</span>
+        </button>
+        {% endfor %}
+      </div>
+      {% if measure_text %}
+      <div class="pdp-guide" data-guide hidden>
+        {{ measure_text }}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 
   <div class="pdp-acc" data-acc-root>

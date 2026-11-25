@@ -84,7 +84,7 @@ BLOCK_DEFAULTS: dict[tuple[str, str], str] = {
     ("home", "blog_section_visible"): "1",
     ("home", "blog_title"): "Корисне для вибору",
     ("home", "blog_more_label"): "Корисні статті про замки",
-    ("site", "header_catalog_label"): "Каталог",
+    ("site", "header_catalog_label"): "Каталог товарів",
     ("site", "header_search_placeholder"): "Пошук замків, циліндрів…",
     ("site", "header_callback_label"): "Передзвоніть мені",
     ("site", "header_phone_visible"): "1",

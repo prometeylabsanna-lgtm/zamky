@@ -113,3 +113,11 @@ class CmsAdminSmokeTests(TestCase):
         self.assertContains(page, "Підвал — про нас (текст)")
         self.assertNotContains(page, "Підвал — про нас (заголовок)")
         self.assertNotContains(page, "footer_about_title")
+
+    def test_catalog_filters_title_hint_is_mobile(self):
+        url = reverse("admin:pages_catalogchromesettings_change", args=[1])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Заголовок фільтрів")
+        self.assertContains(page, "на мобільному та планшеті")
+        self.assertContains(page, "На десктопі не показується")

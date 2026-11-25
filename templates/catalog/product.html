@@ -17,7 +17,7 @@
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
     <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товрів' %}</a>
+    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товарів' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <span data-crumb-title>{{ product.name|tr }}</span>
   </nav>
@@ -26,14 +26,10 @@
     {% include 'catalog/partials/gallery.html' %}
     {% include 'catalog/partials/buy_box.html' %}
     <div class="pdp-info">
-      {% if description_parts %}
+      {% if description_html %}
       <section class="pdp-desc">
         <h2>{% t 'Опис' %}</h2>
-        <div class="pdp-desc__body">
-          {% for p in description_parts %}
-          <p>{{ p }}</p>
-          {% endfor %}
-        </div>
+        <div class="pdp-desc__body">{{ description_html|safe }}</div>
       </section>
       {% endif %}
       {% if spec_groups %}
@@ -47,7 +43,7 @@
               {% for r in g.rows %}
               <div class="pdp-specs__row{% if r.zebra %} is-zebra{% endif %}">
                 <dt>{{ r.k }}</dt>
-                <dd{% if r.k == 'Артикул' %} data-spec-sku{% endif %}{% if r.k == 'Покриття' %} data-spec-cover{% endif %}{% if r.k == 'Загальна довжина' %} data-spec-len{% endif %}{% if r.k == 'Розмір A×B' %} data-spec-ab{% endif %}>{{ r.v|tr }}</dd>
+                <dd{% if r.spec == 'sku' %} data-spec-sku{% endif %}{% if r.spec == 'cover' %} data-spec-cover{% endif %}{% if r.spec == 'len' %} data-spec-len{% endif %}{% if r.spec == 'ab' %} data-spec-ab{% endif %}>{{ r.v|tr }}</dd>
               </div>
               {% endfor %}
             </dl>

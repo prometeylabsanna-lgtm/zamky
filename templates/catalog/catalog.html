@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/catalog-chips.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}
@@ -16,7 +17,7 @@
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
     <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товрів' %}</a>
+    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товарів' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <span>{{ title }}</span>
   </nav>
@@ -59,6 +60,14 @@
     </div>
   </div>
 
+  {% if category_chips %}
+  <nav class="catalog-cats" aria-label="{% t 'Підкатегорії' %}">
+    {% for chip in category_chips %}
+    <a class="catalog-cats__chip{% if chip.active %} is-active{% endif %}" href="{{ chip.url }}">{{ chip.name }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+
   <div class="catalog-layout">
     <div id="filters-overlay" class="filters-overlay" data-close-filters></div>
     <aside id="filters" class="filters">
@@ -94,7 +103,7 @@
                 <span class="filter-check">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
                 </span>
-                <span class="filter-options__label">{{ opt.value.value|tr }}</span>
+                <span class="filter-options__label">{{ opt.value.display_value }}</span>
                 <span class="filter-options__count">{{ opt.count }}</span>
               </label>
             </li>

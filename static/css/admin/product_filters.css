@@ -1,0 +1,29 @@
+.product-filter-heading {
+  margin: 1.35rem 0 0.45rem;
+  padding: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-font-subtle-light, #6b7280);
+}
+
+[class*="field-spec_attr_"] {
+  max-width: 42rem;
+}
+
+[class*="field-spec_attr_"] select {
+  min-height: 48px;
+  width: 100%;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  [class*="field-spec_attr_"] {
+    max-width: none;
+  }
+
+  [class*="field-spec_attr_"] select {
+    min-height: 48px;
+  }
+}

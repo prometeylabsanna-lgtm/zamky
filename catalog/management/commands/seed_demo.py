@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
 
+from catalog.measure_guide import apply_default_measure
 from catalog.models import (
     Attribute,
     AttributeGroup,
@@ -107,7 +108,7 @@ class Command(BaseCommand):
                         f"{d.get('delivery', '')}. Райони: {', '.join(d.get('areas', []))}."
                     ),
                     'is_active': True,
-                    'sort_order': i,
+                    'sort_order': i + 1,
                 },
             )
 
@@ -133,19 +134,19 @@ class Command(BaseCommand):
     def _seed_catalog(self):
         self._clear_catalog()
 
-        # Порядок як у E-com/Home.dc.html (Elbor двічі).
         cats_data = [
-            ('Серцевини (циліндри)', 'cyl', None),
-            ('Замки', 'pad', None),
-            ('Замки підвищеного захисту', 'shield', None),
+            ('Замки', 'pad', 'menu/p2_8.png'),
+            ('Циліндри', 'cyl', 'menu/p2_9.png'),
+            ('Дверна фурнітура', 'brand', 'menu/p2_10.png'),
+            ('Броненакладки', 'brand', 'menu/p2_11.png'),
+            ('Дотягувачі', 'brand', 'menu/p2_12.png'),
+            ('Контроль доступу', 'brand', 'menu/p2_13.png'),
             ('Mottura', 'brand', 'mottura.png'),
             ('Cisa', 'brand', 'cisa.png'),
             ('Elbor', 'brand', 'elbor.png'),
-            ('Guardian', 'brand', 'guardian.png'),
             ('Apecs', 'brand', 'apecs.png'),
             ('Securame', 'brand', 'securame.png'),
             ('Kale', 'brand', 'kale.png'),
-            ('Elbor', 'brand', 'elbor.png'),
         ]
         home_subs = (
             'Врізні, накладні, електромеханічні',
@@ -167,10 +168,13 @@ class Command(BaseCommand):
                 name=name,
                 slug=slug,
                 icon=icon,
-                sort_order=i,
+                sort_order=i + 1,
                 is_active=True,
                 home_subtitle=home_subs[i] if i < len(home_subs) else '',
             )
+            changed = apply_default_measure(cat)
+            if changed:
+                cat.save(update_fields=changed)
             if logo:
                 src = settings.BASE_DIR / 'static' / 'img' / logo
                 if src.exists():
@@ -182,6 +186,10 @@ class Command(BaseCommand):
                             cat.logo.save(logo, File(fh), save=True)
             if name not in categories:
                 categories[name] = cat
+
+        from catalog.category_tree import ensure_category_tree
+
+        ensure_category_tree()
 
         groups = {
             'general': AttributeGroup.objects.create(name='Загальне', slug='zagalne', sort_order=1),
@@ -303,12 +311,16 @@ class Command(BaseCommand):
 
         created = 0
         created += self._seed_cylinders(categories, attrs, av, img_dir)
-        # замки-демо не в каталозі (Catalog.dc.html = 42 циліндри, max 1690);
-        # лишаємо brand-категорії для сайдбару home без SKU у вітрині
+        from catalog.mockup_catalog import sync_mockup_products
+
+        created += sync_mockup_products()
         self._configure_home_carousels(img_dir)
         catalog_n = Product.objects.filter(is_active=True, catalog_order__lt=500).exclude(
             sku__startswith='HOME-'
         ).count()
+        from catalog.filter_i18n import fill_filter_translations
+
+        fill_filter_translations()
         self.stdout.write(f'Products created: {created} (catalog vitrine: {catalog_n})')
 
     def _attach_image(self, product, src, dest_name, alt, sort_order, primary=False):
@@ -341,6 +353,8 @@ class Command(BaseCommand):
 
     def _seed_cylinders(self, categories, attrs, av, img_dir):
         """Циліндри як у E-com/Catalog.dc.html (+ повна сімʼя ABARO для PDP)."""
+        from catalog.category_tree import resolve_leaf_category
+
         brands = [
             {'b': 'ABARO', 'code': 'ABR', 'model': 'B100', 'country': 'Туреччина', 'k': 1},
             {'b': 'Mottura', 'code': 'MOT', 'model': 'Champions', 'country': 'Італія', 'k': 2.6},
@@ -349,17 +363,11 @@ class Command(BaseCommand):
             {'b': 'Apecs', 'code': 'APC', 'model': 'Premier', 'country': 'Китай', 'k': 0.8},
         ]
         mechs = [
-            {'id': 'kk', 'label': 'Ключ / ключ', 'short': '5 ключів'},
-            {'id': 'kt', 'label': 'Ключ / тумблер', 'short': 'ключ/тумблер'},
-            {'id': 'half', 'label': 'Половинчастий', 'short': 'половинчастий'},
+            {'id': 'kk', 'label': 'Ключ-ключ', 'short': '5 ключів'},
+            {'id': 'kt', 'label': 'Ключ-вертушка', 'short': 'ключ/вертушка'},
+            {'id': 'half', 'label': 'Половинчасті циліндри', 'short': 'половинчастий'},
         ]
-        brand_cat_map = {
-            'ABARO': categories['Серцевини (циліндри)'],
-            'Mottura': categories['Mottura'],
-            'Cisa': categories['Cisa'],
-            'Kale': categories['Kale'],
-            'Apecs': categories['Apecs'],
-        }
+        type_root = categories['Циліндри']
         family = ProductFamily.objects.create(
             name='ABARO B100',
             slug='abaro-b100',
@@ -375,7 +383,7 @@ class Command(BaseCommand):
                     in_catalog = (idx * 7) % 10 <= 6
                     # Вітрина = як PRODUCTS у Catalog.dc.html (42 шт).
                     # ABARO: додаткові варіанти для PDP з catalog_order≥500 (не в каталозі).
-                    if B['b'] != 'ABARO' and not in_catalog:
+                    if B['b'] != 'ABARO':
                         continue
                     M = mechs[(idx + bi) % 3]
                     price = Decimal(str(round(((S['p'] + C['add']) * B['k']) / 10) * 10))
@@ -394,9 +402,17 @@ class Command(BaseCommand):
                     else:
                         stock = 12 + (idx % 5)
                     # <500 → каталог; ≥500 → лише PDP/службові
-                    catalog_order = (idx * 37) % 101 if in_catalog else 500 + idx
+                    catalog_order = 500 + idx
+                    root_cat = type_root
+                    leaf_cat = resolve_leaf_category(
+                        root_cat, M['label'], f"{S['a']}×{S['b']}"
+                    )
+                    if leaf_cat is None:
+                        leaf_cat = Category.objects.filter(
+                            parent=root_cat, name='Циліндри'
+                        ).first()
                     product = Product.objects.create(
-                        category=brand_cat_map.get(B['b'], categories['Серцевини (циліндри)']),
+                        category=leaf_cat or root_cat,
                         family=family if B['b'] == 'ABARO' else None,
                         name=name,
                         slug=slugify(sku.lower()),
@@ -431,7 +447,7 @@ class Command(BaseCommand):
                             )
                         ),
                     )
-                    # Фільтри сайдбару каталогу (FILTER_TITLES): обовʼязкові для вітрини.
+                    # Фільтри сайдбару каталогу: обовʼязкові для вітрини.
                     attr_pairs = [
                         ('brand', B['b']),
                         ('country', B['country']),
@@ -458,26 +474,32 @@ class Command(BaseCommand):
                     src = img_dir / C['img']
                     if not src.exists():
                         src = img_dir / 'product-brass.png'
-                    self._attach_image(product, src, f'{sku.lower()}.png', name, 0, primary=True)
+                    self._attach_image(product, src, f'{sku.lower()}.png', name, 1, primary=True)
                     thumbs = EXTRA_THUMBS if B['b'] == 'ABARO' else ['thumb-1.png', 'thumb-2.png', 'thumb-3.png']
-                    for ti, thumb in enumerate(thumbs, start=1):
+                    for ti, thumb in enumerate(thumbs, start=2):
                         self._attach_image(
                             product,
                             img_dir / thumb,
                             f'{sku.lower()}-t{ti}.png',
-                            f'{name} — фото {ti + 1}',
+                            f'{name} — фото {ti}',
                             ti,
                         )
                     created += 1
         return created
 
     def _seed_locks(self, categories, attrs, av, img_dir, media_seed):
+        from catalog.category_tree import resolve_leaf_category
+
         lock_cat = categories['Замки']
         n = 0
         for i, brand in enumerate(['Elbor', 'Guardian', 'Securame']):
             sku = f'LCK-{brand[:3].upper()}-{100 + i}'
+            root = categories.get(brand, lock_cat)
+            leaf_cat = resolve_leaf_category(root, 'Замки', None)
+            if leaf_cat is None:
+                leaf_cat = resolve_leaf_category(lock_cat, 'Врізні замки', None)
             product = Product.objects.create(
-                category=categories.get(brand, lock_cat),
+                category=leaf_cat or lock_cat,
                 name=f'Замок врізний {brand} Secure {100 + i}',
                 slug=slugify(sku.lower()),
                 sku=sku,
@@ -495,7 +517,7 @@ class Command(BaseCommand):
             )
             # без filterable-атрибутів — щоб сайдбар каталогу збігався з Catalog.dc.html
             src = img_dir / 'product-chrome.png'
-            self._attach_image(product, src, f'{sku.lower()}.png', product.name, 0, primary=True)
+            self._attach_image(product, src, f'{sku.lower()}.png', product.name, 1, primary=True)
             n += 1
         return n
 
@@ -509,7 +531,7 @@ class Command(BaseCommand):
 
         brass = img_dir / 'product-brass.png'
         chrome = img_dir / 'product-chrome.png'
-        cat = Category.objects.filter(name='Серцевини (циліндри)').first()
+        cat = Category.objects.filter(name='Циліндри').first()
         if not cat:
             return
 
@@ -532,7 +554,7 @@ class Command(BaseCommand):
                 short_description='Циліндровий механізм для дверей із комплектом ключів.',
                 description=ABARO_DESC,
             )
-            self._attach_image(p, brass, f'home-hit-{i}.png', home_name, 0, primary=True)
+            self._attach_image(p, brass, f'home-hit-{i}.png', home_name, 1, primary=True)
 
         news_stocks = [12, 12, 0, 12, 12, 12, 12, 12]
         for i, stock in enumerate(news_stocks):
@@ -554,7 +576,7 @@ class Command(BaseCommand):
                 description=ABARO_DESC,
             )
             src = chrome if i == 2 else brass
-            self._attach_image(p, src, f'home-new-{i}.png', home_name, 0, primary=True)
+            self._attach_image(p, src, f'home-new-{i}.png', home_name, 1, primary=True)
 
         from pages.popular_products import reset_demo_popular
 

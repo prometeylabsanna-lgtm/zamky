@@ -1,0 +1,63 @@
+.catalog-count {
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .catalog-head__titles {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .catalog-count {
+    white-space: normal;
+  }
+}
+
+.catalog-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 8px;
+}
+
+.catalog-cats__chip {
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-muted-2);
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.catalog-cats__chip:hover,
+.catalog-cats__chip.is-active {
+  border-color: transparent;
+  color: #fff;
+  background-color: var(--color-accent);
+  background-image: linear-gradient(90deg, #f97f0c 32%, #ff2e2e 100%);
+}
+
+@media (max-width: 767px) {
+  .catalog-cats {
+    margin-top: 12px;
+    gap: 8px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .catalog-cats__chip {
+    flex: none;
+    white-space: nowrap;
+  }
+}

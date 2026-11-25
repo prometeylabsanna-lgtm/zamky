@@ -4,6 +4,8 @@ from django.db import models
 from django.urls import reverse
 from pages.slug_utils import ensure_unique_slug
 
+from .filter_sort import apply_auto_sort_order
+
 
 class Category(models.Model):
     name = models.CharField('Назва', max_length=200)
@@ -36,8 +38,33 @@ class Category(models.Model):
         blank=True,
         default='',
     )
+    measure_title = models.CharField(
+        'Кнопка підказки',
+        max_length=160,
+        blank=True,
+        default='',
+        help_text='На картці товару біля розміру. Порожнє — з батьківської категорії.',
+    )
+    measure_title_ru = models.CharField(
+        'Кнопка підказки (RU)',
+        max_length=160,
+        blank=True,
+        default='',
+    )
+    measure_text = models.TextField(
+        'Текст підказки',
+        blank=True,
+        default='',
+        help_text='Пояснення після натискання кнопки. Порожнє — з батьківської категорії.',
+    )
+    measure_text_ru = models.TextField(
+        'Текст підказки (RU)',
+        blank=True,
+        default='',
+    )
     sort_order = models.PositiveIntegerField('Порядок', default=0)
     is_active = models.BooleanField('Активна', default=True)
+    show_in_menu = models.BooleanField('Показувати в меню', default=True)
 
     class Meta:
         verbose_name = 'Категорія'
@@ -45,6 +72,10 @@ class Category(models.Model):
         ordering = ['sort_order', 'name']
 
     def __str__(self):
+        from catalog.category_tree import category_path_label
+
+        if self.parent_id:
+            return category_path_label(self)
         return self.name
 
     def save(self, *args, **kwargs):
@@ -52,6 +83,9 @@ class Category(models.Model):
             self.slug = ensure_unique_slug(
                 Category, self.name, instance_pk=self.pk, fallback='category'
             )
+        apply_auto_sort_order(
+            self, Category.objects.filter(parent_id=self.parent_id)
+        )
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -70,27 +104,35 @@ class Category(models.Model):
 
 class AttributeGroup(models.Model):
     name = models.CharField('Назва', max_length=120)
+    name_ru = models.CharField('Назва (RU)', max_length=120, blank=True, default='')
     slug = models.SlugField('Слаг', max_length=140, unique=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
-        verbose_name = 'Група характеристик'
-        verbose_name_plural = 'Групи характеристик'
+        verbose_name = 'Група фільтрів'
+        verbose_name_plural = 'Фільтри'
         ordering = ['sort_order', 'name']
 
     def __str__(self):
         return self.name
+
+    def display_name(self):
+        from catalog.filter_i18n import localized_text
+
+        return localized_text(self.name, self.name_ru)
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = ensure_unique_slug(
                 AttributeGroup, self.name, instance_pk=self.pk, fallback='group'
             )
+        apply_auto_sort_order(self, AttributeGroup.objects.all())
         super().save(*args, **kwargs)
 
 
 class Attribute(models.Model):
     name = models.CharField('Назва', max_length=120)
+    name_ru = models.CharField('Назва (RU)', max_length=120, blank=True, default='')
     slug = models.SlugField('Слаг', max_length=140, unique=True)
     group = models.ForeignKey(
         AttributeGroup,
@@ -104,18 +146,25 @@ class Attribute(models.Model):
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
     class Meta:
-        verbose_name = 'Фільтр каталогу'
-        verbose_name_plural = 'Фільтри каталогу'
+        verbose_name = 'Фільтр'
+        verbose_name_plural = 'Фільтри'
         ordering = ['sort_order', 'name']
 
     def __str__(self):
         return self.name
+
+    def display_name(self):
+        from catalog.filter_i18n import localized_text
+
+        return localized_text(self.name, self.name_ru)
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = ensure_unique_slug(
                 Attribute, self.name, instance_pk=self.pk, fallback='attr'
             )
+        siblings = Attribute.objects.filter(group_id=self.group_id)
+        apply_auto_sort_order(self, siblings)
         super().save(*args, **kwargs)
 
 
@@ -127,6 +176,7 @@ class AttributeValue(models.Model):
         verbose_name='Атрибут',
     )
     value = models.CharField('Значення', max_length=200)
+    value_ru = models.CharField('Значення (RU)', max_length=200, blank=True, default='')
     slug = models.SlugField('Слаг', max_length=220)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
@@ -139,6 +189,11 @@ class AttributeValue(models.Model):
     def __str__(self):
         return f'{self.attribute.name}: {self.value}'
 
+    def display_value(self):
+        from catalog.filter_i18n import localized_text
+
+        return localized_text(self.value, self.value_ru)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             extra = {'attribute_id': self.attribute_id} if self.attribute_id else None
@@ -149,6 +204,9 @@ class AttributeValue(models.Model):
                 extra_filter=extra,
                 fallback='value',
             )
+        apply_auto_sort_order(
+            self, AttributeValue.objects.filter(attribute_id=self.attribute_id)
+        )
         super().save(*args, **kwargs)
 
 
@@ -175,12 +233,50 @@ class ProductFamily(models.Model):
         super().save(*args, **kwargs)
 
 
+COLOR_CHOICES = (
+    ('G', 'Латунь'),
+    ('N', 'Нікель'),
+    ('B', 'Чорний'),
+)
+COLOR_LABELS = dict(COLOR_CHOICES)
+
+
+class FamilyColorSwatch(models.Model):
+    family = models.ForeignKey(
+        ProductFamily,
+        related_name='color_swatches',
+        on_delete=models.CASCADE,
+        verbose_name='Сімʼя',
+    )
+    color_code = models.CharField(
+        'Колір серцевини',
+        max_length=8,
+        choices=COLOR_CHOICES,
+    )
+    image = models.ImageField(
+        'Плашка',
+        upload_to='families/swatches/',
+        blank=True,
+        help_text='Фото кнопки кольору на сторінці товару. Порожньо — суцільний колір.',
+    )
+
+    class Meta:
+        verbose_name = 'Плашка кольору'
+        verbose_name_plural = 'Плашки кольорів'
+        unique_together = [('family', 'color_code')]
+        ordering = ['id']
+
+    def __str__(self):
+        return f'{self.family}: {self.get_color_code_display()}'
+
+
 class Product(models.Model):
     category = models.ForeignKey(
         Category,
         related_name='products',
         on_delete=models.PROTECT,
         verbose_name='Категорія',
+        help_text='Категорію з товарами видалити не можна — спочатку перенесіть товари.',
     )
     family = models.ForeignKey(
         ProductFamily,
@@ -208,7 +304,13 @@ class Product(models.Model):
     catalog_order = models.PositiveIntegerField('Порядок у каталозі', default=0, db_index=True)
     rating = models.PositiveSmallIntegerField('Рейтинг', default=4)
     brand = models.CharField('Бренд', max_length=100, blank=True)
-    color_code = models.CharField('Код кольору', max_length=8, blank=True)
+    color_code = models.CharField(
+        'Колір серцевини',
+        max_length=8,
+        blank=True,
+        choices=COLOR_CHOICES,
+        help_text='Кружечки на сторінці товару та в кошику.',
+    )
     color_label = models.CharField('Колір', max_length=64, blank=True)
     finish = models.CharField('Оздоблення', max_length=120, blank=True)
     cover = models.CharField('Покриття', max_length=120, blank=True)
@@ -255,6 +357,11 @@ class Product(models.Model):
                 instance_pk=self.pk,
                 fallback='product',
             )
+        code = (self.color_code or '').strip()
+        if code:
+            mapped = COLOR_LABELS.get(code)
+            if mapped:
+                self.color_label = mapped
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -367,3 +474,9 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f'{self.product.sku} #{self.pk}'
+
+    def save(self, *args, **kwargs):
+        apply_auto_sort_order(
+            self, ProductImage.objects.filter(product_id=self.product_id)
+        )
+        super().save(*args, **kwargs)

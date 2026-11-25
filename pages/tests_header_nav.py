@@ -35,7 +35,7 @@ class HeaderNavCmsTests(TestCase):
         page = self.client.get(self._admin())
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "Кнопки навігації")
-        self.assertContains(page, "Серцевини (циліндри)")
+        self.assertContains(page, "Циліндри")
         self.assertContains(page, "Акції")
         self.assertContains(page, "Додати кнопку")
 
@@ -44,18 +44,18 @@ class HeaderNavCmsTests(TestCase):
             page = self.client.get("/ua/")
         body = page.content.decode()
         self.assertIn("hdr-nav__link", body)
-        self.assertIn("Серцевини (циліндри)", body)
+        self.assertIn("Циліндри", body)
         self.assertIn("hdr-nav__promo", body)
         self.assertIn("hdr-nav__install", body)
         self.assertIn("/ua/info/promos/", body)
 
     def test_hidden_button_not_on_site(self):
-        HeaderNavLink.objects.filter(key="elbor").update(is_active=False)
+        HeaderNavLink.objects.filter(key="cyl").update(is_active=False)
         with translation.override("ua"):
             page = self.client.get("/ua/")
         body = page.content.decode()
         nav = body[body.index('class="hdr-nav"') : body.index("</nav>", body.index('class="hdr-nav"'))]
-        self.assertNotIn("Elbor", nav)
+        self.assertNotIn("Циліндри", nav)
 
     def test_ru_label_and_prefix(self):
         rows = get_header_nav_links("ru")
@@ -87,13 +87,13 @@ class HeaderNavCmsTests(TestCase):
             data[f"header_nav-{i}-name_ru"] = inst.name_ru
             data[f"header_nav-{i}-url"] = inst.url
             data[f"header_nav-{i}-sort_order"] = str(i)
-            if inst.key != "cisa":
+            if inst.key != "hardware":
                 data[f"header_nav-{i}-is_active"] = "on"
         data["header_nav-0-sort_order"] = "9"
         good = build_header_nav_formset(data=data)
         self.assertTrue(good.is_valid(), good.errors)
         good.save()
-        cisa = HeaderNavLink.objects.get(key="cisa")
-        self.assertFalse(cisa.is_active)
-        first = HeaderNavLink.objects.get(key="cyl")
+        hardware = HeaderNavLink.objects.get(key="hardware")
+        self.assertFalse(hardware.is_active)
+        first = HeaderNavLink.objects.get(key="locks")
         self.assertEqual(first.sort_order, 9)

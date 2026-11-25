@@ -34,3 +34,9 @@ class HeaderNavLink(models.Model):
         if lang == "ru" and self.name_ru.strip():
             return self.name_ru.strip()
         return self.name.strip()
+
+    def save(self, *args, **kwargs):
+        from catalog.filter_sort import apply_auto_sort_order
+
+        apply_auto_sort_order(self, HeaderNavLink.objects.all())
+        super().save(*args, **kwargs)

@@ -26,7 +26,7 @@ BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
     ("home", "popular_tab_sales"): "Скидки",
     ("home", "blog_title"): "Полезное для выбора",
     ("home", "blog_more_label"): "Полезные статьи о замках",
-    ("site", "header_catalog_label"): "Каталог",
+    ("site", "header_catalog_label"): "Каталог товаров",
     ("site", "header_search_placeholder"): "Поиск замков, цилиндров…",
     ("site", "header_callback_label"): "Перезвоните мне",
     ("site", "footer_about_text"): "Замки, цилиндры и фурнитура с доставкой по Киеву.",

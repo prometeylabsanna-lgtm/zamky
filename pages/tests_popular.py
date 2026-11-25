@@ -95,13 +95,13 @@ class HomePopularCmsTests(TestCase):
         HomePopularProduct.objects.create(
             tab=HomePopularProduct.Tab.HITS,
             product=self.other,
-            sort_order=0,
+            sort_order=1,
             is_active=True,
         )
         HomePopularProduct.objects.create(
             tab=HomePopularProduct.Tab.HITS,
             product=self.hit,
-            sort_order=1,
+            sort_order=2,
             is_active=True,
         )
         from pages.models_cms import SiteBlock

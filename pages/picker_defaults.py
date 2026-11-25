@@ -17,10 +17,10 @@ DEFAULT_DOORS = (
 )
 
 DEFAULT_FILTERS = (
-    ("mech", "Тип замка", "Тип замка", 0),
-    ("brand", "Бренд", "Бренд", 1),
-    ("price", "Ціновий діапазон", "Ценовой диапазон", 2),
-    ("color", "Колір/покриття", "Цвет/покрытие", 3),
+    ("mech", "Тип замка", "Тип замка", 1),
+    ("brand", "Бренд", "Бренд", 2),
+    ("price", "Ціновий діапазон", "Ценовой диапазон", 3),
+    ("color", "Колір/покриття", "Цвет/покрытие", 4),
 )
 
 DEFAULT_PRICE = (
@@ -47,7 +47,7 @@ def ensure_picker_defaults() -> None:
                 label_line2_ru=l2r,
                 static_fallback=fallback,
                 match_hints=hints,
-                sort_order=i,
+                sort_order=i + 1,
                 is_active=True,
             )
     if not PickerFilter.objects.exists():
@@ -73,7 +73,7 @@ def _seed_filter_options() -> None:
                 value=label,
                 price_min=lo,
                 price_max=hi,
-                sort_order=i,
+                sort_order=i + 1,
                 is_active=True,
             )
 
@@ -100,7 +100,7 @@ def _fill_attr_options(filt, slug: str, fallback: tuple[str, ...]) -> None:
             filter=filt,
             label=row["value"],
             value=row["slug"] or row["value"],
-            sort_order=i,
+            sort_order=i + 1,
             is_active=True,
         )
 
@@ -128,7 +128,7 @@ def _fill_brands(filt) -> None:
             filter=filt,
             label=brand,
             value=brand,
-            sort_order=i,
+            sort_order=i + 1,
             is_active=True,
         )
 
@@ -225,7 +225,7 @@ def fill_options_from_attribute(filt: PickerFilter) -> None:
             filter=filt,
             label=(row.value or "")[:80],
             value=(row.slug or row.value or "")[:80],
-            sort_order=i,
+            sort_order=i + 1,
             is_active=True,
         )
 

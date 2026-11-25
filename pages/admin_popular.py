@@ -115,12 +115,12 @@ class HomePopularProductBaseFormSet(BaseModelFormSet):
                 form.cleaned_data.get("tab") or HomePopularProduct.Tab.HITS
             ).strip()
             order = form.cleaned_data.get("sort_order")
-            if order is None:
-                counters[obj.tab] = counters.get(obj.tab, 0)
+            if not order:
+                counters[obj.tab] = counters.get(obj.tab, 1)
                 obj.sort_order = counters[obj.tab]
             else:
                 obj.sort_order = int(order)
-            counters[obj.tab] = max(counters.get(obj.tab, 0), obj.sort_order + 1)
+            counters[obj.tab] = max(counters.get(obj.tab, 1), obj.sort_order + 1)
             if commit:
                 obj.save()
             saved.append(obj)

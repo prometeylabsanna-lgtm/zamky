@@ -50,6 +50,13 @@ class DeliveryDistrictAdmin(TopDropdownFiltersMixin, ModelAdmin):
         ),
     )
 
+    def get_changeform_initial_data(self, request):
+        from catalog.filter_sort import next_sort_order
+
+        initial = super().get_changeform_initial_data(request)
+        initial['sort_order'] = next_sort_order(DeliveryDistrict.objects.all())
+        return initial
+
 
 @admin.register(QuickOrder)
 class QuickOrderAdmin(TopDropdownFiltersMixin, ModelAdmin):

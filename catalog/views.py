@@ -1,9 +1,9 @@
 import json
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import Count, Max, Min, Prefetch, Q
+from django.db.models import Count, Max, Min, Prefetch
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
+from django.utils.translation import get_language
 from django.views.generic import DetailView, ListView, TemplateView
 
 from cart.services import WishlistService
@@ -19,8 +19,13 @@ from pages.picker_defaults import (
 from pages.popular_products import get_home_popular
 from pages.views_extra import _form_with_key
 
+from .listing_scope import apply_listing_scope, category_nav_chips, listing_scope
 from .chrome_cms import catalog_chrome
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
+from .measure_guide import resolve_measure
+from .product_html import product_description_html
+from .product_specs import product_spec_groups
+from .product_variants import build_variant_context
 from .search import filter_queryset_by_query
 
 SORT_MAP = {
@@ -31,21 +36,8 @@ SORT_MAP = {
     'rating': ('-rating', 'catalog_order'),
 }
 
-FILTER_TITLES = {
-    'brand': 'Виробник/Бренд',
-    'country': 'Країна виробництва',
-    'color': 'Колір/покриття',
-    'mech': 'Тип механізму',
-}
-
-FILTER_OPEN_DEFAULT = {
-    'brand': True,
-    'country': True,
-    'color': False,
-    'mech': True,
-}
-
 PAGE_SIZE = 12
+FILTER_OPEN_COUNT = 3
 
 HOME_CATEGORY_SUBS = [
     'Врізні, накладні, електромеханічні',
@@ -170,7 +162,7 @@ class CatalogView(ListView):
         slug = self.kwargs.get('slug')
         if slug:
             self.category = get_object_or_404(Category, slug=slug, is_active=True)
-            qs = qs.filter(Q(category=self.category) | Q(category__parent=self.category))
+            qs = apply_listing_scope(qs, listing_scope(self.category))
 
         q = self.request.GET.get('q', '').strip()
         self._search_q = q
@@ -179,10 +171,7 @@ class CatalogView(ListView):
         if sku:
             qs = qs.filter(sku__icontains=sku)
 
-        for key in ('brand', 'country', 'color', 'mech'):
-            values = self.request.GET.getlist(key)
-            if values:
-                qs = qs.filter(attributes__slug__in=values, attributes__attribute__slug=key)
+        qs = self._apply_attr_filters(qs)
 
         price_min = self._decimal(self.request.GET.get('price_min'))
         price_max = self._decimal(self.request.GET.get('price_max'))
@@ -217,21 +206,38 @@ class CatalogView(ListView):
             sku__startswith='HOME-'
         )
 
+    def _filterable_attrs(self):
+        cached = getattr(self, '_filterable_attrs_cache', None)
+        if cached is None:
+            self._filterable_attrs_cache = list(
+                Attribute.objects.filter(filterable=True)
+                .prefetch_related('values')
+                .order_by('sort_order', 'name')
+            )
+            cached = self._filterable_attrs_cache
+        return cached
+
+    def _apply_attr_filters(self, qs, skip_key=None):
+        for attr in self._filterable_attrs():
+            if attr.slug == skip_key:
+                continue
+            values = self.request.GET.getlist(attr.slug)
+            if values:
+                qs = qs.filter(
+                    attributes__slug__in=values,
+                    attributes__attribute__slug=attr.slug,
+                )
+        return qs
+
     def _base_qs(self):
         base = self._catalog_products()
         if self.category:
-            base = base.filter(Q(category=self.category) | Q(category__parent=self.category))
+            base = apply_listing_scope(base, listing_scope(self.category))
         return base
 
     def _filter_counts(self, base, skip_key=None):
-        """Лічильники опцій з урахуванням інших активних фільтрів (як у дизайні)."""
-        qs = base
-        for key in ('brand', 'country', 'color', 'mech'):
-            if key == skip_key:
-                continue
-            values = self.request.GET.getlist(key)
-            if values:
-                qs = qs.filter(attributes__slug__in=values, attributes__attribute__slug=key)
+        """Лічильники опцій з урахуванням інших активних фільтрів."""
+        qs = self._apply_attr_filters(base, skip_key=skip_key)
         sku = self.request.GET.get('sku', '').strip()
         if sku:
             qs = qs.filter(sku__icontains=sku)
@@ -264,16 +270,8 @@ class CatalogView(ListView):
             current_price_min, current_price_max = current_price_max, current_price_min
 
         filter_groups = []
-        filter_attrs = {
-            a.slug: a
-            for a in Attribute.objects.filter(filterable=True, slug__in=FILTER_TITLES).prefetch_related(
-                'values'
-            )
-        }
-        for slug in FILTER_TITLES:
-            attr = filter_attrs.get(slug)
-            if not attr:
-                continue
+        filter_attrs = {attr.slug: attr for attr in self._filterable_attrs()}
+        for index, attr in enumerate(self._filterable_attrs()):
             counted = (
                 self._filter_counts(base, skip_key=attr.slug)
                 .filter(attributes__attribute=attr)
@@ -294,24 +292,13 @@ class CatalogView(ListView):
                         'disabled': (not selected) and count == 0,
                     }
                 )
-            # порядок опцій як у Catalog.dc.html
-            value_order = {
-                'brand': ['ABARO', 'Mottura', 'Cisa', 'Kale', 'Apecs'],
-                'country': ['Туреччина', 'Італія', 'Китай'],
-                'color': ['Латунь', 'Нікель', 'Чорний'],
-                'mech': ['Ключ / ключ', 'Ключ / тумблер', 'Половинчастий'],
-            }.get(attr.slug)
-            if value_order:
-                options.sort(
-                    key=lambda o: value_order.index(o['value'].value)
-                    if o['value'].value in value_order
-                    else 99
-                )
+            if not any(opt['count'] or opt['selected'] for opt in options):
+                continue
             filter_groups.append(
                 {
                     'attribute': attr,
-                    'title': tr(FILTER_TITLES.get(attr.slug, attr.name)),
-                    'open': FILTER_OPEN_DEFAULT.get(attr.slug, True),
+                    'title': attr.display_name(),
+                    'open': index < FILTER_OPEN_COUNT,
                     'options': options,
                 }
             )
@@ -322,7 +309,7 @@ class CatalogView(ListView):
                 val = AttributeValue.objects.filter(attribute=attr, slug=slug).first()
                 if val:
                     selected_chips.append(
-                        {'label': tr(val.value), 'key': attr.slug, 'slug': slug}
+                        {'label': val.display_value(), 'key': attr.slug, 'slug': slug}
                     )
 
         sku = self.request.GET.get('sku', '').strip()
@@ -340,7 +327,7 @@ class CatalogView(ListView):
 
         sort = self.request.GET.get('sort', 'default')
         sorts = [
-            ('default', tr('За замовчуванням')),
+            ('default', tr('За популярністю')),
             ('cheap', tr('Спочатку дешевші')),
             ('expensive', tr('Спочатку дорожчі')),
             ('rating', tr('За рейтингом')),
@@ -354,10 +341,17 @@ class CatalogView(ListView):
         ctx.update(
             {
                 'category': self.category,
-                'title': tr(self.category.name) if self.category else listing_title,
+                'title': (
+                    self.category.card_name(get_language() or 'ua')
+                    if self.category
+                    else listing_title
+                ),
                 'catalog_empty': chrome['empty'],
                 'catalog_filters_title': chrome['filters_title'],
-                'count_label': f'{total} {plural_goods(total)}',
+                'count_label': tr('Знайдено {n} {word}').format(
+                    n=total, word=plural_goods(total)
+                ),
+                'category_chips': category_nav_chips(self.category),
                 'filter_groups': filter_groups,
                 'selected_chips': selected_chips,
                 'price_lo': price_lo,
@@ -431,8 +425,11 @@ class ProductDetailView(DetailView):
     ]
 
     def get_queryset(self):
-        return Product.objects.filter(is_active=True).select_related('family', 'category').prefetch_related(
+        return Product.objects.filter(is_active=True).select_related(
+            'family', 'category', 'category__parent'
+        ).prefetch_related(
             Prefetch('images', queryset=ProductImage.objects.order_by('sort_order', 'id')),
+            'family__color_swatches',
             Prefetch(
                 'attributes',
                 queryset=AttributeValue.objects.select_related('attribute', 'attribute__group'),
@@ -443,82 +440,11 @@ class ProductDetailView(DetailView):
         ctx = super().get_context_data(**kwargs)
         product = self.object
         wishlist = WishlistService(self.request)
-        variants = []
-        colors = []
-        sizes = []
+        variants, colors, sizes = build_variant_context(product)
 
-        def _variant_payload(v):
-            imgs = [
-                {'src': img.image.url, 'alt': img.alt or v.name}
-                for img in v.images.all()
-            ]
-            return {
-                'id': v.pk,
-                'sku': v.sku,
-                'slug': v.slug,
-                'url': v.get_absolute_url(),
-                'name': tr(v.name),
-                'price': int(v.price),
-                'old_price': int(v.old_price) if v.old_price else None,
-                'discount': v.discount_percent,
-                'stock': int(v.stock or 0),
-                'status': v.stock_status,
-                'badge': v.stock_label,
-                'stock_note': v.stock_note,
-                'color': v.color_code or '',
-                'color_label': tr(v.color_label),
-                'size': v.size_mm or 0,
-                'size_a': v.size_a,
-                'size_b': v.size_b,
-                'size_label': v.size_label,
-                'cover': tr(v.cover),
-                'images': imgs,
-                'add_url': reverse('cart:add', kwargs={'pk': v.pk}),
-                'quick_url': reverse('orders:quick', kwargs={'pk': v.pk}),
-                'wishlist_url': reverse('cart:wishlist', kwargs={'pk': v.pk}),
-            }
-
-        if product.family_id:
-            family_qs = (
-                Product.objects.filter(is_active=True, family=product.family)
-                .prefetch_related(
-                    Prefetch('images', queryset=ProductImage.objects.order_by('sort_order', 'id'))
-                )
-                .order_by('size_mm', 'color_code')
-            )
-            seen_colors = {}
-            seen_sizes = {}
-            for v in family_qs:
-                variants.append(_variant_payload(v))
-                if v.color_code and v.color_code not in seen_colors:
-                    primary = v.images.first()
-                    seen_colors[v.color_code] = {
-                        'code': v.color_code,
-                        'label': tr(v.color_label),
-                        'img': primary.image.url if primary else '',
-                    }
-                if v.size_mm and v.size_mm not in seen_sizes:
-                    seen_sizes[v.size_mm] = {
-                        'len': v.size_mm,
-                        'a': v.size_a,
-                        'b': v.size_b,
-                        'label': v.size_label,
-                    }
-            color_order = {'G': 0, 'N': 1, 'B': 2}
-            colors = sorted(
-                seen_colors.values(),
-                key=lambda x: color_order.get(x['code'], 99),
-            )
-            sizes = sorted(seen_sizes.values(), key=lambda x: x['len'])
-        else:
-            # Товар без family — все одно потрібен варіант для qty/stock у JS.
-            variants.append(_variant_payload(product))
-
-        spec_groups = self._spec_groups(product)
-        description_parts = []
-        desc = product.description or (product.family.description if product.family_id else '')
-        if desc:
-            description_parts = [tr(p.strip()) for p in desc.split('\n\n') if p.strip()]
+        spec_groups = product_spec_groups(product)
+        description_html = product_description_html(product, self.request)
+        measure_title, measure_text = resolve_measure(product.category)
 
         accordions = []
         for block in self.ACCORDIONS:
@@ -535,34 +461,15 @@ class ProductDetailView(DetailView):
             {
                 'in_wishlist': wishlist.contains(product.pk),
                 'spec_groups': spec_groups,
-                'description_parts': description_parts,
+                'description_html': description_html,
                 'accordions': accordions,
                 'variant_colors': colors,
                 'variant_sizes': sizes,
                 'variants_json': json.dumps(variants, ensure_ascii=False),
                 'current_color': product.color_code,
                 'current_size': product.size_mm,
+                'measure_title': measure_title,
+                'measure_text': measure_text,
             }
         )
         return ctx
-
-    def _spec_groups(self, product):
-        rows_by_group = {}
-        for av in product.attributes.all():
-            attr = av.attribute
-            if attr.group_id and attr.group.slug == 'filters':
-                continue
-            group = attr.group
-            key = group.pk if group else 0
-            title = tr(group.name) if group else tr('Інше')
-            order = group.sort_order if group else 999
-            bucket = rows_by_group.setdefault(key, {'title': title, 'order': order, 'rows': []})
-            bucket['rows'].append(
-                {'k': tr(attr.name), 'v': tr(av.value), 'order': attr.sort_order}
-            )
-        groups = sorted(rows_by_group.values(), key=lambda g: g['order'])
-        for g in groups:
-            g['rows'] = sorted(g['rows'], key=lambda r: r['order'])
-            for i, row in enumerate(g['rows']):
-                row['zebra'] = i % 2 == 1
-        return groups

@@ -13,13 +13,13 @@ class HeroCtaTests(TestCase):
         self.s1 = HeroSlide.objects.create(
             alt_text="Слайд 1",
             static_fallback="img/v2/hero/slide-home.webp",
-            sort_order=0,
+            sort_order=1,
             show_secondary=True,
         )
         self.s2 = HeroSlide.objects.create(
             alt_text="Слайд 2",
             static_fallback="img/v2/hero/slide-promo.webp",
-            sort_order=1,
+            sort_order=2,
         )
 
     def _cta_html(self, url="/ua/"):

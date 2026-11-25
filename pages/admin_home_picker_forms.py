@@ -160,8 +160,6 @@ def make_option_formset(filter_obj: PickerFilter, data=None):
 
 
 def save_option_formset(formset, filter_obj: PickerFilter) -> None:
-    from django.db.models import Max
-
     instances = formset.save(commit=False)
     for obj in formset.deleted_objects:
         obj.delete()
@@ -170,12 +168,11 @@ def save_option_formset(formset, filter_obj: PickerFilter) -> None:
         .exclude(pk__in=[item.pk for item in instances if item.pk])
         .values_list("value", flat=True)
     )
-    next_order = (
-        PickerFilterOption.objects.filter(filter=filter_obj).aggregate(
-            m=Max("sort_order")
-        )["m"]
-        or -1
-    ) + 1
+    from catalog.filter_sort import next_sort_order
+
+    next_order = next_sort_order(
+        PickerFilterOption.objects.filter(filter=filter_obj)
+    )
     for obj in instances:
         label = (obj.label or "").strip()
         if not label:
@@ -204,10 +201,9 @@ def prepare_new_door(form: PickerDoorForm) -> PickerDoor:
     obj.code = ensure_unique_slug(
         PickerDoor, name, field="code", fallback="door"
     )
-    from django.db.models import Max
+    from catalog.filter_sort import next_sort_order
 
-    current = PickerDoor.objects.aggregate(m=Max("sort_order"))["m"] or 0
-    obj.sort_order = current + 1
+    obj.sort_order = next_sort_order(PickerDoor.objects.all())
     return obj
 
 
@@ -224,7 +220,7 @@ _RESERVED_FILTER_KEYS = frozenset(
 
 
 def prepare_new_filter(form: PickerFilterMetaForm) -> PickerFilter:
-    from django.db.models import Max
+    from catalog.filter_sort import next_sort_order
 
     obj = form.save(commit=False)
     attr = obj.attribute
@@ -238,6 +234,5 @@ def prepare_new_filter(form: PickerFilterMetaForm) -> PickerFilter:
         )
     if not (obj.label or "").strip() and attr is not None:
         obj.label = attr.name
-    current = PickerFilter.objects.aggregate(m=Max("sort_order"))["m"] or 0
-    obj.sort_order = current + 1
+    obj.sort_order = next_sort_order(PickerFilter.objects.all())
     return obj

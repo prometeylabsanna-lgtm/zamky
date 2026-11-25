@@ -72,13 +72,12 @@
 
   function catMark(cat, size) {
     if (!cat) return '';
-    if (cat.lock) return lockIcon(cat.lock, size);
-    if (cat.logo) {
-      var src = '/static/' + cat.logo;
+    if (cat.logo_url) {
       var w = size > 40 ? 54 : 48;
       var h = size > 40 ? 44 : 40;
-      return '<img src="' + src + '" alt="" width="' + w + '" height="' + h + '">';
+      return '<img src="' + cat.logo_url + '" alt="" width="' + w + '" height="' + h + '">';
     }
+    if (cat.lock) return lockIcon(cat.lock, size);
     return '';
   }
 
@@ -87,15 +86,8 @@
       name + '</span><svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button></li>';
   }
 
-  function catalogUrl() {
-    var pref = (location.pathname.match(/^\/(ua|ru)(?=\/|$)/) || [])[0] || '/ua';
-    return pref + '/catalog/';
-  }
-
-  function goCatalog(title) {
-    var url = catalogUrl();
-    if (title) url += '#' + encodeURIComponent(title);
-    location.href = url;
+  function goCatalog(url) {
+    if (url) location.href = url;
   }
 
   function renderMega() {
@@ -110,7 +102,7 @@
       if (cat) {
         colSubs.hidden = false;
         var name = cat.name;
-        qsa('[data-mega-cat-name],[data-mega-cat-title]', colSubs).forEach(function (n) {
+        qsa('[data-mega-cat-title]', colSubs).forEach(function (n) {
           n.textContent = name;
         });
         var ico = qs('[data-mega-title-ico]', colSubs);
@@ -132,19 +124,22 @@
       if (cat && megaState.sub != null) {
         colLeaves.hidden = false;
         var sub = cat.subs[megaState.sub];
-        qsa('[data-mega-sub-name],[data-mega-sub-title]', colLeaves).forEach(function (n) {
+        qsa('[data-mega-sub-name]', colLeaves).forEach(function (n) {
+          n.textContent = cat.name;
+        });
+        qsa('[data-mega-sub-title]', colLeaves).forEach(function (n) {
           n.textContent = sub.name;
         });
         var ico2 = qs('[data-mega-leaf-ico]', colLeaves);
-        if (ico2) ico2.innerHTML = catMark(cat, 44);
+        if (ico2) ico2.innerHTML = catMark(sub, 44) || catMark(cat, 44);
         var leaves = qs('[data-mega-leaves]', colLeaves);
         if (leaves) {
           leaves.innerHTML = sub.leaves.map(function (n, i) {
-            return rowHtml(n, i, 'data-mega-leaf');
+            return rowHtml(n.name || n, i, 'data-mega-leaf');
           }).join('');
         }
         var find = qs('[data-mega-find]', colLeaves);
-        if (find) find.setAttribute('href', catalogUrl() + '#' + encodeURIComponent(sub.name));
+        if (find) find.setAttribute('href', sub.url || '/ua/catalog/');
       } else {
         colLeaves.hidden = true;
       }
@@ -190,7 +185,14 @@
       }
       var subBtn = e.target.closest('[data-mega-sub]');
       if (subBtn) {
-        megaState.sub = Number(subBtn.getAttribute('data-mega-sub'));
+        var subIdx = Number(subBtn.getAttribute('data-mega-sub'));
+        var subCat = menuData[megaState.cat];
+        var subRow = subCat && subCat.subs[subIdx];
+        if (subRow && (!subRow.leaves || !subRow.leaves.length)) {
+          goCatalog(subRow.url);
+          return;
+        }
+        megaState.sub = subIdx;
         renderMega();
         return;
       }
@@ -198,8 +200,9 @@
       if (leafBtn && megaState.cat != null && megaState.sub != null) {
         var leafCat = menuData[megaState.cat];
         var leafSub = leafCat && leafCat.subs[megaState.sub];
-        var leafName = leafSub && leafSub.leaves[Number(leafBtn.getAttribute('data-mega-leaf'))];
-        if (leafName) goCatalog(leafName);
+        var leaf = leafSub && leafSub.leaves[Number(leafBtn.getAttribute('data-mega-leaf'))];
+        if (leaf && leaf.url) goCatalog(leaf.url);
+        else if (typeof leaf === 'string') goCatalog(leaf);
       }
     });
   }
@@ -244,16 +247,17 @@
     var subTitle = qs('[data-mnav-sub-title]', mnav);
     if (subTitle) subTitle.textContent = sub.name;
     var ico2 = qs('[data-mnav-leaf-ico]', mnav);
-    if (ico2) ico2.innerHTML = catMark(cat, 40);
+    if (ico2) ico2.innerHTML = catMark(sub, 40) || catMark(cat, 40);
     var leaves = qs('[data-mnav-leaves]', mnav);
     if (leaves) {
       leaves.innerHTML = sub.leaves.map(function (n, i) {
+        var label = n.name || n;
         return '<li><button type="button" class="mnav__row" data-mnav-leaf="' + i + '"><span class="mega__name">' +
-          n + '</span><svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button></li>';
+          label + '</span><svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button></li>';
       }).join('');
     }
     var find = qs('[data-mnav-find]', mnav);
-    if (find) find.setAttribute('href', catalogUrl() + '#' + encodeURIComponent(sub.name));
+    if (find) find.setAttribute('href', sub.url || '/ua/catalog/');
   }
 
   function openMnav() {
@@ -292,7 +296,14 @@
       }
       var subBtn = e.target.closest('[data-mnav-sub]');
       if (subBtn) {
-        mnavState.sub = Number(subBtn.getAttribute('data-mnav-sub'));
+        var mSubIdx = Number(subBtn.getAttribute('data-mnav-sub'));
+        var mSubCat = menuData[mnavState.cat];
+        var mSubRow = mSubCat && mSubCat.subs[mSubIdx];
+        if (mSubRow && (!mSubRow.leaves || !mSubRow.leaves.length)) {
+          goCatalog(mSubRow.url);
+          return;
+        }
+        mnavState.sub = mSubIdx;
         renderMnav();
         return;
       }
@@ -301,7 +312,8 @@
         var mCat = menuData[mnavState.cat];
         var mSub = mCat && mCat.subs[mnavState.sub];
         var mLeaf = mSub && mSub.leaves[Number(leafBtn.getAttribute('data-mnav-leaf'))];
-        if (mLeaf) goCatalog(mLeaf);
+        if (mLeaf && mLeaf.url) goCatalog(mLeaf.url);
+        else if (typeof mLeaf === 'string') goCatalog(mLeaf);
         return;
       }
       var back = e.target.closest('[data-mnav-back]');

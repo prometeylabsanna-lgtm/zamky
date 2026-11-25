@@ -106,12 +106,12 @@ class FooterNavLinkBaseFormSet(BaseModelFormSet):
                     fallback="footer",
                 )
             order = form.cleaned_data.get("sort_order")
-            if order is None:
-                counters[obj.group] = counters.get(obj.group, 0)
+            if not order:
+                counters[obj.group] = counters.get(obj.group, 1)
                 obj.sort_order = counters[obj.group]
             else:
                 obj.sort_order = int(order)
-            counters[obj.group] = max(counters.get(obj.group, 0), obj.sort_order + 1)
+            counters[obj.group] = max(counters.get(obj.group, 1), obj.sort_order + 1)
             if commit:
                 obj.save()
             saved.append(obj)
