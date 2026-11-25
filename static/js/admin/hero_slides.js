@@ -5,8 +5,20 @@
   const list = root.querySelector("[data-hero-list]");
   const addBtn = root.querySelector("[data-hero-add]");
   const emptyTpl = root.querySelector("[data-hero-empty]");
-  const totalInput = root.querySelector('input[name$="-TOTAL_FORMS"]');
+  const formEl = root.closest("form");
+  const totalInput =
+    root.querySelector('input[name="hero_slides-TOTAL_FORMS"]') ||
+    (formEl && formEl.querySelector('input[name="hero_slides-TOTAL_FORMS"]'));
   if (!list || !addBtn || !emptyTpl || !totalInput) return;
+
+  const emptyHtml = () => {
+    if (emptyTpl instanceof HTMLTemplateElement) {
+      const holder = document.createElement("div");
+      holder.appendChild(emptyTpl.content.cloneNode(true));
+      return holder.innerHTML;
+    }
+    return emptyTpl.innerHTML;
+  };
 
   const reindex = () => {
     const rows = [...list.querySelectorAll("[data-hero-row]")];
@@ -15,7 +27,7 @@
         ["name", "id", "for"].forEach((attr) => {
           const val = el.getAttribute(attr);
           if (!val) return;
-          el.setAttribute(attr, val.replace(/hero_slides-\d+-/, `hero_slides-${index}-`));
+          el.setAttribute(attr, val.replace(/hero_slides-(?:\d+|__prefix__)-/, `hero_slides-${index}-`));
         });
       });
       const order =
@@ -27,13 +39,14 @@
   };
 
   addBtn.addEventListener("click", () => {
-    const html = emptyTpl.innerHTML.replace(/__prefix__/g, totalInput.value);
+    const html = emptyHtml().replace(/__prefix__/g, totalInput.value);
     const wrap = document.createElement("div");
     wrap.innerHTML = html.trim();
     const row = wrap.firstElementChild;
     if (!row) return;
     list.appendChild(row);
     reindex();
+    row.dispatchEvent(new CustomEvent("formset:added", { bubbles: true }));
   });
 
   let dragRow = null;

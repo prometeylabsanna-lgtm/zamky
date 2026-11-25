@@ -5,17 +5,22 @@ from __future__ import annotations
 from django import forms
 from django.contrib import messages
 from django.core.cache import cache
+from django.core.validators import FileExtensionValidator
 from django.shortcuts import redirect, render
 from unfold.widgets import UnfoldAdminFileFieldWidget, UnfoldBooleanWidget
 
 from pages.admin_guidelines import help_for_key, help_for_section
+from pages.admin_footer_nav import build_footer_nav_formset
+from pages.admin_header_nav import build_header_nav_formset
 from pages.admin_hero_slides import build_hero_slide_formset
+from pages.admin_popular import build_popular_formset
 from pages.admin_site_content_widgets import (
     CmsAdminColorWidget,
     CmsAdminTextInputWidget,
     CmsAdminTextareaWidget,
     CmsTinyMCEWidget,
 )
+from pages.audience_icons import ICON_UPLOAD_EXTENSIONS
 from pages.block_defaults import (
     INLINE_KEYS,
     MULTILINE_KEYS,
@@ -80,29 +85,10 @@ class SitePageContentForm(forms.Form):
         if not section:
             return
 
-        style = PageStyle.for_page(section.page_slug)
-        self._page_style = style
-        self.fields["style_background"] = forms.CharField(
-            required=False,
-            label="Колір фону",
-            initial=(style.background_color or "").strip() or PageStyle.DEFAULT_BACKGROUND,
-            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_BACKGROUND),
-            help_text=f"За замовчуванням: {PageStyle.DEFAULT_BACKGROUND}",
-        )
-        self.fields["style_text"] = forms.CharField(
-            required=False,
-            label="Колір шрифту",
-            initial=(style.text_color or "").strip() or PageStyle.DEFAULT_TEXT,
-            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_TEXT),
-            help_text=f"За замовчуванням: {PageStyle.DEFAULT_TEXT}",
-        )
-        self.fields["style_accent"] = forms.CharField(
-            required=False,
-            label="Колір підсвітки",
-            initial=(style.accent_color or "").strip() or PageStyle.DEFAULT_ACCENT,
-            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_ACCENT),
-            help_text=f"За замовчуванням: {PageStyle.DEFAULT_ACCENT}",
-        )
+        if getattr(section, "include_style", True):
+            style = PageStyle.for_page(section.page_slug)
+            self._page_style = style
+            self._add_style_fields(style)
 
         if section.visibility_key:
             block = self.blocks.get(section.visibility_key)
@@ -135,11 +121,23 @@ class SitePageContentForm(forms.Form):
                 continue
 
             if ctype == "image":
-                self.fields[f"block__{page}__{key}__image"] = forms.ImageField(
+                is_icon = key.endswith("_icon")
+                widget_attrs = {}
+                extra = {}
+                if is_icon:
+                    widget_attrs["accept"] = (
+                        "image/png,image/jpeg,image/webp,image/svg+xml,image/gif,.svg"
+                    )
+                    extra["validators"] = [
+                        FileExtensionValidator(ICON_UPLOAD_EXTENSIONS)
+                    ]
+                field_cls = forms.FileField if is_icon else forms.ImageField
+                self.fields[f"block__{page}__{key}__image"] = field_cls(
                     required=False,
                     label=label,
                     help_text=help_text,
-                    widget=UnfoldAdminFileFieldWidget(),
+                    widget=UnfoldAdminFileFieldWidget(attrs=widget_attrs or None),
+                    **extra,
                 )
                 continue
 
@@ -155,8 +153,9 @@ class SitePageContentForm(forms.Form):
 
             pair = (page, key)
             if is_richtext_key(page, key):
-                widget = CmsTinyMCEWidget(attrs={"rows": 14})
-                ru_widget = CmsTinyMCEWidget(attrs={"rows": 14})
+                tall = "cms-tinymce--tall" if key.endswith("_body") else ""
+                widget = CmsTinyMCEWidget(attrs={"rows": 22, "class": tall})
+                ru_widget = CmsTinyMCEWidget(attrs={"rows": 22, "class": tall})
             elif pair in INLINE_KEYS:
                 widget = CmsAdminTextInputWidget()
                 ru_widget = CmsAdminTextInputWidget()
@@ -181,6 +180,29 @@ class SitePageContentForm(forms.Form):
                 help_text="Порожнє = український текст на вітрині.",
                 widget=ru_widget,
             )
+
+    def _add_style_fields(self, style):
+        self.fields["style_background"] = forms.CharField(
+            required=False,
+            label="Колір фону",
+            initial=(style.background_color or "").strip() or PageStyle.DEFAULT_BACKGROUND,
+            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_BACKGROUND),
+            help_text=f"За замовчуванням: {PageStyle.DEFAULT_BACKGROUND}",
+        )
+        self.fields["style_text"] = forms.CharField(
+            required=False,
+            label="Колір шрифту",
+            initial=(style.text_color or "").strip() or PageStyle.DEFAULT_TEXT,
+            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_TEXT),
+            help_text=f"За замовчуванням: {PageStyle.DEFAULT_TEXT}",
+        )
+        self.fields["style_accent"] = forms.CharField(
+            required=False,
+            label="Колір підсвітки",
+            initial=(style.accent_color or "").strip() or PageStyle.DEFAULT_ACCENT,
+            widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_ACCENT),
+            help_text=f"За замовчуванням: {PageStyle.DEFAULT_ACCENT}",
+        )
 
     def clean_style_background(self):
         return clean_color(
@@ -256,6 +278,9 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
     keys = [key for _, key in section.blocks]
     blocks = load_section_blocks(section.page_slug, keys)
     hero_formset = None
+    header_nav_formset = None
+    footer_nav_formset = None
+    popular_formset = None
 
     if request.method == "POST":
         form = SitePageContentForm(
@@ -265,17 +290,44 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
             hero_formset = build_hero_slide_formset(
                 data=request.POST, files=request.FILES
             )
-        ok = form.is_valid() and (hero_formset is None or hero_formset.is_valid())
+        if getattr(section, "has_header_nav", False):
+            header_nav_formset = build_header_nav_formset(data=request.POST)
+        if getattr(section, "has_footer_nav", False):
+            footer_nav_formset = build_footer_nav_formset(data=request.POST)
+        if getattr(section, "has_popular_products", False):
+            popular_formset = build_popular_formset(data=request.POST)
+        extra_ok = True
+        if hero_formset is not None:
+            extra_ok = extra_ok and hero_formset.is_valid()
+        if header_nav_formset is not None:
+            extra_ok = extra_ok and header_nav_formset.is_valid()
+        if footer_nav_formset is not None:
+            extra_ok = extra_ok and footer_nav_formset.is_valid()
+        if popular_formset is not None:
+            extra_ok = extra_ok and popular_formset.is_valid()
+        ok = form.is_valid() and extra_ok
         if ok:
             form.save()
             if hero_formset is not None:
                 hero_formset.save()
+            if header_nav_formset is not None:
+                header_nav_formset.save()
+            if footer_nav_formset is not None:
+                footer_nav_formset.save()
+            if popular_formset is not None:
+                popular_formset.save()
             messages.success(request, "Збережено.")
             return redirect(request.path)
     else:
         form = SitePageContentForm(section=section, blocks=blocks)
         if section.has_hero_slides:
             hero_formset = build_hero_slide_formset()
+        if getattr(section, "has_header_nav", False):
+            header_nav_formset = build_header_nav_formset()
+        if getattr(section, "has_footer_nav", False):
+            footer_nav_formset = build_footer_nav_formset()
+        if getattr(section, "has_popular_products", False):
+            popular_formset = build_popular_formset()
 
     field_groups = []
     style_fields = []
@@ -328,11 +380,13 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
                 "preview_url": preview_url,
                 "preview_fallback": preview_fallback,
                 "preview_contain": False,
+                "preview_icon": key.endswith("_icon"),
             }
             ru_name = f"block__{page}__{key}__text_html_ru"
             if (
                 ctype not in {"image", "url"}
                 and not is_visibility_key(key)
+                and not key.endswith("_icon")
                 and ru_name in form.fields
             ):
                 item["field_ru"] = form[ru_name]
@@ -361,6 +415,9 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
         },
         "blocks_map": blocks,
         "hero_formset": hero_formset,
+        "header_nav_formset": header_nav_formset,
+        "footer_nav_formset": footer_nav_formset,
+        "popular_formset": popular_formset,
         "opts": SiteSettings._meta,
         "has_view_permission": True,
         "has_change_permission": True,
@@ -369,4 +426,10 @@ def site_content_section_view(request, page_slug: str, section_slug: str, model_
     }
     if hero_formset is not None:
         context["media"] += hero_formset.media
+    if header_nav_formset is not None:
+        context["media"] += header_nav_formset.media
+    if footer_nav_formset is not None:
+        context["media"] += footer_nav_formset.media
+    if popular_formset is not None:
+        context["media"] += popular_formset.media
     return render(request, "admin/pages/site_content_page.html", context)

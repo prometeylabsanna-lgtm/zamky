@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pages.cms_content import get_block_text
+from pages.legal_body import sanitize_legal_html
 
 
 def _t(page: str, key: str, lang: str, blocks) -> str:
@@ -179,17 +180,10 @@ def assemble_promos(lang: str, blocks) -> dict:
 def assemble_offer(lang: str, blocks) -> dict:
     p = "offer"
     g = lambda k: _t(p, k, lang, blocks)  # noqa: E731
-    sections = []
-    counts = {1: 2, 2: 2, 3: 2, 4: 2, 5: 1, 6: 0}
-    for i in range(1, 7):
-        paras = [g(f"offer_sec_{i}_p{j}") for j in range(1, counts[i] + 1)]
-        sections.append((g(f"offer_sec_{i}_title"), paras))
     return {
         "h1": g("offer_title"),
         "rev": g("offer_rev"),
-        "intro": g("offer_intro"),
-        "sections": sections,
-        "legal_box": g("offer_legal_box"),
+        "body": sanitize_legal_html(g("offer_body")),
     }
 
 
@@ -199,20 +193,7 @@ def assemble_privacy(lang: str, blocks) -> dict:
     return {
         "h1": g("privacy_title"),
         "rev": g("privacy_rev"),
-        "intro": g("privacy_intro"),
-        "collect_title": g("privacy_collect_title"),
-        "collect": [
-            g("privacy_collect_1"),
-            g("privacy_collect_2"),
-            g("privacy_collect_3"),
-        ],
-        "why_title": g("privacy_why_title"),
-        "why": g("privacy_why"),
-        "who_title": g("privacy_who_title"),
-        "who": g("privacy_who"),
-        "rights_title": g("privacy_rights_title"),
-        "rights": g("privacy_rights"),
-        "callout": g("privacy_callout"),
+        "body": sanitize_legal_html(g("privacy_body")),
     }
 
 
@@ -234,4 +215,18 @@ def consult_context(lang: str, blocks) -> dict:
         "phone": g("info_consult_phone"),
         "hours": g("info_consult_hours"),
         "cta": g("info_consult_cta"),
+    }
+
+
+def assemble_blog_ask(lang: str, blocks) -> dict:
+    from pages.cms_content import is_section_visible
+
+    g = lambda k: _t("blog", k, lang, blocks)  # noqa: E731
+    return {
+        "title": g("blog_ask_title"),
+        "text": g("blog_ask_text"),
+        "phone": g("blog_ask_phone"),
+        "hours": g("blog_ask_hours"),
+        "cta": g("blog_ask_cta"),
+        "visible": is_section_visible("blog", "blog_ask_visible", blocks),
     }

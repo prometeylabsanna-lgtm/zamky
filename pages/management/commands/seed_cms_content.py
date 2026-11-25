@@ -7,7 +7,10 @@ from pages.block_defaults import (
     get_block_default,
     get_block_label,
 )
+from pages.footer_nav import ensure_default_footer_nav
+from pages.header_nav import ensure_default_header_nav
 from pages.hero_slides import ensure_default_hero_slides
+from pages.popular_products import ensure_default_popular
 from pages.models_cms import SiteBlock, SiteSettings, clear_site_blocks_cache
 from pages.seed_parity import collect_parity
 from pages.site_content_registry import all_registry_block_keys
@@ -105,6 +108,9 @@ class Command(BaseCommand):
                 filled_blocks += 1
 
         hero_created = ensure_default_hero_slides()
+        nav_created = ensure_default_header_nav()
+        footer_nav_created = ensure_default_footer_nav()
+        popular_created = ensure_default_popular()
         from pages.page_styles import ensure_all_page_styles
 
         styles_created = ensure_all_page_styles()
@@ -112,7 +118,9 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"SiteBlock +{created_blocks} filled {filled_blocks}, "
-                f"HeroSlide +{hero_created}, PageStyle +{styles_created}"
+                f"HeroSlide +{hero_created}, HeaderNav +{nav_created}, "
+                f"FooterNav +{footer_nav_created}, Popular +{popular_created}, "
+                f"PageStyle +{styles_created}"
             )
         )
         report = collect_parity()

@@ -9,19 +9,7 @@ from django.urls import reverse
 from django.views import View
 
 from catalog.models import AttributeValue, Product
-
-DOOR_CATEGORY_HINTS = {
-    '0': ['Замки', 'захист'],
-    '1': ['Серцевини', 'циліндр'],
-    '2': ['Замки', 'захист'],
-    '3': ['Серцевини'],
-    '4': ['код', 'елект'],
-    'entrance': ['Замки', 'захист'],
-    'interior': ['Серцевини', 'циліндр'],
-    'metal': ['Замки', 'захист'],
-    'plastic': ['Серцевини'],
-    'metal_electric': ['код', 'елект'],
-}
+from pages.picker_defaults import door_category_ids, door_hints, price_band
 
 
 def _catalog_qs():
@@ -33,9 +21,10 @@ def _catalog_qs():
 def _door_filter(qs, raw):
     if not raw:
         return qs
-    hints = DOOR_CATEGORY_HINTS.get(raw.strip().lower())
-    if hints is None and raw.isdigit():
-        hints = DOOR_CATEGORY_HINTS.get(raw)
+    cat_ids = door_category_ids(raw)
+    if cat_ids:
+        return qs.filter(category_id__in=cat_ids)
+    hints = door_hints(raw)
     if not hints:
         return qs
     q = Q()
@@ -54,7 +43,7 @@ def _filter_attr(qs, slug, value):
     if not values:
         return qs
     return qs.filter(
-        attributes__slug__in=values,
+        Q(attributes__slug__in=values) | Q(attributes__value__in=values),
         attributes__attribute__slug=slug,
     )
 
@@ -98,6 +87,60 @@ def _filter_size(qs, raw):
         )
 
 
+def _filter_price(qs, label):
+    lo_hi = price_band(label)
+    if lo_hi is None:
+        if '-' in label:
+            parts = label.replace('₴', '').replace(' ', '').split('-')
+            try:
+                lo_hi = (Decimal(parts[0]), Decimal(parts[1]))
+            except (InvalidOperation, IndexError):
+                return qs
+        else:
+            return qs
+    lo, hi = lo_hi
+    if lo is not None:
+        qs = qs.filter(price__gte=lo)
+    if hi is not None:
+        qs = qs.filter(price__lt=hi)
+    return qs
+
+
+def _apply_picker_filters(request, qs):
+    from pages.models_picker import PickerFilter
+
+    special = {
+        'brand': _filter_brand,
+        'price': _filter_price,
+        'size': _filter_size,
+    }
+    filters = PickerFilter.objects.filter(is_active=True).select_related('attribute')
+    for filt in filters:
+        raw = (request.GET.get(filt.key) or '').strip()
+        if not raw:
+            continue
+        handler = special.get(filt.key)
+        if handler is not None:
+            qs = handler(qs, raw)
+            continue
+        slug = filt.attribute.slug if filt.attribute_id else filt.key
+        qs = _filter_attr(qs, slug, raw)
+    return qs
+
+
+def _popular_products():
+    from pages.popular_products import products_for_tab
+
+    curated = products_for_tab('hits')
+    if curated:
+        return curated
+    qs = _catalog_qs().prefetch_related('images')
+    hits = qs.filter(is_hit=True).order_by('catalog_order', 'pk')
+    if hits.exists():
+        return list(hits[:8])
+    return list(qs.order_by('catalog_order', 'name')[:8])
+
+
 def _picker_item(product):
     img = product.primary_image
     image_url = img.image.url if img else static('img/product-brass.png')
@@ -122,38 +165,21 @@ class PickerApiView(View):
     def get(self, request):
         qs = _catalog_qs()
         qs = _door_filter(qs, request.GET.get('door', ''))
-        qs = _filter_brand(qs, request.GET.get('brand', ''))
-        qs = _filter_attr(qs, 'color', request.GET.get('color', ''))
-        qs = _filter_attr(qs, 'mech', request.GET.get('mech', ''))
-        qs = _filter_size(qs, request.GET.get('size', ''))
+        qs = _apply_picker_filters(request, qs)
 
-        price_raw = request.GET.get('price', '').strip()
-        if price_raw:
-            qs = self._filter_price_band(qs, price_raw)
-
-        products = qs.distinct().prefetch_related('images').order_by('catalog_order', 'name')[:24]
+        products = list(
+            qs.distinct().prefetch_related('images').order_by('catalog_order', 'name')[:24]
+        )
+        fallback = False
+        if not products:
+            products = list(_popular_products()[:8])
+            fallback = bool(products)
         items = [_picker_item(p) for p in products]
-        return JsonResponse({'ok': True, 'count': len(items), 'items': items})
-
-    def _filter_price_band(self, qs, label):
-        bands = {
-            'до 1500 ₴': (0, 1500),
-            '1500 – 3000 ₴': (1500, 3000),
-            '3000 – 4500 ₴': (3000, 4500),
-            'від 4500 ₴': (4500, None),
-        }
-        lo_hi = bands.get(label)
-        if not lo_hi:
-            if '-' in label:
-                parts = label.replace('₴', '').replace(' ', '').split('-')
-                try:
-                    lo_hi = (Decimal(parts[0]), Decimal(parts[1]))
-                except (InvalidOperation, IndexError):
-                    return qs
-            else:
-                return qs
-        lo, hi = lo_hi
-        qs = qs.filter(price__gte=lo)
-        if hi is not None:
-            qs = qs.filter(price__lt=hi)
-        return qs
+        return JsonResponse(
+            {
+                'ok': True,
+                'count': len(items),
+                'items': items,
+                'fallback': fallback,
+            }
+        )

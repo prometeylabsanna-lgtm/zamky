@@ -125,15 +125,39 @@
     return !!root.querySelector("[data-admin-panel='style']");
   }
 
-  function applyPanel(root, panel) {
-    var showStyle = panel === "style";
+  function panelIds(root) {
+    var ids = [];
     root.querySelectorAll("[data-admin-panel]").forEach(function (node) {
-      var isStyle = node.getAttribute("data-admin-panel") === "style";
-      if (showStyle) {
-        node.hidden = !isStyle;
-      } else {
-        node.hidden = isStyle;
+      var id = node.getAttribute("data-admin-panel");
+      if (id && ids.indexOf(id) === -1) ids.push(id);
+    });
+    return ids;
+  }
+
+  function panelLabel(root, id) {
+    var node = root.querySelector("[data-admin-panel='" + id + "']");
+    var label = node && node.getAttribute("data-admin-panel-label");
+    return label || id;
+  }
+
+  function extraPanelIds(root) {
+    return panelIds(root).filter(function (id) {
+      if (id === "style") return false;
+      if (id === "content") {
+        var node = root.querySelector("[data-admin-panel='content']");
+        return !!(node && node.getAttribute("data-admin-panel-label"));
       }
+      return true;
+    });
+  }
+
+  function applyPanel(root, panel) {
+    var ids = panelIds(root);
+    if (ids.indexOf(panel) === -1) {
+      panel = ids.indexOf("content") >= 0 ? "content" : ids[0] || "content";
+    }
+    root.querySelectorAll("[data-admin-panel]").forEach(function (node) {
+      node.hidden = node.getAttribute("data-admin-panel") !== panel;
     });
     root.querySelectorAll("[data-admin-panel-tab]").forEach(function (btn) {
       var active = btn.getAttribute("data-admin-panel-tab") === panel;
@@ -141,6 +165,7 @@
       btn.setAttribute("aria-selected", active ? "true" : "false");
       btn.setAttribute("tabindex", active ? "0" : "-1");
     });
+    var showStyle = panel === "style";
     root.querySelectorAll("[data-admin-lang-tab]").forEach(function (btn) {
       if (showStyle) {
         btn.classList.remove("is-active");
@@ -148,12 +173,24 @@
         btn.setAttribute("tabindex", "-1");
       }
     });
+    var tabInput = root.querySelector('input[name="picker_tab"]');
+    if (tabInput && panel !== "style") {
+      tabInput.value = panel;
+    }
   }
 
   function applyLang(root, lang) {
-    applyPanel(root, "content");
+    var current = "content";
+    var activeTab = root.querySelector("[data-admin-panel-tab].is-active");
+    if (activeTab) {
+      current = activeTab.getAttribute("data-admin-panel-tab") || "content";
+    }
+    if (current === "style") {
+      current = "content";
+    }
+    applyPanel(root, current);
     try {
-      window.localStorage.setItem(PANEL_KEY, "content");
+      window.localStorage.setItem(PANEL_KEY, current);
     } catch (err) {}
     root.querySelectorAll("[data-admin-lang]").forEach(function (node) {
       // Ніколи не ховаємо цілий рядок tabular-інлайну
@@ -181,7 +218,8 @@
     opts = opts || {};
     var withLang = !!opts.withLang;
     var withStyle = !!opts.withStyle;
-    if (!withLang && !withStyle) return;
+    var extras = extraPanelIds(root);
+    if (!withLang && !withStyle && !extras.length) return;
 
     var tabs = document.createElement("div");
     tabs.className = "admin-lang-tabs";
@@ -200,7 +238,6 @@
         btn.addEventListener("click", function () {
           try {
             window.localStorage.setItem(STORAGE_KEY, lang);
-            window.localStorage.setItem(PANEL_KEY, "content");
           } catch (err) {}
           applyLang(root, lang);
           document.dispatchEvent(
@@ -225,6 +262,29 @@
       });
       tabs.appendChild(contentBtn);
     }
+
+    extras.forEach(function (id) {
+      var extraBtn = document.createElement("button");
+      extraBtn.type = "button";
+      extraBtn.className = "admin-lang-tabs__btn";
+      extraBtn.setAttribute("role", "tab");
+      extraBtn.setAttribute("data-admin-panel-tab", id);
+      extraBtn.setAttribute("aria-selected", "false");
+      extraBtn.textContent = panelLabel(root, id);
+      extraBtn.addEventListener("click", function () {
+        try {
+          window.localStorage.setItem(PANEL_KEY, id);
+        } catch (err) {}
+        applyPanel(root, id);
+        var langBtn = root.querySelector("[data-admin-lang-tab].is-active");
+        if (!langBtn) {
+          var saved = readLang();
+          var match = root.querySelector('[data-admin-lang-tab="' + saved + '"]');
+          if (match) match.classList.add("is-active");
+        }
+      });
+      tabs.appendChild(extraBtn);
+    });
 
     if (withStyle) {
       var styleBtn = document.createElement("button");
@@ -266,24 +326,34 @@
     return "uk";
   }
 
-  function readPanel() {
+  function readPanel(root) {
+    var initial = root && root.getAttribute("data-admin-initial-panel");
+    if (initial) return initial;
     try {
       var saved = window.localStorage.getItem(PANEL_KEY);
-      if (saved === "style" || saved === "content") return saved;
+      if (saved) return saved;
     } catch (err) {}
     return "content";
   }
 
   function initRoot(root) {
     if (!root || root.getAttribute(ROOT_ATTR) === "1") return;
+    if (root.parentElement && root.parentElement.closest("[" + ROOT_ATTR + "='1']")) {
+      return;
+    }
     var hasRu = markPairs(root) || !!root.querySelector("[data-admin-lang=ru]");
     var withStyle = hasStylePanel(root);
-    if (!hasRu && !withStyle) return;
+    var extras = extraPanelIds(root);
+    if (!hasRu && !withStyle && !extras.length) return;
     root.setAttribute(ROOT_ATTR, "1");
     var lang = readLang();
     buildTabs(root, lang, { withLang: hasRu, withStyle: withStyle });
-    if (withStyle && readPanel() === "style") {
+    var panel = readPanel(root);
+    if (panel === "style" && withStyle) {
       applyPanel(root, "style");
+    } else if (extras.indexOf(panel) >= 0) {
+      applyPanel(root, panel);
+      applyLang(root, lang);
     } else if (hasRu) {
       applyLang(root, lang);
     } else {

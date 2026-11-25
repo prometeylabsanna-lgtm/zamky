@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n_ui static catalog_tags %}
 
-{% block title %}{{ title }} — Каталог{% endblock %}
+{% block title %}{{ title }} — {% t 'Замки' %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ asset_v }}">
@@ -29,7 +29,7 @@
     <div class="catalog-head__actions">
       <button type="button" class="catalog-filters-btn hide-desktop" data-open-filters>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"></path><circle cx="16" cy="6" r="2"></circle><circle cx="10" cy="12" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg>
-        <span>{% t 'Фільтри' %}</span>
+        <span>{{ catalog_filters_title }}</span>
         {% if selected_chips %}<span class="catalog-filters-btn__badge">{{ selected_chips|length }}</span>{% endif %}
       </button>
       <div class="dropdown catalog-sort">
@@ -63,7 +63,7 @@
     <div id="filters-overlay" class="filters-overlay" data-close-filters></div>
     <aside id="filters" class="filters">
       <div class="filters__head hide-desktop">
-        <span class="filters__title">{% t 'Фільтри' %}</span>
+        <span class="filters__title">{{ catalog_filters_title }}</span>
         <button type="button" class="filters__close" data-close-filters aria-label="{% t 'Закрити' %}">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
         </button>

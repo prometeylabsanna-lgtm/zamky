@@ -17,13 +17,19 @@ class SiteSettings(models.Model):
     """Глобальні налаштування (singleton pk=1)."""
 
     site_name = models.CharField("Назва сайту", max_length=128, default="Замки")
-    phone = models.CharField("Телефон", max_length=32, blank=True, default="")
+    phone = models.CharField(
+        "Телефон",
+        max_length=32,
+        blank=True,
+        default="",
+        help_text="Показується в шапці, мобільному меню і футері.",
+    )
     phone_raw = models.CharField(
         "Телефон для tel:",
         max_length=32,
         blank=True,
         default="",
-        help_text="Лише цифри та +, для посилання tel:",
+        help_text="Заповнюється автоматично з поля «Телефон».",
     )
     email = models.EmailField("Email", blank=True, default="")
     address = models.CharField("Адреса", max_length=255, blank=True, default="")
@@ -53,6 +59,11 @@ class SiteSettings(models.Model):
 
     def save(self, *args, **kwargs):
         self.pk = 1
+        from pages.phone import normalize_ua_tel
+
+        derived = normalize_ua_tel(self.phone)
+        if derived:
+            self.phone_raw = derived
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -203,6 +214,28 @@ class HeroSlide(models.Model):
         validators=[cta_url_validator],
         help_text="Порожньо = блок підбору (#picker). Формат: /шлях, #якір, https://… або tel:…",
     )
+    headline = models.CharField("Заголовок (UA)", max_length=160, blank=True, default="")
+    headline_ru = models.CharField("Заголовок (RU)", max_length=160, blank=True, default="")
+    headline_accent = models.CharField(
+        "Акцент у заголовку (UA)",
+        max_length=32,
+        blank=True,
+        default="",
+        help_text="Наприклад 24/7 — показується оранжевим після заголовка.",
+    )
+    headline_accent_ru = models.CharField(
+        "Акцент у заголовку (RU)", max_length=32, blank=True, default=""
+    )
+    subtitle = models.CharField("Підзаголовок (UA)", max_length=240, blank=True, default="")
+    subtitle_ru = models.CharField("Підзаголовок (RU)", max_length=240, blank=True, default="")
+    show_secondary = models.BooleanField("Друга кнопка", default=False)
+    cta_primary_light = models.BooleanField(
+        "Кнопка 1 світла",
+        default=False,
+        help_text="Біла кнопка з оранжевим текстом (акції / бренди).",
+    )
+    show_features = models.BooleanField("Картки переваг справа", default=False)
+    show_brands = models.BooleanField("Логотипи брендів", default=False)
 
     def resolved_image_url(self) -> str | None:
         if self.media_id and self.media and self.media.file:

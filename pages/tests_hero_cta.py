@@ -10,12 +10,21 @@ class HeroCtaTests(TestCase):
     def setUp(self):
         cache.clear()
         HeroSlide.objects.all().delete()  # тестова БД
-        self.s1 = HeroSlide.objects.create(alt_text="Слайд 1", static_fallback="img/v2/banner1.png", sort_order=0)
-        self.s2 = HeroSlide.objects.create(alt_text="Слайд 2", static_fallback="img/v2/banner2.png", sort_order=1)
+        self.s1 = HeroSlide.objects.create(
+            alt_text="Слайд 1",
+            static_fallback="img/v2/hero/slide-home.webp",
+            sort_order=0,
+            show_secondary=True,
+        )
+        self.s2 = HeroSlide.objects.create(
+            alt_text="Слайд 2",
+            static_fallback="img/v2/hero/slide-promo.webp",
+            sort_order=1,
+        )
 
     def _cta_html(self, url="/ua/"):
         html = self.client.get(url).content.decode()
-        start = html.index('<div class="home-hero__cta">')
+        start = html.index('class="home-hero__overlay"')
         return html[start: html.index("</section>", start)]
 
     def test_fallback_texts_and_urls(self):
@@ -32,6 +41,7 @@ class HeroCtaTests(TestCase):
         self.s2.cta_primary_url = "/ua/catalog/cyl/"
         self.s2.cta_secondary_label = "Подзвонити"
         self.s2.cta_secondary_url = "tel:+380441234567"
+        self.s2.show_secondary = True
         self.s2.save()
         cta = self._cta_html()
         self.assertIn("Перейти до каталогу", cta)  # слайд 1 — фолбек
@@ -93,3 +103,34 @@ class HeroCtaTests(TestCase):
         self.assertContains(response, "hero-slide-row__cta-col")
         self.assertContains(response, "hero-slide-row__check")
         self.assertContains(response, "js/admin/image_preview.js")
+        self.assertContains(response, "js/admin/hero_slides.js")
+        self.assertContains(response, "data-hero-add")
+        self.assertContains(response, "data-hero-empty")
+        self.assertContains(response, "hero_slides-__prefix__-alt_text")
+        self.assertContains(response, "hero_slides-__prefix__-headline")
+        html = response.content.decode()
+        start = html.index("data-hero-slides")
+        end = html.index("</fieldset>", start)
+        self.assertIn('name="hero_slides-TOTAL_FORMS"', html[start:end])
+
+    def test_hero_overlay_is_html_not_image_only(self):
+        html = self.client.get("/ua/").content.decode()
+        self.assertIn("home-hero__overlay", html)
+        self.assertIn("home-hero__cta-link", html)
+        self.assertIn("home-hero__badge", html)
+        self.assertIn("css/home-hero.css", html)
+        self.assertIn("css/home-hero-2.css", html)
+
+    def test_hero_kind_and_wide_cta(self):
+        from pages.hero_slides import ensure_default_hero_slides
+
+        HeroSlide.objects.all().delete()
+        ensure_default_hero_slides()
+        html = self.client.get("/ua/").content.decode()
+        self.assertIn('data-hero-kind="home"', html)
+        self.assertIn('data-hero-kind="promo"', html)
+        self.assertIn('data-hero-kind="install"', html)
+        self.assertIn('data-hero-kind="brands"', html)
+        self.assertIn("home-hero__actions--single", html)
+        self.assertIn("home-hero__cta-spark", html)
+        self.assertIn("heroPromoSpark", html)

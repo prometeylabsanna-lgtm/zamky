@@ -154,7 +154,18 @@
     if (!root) return;
     var apiUrl = root.getAttribute('data-picker-api');
     var options = readJson('picker-options') || {};
-    var state = { door: '0', mech: '', brand: '', color: '', price: '' };
+    var firstDoor = qs('[data-door-id]', root);
+    var filterKeys = qsa('[data-filter]', root)
+      .map(function (el) {
+        return el.getAttribute('data-filter');
+      })
+      .filter(Boolean);
+    var state = {
+      door: firstDoor ? firstDoor.getAttribute('data-door-id') : '0',
+    };
+    filterKeys.forEach(function (key) {
+      state[key] = '';
+    });
     var resultsEl = qs('#picker-results', root);
     var backdrop = null;
 
@@ -256,16 +267,20 @@
       resultsEl.hidden = false;
       var count = data.count || 0;
       var items = data.items || [];
+      var fallback = !!data.fallback;
       var subParts = [t('Для дверей') + ': ' + doorLabel()];
-      if (state.mech) subParts.push(findLabel('mech', state.mech));
-      if (state.brand) subParts.push(state.brand);
-      if (state.price) subParts.push(state.price);
-      if (state.color) subParts.push(findLabel('color', state.color));
+      filterKeys.forEach(function (key) {
+        if (state[key]) subParts.push(findLabel(key, state[key]));
+      });
+      if (fallback) {
+        subParts.unshift(t('Точних збігів немає — популярні моделі'));
+      }
 
       var html = '<div class="home-picker__results-head">';
       html += '<div><div class="home-picker__results-title">';
-      html +=
-        count > 0
+      html += fallback
+        ? t('Рекомендуємо популярні')
+        : count > 0
           ? t('Підібрали') + ' ' + count + ' ' + pluralModels(count)
           : t('Нічого не знайдено');
       html += '</div><div class="home-picker__results-sub">' + subParts.join(' · ') + '</div></div>';
@@ -288,7 +303,7 @@
       } else {
         html += '<div class="home-picker__cards">';
         items.slice(0, 4).forEach(function (item, i) {
-          html += renderCard(item, i === 0);
+          html += renderCard(item, !fallback && i === 0);
         });
         html += '</div>';
       }
@@ -384,7 +399,9 @@
     }
 
     function resetPicker() {
-      state.mech = state.brand = state.color = state.price = '';
+      filterKeys.forEach(function (key) {
+        state[key] = '';
+      });
       qsa('.home-filter', root).forEach(function (f) {
         f.classList.remove('is-set');
         var valEl = qs('[data-filter-val]', f);
@@ -402,10 +419,9 @@
         closeFilters();
         var params = new URLSearchParams();
         params.set('door', state.door);
-        if (state.mech) params.set('mech', state.mech);
-        if (state.brand) params.set('brand', state.brand);
-        if (state.color) params.set('color', state.color);
-        if (state.price) params.set('price', state.price);
+        filterKeys.forEach(function (key) {
+          if (state[key]) params.set(key, state[key]);
+        });
         fetch(apiUrl + '?' + params.toString(), {
           headers: { Accept: 'application/json' },
           credentials: 'same-origin',

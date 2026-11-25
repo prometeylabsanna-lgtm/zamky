@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
-from pages.cms_content import get_block_text, get_site_blocks_map, is_section_visible
-from pages.hero_slides import get_hero_slides
+from pages.cms_content import (
+    get_block_image_url,
+    get_block_text,
+    get_site_blocks_map,
+    is_section_visible,
+)
+from pages.hero_slides import HERO_FEATURES, get_hero_slides
 
 
 def _lang_from_request(request) -> str:
@@ -25,17 +30,18 @@ def build_home_cms(request) -> dict:
     vis = lambda page, key: is_section_visible(page, key, site_blocks=blocks)  # noqa: E731
 
     audience = []
-    icons = ("home", "biz", "tools", "shield")
-    for i, icon in enumerate(icons, start=1):
+    for i in range(1, 5):
         audience.append(
             {
                 "title": t("home", f"audience_{i}_title"),
                 "text": t("home", f"audience_{i}_text"),
-                "icon": icon,
+                "icon_url": get_block_image_url(
+                    "home",
+                    f"audience_{i}_icon",
+                    site_blocks=blocks,
+                ),
             }
         )
-
-    category_subs = [t("home", f"categories_{i}_sub") for i in range(1, 7)]
 
     hero = []
     for slide in get_hero_slides(lang=lang):
@@ -49,6 +55,14 @@ def build_home_cms(request) -> dict:
                 "cta_primary_url": slide.cta_primary_url,
                 "cta_secondary_label": slide.cta_secondary_label,
                 "cta_secondary_url": slide.cta_secondary_url,
+                "headline": slide.headline,
+                "headline_accent": slide.headline_accent,
+                "subtitle": slide.subtitle,
+                "show_secondary": slide.show_secondary,
+                "cta_primary_light": slide.cta_primary_light,
+                "show_features": slide.show_features,
+                "show_brands": slide.show_brands,
+                "brands": slide.brands,
             }
         )
 
@@ -56,12 +70,11 @@ def build_home_cms(request) -> dict:
         "site_blocks": blocks,
         "cms_lang": lang,
         "hero_slides": hero,
+        "hero_features": HERO_FEATURES,
         "show_hero": vis("home", "hero_section_visible"),
         "audience": audience,
         "show_audience": vis("home", "audience_section_visible"),
         "show_categories": vis("home", "categories_section_visible"),
-        "categories_title": t("home", "categories_title", "Категорії"),
-        "category_subs": category_subs,
         "show_picker": vis("home", "picker_section_visible"),
         "picker_title": t("home", "picker_title"),
         "picker_lead": t("home", "picker_lead"),
@@ -78,6 +91,4 @@ def build_home_cms(request) -> dict:
         "show_blog": vis("home", "blog_section_visible"),
         "blog_title": t("home", "blog_title"),
         "blog_more_label": t("home", "blog_more_label"),
-        "show_district": vis("home", "district_section_visible"),
-        "district_others_title": t("home", "district_others_title"),
     }

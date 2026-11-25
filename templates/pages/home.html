@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="{% static 'css/home.css' %}?v={{ asset_v }}">
 <link rel="stylesheet" href="{% static 'css/home-2.css' %}?v={{ asset_v }}">
 <link rel="stylesheet" href="{% static 'css/home-3.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/home-hero.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/home-hero-2.css' %}?v={{ asset_v }}">
 {% endblock %}
 
 {% block content %}
@@ -26,57 +28,7 @@
   {% endif %}
 
   {% if show_hero %}
-  <section class="home-hero" data-hero aria-roledescription="carousel">
-    <div class="home-hero__stage">
-      <div class="home-hero__track">
-        {% for slide in hero_slides %}
-        <a href="{{ slide.url }}" class="home-hero__slide{% if forloop.first %} is-active{% endif %}" data-hero-slide aria-label="{{ slide.alt }}">
-          {% if slide.image_url %}
-          <img src="{{ slide.image_url }}" alt="{{ slide.alt }}"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
-          {% else %}
-          <img src="{% static slide.image %}" alt="{{ slide.alt }}"{% if forloop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
-          {% endif %}
-        </a>
-        {% endfor %}
-      </div>
-      <div class="home-hero__dots" role="tablist" aria-label="{% t 'Слайди банера' %}">
-        {% for slide in hero_slides %}
-        <button type="button" class="home-hero__dot{% if forloop.first %} is-active{% endif %}" data-hero-dot aria-label="{% t 'Слайд' %} {{ forloop.counter }}"></button>
-        {% endfor %}
-      </div>
-    </div>
-    <div class="home-hero__nav" aria-hidden="true">
-      <button type="button" class="home-icon-btn home-hero__arrow" data-hero-prev aria-label="{% t 'Назад' %}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"></path></svg>
-      </button>
-      <button type="button" class="home-icon-btn home-hero__arrow" data-hero-next aria-label="{% t 'Далі' %}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"></path></svg>
-      </button>
-    </div>
-    <div class="home-hero__cta">
-      {% for slide in hero_slides %}
-      <div class="home-hero__cta-set" data-hero-cta{% if not forloop.first %} hidden{% endif %}>
-        <a class="home-hero__cta-link home-hero__cta-link--primary" href="{% if slide.cta_primary_url %}{{ slide.cta_primary_url }}{% else %}{% url 'catalog:catalog' %}{% endif %}">
-          <span>{% if slide.cta_primary_label %}{{ slide.cta_primary_label }}{% else %}{% t 'Перейти до каталогу' %}{% endif %}</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-        </a>
-        {% if slide.cta_secondary_url %}
-        <a class="home-hero__cta-link home-hero__cta-link--ghost" href="{{ slide.cta_secondary_url }}">{% if slide.cta_secondary_label %}{{ slide.cta_secondary_label }}{% else %}{% t 'Підібрати замок за 2 хв' %}{% endif %}</a>
-        {% elif show_picker %}
-        <a class="home-hero__cta-link home-hero__cta-link--ghost" href="#picker">{% if slide.cta_secondary_label %}{{ slide.cta_secondary_label }}{% else %}{% t 'Підібрати замок за 2 хв' %}{% endif %}</a>
-        {% endif %}
-      </div>
-      {% empty %}
-      <a class="home-hero__cta-link home-hero__cta-link--primary" href="{% url 'catalog:catalog' %}">
-        <span>{% t 'Перейти до каталогу' %}</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
-      </a>
-      {% if show_picker %}
-      <a class="home-hero__cta-link home-hero__cta-link--ghost" href="#picker">{% t 'Підібрати замок за 2 хв' %}</a>
-      {% endif %}
-      {% endfor %}
-    </div>
-  </section>
+  {% include "pages/includes/home_hero.html" %}
   {% endif %}
 
   {% if show_audience %}
@@ -84,14 +36,8 @@
     {% for card in audience %}
     <article class="home-audience__card">
       <span class="home-audience__icon" aria-hidden="true">
-        {% if card.icon == 'home' %}
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M10.6 3.3a2.3 2.3 0 0 1 2.8 0l6.6 5.2c.6.4.9 1.1.9 1.8v8.3a2.4 2.4 0 0 1-2.4 2.4h-3.2v-4.6a3.3 3.3 0 0 0-6.6 0V21H5.5a2.4 2.4 0 0 1-2.4-2.4v-8.3c0-.7.3-1.4.9-1.8z"></path></svg>
-        {% elif card.icon == 'biz' %}
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path fill-rule="evenodd" d="M6 2.5h7A2.5 2.5 0 0 1 15.5 5v3.5h2.5A2.5 2.5 0 0 1 20.5 11v8a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 19V5A2.5 2.5 0 0 1 6 2.5z"></path></svg>
-        {% elif card.icon == 'tools' %}
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path fill-rule="evenodd" d="M15.6 2.6a5 5 0 0 1 3.1.2c.4.2.5.7.2 1l-2.4 2.4.4 2.4 2.4.4 2.4-2.4c.3-.3.8-.2 1 .2a5 5 0 0 1-6.4 6.6l-7.6 7.6a2.6 2.6 0 0 1-3.7-3.7l7.6-7.6a5 5 0 0 1 3-7.1zM5.8 17a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"></path></svg>
-        {% else %}
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path fill-rule="evenodd" d="M10.9 2.4a3 3 0 0 1 2.2 0l5.5 2.1A2.2 2.2 0 0 1 20 6.6V11c0 5-3.4 9.1-7.4 10.6a1.7 1.7 0 0 1-1.2 0C7.4 20.1 4 16 4 11V6.6c0-.9.6-1.8 1.4-2.1zM12 8a2.3 2.3 0 0 0-1.1 4.3v2.5a1.1 1.1 0 0 0 2.2 0v-2.5A2.3 2.3 0 0 0 12 8z"></path></svg>
+        {% if card.icon_url %}
+        <img src="{{ card.icon_url }}" alt="" width="22" height="22" decoding="async">
         {% endif %}
       </span>
       <div class="home-audience__text">
@@ -104,7 +50,7 @@
   {% endif %}
 
   {% if show_categories %}
-  <section class="home-categories" aria-label="{{ categories_title|default:'Категорії' }}">
+  <section class="home-categories" aria-label="{% t 'Категорії' %}">
     <div class="home-categories__scroll ic-scroll">
       {% for card in category_cards %}
       {% with c=card.category %}
@@ -118,7 +64,7 @@
         </div>
         <div class="home-cat-card__foot">
           <div class="home-cat-card__meta">
-            <span class="home-cat-card__title">{{ c.name|tr }}</span>
+            <span class="home-cat-card__title">{{ card.title|default:c.name }}</span>
             {% if card.sub %}<span class="home-cat-card__sub">{{ card.sub }}</span>{% endif %}
           </div>
           <span class="home-cat-card__go" aria-hidden="true">
@@ -140,7 +86,11 @@
     <div class="home-picker__doors ic-scroll">
       {% for d in door_types %}
       <button type="button" class="home-door-btn{% if forloop.first %} is-active{% endif %}" data-door-id="{{ d.id }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">
+        {% if d.image_url %}
+        <img src="{{ d.image_url }}" alt="">
+        {% else %}
         <img src="{% static d.image %}" alt="">
+        {% endif %}
         <span class="home-door-btn__foot">
           <span class="home-door-btn__label">{{ d.line1 }}<br>{{ d.line2 }}</span>
           <span class="home-door-btn__check" aria-hidden="true">
@@ -152,34 +102,15 @@
     </div>
     <h3 class="home-picker__step home-picker__step--2">{{ picker_step2 }}</h3>
     <div class="home-picker__filters">
-      <div class="home-filter" data-filter="mech">
+      {% for f in picker_filters %}
+      <div class="home-filter" data-filter="{{ f.key }}">
         <button type="button" class="home-filter__toggle" aria-expanded="false">
-          <span class="home-filter__labels"><span class="home-filter__name">{% t 'Тип замка' %}</span><span class="home-filter__val" data-filter-val>{% t 'Не обрано' %}</span></span>
+          <span class="home-filter__labels"><span class="home-filter__name">{{ f.label }}</span><span class="home-filter__val" data-filter-val>{% t 'Не обрано' %}</span></span>
           <svg class="home-filter__chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg>
         </button>
         <div class="home-filter__menu" hidden></div>
       </div>
-      <div class="home-filter" data-filter="brand">
-        <button type="button" class="home-filter__toggle" aria-expanded="false">
-          <span class="home-filter__labels"><span class="home-filter__name">{% t 'Бренд' %}</span><span class="home-filter__val" data-filter-val>{% t 'Не обрано' %}</span></span>
-          <svg class="home-filter__chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg>
-        </button>
-        <div class="home-filter__menu" hidden></div>
-      </div>
-      <div class="home-filter" data-filter="price">
-        <button type="button" class="home-filter__toggle" aria-expanded="false">
-          <span class="home-filter__labels"><span class="home-filter__name">{% t 'Ціновий діапазон' %}</span><span class="home-filter__val" data-filter-val>{% t 'Не обрано' %}</span></span>
-          <svg class="home-filter__chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg>
-        </button>
-        <div class="home-filter__menu" hidden></div>
-      </div>
-      <div class="home-filter" data-filter="color">
-        <button type="button" class="home-filter__toggle" aria-expanded="false">
-          <span class="home-filter__labels"><span class="home-filter__name">{% t 'Колір/покриття' %}</span><span class="home-filter__val" data-filter-val>{% t 'Не обрано' %}</span></span>
-          <svg class="home-filter__chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"></path></svg>
-        </button>
-        <div class="home-filter__menu" hidden></div>
-      </div>
+      {% endfor %}
       <button type="button" class="home-btn-grad home-picker__submit" data-picker-show>
         <span>{{ picker_submit }}</span>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg>

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from pages.cms_content import get_block_text, get_site_blocks_map, is_section_visible
-from pages.info_cms_2 import assemble_blog, assemble_install, assemble_offer
-from pages.info_cms_2 import assemble_privacy, assemble_promos, assemble_returns
-from pages.info_cms_2 import assemble_warranty, consult_context
+from pages.info_cms_2 import assemble_blog, assemble_blog_ask, assemble_install
+from pages.info_cms_2 import assemble_offer, assemble_privacy, assemble_promos
+from pages.info_cms_2 import assemble_returns, assemble_warranty, consult_context
 
 
 def _t(page: str, key: str, lang: str, blocks) -> str:
@@ -91,3 +91,8 @@ def is_info_page_visible(page: str, *, site_blocks=None) -> bool:
 def info_consult(lang: str = "ua", site_blocks=None) -> dict:
     blocks = site_blocks if site_blocks is not None else get_site_blocks_map()
     return consult_context(lang, blocks)
+
+
+def blog_ask(lang: str = "ua", site_blocks=None) -> dict:
+    blocks = site_blocks if site_blocks is not None else get_site_blocks_map()
+    return assemble_blog_ask(lang, blocks)

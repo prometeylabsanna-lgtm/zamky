@@ -11,13 +11,6 @@ BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
     ("home", "audience_3_text"): "И строительных компаний",
     ("home", "audience_4_title"): "Максимальная безопасность",
     ("home", "audience_4_text"): "Сертифицированная продукция",
-    ("home", "categories_title"): "Категории",
-    ("home", "categories_1_sub"): "Врезные, накладные, электромеханические",
-    ("home", "categories_2_sub"): "Секретность и надёжность",
-    ("home", "categories_3_sub"): "Ручки, петли, завесы и розетки",
-    ("home", "categories_4_sub"): "Защита от взлома",
-    ("home", "categories_5_sub"): "Для комфортного закрывания",
-    ("home", "categories_6_sub"): "Кодовые замки, домофоны, СКУД",
     ("home", "picker_title"): "Быстрый подбор замка",
     ("home", "picker_lead"): "Укажите параметры — покажем модели",
     ("home", "picker_step1"): "1. Для каких дверей ищете замок?",
@@ -33,11 +26,9 @@ BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
     ("home", "popular_tab_sales"): "Скидки",
     ("home", "blog_title"): "Полезное для выбора",
     ("home", "blog_more_label"): "Полезные статьи о замках",
-    ("home", "district_others_title"): "Другие районы Киева",
     ("site", "header_catalog_label"): "Каталог",
     ("site", "header_search_placeholder"): "Поиск замков, цилиндров…",
     ("site", "header_callback_label"): "Перезвоните мне",
-    ("site", "footer_about_title"): "Центр замков",
     ("site", "footer_about_text"): "Замки, цилиндры и фурнитура с доставкой по Киеву.",
     ("site", "footer_catalog_title"): "Каталог",
     ("site", "footer_info_title"): "Информация",
@@ -80,6 +71,16 @@ def _fill_info_ru_from_map() -> None:
 
 
 _fill_info_ru_from_map()
+
+from pages.legal_body import default_offer_html, default_privacy_html  # noqa: E402
+
+BLOCK_DEFAULTS_RU[("offer", "offer_body")] = default_offer_html("ru")
+BLOCK_DEFAULTS_RU[("privacy", "privacy_body")] = default_privacy_html("ru")
+BLOCK_DEFAULTS_RU[("blog", "blog_ask_title")] = "Есть вопросы?"
+BLOCK_DEFAULTS_RU[("blog", "blog_ask_text")] = (
+    "Консультируем ежедневно по телефону, Viber и Telegram"
+)
+BLOCK_DEFAULTS_RU[("blog", "blog_ask_cta")] = "Заказать звонок"
 
 
 def get_block_default_ru(page: str, key: str) -> str:

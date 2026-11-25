@@ -184,7 +184,9 @@ def organization_jsonld(seo, site_settings, domain: str) -> dict | None:
     if same_as:
         data["sameAs"] = same_as
     if site_settings is not None:
-        phone = (site_settings.phone_raw or site_settings.phone or "").strip()
+        from pages.phone import contacts_from_settings
+
+        phone = contacts_from_settings(site_settings).get("tel") or ""
         if phone:
             data["telephone"] = phone
         if (site_settings.email or "").strip():

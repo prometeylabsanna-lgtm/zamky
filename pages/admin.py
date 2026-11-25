@@ -8,6 +8,8 @@ from pages.admin_site_content_proxies import (
     SingletonModelAdminMixin,
     register_site_content_section_admins,
 )
+from pages.admin_site_content_widgets import CmsTinyMCEWidget
+from pages.legal_body import sanitize_legal_html
 from pages.models import ContactRequest
 from pages.models_cms import SiteSettings
 from pages.models_extra import (
@@ -17,41 +19,7 @@ from pages.models_extra import (
     PhotoPickImage,
     PhotoPickRequest,
 )
-from pages.models_media import MediaItem
-
 patch_admin_urls()
-
-
-@admin.register(MediaItem)
-class MediaItemAdmin(TopDropdownFiltersMixin, ModelAdmin):
-    list_display = ("preview", "title", "media_type", "alt_text", "file_size", "created_at")
-    list_filter = ("media_type", "created_at")
-    search_fields = ("title", "alt_text", "alt_text_ru", "file")
-    readonly_fields = ("preview", "width", "height", "file_size", "content_hash", "created_at")
-    fields = (
-        "preview",
-        "file",
-        "media_type",
-        "title",
-        "alt_text",
-        "alt_text_ru",
-        "width",
-        "height",
-        "file_size",
-        "content_hash",
-        "created_at",
-    )
-
-    @admin.display(description="Превʼю")
-    def preview(self, obj):
-        if obj.pk and obj.media_type == MediaItem.MediaType.IMAGE:
-            return admin_image_preview(obj.file, max_size=96)
-        return "—"
-
-    def save_model(self, request, obj, form, change):
-        if not obj.uploaded_by_id:
-            obj.uploaded_by = request.user
-        super().save_model(request, obj, form, change)
 
 
 @admin.register(SiteSettings)
@@ -162,29 +130,56 @@ class InstallRequestAdmin(TopDropdownFiltersMixin, ModelAdmin):
 @admin.register(BlogPost)
 class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("cover_thumb", "title", "slug", "is_published", "sort_order", "created_at")
+    list_display_links = ("title",)
     list_filter = ("is_published", "created_at")
     search_fields = ("title", "slug", "excerpt", "body")
     readonly_fields = ("slug", "cover_preview", "created_at", "updated_at")
-    fields = (
-        "title",
-        "slug",
-        "cover_preview",
-        "cover",
-        "excerpt",
-        "body",
-        "is_published",
-        "sort_order",
-        "created_at",
-        "updated_at",
+    fieldsets = (
+        (
+            "Шапка",
+            {"fields": ("title", "slug", "excerpt", "cover_preview", "cover")},
+        ),
+        ("Текст", {"fields": ("body",)}),
+        (
+            "Публікація",
+            {"fields": ("is_published", "sort_order", "created_at", "updated_at")},
+        ),
     )
+
+    class Media:
+        js = ("js/admin/image_preview.js",)
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "body":
+            kwargs["widget"] = CmsTinyMCEWidget(
+                attrs={"rows": 22, "class": "cms-tinymce--tall"}
+            )
+            kwargs["help_text"] = (
+                "Один редактор: заголовки (H2), абзаци, списки — як на сайті."
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        obj.body = sanitize_legal_html(obj.body)
+        super().save_model(request, obj, form, change)
+
+    def _cover_preview(self, obj, max_size: int):
+        fallback = ""
+        if obj is not None:
+            fallback = getattr(obj, "cover_fallback", "") or ""
+        return admin_image_preview(
+            getattr(obj, "cover", None),
+            max_size=max_size,
+            fallback_static=fallback,
+        )
 
     @admin.display(description="")
     def cover_thumb(self, obj):
-        return admin_image_preview(getattr(obj, "cover", None), max_size=48)
+        return self._cover_preview(obj, 48)
 
     @admin.display(description="Превʼю обкладинки")
     def cover_preview(self, obj):
-        return admin_image_preview(getattr(obj, "cover", None), max_size=180)
+        return self._cover_preview(obj, 180)
 
 
 register_site_content_section_admins()

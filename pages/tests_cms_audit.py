@@ -71,7 +71,6 @@ class CmsAuditTests(TestCase):
             "pages_homeherosettings_changelist",
             "pages_homeaudiencesettings_changelist",
             "pages_sitefootersettings_changelist",
-            "pages_mediaitem_changelist",
         ):
             url = reverse(f"admin:{name}")
             resp = client.get(url)

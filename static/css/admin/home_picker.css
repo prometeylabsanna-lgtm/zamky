@@ -1,0 +1,94 @@
+/* CMS: підбір на головній — двері та фільтри */
+
+.home-picker-admin-opts-title {
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+}
+
+.home-picker-admin-opt {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 0.85rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 0.75rem;
+}
+
+.home-picker-admin-opt--new {
+  border-style: dashed;
+}
+
+.home-picker-admin-opt__prices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.home-picker-admin-opt__del {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+.home-picker-admin-cats {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-picker-admin-cats li {
+  list-style: none;
+}
+
+.home-picker-admin-cats label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-picker-admin-cats input {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.home-picker-admin-delete {
+  appearance: none;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  min-height: 2.75rem;
+  border: 1px solid rgba(185, 28, 28, 0.45);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (max-width: 767px) {
+  .site-content-editor .admin-lang-tabs__btn {
+    min-height: 3rem;
+    font-size: 16px;
+  }
+
+  .home-picker-admin-opt input,
+  .home-picker-admin-opt__del,
+  .home-picker-admin-delete,
+  .home-picker-admin-cats label {
+    min-height: 3rem;
+    font-size: 16px;
+  }
+
+  .home-picker-admin-opt__prices {
+    grid-template-columns: 1fr;
+  }
+}

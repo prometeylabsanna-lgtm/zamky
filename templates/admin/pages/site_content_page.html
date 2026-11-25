@@ -4,9 +4,12 @@
 {% block extrahead %}
   {{ block.super }}
   {{ media }}
-  <link rel="stylesheet" href="{% static 'css/admin/site_content.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/site_content.css' %}?v=icon-preview">
   <link rel="stylesheet" href="{% static 'css/admin/lang_tabs.css' %}">
   <link rel="stylesheet" href="{% static 'css/admin/cms_color_picker.css' %}">
+  {% if header_nav_formset or footer_nav_formset or popular_formset %}
+  <link rel="stylesheet" href="{% static 'css/admin/header_nav.css' %}">
+  {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -57,10 +60,16 @@
             <div class="site-content-editor__field">
               <label class="text-font-important-light dark:text-font-important-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
               {% if item.preview_url %}
-                <div class="site-content-editor__img-preview">
-                  <img src="{{ item.preview_url }}" alt="" width="240" height="160" loading="lazy" decoding="async">
+                <div class="site-content-editor__img-preview{% if item.preview_icon %} site-content-editor__img-preview--icon{% endif %}">
+                  {% if item.preview_icon %}
+                    <span class="cms-icon-preview">
+                      <img class="cms-icon-preview__img" src="{{ item.preview_url }}" alt="" width="22" height="22" loading="lazy" decoding="async">
+                    </span>
+                  {% else %}
+                    <img src="{{ item.preview_url }}" alt="" width="240" height="160" loading="lazy" decoding="async">
+                  {% endif %}
                   {% if item.preview_fallback %}
-                    <p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">Зараз на сайті — стандартне фото.</p>
+                    <p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{% if item.preview_icon %}Зараз на сайті — стандартна іконка.{% else %}Зараз на сайті — стандартне фото.{% endif %}</p>
                   {% endif %}
                 </div>
               {% endif %}
@@ -76,6 +85,15 @@
 
       {% if hero_formset %}
         {% include "admin/pages/hero_slides_fieldset.html" %}
+      {% endif %}
+      {% if header_nav_formset %}
+        {% include "admin/pages/header_nav_fieldset.html" %}
+      {% endif %}
+      {% if footer_nav_formset %}
+        {% include "admin/pages/footer_nav_fieldset.html" %}
+      {% endif %}
+      {% if popular_formset %}
+        {% include "admin/pages/popular_products_fieldset.html" %}
       {% endif %}
     </div>
 
@@ -120,5 +138,8 @@
   <script src="{% static 'js/admin/image_preview.js' %}" defer></script>
   {% if hero_formset %}
     <script src="{% static 'js/admin/hero_slides.js' %}" defer></script>
+  {% endif %}
+  {% if header_nav_formset or footer_nav_formset or popular_formset %}
+    <script src="{% static 'js/admin/header_nav.js' %}?v=nav-idx" defer></script>
   {% endif %}
 {% endblock %}

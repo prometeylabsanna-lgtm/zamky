@@ -323,6 +323,15 @@ html.dark .zamky-theme-switch__btn:hover {
   background: rgb(55 65 81);
 }
 
+.zamky-nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  margin: 2px 0 8px 21px;
+  padding: 0;
+}
+
 @media (max-width: 767px) {
   .zamky-changelist-toolbar {
     align-items: stretch;

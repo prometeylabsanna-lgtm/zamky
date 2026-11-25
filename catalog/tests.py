@@ -89,6 +89,53 @@ class CatalogFilterTests(TestCase):
         self.assertIn('brand=abaro', body)
         self.assertIn('brand=mottura', body)
 
+    def test_cms_chrome_on_listing(self):
+        from pages.models_cms import SiteBlock, clear_site_blocks_cache
+
+        SiteBlock.objects.update_or_create(
+            page="catalog",
+            key="catalog_title",
+            defaults={
+                "label": "t",
+                "content_type": "text",
+                "text_html": "Всі замки CMS",
+            },
+        )
+        SiteBlock.objects.update_or_create(
+            page="catalog",
+            key="catalog_filters_title",
+            defaults={
+                "label": "f",
+                "content_type": "text",
+                "text_html": "Фільтри CMS",
+            },
+        )
+        SiteBlock.objects.update_or_create(
+            page="catalog",
+            key="catalog_empty",
+            defaults={
+                "label": "e",
+                "content_type": "text",
+                "text_html": "Порожньо CMS",
+            },
+        )
+        clear_site_blocks_cache()
+        try:
+            page = self.client.get(reverse("catalog:catalog"))
+            self.assertContains(page, "Всі замки CMS")
+            self.assertContains(page, "Фільтри CMS")
+            empty = self.client.get(
+                reverse("catalog:catalog"), {"sku": "NO-SUCH-SKU-XYZ"}
+            )
+            self.assertContains(empty, "Порожньо CMS")
+            cat_page = self.client.get(
+                reverse("catalog:category", args=[self.cat.slug])
+            )
+            self.assertContains(cat_page, "Циліндри")
+            self.assertNotContains(cat_page, "Всі замки CMS")
+        finally:
+            clear_site_blocks_cache()
+
 
 class PluralGoodsTests(TestCase):
     def test_plural_42_towary(self):

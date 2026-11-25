@@ -22,6 +22,33 @@ class DeliveryDistrictAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('name', 'slug', 'short')
     readonly_fields = ('slug',)
+    fieldsets = (
+        (
+            'Основне',
+            {
+                'fields': (
+                    'name',
+                    'slug',
+                    'short',
+                    'name_locative',
+                    'delivery_note',
+                    'areas',
+                    'is_active',
+                    'sort_order',
+                ),
+            },
+        ),
+        (
+            'Сторінка району',
+            {
+                'fields': ('h1', 'seo_text', 'others_title', 'others_title_ru'),
+                'description': (
+                    'Блок унизу сторінки району: SEO-текст і заголовок списку '
+                    'інших районів.'
+                ),
+            },
+        ),
+    )
 
 
 @admin.register(QuickOrder)

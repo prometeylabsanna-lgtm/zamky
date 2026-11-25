@@ -205,11 +205,6 @@ UNFOLD = {
                         'link': _admin_link('pages/sitesettings/'),
                     },
                     {
-                        'title': 'Медіатека',
-                        'icon': 'photo_library',
-                        'link': _admin_link('pages/mediaitem/'),
-                    },
-                    {
                         'title': 'Недавні дії',
                         'icon': 'history',
                         'link': _admin_link('recent-actions/'),
@@ -312,11 +307,6 @@ UNFOLD = {
                         'title': 'Підбір за фото',
                         'icon': 'photo_camera',
                         'link': _admin_link('pages/photopickrequest/'),
-                    },
-                    {
-                        'title': 'Блог',
-                        'icon': 'article',
-                        'link': _admin_link('pages/blogpost/'),
                     },
                 ],
             },

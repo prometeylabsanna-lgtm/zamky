@@ -1,0 +1,111 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media }}
+  <link rel="stylesheet" href="{% static 'css/admin/site_content.css' %}?v=icon-preview">
+  <link rel="stylesheet" href="{% static 'css/admin/lang_tabs.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/home_categories.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/home_picker.css' %}?v=picker-tabs">
+{% endblock %}
+
+{% block content %}
+<div class="site-content-editor" data-admin-lang-scope>
+  <div class="site-content-editor__head">
+    <div>
+      <h1 class="text-font-important-light dark:text-font-important-dark">{{ title }}</h1>
+      {% if section_hint %}
+        <p class="site-content-editor__hint">{{ section_hint }}</p>
+      {% endif %}
+    </div>
+    {% if preview_url %}
+      <a class="site-content-editor__preview" href="{{ preview_url }}" target="_blank" rel="noopener">Переглянути на сайті</a>
+    {% endif %}
+  </div>
+
+  <form method="post" enctype="multipart/form-data" novalidate data-admin-lang-scope>
+    {% csrf_token %}
+    <div class="admin-lang-tabs-anchor" hidden></div>
+    <input type="hidden" name="door_new" value="{% if is_new_door %}1{% else %}0{% endif %}">
+
+    <fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+      <legend class="text-font-important-light dark:text-font-important-dark">Типи дверей</legend>
+      <nav class="home-cat-admin-nav" aria-label="Двері">
+        {% for item in door_nav %}
+          <a class="home-cat-admin-nav__btn{% if item.active %} is-active{% endif %}{% if item.inactive %} is-off{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.name }}</a>
+        {% endfor %}
+        <a class="home-cat-admin-nav__btn home-cat-admin-nav__btn--add{% if is_new_door %} is-active{% endif %}" href="{{ add_door_url }}"{% if is_new_door %} aria-current="page"{% endif %}>Додати</a>
+      </nav>
+
+      {% if door_form %}
+        <div class="home-cat-admin-detail">
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark">Картинка</label>
+            {% if door_preview_url %}
+            <div class="site-content-editor__img-preview home-cat-admin-preview">
+              <img src="{{ door_preview_url }}" alt="" width="160" height="160" loading="lazy" decoding="async">
+              {% if door_preview_fallback %}
+                <p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">Зараз на сайті — стандартне фото.</p>
+              {% endif %}
+            </div>
+            {% endif %}
+            {{ door_form.image }}
+            {% if door_form.image.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{{ door_form.image.help_text }}</p>{% endif %}
+            {% for error in door_form.image.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="site-content-editor__pair">
+            <div class="site-content-editor__field" data-admin-lang="uk">
+              <label class="text-font-important-light dark:text-font-important-dark" for="{{ door_form.label_line1.id_for_label }}">{{ door_form.label_line1.label }}</label>
+              {{ door_form.label_line1 }}
+              {% for error in door_form.label_line1.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+            </div>
+            <div class="site-content-editor__field" data-admin-lang="ru">
+              <label class="text-font-important-light dark:text-font-important-dark" for="{{ door_form.label_line1_ru.id_for_label }}">{{ door_form.label_line1_ru.label }}</label>
+              {{ door_form.label_line1_ru }}
+              {% for error in door_form.label_line1_ru.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+          <div class="site-content-editor__pair">
+            <div class="site-content-editor__field" data-admin-lang="uk">
+              <label class="text-font-important-light dark:text-font-important-dark" for="{{ door_form.label_line2.id_for_label }}">{{ door_form.label_line2.label }}</label>
+              {{ door_form.label_line2 }}
+              {% for error in door_form.label_line2.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+            </div>
+            <div class="site-content-editor__field" data-admin-lang="ru">
+              <label class="text-font-important-light dark:text-font-important-dark" for="{{ door_form.label_line2_ru.id_for_label }}">{{ door_form.label_line2_ru.label }}</label>
+              {{ door_form.label_line2_ru }}
+              {% for error in door_form.label_line2_ru.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark">{{ door_form.categories.label }}</label>
+            {{ door_form.categories }}
+            {% if door_form.categories.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{{ door_form.categories.help_text }}</p>{% endif %}
+            {% for error in door_form.categories.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark" for="{{ door_form.is_active.id_for_label }}">{{ door_form.is_active.label }}</label>
+            {{ door_form.is_active }}
+          </div>
+          {% if current_door and not is_new_door %}
+            <button type="submit" name="delete_door" value="1" class="home-picker-admin-delete" formnovalidate>Видалити картку</button>
+          {% endif %}
+        </div>
+      {% endif %}
+    </fieldset>
+
+    <div class="site-content-editor__actions">
+      <button type="submit" class="bg-primary-600 border border-transparent font-medium px-3 py-2 rounded-default text-white">
+        Зберегти
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <script src="{% static 'js/admin/lang_tabs.js' %}?v=picker-split" defer></script>
+  <script src="{% static 'js/admin/image_preview.js' %}" defer></script>
+{% endblock %}

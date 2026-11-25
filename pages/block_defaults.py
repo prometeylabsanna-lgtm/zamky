@@ -5,22 +5,19 @@ from __future__ import annotations
 BLOCK_LABELS: dict[tuple[str, str], str] = {
     ("home", "hero_section_visible"): "Показувати банер",
     ("home", "audience_section_visible"): "Показувати «Для кого»",
+    ("home", "audience_1_icon"): "Картка 1 — іконка",
     ("home", "audience_1_title"): "Картка 1 — заголовок",
     ("home", "audience_1_text"): "Картка 1 — текст",
+    ("home", "audience_2_icon"): "Картка 2 — іконка",
     ("home", "audience_2_title"): "Картка 2 — заголовок",
     ("home", "audience_2_text"): "Картка 2 — текст",
+    ("home", "audience_3_icon"): "Картка 3 — іконка",
     ("home", "audience_3_title"): "Картка 3 — заголовок",
     ("home", "audience_3_text"): "Картка 3 — текст",
+    ("home", "audience_4_icon"): "Картка 4 — іконка",
     ("home", "audience_4_title"): "Картка 4 — заголовок",
     ("home", "audience_4_text"): "Картка 4 — текст",
     ("home", "categories_section_visible"): "Показувати категорії",
-    ("home", "categories_title"): "Заголовок категорій",
-    ("home", "categories_1_sub"): "Підпис категорії 1",
-    ("home", "categories_2_sub"): "Підпис категорії 2",
-    ("home", "categories_3_sub"): "Підпис категорії 3",
-    ("home", "categories_4_sub"): "Підпис категорії 4",
-    ("home", "categories_5_sub"): "Підпис категорії 5",
-    ("home", "categories_6_sub"): "Підпис категорії 6",
     ("home", "picker_section_visible"): "Показувати підбір",
     ("home", "picker_title"): "Заголовок підбору",
     ("home", "picker_lead"): "Підзаголовок підбору",
@@ -37,15 +34,12 @@ BLOCK_LABELS: dict[tuple[str, str], str] = {
     ("home", "blog_section_visible"): "Показувати блог",
     ("home", "blog_title"): "Заголовок блогу",
     ("home", "blog_more_label"): "Картка «усі статті»",
-    ("home", "district_section_visible"): "Показувати блок району",
-    ("home", "district_others_title"): "Заголовок інших районів",
     ("site", "header_catalog_label"): "Кнопка каталогу",
     ("site", "header_search_placeholder"): "Плейсхолдер пошуку",
     ("site", "header_callback_label"): "Кнопка «Передзвоніть»",
     ("site", "header_phone_visible"): "Показувати телефон",
     ("site", "header_cart_visible"): "Показувати кошик",
     ("site", "header_wishlist_visible"): "Показувати обране",
-    ("site", "footer_about_title"): "Підвал — про нас (заголовок)",
     ("site", "footer_about_text"): "Підвал — про нас (текст)",
     ("site", "footer_catalog_title"): "Підвал — каталог",
     ("site", "footer_info_title"): "Підвал — інфо",
@@ -59,22 +53,19 @@ BLOCK_LABELS: dict[tuple[str, str], str] = {
 BLOCK_DEFAULTS: dict[tuple[str, str], str] = {
     ("home", "hero_section_visible"): "1",
     ("home", "audience_section_visible"): "1",
+    ("home", "audience_1_icon"): "home",
     ("home", "audience_1_title"): "Для дому",
     ("home", "audience_1_text"): "Квартири, приватні будинки",
+    ("home", "audience_2_icon"): "biz",
     ("home", "audience_2_title"): "Для бізнесу",
     ("home", "audience_2_text"): "Офіси, магазини, склади",
+    ("home", "audience_3_icon"): "tools",
     ("home", "audience_3_title"): "Для майстрів",
     ("home", "audience_3_text"): "Та будівельних компаній",
+    ("home", "audience_4_icon"): "shield",
     ("home", "audience_4_title"): "Максимальна безпека",
     ("home", "audience_4_text"): "Сертифікована продукція",
     ("home", "categories_section_visible"): "1",
-    ("home", "categories_title"): "Категорії",
-    ("home", "categories_1_sub"): "Врізні, накладні, електромеханічні",
-    ("home", "categories_2_sub"): "Секретність та надійність",
-    ("home", "categories_3_sub"): "Ручки, петлі, завіси і розетки",
-    ("home", "categories_4_sub"): "Захист від злому",
-    ("home", "categories_5_sub"): "Для комфортного закривання",
-    ("home", "categories_6_sub"): "Кодові замки, домофони, СКУД",
     ("home", "picker_section_visible"): "1",
     ("home", "picker_title"): "Швидкий підбір замка",
     ("home", "picker_lead"): "Вкажіть параметри, ми покажемо моделі",
@@ -93,15 +84,12 @@ BLOCK_DEFAULTS: dict[tuple[str, str], str] = {
     ("home", "blog_section_visible"): "1",
     ("home", "blog_title"): "Корисне для вибору",
     ("home", "blog_more_label"): "Корисні статті про замки",
-    ("home", "district_section_visible"): "1",
-    ("home", "district_others_title"): "Інші райони Києва",
     ("site", "header_catalog_label"): "Каталог",
     ("site", "header_search_placeholder"): "Пошук замків, циліндрів…",
     ("site", "header_callback_label"): "Передзвоніть мені",
     ("site", "header_phone_visible"): "1",
     ("site", "header_cart_visible"): "1",
     ("site", "header_wishlist_visible"): "1",
-    ("site", "footer_about_title"): "Центр замків",
     ("site", "footer_about_text"): "Замки, циліндри та фурнітура з доставкою по Києву.",
     ("site", "footer_catalog_title"): "Каталог",
     ("site", "footer_info_title"): "Інформація",
@@ -117,7 +105,6 @@ INLINE_KEYS: set[tuple[str, str]] = {
     ("home", "audience_2_title"),
     ("home", "audience_3_title"),
     ("home", "audience_4_title"),
-    ("home", "categories_title"),
     ("home", "picker_title"),
     ("home", "picker_photo_cta"),
     ("home", "picker_submit"),
@@ -127,11 +114,9 @@ INLINE_KEYS: set[tuple[str, str]] = {
     ("home", "popular_tab_sales"),
     ("home", "blog_title"),
     ("home", "blog_more_label"),
-    ("home", "district_others_title"),
     ("site", "header_catalog_label"),
     ("site", "header_search_placeholder"),
     ("site", "header_callback_label"),
-    ("site", "footer_about_title"),
     ("site", "footer_catalog_title"),
     ("site", "footer_info_title"),
     ("site", "footer_contacts_title"),
@@ -152,7 +137,12 @@ MULTILINE_KEYS: set[tuple[str, str]] = {
 }
 
 RICHTEXT_KEYS: set[tuple[str, str]] = set()
-STATIC_FALLBACKS: dict[tuple[str, str], str] = {}
+from pages.audience_icons import AUDIENCE_ICON_STATICS  # noqa: E402
+
+STATIC_FALLBACKS: dict[tuple[str, str], str] = {
+    ("home", f"audience_{i}_icon"): path
+    for i, path in enumerate(AUDIENCE_ICON_STATICS, start=1)
+}
 IMAGE_KEYS: set[tuple[str, str]] = set()
 URL_KEYS: set[tuple[str, str]] = set()
 
@@ -176,7 +166,11 @@ def get_block_default(page: str, key: str) -> str:
 
 
 def get_block_content_type(page: str, key: str) -> str:
-    if (page, key) in IMAGE_KEYS or key.endswith("_image"):
+    if (
+        (page, key) in IMAGE_KEYS
+        or key.endswith("_image")
+        or key.endswith("_icon")
+    ):
         return "image"
     if (page, key) in URL_KEYS or key.endswith("_link") or key.endswith("_url"):
         return "url"

@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import get_language
 
 from config.validators import (
     MSG_CONSENT,
@@ -7,13 +8,10 @@ from config.validators import (
     clean_person_name,
     clean_ua_phone,
 )
+from pages.contact_form_cms import get_contact_form_copy
 from pages.i18n_lib import tr, tr_lazy
 
 from .models import ContactRequest
-
-
-def _topic_choices():
-    return [(value, tr(label)) for value, label in ContactRequest.Topic.choices]
 
 
 class ContactForm(forms.Form):
@@ -56,7 +54,7 @@ class ContactForm(forms.Form):
     )
     topic = forms.ChoiceField(
         label=tr_lazy('Тема'),
-        choices=_topic_choices,
+        choices=ContactRequest.Topic.choices,
         initial=ContactRequest.Topic.LOCK,
     )
     message = forms.CharField(
@@ -77,13 +75,21 @@ class ContactForm(forms.Form):
     )
     idempotency_key = forms.CharField(widget=forms.HiddenInput(), max_length=64)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, lang=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs['placeholder'] = tr('Олександр')
-        self.fields['message'].widget.attrs['placeholder'] = tr(
-            'Опишіть ваше питання. Для підбору вкажіть товщину дверей або розміри A і B.'
-        )
-        self.fields['topic'].choices = _topic_choices()
+        raw = lang if lang is not None else (get_language() or 'ua')
+        copy = get_contact_form_copy(raw)
+        self.fields['name'].label = copy['name_label']
+        self.fields['name'].widget.attrs['placeholder'] = copy['name_ph']
+        self.fields['phone'].label = copy['phone_label']
+        self.fields['phone'].widget.attrs['placeholder'] = copy['phone_ph']
+        self.fields['email'].label = copy['email_label']
+        self.fields['email'].widget.attrs['placeholder'] = copy['email_ph']
+        self.fields['topic'].label = copy['topic_label']
+        self.fields['topic'].choices = copy['topics']
+        self.fields['message'].label = copy['message_label']
+        self.fields['message'].widget.attrs['placeholder'] = copy['message_ph']
+        self.contact_copy = copy
 
     def clean_name(self):
         return clean_person_name(self.cleaned_data.get('name', ''))

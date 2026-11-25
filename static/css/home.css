@@ -27,177 +27,6 @@
   color: var(--color-muted);
 }
 
-/* Hero */
-.home-hero {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  margin-top: 16px;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  background: #000;
-  aspect-ratio: auto;
-}
-
-.home-hero__stage {
-  position: relative;
-  width: 100%;
-  flex: 0 0 auto;
-  min-width: 0;
-}
-
-/* 1261 * 0.84 = 1059.24 — top of 2720×1332, painted CTA strip cropped */
-.home-hero__stage::before {
-  content: "";
-  display: block;
-  width: 100%;
-  padding-top: calc(1059.24 / 2576 * 100%);
-}
-
-.home-hero__track {
-  position: absolute;
-  inset: 0;
-}
-
-.home-hero__slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.7s ease;
-}
-
-.home-hero__slide.is-active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.home-hero__slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: left top;
-  display: block;
-}
-
-.home-hero__nav {
-  display: none;
-}
-
-.home-hero__arrow {
-  position: absolute;
-  top: 50%;
-  margin-top: -24px;
-  z-index: 2;
-}
-
-.home-hero__arrow[data-hero-prev] {
-  left: 16px;
-}
-
-.home-hero__arrow[data-hero-next] {
-  right: 16px;
-}
-
-.home-hero__dots {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.home-hero__dot {
-  pointer-events: auto;
-  width: 6px;
-  height: 6px;
-  padding: 0;
-  border: 0;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.45);
-  transition: width 0.3s ease, background 0.3s ease;
-  cursor: pointer;
-}
-
-.home-hero__dot.is-active {
-  width: 22px;
-  background: var(--color-accent);
-}
-
-.home-hero__cta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 10px;
-  padding: 14px 12px;
-  flex: 0 0 auto;
-}
-
-/* Набір кнопок слайда: не ламає flex-розкладку .home-hero__cta; JS показує активний */
-.home-hero__cta-set {
-  display: contents;
-}
-
-.home-hero__cta-set[hidden] {
-  display: none;
-}
-
-.home-hero__cta-link {
-  flex: 1 1 0;
-  max-width: 100%;
-  min-width: 0;
-  min-height: 52px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: var(--radius-md);
-  color: #fff;
-  font: 500 16px/1.2 var(--font);
-  text-align: center;
-  text-decoration: none;
-  -webkit-appearance: none;
-  appearance: none;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  touch-action: manipulation;
-}
-
-.home-hero__cta-link span {
-  min-width: 0;
-}
-
-.home-hero__cta-link svg {
-  flex: none;
-  display: block;
-}
-
-.home-hero__cta-link--primary {
-  background: var(--color-grad);
-}
-
-.home-hero__cta-link--ghost {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.home-hero__cta-link:hover,
-.home-hero__cta-link:active {
-  color: #fff;
-}
-
-.home-hero__cta-link:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: -3px;
-}
-
 /* Audience */
 .home-audience {
   margin-top: 10px;
@@ -225,6 +54,13 @@
   box-shadow: 0 6px 14px rgba(249, 127, 12, 0.25);
   display: grid;
   place-items: center;
+}
+
+.home-audience__icon img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
 }
 
 .home-audience__title {
@@ -298,8 +134,16 @@
 .home-cat-card__foot {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+}
+
+.home-cat-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .home-cat-card__title {
@@ -315,6 +159,14 @@
 
 .home-cat-card__go {
   display: none;
+  flex: none;
+}
+
+.home-cat-card__go svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
 }
 
 /* Picker */
@@ -547,14 +399,21 @@
 }
 
 .home-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 44px;
   padding: 0 18px;
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
   background: var(--color-bg);
   color: var(--color-accent);
-  font: 500 15px var(--font);
+  font: 500 15px/1 var(--font);
+  text-align: center;
+  white-space: nowrap;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .home-btn-solid {

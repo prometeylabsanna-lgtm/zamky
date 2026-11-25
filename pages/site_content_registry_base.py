@@ -26,6 +26,12 @@ class ContentSection:
     field_groups: tuple[FieldGroup, ...] = ()
     admin_model_name: str = ""
     has_hero_slides: bool = False
+    has_header_nav: bool = False
+    has_footer_nav: bool = False
+    has_popular_products: bool = False
+    sidebar_group: str = ""
+    include_style: bool = True
+    hide_from_sidebar: bool = False
 
     def __post_init__(self):
         if not self.admin_model_name:

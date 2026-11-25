@@ -83,6 +83,8 @@ class Command(BaseCommand):
         self._seed_districts()
         self.stdout.write('Seeding catalog...')
         self._seed_catalog()
+        self.stdout.write('Seeding picker...')
+        self._seed_picker()
         self.stdout.write(self.style.SUCCESS('Demo data ready.'))
 
     def _seed_districts(self):
@@ -120,6 +122,14 @@ class Command(BaseCommand):
         Attribute.objects.all().delete()
         AttributeGroup.objects.all().delete()
 
+    def _seed_picker(self):
+        from pages.models_picker import PickerDoor, PickerFilter
+        from pages.picker_defaults import ensure_picker_defaults
+
+        PickerFilter.objects.all().delete()
+        PickerDoor.objects.all().delete()
+        ensure_picker_defaults()
+
     def _seed_catalog(self):
         self._clear_catalog()
 
@@ -137,6 +147,14 @@ class Command(BaseCommand):
             ('Kale', 'brand', 'kale.png'),
             ('Elbor', 'brand', 'elbor.png'),
         ]
+        home_subs = (
+            'Врізні, накладні, електромеханічні',
+            'Секретність та надійність',
+            'Ручки, петлі, завіси і розетки',
+            'Захист від злому',
+            'Для комфортного закривання',
+            'Кодові замки, домофони, СКУД',
+        )
         categories = {}
         for i, (name, icon, logo) in enumerate(cats_data):
             base_slug = slugify(name) or f'cat-{i}'
@@ -151,6 +169,7 @@ class Command(BaseCommand):
                 icon=icon,
                 sort_order=i,
                 is_active=True,
+                home_subtitle=home_subs[i] if i < len(home_subs) else '',
             )
             if logo:
                 src = settings.BASE_DIR / 'static' / 'img' / logo
@@ -536,3 +555,7 @@ class Command(BaseCommand):
             )
             src = chrome if i == 2 else brass
             self._attach_image(p, src, f'home-new-{i}.png', home_name, 0, primary=True)
+
+        from pages.popular_products import reset_demo_popular
+
+        reset_demo_popular()

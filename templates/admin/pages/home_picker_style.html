@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media }}
+  <link rel="stylesheet" href="{% static 'css/admin/site_content.css' %}?v=icon-preview">
+  <link rel="stylesheet" href="{% static 'css/admin/cms_color_picker.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="site-content-editor">
+  <div class="site-content-editor__head">
+    <div>
+      <h1 class="text-font-important-light dark:text-font-important-dark">{{ title }}</h1>
+      {% if section_hint %}
+        <p class="site-content-editor__hint">{{ section_hint }}</p>
+      {% endif %}
+    </div>
+    {% if preview_url %}
+      <a class="site-content-editor__preview" href="{{ preview_url }}" target="_blank" rel="noopener">Переглянути на сайті</a>
+    {% endif %}
+  </div>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if style_fields %}
+    <fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+      <legend class="text-font-important-light dark:text-font-important-dark">Оформлення сторінки</legend>
+      <p class="site-content-editor__style-hint">
+        Кольори для цієї сторінки на сайті. «Дефолт» повертає поточний дизайн сайту
+        (фон {{ style_defaults.background }}, шрифт {{ style_defaults.text }}, підсвітка {{ style_defaults.accent }}).
+      </p>
+      <button type="button" class="zamky-cms-style-reset" data-cms-style-reset-all>
+        Дефолт — скинути всі кольори
+      </button>
+      {% for item in style_fields %}
+        {% with field=item.field %}
+        <div class="site-content-editor__field site-content-editor__field--color">
+          <label class="text-font-important-light dark:text-font-important-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{{ field.help_text }}</p>{% endif %}
+          {% for error in field.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+        </div>
+        {% endwith %}
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    <div class="site-content-editor__actions">
+      <button type="submit" class="bg-primary-600 border border-transparent font-medium px-3 py-2 rounded-default text-white">
+        Зберегти
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <script src="{% static 'js/admin/cms_color_picker.js' %}" defer></script>
+{% endblock %}

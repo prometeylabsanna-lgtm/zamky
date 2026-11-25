@@ -196,6 +196,43 @@ class InstallSubmitView(View):
         )
 
 
+def _blog_lang(request) -> str:
+    lang = (getattr(request, 'LANGUAGE_CODE', None) or 'ua')[:2].lower()
+    return 'ua' if lang in ('uk', 'ua') else 'ru' if lang == 'ru' else 'ua'
+
+
+def blog_page_context(request, *, page_key: str = 'blog') -> dict:
+    from django.urls import reverse
+
+    from pages import info_cms
+    from pages.blog_defaults import BLOG_SIDEBAR_NAV
+    from pages.views import INFO_PAGES
+
+    lang = _blog_lang(request)
+    nav = []
+    for key in BLOG_SIDEBAR_NAV:
+        if key == 'blog':
+            url = reverse('pages:blog_list')
+        else:
+            url = reverse('pages:info_page', kwargs={'page': key})
+        nav.append(
+            {
+                'key': key,
+                'name': tr(INFO_PAGES[key]['name']),
+                'url': url,
+            }
+        )
+    content = info_cms.for_page('blog', lang=lang)
+    return {
+        'page_key': page_key,
+        'page_name': content.get('h1') or tr(INFO_PAGES['blog']['name']),
+        'blog_nav': nav,
+        'blog_ask': info_cms.blog_ask(lang=lang),
+        'blog_title': content.get('h1', ''),
+        'blog_lead': content.get('lead', ''),
+    }
+
+
 class BlogListView(ListView):
     model = BlogPost
     template_name = 'pages/blog_list.html'
@@ -205,28 +242,8 @@ class BlogListView(ListView):
         return BlogPost.objects.filter(is_published=True).order_by('sort_order', '-created_at')
 
     def get_context_data(self, **kwargs):
-        from pages import info_cms
-        from pages.views import INFO_NAV, INFO_PAGES
-        from pages.i18n_lib import tr
-
         ctx = super().get_context_data(**kwargs)
-        lang = (getattr(self.request, 'LANGUAGE_CODE', None) or 'ua')[:2].lower()
-        if lang == 'uk':
-            lang = 'ua'
-        content = info_cms.for_page('blog', lang=lang)
-        ctx.update(
-            {
-                'page_key': 'blog',
-                'page_name': content.get('h1') or tr(INFO_PAGES['blog']['name']),
-                'info_pages': {
-                    key: {'name': tr(INFO_PAGES[key]['name'])} for key in INFO_NAV
-                },
-                'info_content': content,
-                'info_consult': info_cms.info_consult(lang=lang),
-                'blog_title': content.get('h1', ''),
-                'blog_lead': content.get('lead', ''),
-            }
-        )
+        ctx.update(blog_page_context(self.request))
         return ctx
 
 
@@ -241,6 +258,7 @@ class BlogDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx.update(blog_page_context(self.request))
         ctx['more_posts'] = (
             BlogPost.objects.filter(is_published=True)
             .exclude(pk=self.object.pk)

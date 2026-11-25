@@ -6,7 +6,11 @@ from dataclasses import dataclass
 
 from pages.hero_slides import DEFAULT_HERO_SLIDES
 from pages.models_cms import HeroSlide, SiteBlock, SiteSettings
+from pages.popular_products import READY_KEY, READY_PAGE
 from pages.site_content_registry import CONTENT_SECTIONS, all_registry_block_keys
+
+# Службові SiteBlock поза CMS-registry (не показуються в адмінці).
+SERVICE_BLOCK_KEYS = frozenset({(READY_PAGE, READY_KEY)})
 
 
 @dataclass(frozen=True)
@@ -23,23 +27,24 @@ class ParityReport:
 
 def collect_parity() -> ParityReport:
     expected_keys = all_registry_block_keys()
-    existing = set(
-        SiteBlock.objects.values_list("page", "key")
-    )
+    existing = set(SiteBlock.objects.values_list("page", "key"))
+    cms_existing = existing - SERVICE_BLOCK_KEYS
     missing = tuple(k for k in expected_keys if k not in existing)
     settings_n = 1 if SiteSettings.objects.filter(pk=1).exists() else 0
-    blocks_n = sum(1 for k in expected_keys if k in existing)
+    blocks_n = len(cms_existing)
+    expected_n = len(expected_keys)
     heroes = HeroSlide.objects.filter(is_active=True).count()
     expected_heroes = len(DEFAULT_HERO_SLIDES)
     ok = (
         settings_n == 1
         and not missing
+        and blocks_n == expected_n
         and heroes >= expected_heroes
     )
     return ParityReport(
         site_settings=settings_n,
         site_blocks=blocks_n,
-        expected_blocks=len(expected_keys),
+        expected_blocks=expected_n,
         hero_slides=heroes,
         expected_heroes=expected_heroes,
         sections=len(CONTENT_SECTIONS),

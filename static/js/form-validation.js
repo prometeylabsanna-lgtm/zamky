@@ -8,6 +8,12 @@
     return window.t ? window.t(s) : s;
   }
 
+  function requiredMsg(form) {
+    var custom = form && form.getAttribute('data-msg-required');
+    if (custom) return custom;
+    return t(MSG.required);
+  }
+
   var MSG = {
     required: 'Поле обовʼязкове для заповнення',
     name: 'Імʼя не може містити цифри або спецсимволи. Будь ласка, використовуйте лише букви',
@@ -86,7 +92,11 @@
       wrap.classList.toggle('is-valid', !!ok && hasValue);
     }
     input.setAttribute('aria-invalid', ok ? 'false' : 'true');
-    if (err) err.textContent = ok ? '' : t(message || MSG.required);
+    if (err) {
+      err.textContent = ok
+        ? ''
+        : t(message || requiredMsg(input.form || input.closest('form')));
+    }
   }
 
   function clearState(input) {
@@ -105,17 +115,21 @@
     return value === 'np' || value === 'courier';
   }
 
-  function validateName(value, required) {
+  function validateName(value, required, form) {
     var v = String(value || '').trim();
-    if (!v) return required ? { ok: false, msg: MSG.required } : { ok: true, msg: '' };
+    if (!v) {
+      return required
+        ? { ok: false, msg: requiredMsg(form) }
+        : { ok: true, msg: '' };
+    }
     if (v.length < 2) return { ok: false, msg: MSG.nameShort };
     if (/\d/.test(v) || !NAME_RE.test(v)) return { ok: false, msg: MSG.name };
     return { ok: true, msg: '' };
   }
 
-  function validatePhone(value) {
+  function validatePhone(value, form) {
     var v = String(value || '').trim();
-    if (!v) return { ok: false, msg: MSG.required };
+    if (!v) return { ok: false, msg: requiredMsg(form) };
     if (!isValidUaPhone(v)) return { ok: false, msg: MSG.phone };
     return { ok: true, msg: '' };
   }
@@ -127,9 +141,9 @@
     return { ok: true, msg: '' };
   }
 
-  function validateMessage(value) {
+  function validateMessage(value, form) {
     var v = String(value || '').trim();
-    if (!v) return { ok: false, msg: MSG.required };
+    if (!v) return { ok: false, msg: requiredMsg(form) };
     if (v.length < 10) return { ok: false, msg: MSG.message };
     return { ok: true, msg: '' };
   }
@@ -141,11 +155,11 @@
     var result = { ok: true, msg: '' };
     var value = input.type === 'checkbox' ? input.checked : input.value;
 
-    if (kind === 'name') result = validateName(value, true);
-    else if (kind === 'name-optional') result = validateName(value, false);
-    else if (kind === 'phone') result = validatePhone(value);
+    if (kind === 'name') result = validateName(value, true, form);
+    else if (kind === 'name-optional') result = validateName(value, false, form);
+    else if (kind === 'phone') result = validatePhone(value, form);
     else if (kind === 'email') result = validateEmail(value);
-    else if (kind === 'message') result = validateMessage(value);
+    else if (kind === 'message') result = validateMessage(value, form);
     else if (kind === 'consent') {
       result = input.checked
         ? { ok: true, msg: '' }
@@ -159,7 +173,9 @@
         result = { ok: false, msg: MSG.address };
       }
     } else if (kind === 'required') {
-      if (!String(value || '').trim()) result = { ok: false, msg: MSG.required };
+      if (!String(value || '').trim()) {
+        result = { ok: false, msg: requiredMsg(form) };
+      }
     }
 
     if (!String(input.value || '').trim() && kind !== 'consent' && result.ok) {

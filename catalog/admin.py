@@ -53,15 +53,18 @@ class ProductAttributeInline(TabularInline):
 class CategoryAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ('logo_thumb', 'name', 'slug', 'parent', 'sort_order', 'is_active')
     list_filter = ('is_active', 'parent')
-    search_fields = ('name', 'slug')
+    search_fields = ('name', 'name_ru', 'slug')
     readonly_fields = ('slug', 'logo_preview')
     fields = (
         'name',
+        'name_ru',
         'slug',
         'parent',
         'logo_preview',
         'logo',
         'icon',
+        'home_subtitle',
+        'home_subtitle_ru',
         'sort_order',
         'is_active',
     )

@@ -1,0 +1,31 @@
+{% load i18n_ui %}
+<aside class="blog-aside">
+  <nav class="blog-aside__nav" aria-label="{% t 'Покупцям' %}">
+    <span class="blog-aside__label">{% t 'Покупцям' %}</span>
+    {% for item in blog_nav %}
+    <a href="{{ item.url }}" class="{% if item.key == page_key %}is-active{% endif %}">
+      <span>{{ item.name }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"></path></svg>
+    </a>
+    {% endfor %}
+  </nav>
+  {% if blog_ask.visible %}
+  <div class="blog-aside__ask">
+    {% if blog_ask.title %}
+    <span class="blog-aside__ask-title">{{ blog_ask.title }}</span>
+    {% endif %}
+    {% if blog_ask.text %}
+    <span class="blog-aside__ask-text">{{ blog_ask.text }}</span>
+    {% endif %}
+    {% if blog_ask.phone %}
+    <a href="tel:{{ blog_ask.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="blog-aside__ask-phone">{{ blog_ask.phone }}</a>
+    {% endif %}
+    {% if blog_ask.hours %}
+    <span class="blog-aside__ask-hours">{{ blog_ask.hours }}</span>
+    {% endif %}
+    {% if blog_ask.cta %}
+    <button type="button" class="blog-aside__ask-btn" data-open-callback>{{ blog_ask.cta }}</button>
+    {% endif %}
+  </div>
+  {% endif %}
+</aside>

@@ -1,0 +1,76 @@
+{% load static %}
+<fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900" data-cms-nav="header_nav">
+  <legend class="text-font-important-light dark:text-font-important-dark">Кнопки навігації</legend>
+  {{ header_nav_formset.management_form }}
+  <p class="site-content-editor__hint">
+    Ряд кнопок під пошуком: назва, посилання, порядок і видимість.
+    Посилання — відносний шлях, наприклад /ua/catalog/?q=Замки або /ua/info/promos/.
+  </p>
+
+  <div class="hdr-nav-admin" data-cms-nav-list>
+    {% for form in header_nav_formset %}
+      <div class="hdr-nav-admin__row" data-cms-nav-row>
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="hdr-nav-admin__names">
+          <div class="site-content-editor__field" data-admin-lang="uk">
+            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% for error in form.name.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="site-content-editor__field" data-admin-lang="ru">
+            <label for="{{ form.name_ru.id_for_label }}">{{ form.name_ru.label }}</label>
+            {{ form.name_ru }}
+            {% for error in form.name_ru.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+        <div class="site-content-editor__field">
+          <label for="{{ form.url.id_for_label }}">{{ form.url.label }}</label>
+          {{ form.url }}
+          {% if form.url.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{{ form.url.help_text }}</p>{% endif %}
+          {% for error in form.url.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="hdr-nav-admin__meta">
+          <div class="site-content-editor__field hdr-nav-admin__order">
+            <label for="{{ form.sort_order.id_for_label }}">{{ form.sort_order.label }}</label>
+            {{ form.sort_order }}
+          </div>
+          <label class="hdr-nav-admin__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+          {% if form.DELETE %}<label class="hdr-nav-admin__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
+        </div>
+        {% if form.non_field_errors %}<div class="site-content-editor__error">{{ form.non_field_errors }}</div>{% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <template data-cms-nav-empty>
+    <div class="hdr-nav-admin__row" data-cms-nav-row>
+      {% with form=header_nav_formset.empty_form %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="hdr-nav-admin__names">
+          <div class="site-content-editor__field" data-admin-lang="uk">
+            <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+          </div>
+          <div class="site-content-editor__field" data-admin-lang="ru">
+            <label for="{{ form.name_ru.id_for_label }}">{{ form.name_ru.label }}</label>
+            {{ form.name_ru }}
+          </div>
+        </div>
+        <div class="site-content-editor__field">
+          <label for="{{ form.url.id_for_label }}">{{ form.url.label }}</label>
+          {{ form.url }}
+        </div>
+        <div class="hdr-nav-admin__meta">
+          <div class="site-content-editor__field hdr-nav-admin__order">
+            <label for="{{ form.sort_order.id_for_label }}">{{ form.sort_order.label }}</label>
+            {{ form.sort_order }}
+          </div>
+          <label class="hdr-nav-admin__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+          {% if form.DELETE %}<label class="hdr-nav-admin__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
+        </div>
+      {% endwith %}
+    </div>
+  </template>
+
+  <button type="button" class="hdr-nav-admin__add" data-cms-nav-add>Додати кнопку</button>
+</fieldset>

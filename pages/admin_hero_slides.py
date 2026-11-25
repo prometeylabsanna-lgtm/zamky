@@ -13,11 +13,16 @@ class HeroSlideForm(forms.ModelForm):
     class Meta:
         model = HeroSlide
         fields = (
-            "media",
             "image",
             "alt_text",
             "alt_text_ru",
             "link_url",
+            "headline",
+            "headline_ru",
+            "headline_accent",
+            "headline_accent_ru",
+            "subtitle",
+            "subtitle_ru",
             "cta_primary_label",
             "cta_primary_label_ru",
             "cta_primary_url",
@@ -26,12 +31,22 @@ class HeroSlideForm(forms.ModelForm):
             "cta_secondary_url",
             "sort_order",
             "is_active",
+            "show_secondary",
+            "cta_primary_light",
+            "show_features",
+            "show_brands",
         )
         widgets = {
             "image": UnfoldAdminFileFieldWidget(attrs={"accept": "image/*"}),
             "alt_text": CmsAdminTextInputWidget(),
             "alt_text_ru": CmsAdminTextInputWidget(),
             "link_url": CmsAdminTextInputWidget(),
+            "headline": CmsAdminTextInputWidget(),
+            "headline_ru": CmsAdminTextInputWidget(),
+            "headline_accent": CmsAdminTextInputWidget(),
+            "headline_accent_ru": CmsAdminTextInputWidget(),
+            "subtitle": CmsAdminTextInputWidget(),
+            "subtitle_ru": CmsAdminTextInputWidget(),
             "cta_primary_label": CmsAdminTextInputWidget(),
             "cta_primary_label_ru": CmsAdminTextInputWidget(),
             "cta_primary_url": CmsAdminTextInputWidget(),
@@ -40,7 +55,19 @@ class HeroSlideForm(forms.ModelForm):
             "cta_secondary_url": CmsAdminTextInputWidget(),
             "sort_order": forms.HiddenInput(),
             "is_active": UnfoldBooleanWidget(),
+            "show_secondary": UnfoldBooleanWidget(),
+            "cta_primary_light": UnfoldBooleanWidget(),
+            "show_features": UnfoldBooleanWidget(),
+            "show_brands": UnfoldBooleanWidget(),
         }
+
+    def overlay_fields(self):
+        names = (
+            ("headline", "headline_ru"),
+            ("headline_accent", "headline_accent_ru"),
+            ("subtitle", "subtitle_ru"),
+        )
+        return [[self[name] for name in pair] for pair in names]
 
     def cta_columns(self):
         names = (
@@ -101,7 +128,7 @@ def build_hero_slide_formset(data=None, files=None):
         HeroSlide,
         form=HeroSlideForm,
         formset=HeroSlideBaseFormSet,
-        extra=1,
+        extra=0,
         can_delete=True,
     )
     queryset = HeroSlide.objects.all().order_by("sort_order", "id")

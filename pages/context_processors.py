@@ -4,11 +4,14 @@ import uuid
 from django.conf import settings
 
 from catalog.menu import menu_payload
+from pages.footer_nav import get_footer_nav
+from pages.header_nav import get_header_nav_links
 from orders.models import DeliveryDistrict
 from pages.cms_content import get_block_text, get_site_blocks_map
 from pages.i18n_lib import js_i18n_dict, site_lang_code, tr
 from pages.models_cms import SiteSettings
 from pages.page_styles import get_page_style_vars
+from pages.phone import contacts_from_settings
 
 CATALOG_URL_NAMES = {'product', 'catalog', 'category'}
 
@@ -65,6 +68,8 @@ def site_context(request):
             page, key, lang=lang, site_blocks=site_blocks, fallback=fallback
         )
 
+    contacts = contacts_from_settings(site_settings, lang=lang)
+
     return {
         'site_city': city,
         'site_districts': districts,
@@ -74,24 +79,29 @@ def site_context(request):
         'cms_lang': lang,
         'site_blocks': site_blocks,
         'site_settings': site_settings,
+        'contact_phone': contacts['phone'],
+        'contact_tel': contacts['tel'],
+        'contact_email': contacts['email'],
+        'contact_hours': contacts['hours'],
         'cms_header_catalog': cms('site', 'header_catalog_label', 'Каталог'),
         'cms_header_search': cms(
             'site', 'header_search_placeholder', 'Пошук замків, циліндрів…'
         ),
         'cms_header_callback': cms('site', 'header_callback_label', 'Передзвоніть мені'),
-        'cms_footer_about_title': cms('site', 'footer_about_title'),
         'cms_footer_about_text': cms('site', 'footer_about_text'),
         'cms_footer_catalog_title': cms('site', 'footer_catalog_title', 'Каталог'),
         'cms_footer_info_title': cms('site', 'footer_info_title', 'Інформація'),
         'cms_footer_contacts_title': cms('site', 'footer_contacts_title', 'Контакти'),
         'cms_footer_copyright': cms('site', 'footer_copyright'),
         'header_menu': menu_payload(),
+        'header_nav_links': get_header_nav_links(lang),
+        'footer_nav': get_footer_nav(lang),
         'header_catalog_active': url_name in CATALOG_URL_NAMES,
         'js_i18n': js_i18n_dict(),
         'callback_idempotency': cb_key,
         'page_style': _safe_page_style(request),
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261123v1',
+        'asset_v': '20261124v26',
     }
 
 

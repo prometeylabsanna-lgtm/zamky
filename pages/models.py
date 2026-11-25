@@ -40,6 +40,9 @@ class ContactRequest(models.Model):
 
 
 from pages.models_cms import HeroSlide, SiteBlock, SiteSettings  # noqa: E402
+from pages.models_footer import FooterNavLink  # noqa: E402
+from pages.models_header import HeaderNavLink  # noqa: E402
+from pages.models_popular import HomePopularProduct  # noqa: E402
 from pages.models_extra import (  # noqa: E402
     BlogPost,
     CallbackRequest,
@@ -49,6 +52,11 @@ from pages.models_extra import (  # noqa: E402
 )
 from pages.models_media import MediaItem  # noqa: E402
 from pages.models_page_style import PageStyle  # noqa: E402
+from pages.models_picker import (  # noqa: E402
+    PickerDoor,
+    PickerFilter,
+    PickerFilterOption,
+)
 
 __all__ = [
     'ContactRequest',
@@ -60,6 +68,12 @@ __all__ = [
     'SiteSettings',
     'SiteBlock',
     'HeroSlide',
+    'HeaderNavLink',
+    'FooterNavLink',
+    'HomePopularProduct',
     'MediaItem',
     'PageStyle',
+    'PickerDoor',
+    'PickerFilter',
+    'PickerFilterOption',
 ]

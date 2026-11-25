@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media }}
+  <link rel="stylesheet" href="{% static 'css/admin/site_content.css' %}?v=icon-preview">
+  <link rel="stylesheet" href="{% static 'css/admin/lang_tabs.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/home_categories.css' %}">
+  <link rel="stylesheet" href="{% static 'css/admin/home_picker.css' %}?v=picker-tabs">
+{% endblock %}
+
+{% block content %}
+<div class="site-content-editor" data-admin-lang-scope>
+  <div class="site-content-editor__head">
+    <div>
+      <h1 class="text-font-important-light dark:text-font-important-dark">{{ title }}</h1>
+      {% if section_hint %}
+        <p class="site-content-editor__hint">{{ section_hint }}</p>
+      {% endif %}
+    </div>
+    {% if preview_url %}
+      <a class="site-content-editor__preview" href="{{ preview_url }}" target="_blank" rel="noopener">Переглянути на сайті</a>
+    {% endif %}
+  </div>
+
+  <form method="post" enctype="multipart/form-data" novalidate data-admin-lang-scope>
+    {% csrf_token %}
+    <div class="admin-lang-tabs-anchor" hidden></div>
+    <input type="hidden" name="filter_new" value="{% if is_new_filter %}1{% else %}0{% endif %}">
+
+    <fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+      <legend class="text-font-important-light dark:text-font-important-dark">Фільтри підбору</legend>
+      <nav class="home-cat-admin-nav" aria-label="Фільтри">
+        {% for item in filter_nav %}
+          <a class="home-cat-admin-nav__btn{% if item.active %} is-active{% endif %}{% if item.inactive %} is-off{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.name }}</a>
+        {% endfor %}
+        <a class="home-cat-admin-nav__btn home-cat-admin-nav__btn--add{% if is_new_filter %} is-active{% endif %}" href="{{ add_filter_url }}"{% if is_new_filter %} aria-current="page"{% endif %}>Додати</a>
+      </nav>
+
+      {% if filter_form %}
+        <div class="home-cat-admin-detail">
+          {% if "attribute" in filter_form.fields %}
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark" for="{{ filter_form.attribute.id_for_label }}">{{ filter_form.attribute.label }}</label>
+            {{ filter_form.attribute }}
+            {% if filter_form.attribute.help_text %}<p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">{{ filter_form.attribute.help_text }}</p>{% endif %}
+            {% for error in filter_form.attribute.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+          </div>
+          {% endif %}
+          <div class="site-content-editor__pair">
+            <div class="site-content-editor__field" data-admin-lang="uk">
+              <label class="text-font-important-light dark:text-font-important-dark" for="{{ filter_form.label.id_for_label }}">{{ filter_form.label.label }}</label>
+              {{ filter_form.label }}
+              {% for error in filter_form.label.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+            </div>
+            <div class="site-content-editor__field" data-admin-lang="ru">
+              <label class="text-font-important-light dark:text-font-important-dark" for="{{ filter_form.label_ru.id_for_label }}">{{ filter_form.label_ru.label }}</label>
+              {{ filter_form.label_ru }}
+              {% for error in filter_form.label_ru.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+          <div class="site-content-editor__field">
+            <label class="text-font-important-light dark:text-font-important-dark" for="{{ filter_form.is_active.id_for_label }}">{{ filter_form.is_active.label }}</label>
+            {{ filter_form.is_active }}
+          </div>
+
+          {% if option_formset %}
+          {{ option_formset.management_form }}
+          <p class="home-picker-admin-opts-title">Варіанти вибору</p>
+          {% for opt in option_formset %}
+            <div class="home-picker-admin-opt{% if forloop.last %} home-picker-admin-opt--new{% endif %}">
+              {{ opt.id }}
+              {{ opt.value }}
+              <div class="site-content-editor__pair">
+                <div class="site-content-editor__field" data-admin-lang="uk">
+                  <label class="text-font-important-light dark:text-font-important-dark" for="{{ opt.label.id_for_label }}">{% if forloop.last %}Новий варіант{% else %}{{ opt.label.label }}{% endif %}</label>
+                  {{ opt.label }}
+                  {% for error in opt.label.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+                </div>
+                <div class="site-content-editor__field" data-admin-lang="ru">
+                  <label class="text-font-important-light dark:text-font-important-dark" for="{{ opt.label_ru.id_for_label }}">{{ opt.label_ru.label }}</label>
+                  {{ opt.label_ru }}
+                </div>
+              </div>
+              {% if show_price_bounds %}
+              <div class="home-picker-admin-opt__prices">
+                <div class="site-content-editor__field">
+                  <label class="text-font-important-light dark:text-font-important-dark" for="{{ opt.price_min.id_for_label }}">{{ opt.price_min.label }}</label>
+                  {{ opt.price_min }}
+                </div>
+                <div class="site-content-editor__field">
+                  <label class="text-font-important-light dark:text-font-important-dark" for="{{ opt.price_max.id_for_label }}">{{ opt.price_max.label }}</label>
+                  {{ opt.price_max }}
+                </div>
+              </div>
+              {% endif %}
+              {% if opt.instance.pk %}
+                <label class="home-picker-admin-opt__del">{{ opt.DELETE }} Видалити</label>
+              {% endif %}
+            </div>
+          {% endfor %}
+          {% elif is_new_filter %}
+          <p class="text-font-subtle-light dark:text-font-subtle-dark site-content-editor__help">Оберіть фільтр каталогу і збережіть — варіанти підтягнуться самі.</p>
+          {% endif %}
+
+          {% if current_filter and not is_new_filter %}
+            <button type="submit" name="delete_filter" value="1" class="home-picker-admin-delete" formnovalidate>Видалити фільтр</button>
+          {% endif %}
+        </div>
+      {% endif %}
+    </fieldset>
+
+    <div class="site-content-editor__actions">
+      <button type="submit" class="bg-primary-600 border border-transparent font-medium px-3 py-2 rounded-default text-white">
+        Зберегти
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block footer %}
+  {{ block.super }}
+  <script src="{% static 'js/admin/lang_tabs.js' %}?v=picker-split" defer></script>
+{% endblock %}

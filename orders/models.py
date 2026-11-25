@@ -14,6 +14,18 @@ class DeliveryDistrict(models.Model):
     areas = models.JSONField('Мікрорайони', default=list, blank=True)
     h1 = models.CharField('H1', max_length=300, blank=True)
     seo_text = models.TextField('SEO текст', blank=True)
+    others_title = models.CharField(
+        'Заголовок інших районів',
+        max_length=200,
+        default='Інші райони Києва',
+        help_text='Напис над списком інших районів на сторінці цього району.',
+    )
+    others_title_ru = models.CharField(
+        'Заголовок інших районів (RU)',
+        max_length=200,
+        blank=True,
+        default='Другие районы Киева',
+    )
     is_active = models.BooleanField('Активний', default=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0)
 
@@ -24,6 +36,14 @@ class DeliveryDistrict(models.Model):
 
     def __str__(self):
         return self.name
+
+    def others_heading(self, lang: str = 'ua') -> str:
+        if lang == 'ru':
+            ru = (self.others_title_ru or '').strip()
+            if ru:
+                return ru
+        ua = (self.others_title or '').strip()
+        return ua or 'Інші райони Києва'
 
     def save(self, *args, **kwargs):
         if not self.slug:

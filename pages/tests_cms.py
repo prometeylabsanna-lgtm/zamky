@@ -41,6 +41,11 @@ class CmsAdminSmokeTests(TestCase):
         self.client = Client()
         self.client.force_login(self.user)
 
+    def test_localized_admin_url_redirects(self):
+        resp = self.client.get("/ua/admin/", follow=False)
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(resp["Location"].startswith("/admin/"))
+
     def test_sitesettings_admin_200(self):
         url = reverse("admin:pages_sitesettings_change", args=[1])
         response = self.client.get(url)
@@ -64,3 +69,47 @@ class CmsAdminSmokeTests(TestCase):
             self.assertContains(follow, "Банер")
             self.assertContains(follow, "site-content-editor__field--color")
             self.assertContains(follow, "zamky-cms-colorpick__hex")
+
+    def test_home_audience_icons_visible(self):
+        url = reverse("admin:pages_homeaudiencesettings_changelist")
+        response = self.client.get(url)
+        self.assertIn(response.status_code, {200, 302})
+        page = response
+        if response.status_code == 302:
+            page = self.client.get(response["Location"])
+            self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Картка 1 — іконка")
+        self.assertContains(page, "site-content-editor__img-preview--icon")
+        self.assertContains(page, "cms-icon-preview")
+        self.assertContains(page, "img/v2/audience/icon-home.svg")
+        self.assertContains(page, "img/v2/audience/icon-biz.svg")
+        self.assertContains(page, 'type="file"')
+        self.assertContains(page, "стандартна іконка")
+        self.assertNotContains(page, "cms-icon-pick")
+
+    def test_home_audience_uses_static_icon_preview(self):
+        response = self.client.get("/ua/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "img/v2/audience/icon-home.svg")
+        self.assertContains(response, "home-audience__icon")
+
+    def test_home_categories_admin_has_no_unused_title(self):
+        url = reverse("admin:pages_homecategoriessettings_changelist")
+        response = self.client.get(url)
+        self.assertIn(response.status_code, {200, 302})
+        page = response
+        if response.status_code == 302:
+            page = self.client.get(response["Location"])
+            self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Додати")
+        self.assertNotContains(page, "Заголовок категорій")
+        self.assertNotContains(page, "Підпис категорії 1")
+        self.assertNotContains(page, "categories_title")
+
+    def test_footer_admin_has_no_unused_about_title(self):
+        url = reverse("admin:pages_sitefootersettings_change", args=[1])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "Підвал — про нас (текст)")
+        self.assertNotContains(page, "Підвал — про нас (заголовок)")
+        self.assertNotContains(page, "footer_about_title")

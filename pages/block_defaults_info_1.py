@@ -105,6 +105,111 @@ _reg(
 )
 _reg("about", "about_row_4_label", "Рядок 4 — назва", "Email", kind="inline")
 _reg("about", "about_row_4_value", "Рядок 4 — значення", "xxx@gmail.com", kind="inline")
+_reg("about", "about_form_visible", "Показувати форму", "1", kind="inline")
+_reg(
+    "about",
+    "about_form_title",
+    "Заголовок форми",
+    "Залишилися питання?",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_lead",
+    "Підзаголовок форми",
+    "Напишіть нам — відповімо протягом робочого дня.",
+)
+_reg(
+    "about",
+    "about_form_submit",
+    "Кнопка відправки",
+    "Надіслати повідомлення",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_or_call",
+    "Текст біля телефону",
+    "Або зателефонуйте:",
+    kind="inline",
+)
+_reg("about", "about_form_name_label", "Ім’я — підпис", "Ім’я*", kind="inline")
+_reg("about", "about_form_name_ph", "Ім’я — плейсхолдер", "Олександр", kind="inline")
+_reg("about", "about_form_phone_label", "Телефон — підпис", "Телефон*", kind="inline")
+_reg(
+    "about",
+    "about_form_phone_ph",
+    "Телефон — плейсхолдер",
+    "+38 (0__) ___ __ __",
+    kind="inline",
+)
+_reg("about", "about_form_email_label", "Email — підпис", "Email", kind="inline")
+_reg(
+    "about",
+    "about_form_email_ph",
+    "Email — плейсхолдер",
+    "mail@example.com",
+    kind="inline",
+)
+_reg("about", "about_form_topic_label", "Тема — підпис", "Тема", kind="inline")
+_reg(
+    "about",
+    "about_form_topic_lock",
+    "Тема 1",
+    "Підбір замка або циліндра",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_topic_order",
+    "Тема 2",
+    "Питання щодо замовлення",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_topic_delivery",
+    "Тема 3",
+    "Доставка і оплата",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_topic_return",
+    "Тема 4",
+    "Обмін та повернення",
+    kind="inline",
+)
+_reg("about", "about_form_topic_install", "Тема 5", "Монтаж", kind="inline")
+_reg("about", "about_form_topic_other", "Тема 6", "Інше", kind="inline")
+_reg(
+    "about",
+    "about_form_message_label",
+    "Повідомлення — підпис",
+    "Повідомлення*",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_message_ph",
+    "Повідомлення — плейсхолдер",
+    "Опишіть ваше питання. Для підбору вкажіть товщину дверей або розміри A і B.",
+)
+_reg("about", "about_form_consent", "Згода — текст", "Погоджуюсь з", kind="inline")
+_reg(
+    "about",
+    "about_form_consent_link",
+    "Згода — посилання",
+    "політикою конфіденційності",
+    kind="inline",
+)
+_reg(
+    "about",
+    "about_form_err_required",
+    "Помилка порожнього поля",
+    "Поле обовʼязкове для заповнення",
+    kind="inline",
+)
 
 # --- delivery ---
 _common_head(

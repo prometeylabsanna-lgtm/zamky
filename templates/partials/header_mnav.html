@@ -43,9 +43,9 @@
         </div>
         <div class="mnav__phones">
           <span class="mnav__phones-label">{% t 'Контакти' %}</span>
-          <a href="tel:+380670000000">(067) 000 00 00</a>
-          <span class="mnav__hours">{% t 'Щоденно 8:00-21:00' %}</span>
-          <a class="mnav__mail" href="mailto:info@centrzamkiv.ua">info@centrzamkiv.ua</a>
+          <a href="tel:{{ contact_tel }}">{{ contact_phone }}</a>
+          <span class="mnav__hours">{{ contact_hours }}</span>
+          <a class="mnav__mail" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
           <button type="button" class="mnav__cb" data-open-callback data-close-menu>{% t 'Замовити дзвінок' %}</button>
         </div>
         <div class="mnav__langs">

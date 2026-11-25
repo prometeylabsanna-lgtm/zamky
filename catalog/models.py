@@ -7,6 +7,7 @@ from pages.slug_utils import ensure_unique_slug
 
 class Category(models.Model):
     name = models.CharField('Назва', max_length=200)
+    name_ru = models.CharField('Назва (RU)', max_length=200, blank=True, default='')
     slug = models.SlugField('Слаг', max_length=220, unique=True)
     parent = models.ForeignKey(
         'self',
@@ -22,6 +23,18 @@ class Category(models.Model):
         max_length=32,
         blank=True,
         help_text='cyl | pad | shield | brand',
+    )
+    home_subtitle = models.CharField(
+        'Підпис на головній',
+        max_length=180,
+        blank=True,
+        default='',
+    )
+    home_subtitle_ru = models.CharField(
+        'Підпис на головній (RU)',
+        max_length=180,
+        blank=True,
+        default='',
     )
     sort_order = models.PositiveIntegerField('Порядок', default=0)
     is_active = models.BooleanField('Активна', default=True)
@@ -43,6 +56,16 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('catalog:category', kwargs={'slug': self.slug})
+
+    def card_name(self, lang: str = 'ua') -> str:
+        if str(lang).lower().startswith('ru') and (self.name_ru or '').strip():
+            return self.name_ru.strip()
+        return self.name
+
+    def card_subtitle(self, lang: str = 'ua') -> str:
+        if str(lang).lower().startswith('ru') and (self.home_subtitle_ru or '').strip():
+            return self.home_subtitle_ru.strip()
+        return (self.home_subtitle or '').strip()
 
 
 class AttributeGroup(models.Model):

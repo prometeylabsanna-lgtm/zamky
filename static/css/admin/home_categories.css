@@ -1,0 +1,64 @@
+/* CMS: картки категорій на головній */
+
+.home-cat-admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.35rem 0 1rem;
+}
+
+.home-cat-admin-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  border-radius: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.home-cat-admin-nav__btn.is-active {
+  border-color: #f97f0c;
+  box-shadow: 0 0 0 2px rgba(249, 127, 12, 0.28);
+}
+
+.home-cat-admin-nav__btn.is-off {
+  opacity: 0.55;
+}
+
+.home-cat-admin-nav__btn--add {
+  border-style: dashed;
+}
+
+.home-cat-admin-detail {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.home-cat-admin-preview {
+  width: 10rem;
+}
+
+.home-cat-admin-preview img {
+  width: 10rem;
+  height: 10rem;
+  max-width: 10rem;
+  max-height: 10rem;
+  object-fit: contain;
+  background: #f3f4f6;
+  border-radius: 0.75rem;
+}
+
+@media (max-width: 767px) {
+  .home-cat-admin-nav__btn {
+    min-height: 3rem;
+    font-size: 16px;
+  }
+}

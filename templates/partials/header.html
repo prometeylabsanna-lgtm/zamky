@@ -24,12 +24,8 @@
       <div class="hdr-phone">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.6 2.8c.6-.1 1.2.2 1.5.8l1.5 3.3c.3.6.1 1.3-.4 1.7l-1.6 1.3a12 12 0 0 0 5.5 5.5l1.3-1.6c.4-.5 1.1-.7 1.7-.4l3.3 1.5c.6.3.9.9.8 1.5l-.4 2.4c-.2 1-1 1.7-2 1.7C10.6 20.5 3.5 13.4 3.5 5.2c0-1 .7-1.8 1.7-2z"></path></svg>
         <div class="hdr-phone__meta">
-          {% if site_settings and site_settings.phone_raw %}
-          <a href="tel:{{ site_settings.phone_raw }}">{{ site_settings.phone }}</a>
-          {% else %}
-          <a href="tel:+380670000000">(067) 000 00 00</a>
-          {% endif %}
-          <span>{% if site_settings and site_settings.work_hours %}{% if cms_lang == 'ru' and site_settings.work_hours_ru %}{{ site_settings.work_hours_ru }}{% else %}{{ site_settings.work_hours }}{% endif %}{% else %}{% t 'Щоденно 8:00-21:00' %}{% endif %}</span>
+          <a href="tel:{{ contact_tel }}">{{ contact_phone }}</a>
+          <span>{{ contact_hours }}</span>
           <button type="button" class="hdr-phone__cb" data-open-callback>{{ cms_header_callback }}</button>
         </div>
       </div>
@@ -62,19 +58,16 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2.6"></rect><rect x="13" y="3" width="8" height="8" rx="2.6"></rect><rect x="3" y="13" width="8" height="8" rx="2.6"></rect><path d="M17 13.2c.6 0 1.1.5 1.1 1.1v1.6h1.6a1.1 1.1 0 0 1 0 2.2h-1.6v1.6a1.1 1.1 0 0 1-2.2 0v-1.6h-1.6a1.1 1.1 0 0 1 0-2.2h1.6v-1.6c0-.6.5-1.1 1.1-1.1z"></path></svg>
         <span>{{ cms_header_catalog }}</span>
       </button>
-      {% for c in header_menu %}
-      {% if forloop.counter <= 6 %}
-      <a class="hdr-nav__link" href="{% url 'catalog:catalog' %}?q={{ c.name|urlencode }}">{{ c.name }}</a>
-      {% endif %}
-      {% endfor %}
-      <a class="hdr-nav__promo" href="{% url 'pages:info_page' 'promos' %}">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="hdrPromoG" x1="0" y1="0" x2="1" y2="1"><stop offset=".32" stop-color="#F97F0C"></stop><stop offset="1" stop-color="#FF2E2E"></stop></linearGradient></defs><path d="M12 1l2.4 2.1 3.1-.5.9 3 3 .9-.5 3.1L23 12l-2.1 2.4.5 3.1-3 .9-.9 3-3.1-.5L12 23l-2.4-2.1-3.1.5-.9-3-3-.9.5-3.1L1 12l2.1-2.4-.5-3.1 3-.9.9-3 3.1.5z" fill="url(#hdrPromoG)"></path><path d="M9 15l6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9.3" cy="9.3" r="1.3" fill="#fff"></circle><circle cx="14.7" cy="14.7" r="1.3" fill="#fff"></circle></svg>
-        <span>{% t 'Акції' %}</span>
-      </a>
-      <a class="hdr-nav__install" href="{% url 'pages:info_page' 'install' %}">
+      {% for item in header_nav_links %}
+      <a class="hdr-nav__{{ item.style }}" href="{{ item.href }}">
+        {% if item.style == "promo" %}
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="hdrPromoG{{ forloop.counter }}" x1="0" y1="0" x2="1" y2="1"><stop offset=".32" stop-color="#F97F0C"></stop><stop offset="1" stop-color="#FF2E2E"></stop></linearGradient></defs><path d="M12 1l2.4 2.1 3.1-.5.9 3 3 .9-.5 3.1L23 12l-2.1 2.4.5 3.1-3 .9-.9 3-3.1-.5L12 23l-2.4-2.1-3.1.5-.9-3-3-.9.5-3.1L1 12l2.1-2.4-.5-3.1 3-.9.9-3 3.1.5z" fill="url(#hdrPromoG{{ forloop.counter }})"></path><path d="M9 15l6-6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><circle cx="9.3" cy="9.3" r="1.3" fill="#fff"></circle><circle cx="14.7" cy="14.7" r="1.3" fill="#fff"></circle></svg>
+        {% elif item.style == "install" %}
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="2" y="3" width="13" height="7" rx="2"></rect><path d="M15 5h3l3-2v7l-3-2h-3z"></path><path d="M6 10h5l-1 4H7z"></path><rect x="6.5" y="14" width="4" height="7" rx="1"></rect></svg>
-        <span>{% t 'Установка' %}</span>
+        {% endif %}
+        <span>{{ item.name }}</span>
       </a>
+      {% endfor %}
     </nav>
   </header>
   {% include 'partials/header_mega.html' %}

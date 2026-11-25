@@ -89,11 +89,13 @@
       branding: false,
       promotion: false,
       height: 420,
+      min_height: 280,
       plugins: "lists link code autolink",
       toolbar:
-        "undo redo | bold italic underline | bullist numlist | link | removeformat | code",
+        "undo redo | blocks | bold italic underline | bullist numlist | blockquote | link | removeformat | code",
+      block_formats: "Абзац=p; Заголовок=h2; Підзаголовок=h3",
       valid_elements:
-        "p,br,strong/b,em/i,u,ul,ol,li,a[href|target|rel|title],h2,h3,h4,span",
+        "p[class],br,strong/b,em/i,u,ul,ol,li,a[href|target|rel|title],h2,h3,h4,blockquote[class],div[class],span",
       forced_root_block: "p",
       newline_behavior: "block",
       convert_urls: false,
@@ -101,7 +103,10 @@
       entity_encoding: "raw",
       content_style:
         "body{font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;padding:8px 12px;}" +
-        "p{margin:0 0 0.85em;}p:last-child{margin-bottom:0;}",
+        "p{margin:0 0 0.85em;}p:last-child{margin-bottom:0;}" +
+        "h2{font-size:1.25em;margin:1.4em 0 0.5em;}h3{font-size:1.1em;margin:1.2em 0 0.4em;}" +
+        "blockquote{margin:1em 0;padding:12px 16px;background:#f4f4f5;border-radius:8px;}" +
+        "ul,ol{margin:0.6em 0 0.85em;padding-left:1.3em;}",
       paste_preprocess: function (_plugin, args) {
         var content = args.content || "";
         if (!HAS_TAG.test(content)) {
@@ -112,6 +117,10 @@
       },
       setup: function (editor) {
         editor.on("init", function () {
+          var el = editor.getElement();
+          if (el && el.classList.contains("cms-tinymce--tall")) {
+            editor.getContainer().style.height = "640px";
+          }
           var html = editor.getContent({ format: "html" });
           var text = editor.getContent({ format: "text" });
           if (text && (!html || html === "<p></p>" || !HAS_TAG.test(html.replace(/<\/?p>/gi, "")))) {

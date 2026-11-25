@@ -36,6 +36,22 @@ class LegacyUkRedirectView(View):
     post = get
 
 
+class LocalizedAdminRedirectView(View):
+    """/ua/admin/ і /ru/admin/ → справжня адмінка без мовного префікса."""
+
+    def get(self, request, rest=''):
+        prefix = settings.ADMIN_URL.strip('/')
+        target = f'/{prefix}/'
+        if rest:
+            target = f'/{prefix}/{rest}'
+        qs = request.META.get('QUERY_STRING')
+        if qs:
+            target = f'{target}?{qs}'
+        return redirect(target)
+
+    post = get
+
+
 urlpatterns = [
     path('healthz/', healthz),
     path(settings.ADMIN_URL, admin.site.urls),
@@ -48,6 +64,8 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
+    path('admin/', LocalizedAdminRedirectView.as_view()),
+    path('admin/<path:rest>', LocalizedAdminRedirectView.as_view()),
     path('', include('catalog.urls')),
     path('cart/', include('cart.urls')),
     path('', include('orders.urls')),

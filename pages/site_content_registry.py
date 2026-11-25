@@ -14,8 +14,9 @@ CONTENT_SECTIONS: tuple[ContentSection, ...] = (
 )
 
 _SIDEBAR_GROUPS: tuple[tuple[str, frozenset[str]], ...] = (
-    ("Головна", frozenset({"home"})),
     ("Оболонка сайту", frozenset({"site"})),
+    ("Головна", frozenset({"home"})),
+    ("Підбір", frozenset()),
     (
         "Інфосторінки",
         frozenset(
@@ -67,20 +68,51 @@ def _sidebar_item_title(section: ContentSection) -> str:
 
 
 def _section_group_title(section: ContentSection) -> str:
+    if section.sidebar_group:
+        return section.sidebar_group
     for group_title, page_slugs in _SIDEBAR_GROUPS:
         if section.page_slug in page_slugs:
             return group_title
     return "Інше"
 
 
+def blog_parent_nav_active(request) -> bool:
+    path = (getattr(request, "path", "") or "").lower()
+    return (
+        "blogbodysettings" in path
+        or "blogasksettings" in path
+        or "blogpost" in path
+    )
+
+
+def _blog_nested_items(admin_prefix: str) -> list[dict]:
+    prefix = admin_prefix.strip("/")
+    return [
+        {
+            "title": "Список статей",
+            "icon": "article",
+            "link": f"/{prefix}/pages/blogpost/",
+        },
+        {
+            "title": "Маєте питання?",
+            "icon": "support_agent",
+            "link": f"/{prefix}/pages/blogasksettings/",
+        },
+    ]
+
+
 def _section_to_item(section: ContentSection, admin_prefix: str = "admin/") -> dict:
     # Рядок, не reverse: Vercel серіалізує settings у JSON до AppRegistry.
     prefix = admin_prefix.strip("/")
-    return {
+    item = {
         "title": _sidebar_item_title(section),
         "icon": section.sidebar_icon,
         "link": f"/{prefix}/pages/{section.admin_model_name}/",
     }
+    if section.page_slug == "blog" and section.slug == "body":
+        item["active"] = "pages.site_content_registry.blog_parent_nav_active"
+        item["items"] = _blog_nested_items(admin_prefix)
+    return item
 
 
 def build_content_sidebar_groups(admin_prefix: str = "admin/") -> list[dict]:
@@ -88,6 +120,8 @@ def build_content_sidebar_groups(admin_prefix: str = "admin/") -> list[dict]:
     buckets["Інше"] = []
 
     for section in CONTENT_SECTIONS:
+        if section.hide_from_sidebar:
+            continue
         buckets[_section_group_title(section)].append(
             _section_to_item(section, admin_prefix)
         )

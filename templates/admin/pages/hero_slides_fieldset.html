@@ -1,9 +1,9 @@
 {% load static %}
-{{ hero_formset.management_form }}
 <fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900" data-hero-slides>
   <legend class="text-font-important-light dark:text-font-important-dark">Слайди банера</legend>
+  {{ hero_formset.management_form }}
   <p class="site-content-editor__hint">
-    Кожен слайд: фото, alt (UA/RU) і посилання. Порядок — перетягуванням.
+    Фото без кнопок і текстів. Заголовок, бейджі й CTA — окремі поля, з’являються поверх фото. Порядок — перетягуванням.
   </p>
 
   <div class="hero-slides" data-hero-list>
@@ -19,7 +19,7 @@
           {% elif form.instance.static_fallback %}
             <img src="{% static form.instance.static_fallback %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
           {% else %}
-            <img src="{% static 'img/v2/banner1.png' %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
+            <img src="{% static 'img/v2/hero/slide-home.webp' %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
           {% endif %}
         </div>
         <div class="hero-slide-row__fields">
@@ -32,10 +32,6 @@
             {{ form.alt_text_ru }}
           </div>
           <div class="site-content-editor__field">
-            <label>{{ form.media.label }}</label>
-            {{ form.media }}
-          </div>
-          <div class="site-content-editor__field">
             <label>{{ form.image.label }}</label>
             {{ form.image }}
           </div>
@@ -43,8 +39,9 @@
             <label>{{ form.link_url.label }}</label>
             {{ form.link_url }}
           </div>
+          {% include "admin/pages/hero_slide_overlay_fields.html" %}
           <div class="hero-slide-row__cta" data-hero-cta-fields>
-            <p class="hero-slide-row__cta-title">Кнопки під банером (мобільний). Порожнє поле = поточний текст / посилання.</p>
+            <p class="hero-slide-row__cta-title">Кнопки на банері. Порожнє поле = поточний текст / посилання.</p>
             {% for col in form.cta_columns %}
             <div class="hero-slide-row__cta-col">
               {% for field in col %}
@@ -60,6 +57,10 @@
           </div>
           <div class="hero-slide-row__meta">
             <label class="hero-slide-row__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.show_secondary }} <span>{{ form.show_secondary.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.cta_primary_light }} <span>{{ form.cta_primary_light.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.show_features }} <span>{{ form.show_features.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.show_brands }} <span>{{ form.show_brands.label }}</span></label>
             {% if form.DELETE %}<label class="hero-slide-row__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
           </div>
           {% if form.non_field_errors %}<div class="site-content-editor__error">{{ form.non_field_errors }}</div>{% endif %}
@@ -74,7 +75,7 @@
         {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
         <div class="hero-slide-row__handle" data-hero-handle draggable="true" title="Перетягнути">⋮⋮</div>
         <div class="hero-slide-row__preview">
-          <img src="{% static 'img/v2/banner1.png' %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
+          <img src="{% static 'img/v2/hero/slide-home.webp' %}" alt="" width="160" height="90" loading="lazy" class="hero-slide-row__fallback">
         </div>
         <div class="hero-slide-row__fields">
           <div class="site-content-editor__field" data-admin-lang="uk">
@@ -86,10 +87,6 @@
             {{ form.alt_text_ru }}
           </div>
           <div class="site-content-editor__field">
-            <label>{{ form.media.label }}</label>
-            {{ form.media }}
-          </div>
-          <div class="site-content-editor__field">
             <label>{{ form.image.label }}</label>
             {{ form.image }}
           </div>
@@ -97,8 +94,9 @@
             <label>{{ form.link_url.label }}</label>
             {{ form.link_url }}
           </div>
+          {% include "admin/pages/hero_slide_overlay_fields.html" %}
           <div class="hero-slide-row__cta" data-hero-cta-fields>
-            <p class="hero-slide-row__cta-title">Кнопки під банером (мобільний). Порожнє поле = поточний текст / посилання.</p>
+            <p class="hero-slide-row__cta-title">Кнопки на банері. Порожнє поле = поточний текст / посилання.</p>
             {% for col in form.cta_columns %}
             <div class="hero-slide-row__cta-col">
               {% for field in col %}
@@ -114,6 +112,10 @@
           </div>
           <div class="hero-slide-row__meta">
             <label class="hero-slide-row__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.show_secondary }} <span>{{ form.show_secondary.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.cta_primary_light }} <span>{{ form.cta_primary_light.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.show_features }} <span>{{ form.show_features.label }}</span></label>
+            <label class="hero-slide-row__check">{{ form.show_brands }} <span>{{ form.show_brands.label }}</span></label>
             {% if form.DELETE %}<label class="hero-slide-row__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
           </div>
         </div>

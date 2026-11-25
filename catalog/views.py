@@ -1,7 +1,7 @@
 import json
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import Count, F, Max, Min, Prefetch, Q
+from django.db.models import Count, Max, Min, Prefetch, Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, TemplateView
@@ -11,8 +11,15 @@ from orders.models import DeliveryDistrict
 from pages.forms_extra import PhotoPickForm
 from pages.i18n_lib import plural_goods, tr
 from pages.models_extra import BlogPost
+from pages.picker_defaults import (
+    get_home_doors,
+    get_picker_filters,
+    get_picker_options_json,
+)
+from pages.popular_products import get_home_popular
 from pages.views_extra import _form_with_key
 
+from .chrome_cms import catalog_chrome
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
 from .search import filter_queryset_by_query
 
@@ -65,40 +72,6 @@ BLOG_FALLBACK_COVERS = [
     'img/v2/p2_36.png',
 ]
 
-PICKER_PRICE_BANDS = [
-    'до 1500 ₴',
-    '1500 – 3000 ₴',
-    '3000 – 4500 ₴',
-    'від 4500 ₴',
-]
-
-
-def _home_picker_options():
-    base = Product.objects.filter(is_active=True, catalog_order__lt=500).exclude(
-        sku__startswith='HOME-'
-    )
-    av = AttributeValue.objects.filter(products__in=base)
-    mech = (
-        av.filter(attribute__slug='mech')
-        .order_by('sort_order', 'value')
-        .values('value', 'slug')
-        .distinct()
-    )
-    color = (
-        av.filter(attribute__slug='color')
-        .order_by('sort_order', 'value')
-        .values('value', 'slug')
-        .distinct()
-    )
-    brands = base.exclude(brand='').order_by('brand').values_list('brand', flat=True).distinct()
-    return {
-        'mech': [{'label': row['value'], 'slug': row['slug']} for row in mech],
-        'color': [{'label': row['value'], 'slug': row['slug']} for row in color],
-        'brand': [{'label': b, 'slug': b} for b in brands],
-        'price': [{'label': p, 'slug': p} for p in PICKER_PRICE_BANDS],
-    }
-
-
 class HomeView(TemplateView):
     template_name = 'pages/home.html'
 
@@ -107,33 +80,10 @@ class HomeView(TemplateView):
         cats = Category.objects.filter(is_active=True, parent__isnull=True).order_by(
             'sort_order', 'name'
         )
-        hits = (
-            Product.objects.filter(is_active=True, is_hit=True)
-            .prefetch_related('images')
-            .order_by('catalog_order', 'pk')[:8]
-        )
-        news = (
-            Product.objects.filter(is_active=True, is_new=True)
-            .prefetch_related('images')
-            .order_by('catalog_order', 'pk')[:8]
-        )
-        if not hits:
-            hits = Product.objects.filter(is_active=True).prefetch_related('images').order_by(
-                'catalog_order'
-            )[:8]
-        if not news:
-            news = (
-                Product.objects.filter(is_active=True)
-                .order_by('-created_at')
-                .prefetch_related('images')[:8]
-            )
-        sales = (
-            Product.objects.filter(is_active=True, old_price__gt=F('price'))
-            .prefetch_related('images')
-            .order_by('catalog_order', 'pk')[:8]
-        )
-        if not sales:
-            sales = hits
+        popular = get_home_popular()
+        hits = popular['hits']
+        news = popular['news']
+        sales = popular['sales']
 
         district = None
         is_city = False
@@ -149,31 +99,25 @@ class HomeView(TemplateView):
         from pages.home_cms import build_home_cms
 
         cms = build_home_cms(self.request)
-        door_types = [
-            {'id': '0', 'image': 'img/v2/p2_14.png', 'line1': tr('Вхідні'), 'line2': tr('двері')},
-            {'id': '1', 'image': 'img/v2/p2_15.png', 'line1': tr('Міжкімнатні'), 'line2': tr('двері')},
-            {'id': '2', 'image': 'img/v2/p2_16.png', 'line1': tr('Металеві'), 'line2': tr('двері')},
-            {'id': '3', 'image': 'img/v2/p2_17.png', 'line1': tr('Пластикові'), 'line2': tr('двері')},
-            {'id': '4', 'image': 'img/v2/p2_18.png', 'line1': tr('Металеві'), 'line2': tr('електро')},
-        ]
+        lang = cms.get('cms_lang') or 'ua'
+        door_types = get_home_doors(lang)
+        picker_filters = get_picker_filters(lang)
+        picker_options = get_picker_options_json(lang)
         blog_posts = BlogPost.objects.filter(is_published=True).order_by(
             'sort_order', '-created_at'
         )[:4]
         cat_list = list(cats)
         category_cards = []
         for i, cat in enumerate(cat_list):
-            sub = ''
-            if i < len(cms['category_subs']) and cms['category_subs'][i]:
-                sub = cms['category_subs'][i]
-            elif i < len(HOME_CATEGORY_SUBS):
+            sub = cat.card_subtitle(lang)
+            if not sub and i < len(HOME_CATEGORY_SUBS):
                 sub = tr(HOME_CATEGORY_SUBS[i])
             category_cards.append(
                 {
                     'category': cat,
+                    'title': cat.card_name(lang),
                     'sub': sub,
-                    'fallback_image': HOME_CATEGORY_IMAGES[
-                        i if i < len(HOME_CATEGORY_IMAGES) else 0
-                    ],
+                    'fallback_image': HOME_CATEGORY_IMAGES[i % len(HOME_CATEGORY_IMAGES)],
                 }
             )
 
@@ -186,9 +130,10 @@ class HomeView(TemplateView):
                 'news': news,
                 'sales': sales,
                 'door_types': door_types,
+                'picker_filters': picker_filters,
                 'blog_posts': blog_posts,
                 'photo_pick_form': _form_with_key(self.request, PhotoPickForm, 'photo_pick'),
-                'picker_options': _home_picker_options(),
+                'picker_options': picker_options,
                 'district': district,
                 'is_city': is_city,
                 'other_districts': DeliveryDistrict.objects.filter(is_active=True).exclude(
@@ -197,6 +142,12 @@ class HomeView(TemplateView):
             }
         )
         ctx.update(cms)
+        if district:
+            ctx["show_district"] = True
+            ctx["district_others_title"] = district.others_heading(lang)
+        else:
+            ctx["show_district"] = False
+            ctx["district_others_title"] = ""
         return ctx
 
 
@@ -398,12 +349,14 @@ class CatalogView(ListView):
         total = ctx['page_obj'].paginator.count
         shown = min(ctx['page_obj'].end_index(), total) if total else 0
         limit = self.get_paginate_by(None)
+        chrome = catalog_chrome(self.request)
+        listing_title = chrome['title'] or tr('Циліндрові врізні замки')
         ctx.update(
             {
                 'category': self.category,
-                'title': tr(self.category.name)
-                if self.category
-                else tr('Циліндрові врізні замки'),
+                'title': tr(self.category.name) if self.category else listing_title,
+                'catalog_empty': chrome['empty'],
+                'catalog_filters_title': chrome['filters_title'],
                 'count_label': f'{total} {plural_goods(total)}',
                 'filter_groups': filter_groups,
                 'selected_chips': selected_chips,

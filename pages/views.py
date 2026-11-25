@@ -56,12 +56,20 @@ def _page_key(raw):
     return 'about'
 
 
+def _form_lang(request):
+    lang = (getattr(request, 'LANGUAGE_CODE', None) or 'ua')[:2].lower()
+    if lang == 'uk':
+        return 'ua'
+    return 'ru' if lang == 'ru' else 'ua'
+
+
 def _new_form(request, data=None):
     key = request.session.get('contact_idempotency') or uuid.uuid4().hex
     request.session['contact_idempotency'] = key
+    lang = _form_lang(request)
     if data is None:
-        return ContactForm(initial={'idempotency_key': key})
-    return ContactForm(data)
+        return ContactForm(initial={'idempotency_key': key}, lang=lang)
+    return ContactForm(data, lang=lang)
 
 
 def _save_contact(form):

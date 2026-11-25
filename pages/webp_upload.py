@@ -24,6 +24,8 @@ def convert_image_field_to_webp(instance, field_name: str, *, quality: int = 82)
         return
 
     name = (field_file.name or '').lower()
+    if name.endswith('.svg'):
+        return
     # Уже webp з аплоаду — лишаємо як є (лише нормалізуємо імʼя за потреби)
     try:
         from PIL import Image

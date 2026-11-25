@@ -1,0 +1,15 @@
+<div class="hero-slide-row__overlay">
+  <p class="hero-slide-row__cta-title">Тексти поверх фото (не малюйте кнопки на картинці)</p>
+  {% for pair in form.overlay_fields %}
+  <div class="hero-slide-row__overlay-pair">
+    {% for field in pair %}
+    <div class="site-content-editor__field"{% if field.name|slice:"-3:" == "_ru" %} data-admin-lang="ru"{% else %} data-admin-lang="uk"{% endif %}>
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<p class="hero-slide-row__cta-help">{{ field.help_text }}</p>{% endif %}
+      {% if field.errors %}<div class="site-content-editor__error">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>

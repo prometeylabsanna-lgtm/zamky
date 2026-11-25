@@ -1,3 +1,6 @@
+{% load cms_tags %}
+{% cms_visible 'about' 'about_form_visible' as show_contact_form %}
+{% if show_contact_form %}
 <section id="form" class="info-form-card">
   {% if form_done %}
     {% include 'pages/partials/contact_success.html' %}
@@ -5,3 +8,4 @@
     {% include 'pages/partials/contact_idle.html' %}
   {% endif %}
 </section>
+{% endif %}

@@ -1,0 +1,56 @@
+{% load static %}
+<div class="footer-nav-admin" data-cms-nav="popular">
+  {{ popular_formset.management_form }}
+  <p class="site-content-editor__hint">
+    Товари на головній у блоці «Популярні». Окремий список для кожної вкладки:
+    додайте товар, змініть порядок або зніміть «Показувати».
+  </p>
+
+  {% for group in popular_formset.grouped_forms %}
+  <fieldset class="site-content-editor__fieldset border border-base-200 dark:border-base-700 rounded-default shadow-sm dark:bg-base-900">
+    <legend class="text-font-important-light dark:text-font-important-dark">{{ group.title }}</legend>
+    <div class="hdr-nav-admin" data-cms-nav-list="{{ group.key }}">
+      {% for form in group.forms %}
+        <div class="hdr-nav-admin__row" data-cms-nav-row>
+          {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+          <div class="site-content-editor__field hdr-nav-admin__product">
+            <label for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
+            {{ form.product }}
+            {% for error in form.product.errors %}<p class="site-content-editor__error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="hdr-nav-admin__meta">
+            <div class="site-content-editor__field hdr-nav-admin__order">
+              <label for="{{ form.sort_order.id_for_label }}">{{ form.sort_order.label }}</label>
+              {{ form.sort_order }}
+            </div>
+            <label class="hdr-nav-admin__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+            {% if form.DELETE %}<label class="hdr-nav-admin__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
+          </div>
+          {% if form.non_field_errors %}<div class="site-content-editor__error">{{ form.non_field_errors }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="hdr-nav-admin__add" data-cms-nav-add data-cms-nav-group="{{ group.key }}">Додати товар</button>
+  </fieldset>
+  {% endfor %}
+
+  <template data-cms-nav-empty>
+    <div class="hdr-nav-admin__row" data-cms-nav-row>
+      {% with form=popular_formset.empty_form %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="site-content-editor__field hdr-nav-admin__product">
+          <label for="{{ form.product.id_for_label }}">{{ form.product.label }}</label>
+          {{ form.product }}
+        </div>
+        <div class="hdr-nav-admin__meta">
+          <div class="site-content-editor__field hdr-nav-admin__order">
+            <label for="{{ form.sort_order.id_for_label }}">{{ form.sort_order.label }}</label>
+            {{ form.sort_order }}
+          </div>
+          <label class="hdr-nav-admin__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
+          {% if form.DELETE %}<label class="hdr-nav-admin__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
+        </div>
+      {% endwith %}
+    </div>
+  </template>
+</div>

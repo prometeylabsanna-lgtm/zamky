@@ -22,38 +22,31 @@
 
       <nav class="site-footer__col" aria-label="{{ cms_footer_catalog_title }}">
         <span class="site-footer__h">{{ cms_footer_catalog_title }}</span>
-        {% for c in header_menu %}
-        {% if forloop.counter <= 6 %}
-        <a href="{% url 'catalog:catalog' %}?q={{ c.name|urlencode }}">{{ c.name }}</a>
-        {% endif %}
+        {% for item in footer_nav.catalog %}
+        <a href="{{ item.href }}">{{ item.name }}</a>
         {% endfor %}
       </nav>
 
       <nav class="site-footer__col" aria-label="{{ cms_footer_info_title }}">
         <span class="site-footer__h">{{ cms_footer_info_title }}</span>
-        <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка та оплата' %}</a>
-        <a href="{% url 'pages:info_page' 'warranty' %}">{% t 'Гарантія' %}</a>
-        <a href="{% url 'pages:info_page' 'returns' %}">{% t 'Обмін та повернення' %}</a>
-        <a href="{% url 'pages:info_page' 'install' %}">{% t 'Установка' %}</a>
-        <a href="{% url 'pages:info_page' 'promos' %}">{% t 'Акції' %}</a>
-        <a href="{% url 'pages:blog_list' %}">{% t 'Корисне для вибору' %}</a>
+        {% for item in footer_nav.info %}
+        <a href="{{ item.href }}">{{ item.name }}</a>
+        {% endfor %}
       </nav>
 
       <div class="site-footer__col site-footer__col--contacts">
         <span class="site-footer__h">{{ cms_footer_contacts_title }}</span>
-        {% if site_settings and site_settings.phone_raw %}
-        <a class="site-footer__tel" href="tel:{{ site_settings.phone_raw }}">{{ site_settings.phone }}</a>
-        {% else %}
-        <a class="site-footer__tel" href="tel:+380670000000">(067) 000 00 00</a>
-        {% endif %}
-        <span class="site-footer__muted">{% if site_settings and site_settings.work_hours %}{% if cms_lang == 'ru' and site_settings.work_hours_ru %}{{ site_settings.work_hours_ru }}{% else %}{{ site_settings.work_hours }}{% endif %}{% else %}{% t 'Щоденно 8:00-21:00' %}{% endif %}</span>
-        {% if site_settings and site_settings.email %}
-        <a class="site-footer__muted" href="mailto:{{ site_settings.email }}">{{ site_settings.email }}</a>
-        {% else %}
-        <a class="site-footer__muted" href="mailto:info@centrzamkiv.ua">info@centrzamkiv.ua</a>
-        {% endif %}
+        <a class="site-footer__tel" href="tel:{{ contact_tel }}">{{ contact_phone }}</a>
+        <span class="site-footer__muted">{{ contact_hours }}</span>
+        <a class="site-footer__muted" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
         <span class="site-footer__muted">{% if site_settings and site_settings.address %}{% if cms_lang == 'ru' and site_settings.address_ru %}{{ site_settings.address_ru }}{% else %}{{ site_settings.address }}{% endif %}{% else %}{% t 'м. Київ' %}{% endif %}</span>
-        <button type="button" class="site-footer__cb" data-open-callback>{% t 'Замовити дзвінок' %}</button>
+        {% for item in footer_nav.action %}
+        {% if item.is_callback %}
+        <button type="button" class="site-footer__cb" data-open-callback>{{ item.name }}</button>
+        {% else %}
+        <a class="site-footer__cb" href="{{ item.href }}">{{ item.name }}</a>
+        {% endif %}
+        {% endfor %}
       </div>
     </div>
 
@@ -61,8 +54,9 @@
     <div class="site-footer__bottom">
       <p class="site-footer__copy">{% if cms_footer_copyright %}{{ cms_footer_copyright }}{% else %}© 2026 {% t 'Центр замків' %}. {% t 'Всі права захищені.' %}{% endif %}</p>
       <div class="site-footer__legal">
-        <a href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
-        <a href="{% url 'pages:info_page' 'offer' %}">{% t 'Публічна оферта' %}</a>
+        {% for item in footer_nav.legal %}
+        <a href="{{ item.href }}">{{ item.name }}</a>
+        {% endfor %}
       </div>
       <p class="site-footer__credit">
         {% t 'Сайт зроблено в' %}

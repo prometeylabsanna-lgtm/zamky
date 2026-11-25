@@ -1,4 +1,6 @@
 from django.db import models
+from pages.blog_defaults import cover_fallback_static
+from pages.legal_body import clean_legal_fragment, sanitize_legal_html
 from pages.slug_utils import ensure_unique_slug
 
 
@@ -102,7 +104,7 @@ class BlogPost(models.Model):
     title = models.CharField('Заголовок', max_length=300)
     slug = models.SlugField('Слаг', max_length=320, unique=True)
     excerpt = models.TextField('Короткий опис')
-    body = models.TextField('Текст')
+    body = models.TextField('Текст статті')
     cover = models.ImageField('Обкладинка', upload_to='blog/', blank=True)
     is_published = models.BooleanField('Опубліковано', default=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0, db_index=True)
@@ -110,16 +112,23 @@ class BlogPost(models.Model):
     updated_at = models.DateTimeField('Оновлено', auto_now=True)
 
     class Meta:
-        verbose_name = 'Стаття блогу'
-        verbose_name_plural = 'Статті блогу'
+        verbose_name = 'Стаття'
+        verbose_name_plural = 'Список статей'
         ordering = ['sort_order', '-created_at']
 
     def __str__(self):
         return self.title
+
+    @property
+    def cover_fallback(self):
+        return cover_fallback_static(self.slug)
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = ensure_unique_slug(
                 BlogPost, self.title, instance_pk=self.pk, fallback='post'
             )
+        self.title = clean_legal_fragment(self.title)
+        self.excerpt = clean_legal_fragment(self.excerpt)
+        self.body = sanitize_legal_html(self.body)
         super().save(*args, **kwargs)

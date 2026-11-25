@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from pages.hero_slides import DEFAULT_HERO_SLIDES
 from pages.models_cms import HeroSlide, SiteBlock, SiteSettings
-from pages.seed_parity import collect_parity
+from pages.seed_parity import SERVICE_BLOCK_KEYS, collect_parity
 from pages.site_content_registry import all_registry_block_keys
 
 
@@ -17,10 +17,8 @@ class SeedParityTests(TestCase):
         self.assertGreaterEqual(report.hero_slides, len(DEFAULT_HERO_SLIDES))
         self.assertEqual(SiteSettings.objects.filter(pk=1).count(), 1)
         self.assertEqual(
-            SiteBlock.objects.filter(
-                page__in={p for p, _ in all_registry_block_keys()}
-            ).count(),
-            len(all_registry_block_keys()),
+            set(SiteBlock.objects.values_list("page", "key")) - SERVICE_BLOCK_KEYS,
+            set(all_registry_block_keys()),
         )
 
     def test_seed_idempotent(self):

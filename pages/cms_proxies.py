@@ -27,8 +27,29 @@ class HomeCategoriesSettings(SiteSettings):
 class HomePickerSettings(SiteSettings):
     class Meta:
         proxy = True
-        verbose_name = "Головна — Підбір"
-        verbose_name_plural = "Головна — Підбір"
+        verbose_name = "Підбір — Тексти"
+        verbose_name_plural = "Підбір — Тексти"
+
+
+class HomePickerDoorsSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Підбір — Двері"
+        verbose_name_plural = "Підбір — Двері"
+
+
+class HomePickerFiltersSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Підбір — Фільтри"
+        verbose_name_plural = "Підбір — Фільтри"
+
+
+class HomePickerStyleSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Підбір — Оформлення"
+        verbose_name_plural = "Підбір — Оформлення"
 
 
 class HomePopularSettings(SiteSettings):
@@ -71,6 +92,13 @@ class AboutBodySettings(SiteSettings):
         proxy = True
         verbose_name = "Про нас"
         verbose_name_plural = "Про нас"
+
+
+class AboutFormSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Про нас — Форма"
+        verbose_name_plural = "Про нас — Форма"
 
 
 class DeliveryBodySettings(SiteSettings):
@@ -127,6 +155,13 @@ class BlogBodySettings(SiteSettings):
         proxy = True
         verbose_name = "Корисне для вибору"
         verbose_name_plural = "Корисне для вибору"
+
+
+class BlogAskSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Маєте питання?"
+        verbose_name_plural = "Маєте питання?"
 
 
 class SiteInfoConsultSettings(SiteSettings):
