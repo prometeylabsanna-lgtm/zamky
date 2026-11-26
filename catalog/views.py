@@ -21,9 +21,11 @@ from pages.views_extra import _form_with_key
 
 from .listing_scope import apply_listing_scope, category_nav_chips, listing_scope
 from .chrome_cms import catalog_chrome
-from .models import Attribute, AttributeValue, Category, Product, ProductImage
+from .models import Attribute, AttributeValue, Category, Product, ProductImage, Review
 from .measure_guide import resolve_measure
 from .product_html import product_description_html
+from .product_meta import review_summary
+from .reviews import INITIAL_VISIBLE, ReviewForm
 from .product_specs import product_spec_rows
 from .product_variants import build_variant_context
 from .search import filter_queryset_by_query
@@ -445,6 +447,9 @@ class ProductDetailView(DetailView):
         spec_rows = product_spec_rows(product)
         description_html = product_description_html(product, self.request)
         measure_title, measure_text = resolve_measure(product.category)
+        reviews = list(
+            Review.objects.filter(product=product, is_published=True).order_by('-created_at', '-id')
+        )
 
         accordions = []
         for block in self.ACCORDIONS:
@@ -470,6 +475,11 @@ class ProductDetailView(DetailView):
                 'current_size': product.size_mm,
                 'measure_title': measure_title,
                 'measure_text': measure_text,
+                'reviews': reviews,
+                'reviews_visible': INITIAL_VISIBLE,
+                'review_stats': review_summary(product, reviews),
+                'review_form': ReviewForm(),
+                'review_sent': self.request.GET.get('review') == 'sent',
             }
         )
         return ctx

@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.db import models
+from django.utils import timezone
 from django.urls import reverse
 from pages.slug_utils import ensure_unique_slug, should_rebuild_slug
 
@@ -494,3 +495,38 @@ class ProductImage(models.Model):
             self, ProductImage.objects.filter(product_id=self.product_id)
         )
         super().save(*args, **kwargs)
+
+
+class Review(models.Model):
+    """Відгук покупця про товар. З сайту приходить неопублікованим — на модерацію."""
+
+    RATING_CHOICES = [(i, '★' * i) for i in range(5, 0, -1)]
+
+    product = models.ForeignKey(
+        Product,
+        related_name='reviews',
+        on_delete=models.CASCADE,
+        verbose_name='Товар',
+    )
+    author_name = models.CharField('Імʼя', max_length=120)
+    rating = models.PositiveSmallIntegerField('Оцінка', choices=RATING_CHOICES, default=5)
+    text = models.TextField('Текст відгуку')
+    created_at = models.DateTimeField(
+        'Дата', default=timezone.now, help_text='Показується на сайті у форматі дд.мм.рррр.'
+    )
+    is_published = models.BooleanField(
+        'Опубліковано',
+        default=False,
+        help_text='Без галочки відгук бачите лише ви в адмінці.',
+    )
+    phone = models.CharField('Телефон', max_length=32, blank=True, help_text='Не публікується.')
+    email = models.EmailField('Email', blank=True, help_text='Не публікується.')
+
+    class Meta:
+        verbose_name = 'Відгук'
+        verbose_name_plural = 'Відгуки'
+        ordering = ['-created_at', '-id']
+        indexes = [models.Index(fields=['product', 'is_published', '-created_at'])]
+
+    def __str__(self):
+        return f'{self.author_name} · {self.rating}★'

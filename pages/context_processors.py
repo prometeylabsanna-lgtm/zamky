@@ -101,7 +101,7 @@ def site_context(request):
         'callback_idempotency': cb_key,
         'page_style': _safe_page_style(request),
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261126v2',
+        'asset_v': '20261126v3',
     }
 
 

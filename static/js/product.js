@@ -490,3 +490,29 @@
   window.addEventListener('hashchange', openFromHash);
   openFromHash();
 })();
+
+/* Відгуки: «Показати ще» і форма «Залишити відгук» */
+(function () {
+  'use strict';
+  var panel = document.getElementById('reviews');
+  if (!panel) return;
+  panel.addEventListener('click', function (e) {
+    var more = e.target.closest('[data-reviews-more]');
+    if (more) {
+      panel.querySelectorAll('[data-review-extra]').forEach(function (el) { el.hidden = false; });
+      more.remove();
+      return;
+    }
+    var open = e.target.closest('[data-review-open]');
+    if (open) {
+      var form = panel.querySelector('[data-review-form]');
+      if (!form) return;
+      form.hidden = false;
+      open.hidden = true;
+      open.setAttribute('aria-expanded', 'true');
+      var first = form.querySelector('input[name="rating"]');
+      if (first) first.focus({ preventScroll: true });
+      form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+})();

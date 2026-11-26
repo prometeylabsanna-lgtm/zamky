@@ -19,6 +19,7 @@ from catalog.models import (
     Product,
     ProductAttribute,
     ProductFamily,
+    Review,
 )
 from orders.models import QuickOrder
 
@@ -99,6 +100,32 @@ class ProductPageTests(TestCase):
         page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
         self.assertContains(page, '· 2 відгуки')
         self.assertContains(page, 'Гарантія 24 місяці')
+
+    def test_published_reviews_drive_counter_and_cards(self):
+        self.product.reviews_count = 13
+        self.product.rating = 3
+        self.product.save(update_fields=['reviews_count', 'rating'])
+        Review.objects.create(product=self.product, author_name='Ірина', rating=5, text='Чудово!', is_published=True)
+        Review.objects.create(product=self.product, author_name='Петро', rating=4, text='Добре', is_published=True)
+        Review.objects.create(product=self.product, author_name='Прихований', rating=1, text='Спам', is_published=False)
+        page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
+        self.assertContains(page, '>Відгуки (2)</button>')
+        self.assertContains(page, '4.5')
+        self.assertContains(page, '· 2 відгуки')
+        self.assertContains(page, 'Ірина')
+        self.assertNotContains(page, 'Прихований')
+
+    def test_review_submit_goes_to_moderation(self):
+        url = reverse('catalog:product_review', args=[self.product.slug])
+        r = self.client.post(url, {'author_name': 'Оля', 'rating': '5', 'text': 'Замок стоїть уже місяць'}, HTTP_HX_REQUEST='true')
+        self.assertContains(r, 'після модерації')
+        review = Review.objects.get()
+        self.assertFalse(review.is_published)
+        # honeypot: нічого не зберігаємо
+        self.client.post(url, {'author_name': 'Bot', 'rating': '5', 'text': 'buy cheap stuff now', 'website': 'x'}, HTTP_HX_REQUEST='true')
+        self.assertEqual(Review.objects.count(), 1)
+        bad = self.client.post(url, {'author_name': '', 'text': ''}, HTTP_HX_REQUEST='true')
+        self.assertContains(bad, 'Поставте оцінку')
 
     def test_variant_context(self):
         response = self.client.get(reverse('catalog:product', args=[self.product.slug]))

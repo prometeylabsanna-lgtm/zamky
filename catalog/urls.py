@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .picker_api import PickerApiView
+from .reviews import ReviewSubmitView
 from .search_api import SearchSuggestApiView
 from .views import CatalogView, HomeView, ProductDetailView
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path('catalog/', CatalogView.as_view(), name='catalog'),
     path('catalog/<slug:slug>/', CatalogView.as_view(), name='category'),
     path('product/<slug:slug>/', ProductDetailView.as_view(), name='product'),
+    path('product/<slug:slug>/review/', ReviewSubmitView.as_view(), name='product_review'),
 ]

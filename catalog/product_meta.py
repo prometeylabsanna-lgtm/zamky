@@ -42,3 +42,34 @@ def warranty_label(months):
     if n <= 0:
         return ''
     return f'{tr("Гарантія")} {n} {plural_months(n)}'
+
+
+def review_summary(product, published=None):
+    """
+    Лічильник і рейтинг біля кнопки купівлі.
+
+    Є опубліковані відгуки — рахуємо з них (кількість і середня оцінка).
+    Немає — як раніше: поля товару «Рейтинг» і «Кількість відгуків».
+    """
+    if published is None:
+        published = list(product.reviews.filter(is_published=True))
+    if published:
+        n = len(published)
+        avg = sum(r.rating for r in published) / n
+        return {
+            'count': n,
+            'rating': round(avg, 1),
+            'score': f'{avg:.1f}',
+            'stars': int(avg + 0.5),
+            'label': reviews_label(n),
+            'from_reviews': True,
+        }
+    rating = int(product.rating or 0)
+    return {
+        'count': int(product.reviews_count or 0),
+        'rating': float(rating),
+        'score': f'{rating}.0',
+        'stars': rating,
+        'label': reviews_label(product.reviews_count),
+        'from_reviews': False,
+    }

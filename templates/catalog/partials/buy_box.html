@@ -23,9 +23,9 @@
       {% endif %}
       <span class="pdp-meta__sep" aria-hidden="true"></span>
       <a href="#reviews" class="pdp-rating">
-        <span class="pdp-stars">{% for _ in "12345" %}{% if forloop.counter <= product.rating %}<span class="pdp-stars__on">★</span>{% else %}<span class="pdp-stars__off">★</span>{% endif %}{% endfor %}</span>
-        <span class="pdp-rating__score">{{ product.rating }}.0</span>
-        {% if product.reviews_label %}<span>{{ product.reviews_label }}</span>{% endif %}
+        <span class="pdp-stars">{% for _ in "12345" %}{% if forloop.counter <= review_stats.stars %}<span class="pdp-stars__on">★</span>{% else %}<span class="pdp-stars__off">★</span>{% endif %}{% endfor %}</span>
+        <span class="pdp-rating__score">{{ review_stats.score }}</span>
+        {% if review_stats.label %}<span>{{ review_stats.label }}</span>{% endif %}
       </a>
       {% if product.warranty_label %}
       <span class="pdp-meta__sep" aria-hidden="true"></span>

@@ -32,7 +32,7 @@
           <button type="button" class="pdp-tabs__tab is-active" role="tab" id="pdp-tab-desc" aria-controls="pdp-panel-desc" aria-selected="true" data-pdp-tab="desc">{% t 'Опис' %}</button>
           {% endif %}
           <button type="button" class="pdp-tabs__tab{% if not description_html %} is-active{% endif %}" role="tab" id="pdp-tab-specs" aria-controls="pdp-panel-specs" aria-selected="{% if description_html %}false{% else %}true{% endif %}" data-pdp-tab="specs">{% t 'Характеристики' %}</button>
-          <button type="button" class="pdp-tabs__tab" role="tab" id="pdp-tab-reviews" aria-controls="reviews" aria-selected="false" data-pdp-tab="reviews">{% t 'Відгуки' %}{% if product.reviews_count %} ({{ product.reviews_count }}){% endif %}</button>
+          <button type="button" class="pdp-tabs__tab" role="tab" id="pdp-tab-reviews" aria-controls="reviews" aria-selected="false" data-pdp-tab="reviews">{% t 'Відгуки' %}{% if review_stats.count %} ({{ review_stats.count }}){% endif %}</button>
         </div>
         {% if description_html %}
         <div class="pdp-tabs__panel pdp-desc" role="tabpanel" id="pdp-panel-desc" aria-labelledby="pdp-tab-desc" data-pdp-panel="desc">
@@ -50,8 +50,31 @@
           </dl>
         </div>
         <div class="pdp-tabs__panel pdp-reviews" role="tabpanel" id="reviews" aria-labelledby="pdp-tab-reviews" data-pdp-panel="reviews" hidden>
-          <p class="pdp-reviews__empty">{% t 'Відгуки про цей товар зʼявляться тут. Поділіться враженням — ми опублікуємо ваш відгук.' %}</p>
-          <a class="pdp-reviews__btn" href="{% url 'pages:info_page' 'contacts' %}">{% t 'Залишити відгук' %}</a>
+          {% if reviews %}
+          <div class="pdp-reviews__list">
+            {% for r in reviews %}
+            <article class="pdp-review"{% if forloop.counter > reviews_visible %} hidden data-review-extra{% endif %}>
+              <div class="pdp-review__head">
+                <span class="pdp-review__name">{{ r.author_name }}</span>
+                <time class="pdp-review__date" datetime="{{ r.created_at|date:'Y-m-d' }}">{{ r.created_at|date:'d.m.Y' }}</time>
+              </div>
+              <div class="pdp-review__stars" role="img" aria-label="{{ r.rating }} / 5">{% for _ in "12345" %}<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"{% if forloop.counter <= r.rating %} class="is-on"{% endif %}><path d="m12 2 3 6.6 7 .7-5.3 4.8 1.6 7L12 17.5 5.7 21l1.6-7L2 9.3l7-.7z"></path></svg>{% endfor %}</div>
+              <p class="pdp-review__text">{{ r.text|linebreaksbr }}</p>
+            </article>
+            {% endfor %}
+          </div>
+          {% if reviews|length > reviews_visible %}
+          <button type="button" class="pdp-reviews__more" data-reviews-more>{% t 'Показати ще' %}</button>
+          {% endif %}
+          {% else %}
+          <p class="pdp-reviews__empty">{% t 'Поки що немає відгуків про цей товар. Будьте першим!' %}</p>
+          {% endif %}
+          {% if review_sent %}
+          {% include 'catalog/partials/review_thanks.html' %}
+          {% else %}
+          <button type="button" class="pdp-reviews__btn" data-review-open aria-controls="review-form" aria-expanded="false">{% t 'Залишити відгук' %}</button>
+          {% include 'catalog/partials/review_form.html' %}
+          {% endif %}
         </div>
       </section>
     </div>

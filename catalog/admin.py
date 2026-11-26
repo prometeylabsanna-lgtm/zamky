@@ -35,6 +35,7 @@ from .models import (
     Category,
     Product,
     ProductImage,
+    Review,
 )
 
 
@@ -65,6 +66,22 @@ class ProductImageInline(TabularInline):
     @admin.display(description='Превʼю')
     def preview(self, obj):
         return admin_image_preview(getattr(obj, 'image', None), max_size=72)
+
+
+class ReviewInline(TabularInline):
+    model = Review
+    extra = 0
+    tab = True
+    fields = ('author_name', 'rating', 'text', 'created_at', 'is_published')
+    ordering = ('-created_at', '-id')
+    verbose_name = 'Відгук'
+    verbose_name_plural = 'Відгуки'
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == 'text' and field is not None:
+            field.widget.attrs.update({'rows': 2})
+        return field
 
 
 @admin.register(Category)
@@ -325,7 +342,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
     )
     search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
     readonly_fields = ('slug', 'og_preview', 'created_at', 'updated_at')
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ReviewInline]
     form = ProductAdminForm
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
     actions = PRODUCT_ACTIONS
@@ -494,3 +511,45 @@ class ProductImageAdmin(TopDropdownFiltersMixin, ModelAdmin):
             siblings = ProductImage.objects.none()
         initial['sort_order'] = next_sort_order(siblings)
         return initial
+
+
+@admin.action(description='Опублікувати')
+def publish_reviews(modeladmin, request, queryset):
+    n = queryset.update(is_published=True)
+    modeladmin.message_user(request, f'Опубліковано відгуків: {n}.')
+
+
+@admin.action(description='Зняти з публікації')
+def unpublish_reviews(modeladmin, request, queryset):
+    n = queryset.update(is_published=False)
+    modeladmin.message_user(request, f'Знято з публікації: {n}.')
+
+
+@admin.register(Review)
+class ReviewAdmin(TopDropdownFiltersMixin, ModelAdmin):
+    list_display = ('author_name', 'product', 'rating_stars', 'short_text', 'created_at', 'is_published')
+    list_display_links = ('author_name',)
+    list_filter = ('is_published', 'rating')
+    list_editable = ('is_published',)
+    search_fields = ('author_name', 'text', 'product__name', 'product__sku', 'phone', 'email')
+    autocomplete_fields = ('product',)
+    actions = (publish_reviews, unpublish_reviews)
+    actions_on_top = True
+    date_hierarchy = None
+    list_per_page = 50
+    fieldsets = (
+        (None, {'fields': ('product', 'author_name', 'rating', 'text', 'created_at', 'is_published')}),
+        ('Контакти (не публікуються)', {'fields': ('phone', 'email')}),
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('product')
+
+    @admin.display(description='Оцінка', ordering='rating')
+    def rating_stars(self, obj):
+        return '★' * obj.rating + '☆' * (5 - obj.rating)
+
+    @admin.display(description='Текст')
+    def short_text(self, obj):
+        t = obj.text or ''
+        return t if len(t) <= 80 else t[:80].rstrip() + '…'

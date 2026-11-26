@@ -213,12 +213,15 @@ class ProductAdminForm(forms.ModelForm):
                 choices=RATING_CHOICES,
                 coerce=int,
                 required=True,
-                help_text='Зірки в картці цього товару на сайті.',
+                help_text='Зірки на сторінці товару, поки немає опублікованих відгуків. Коли вони є — оцінка рахується з них.',
                 widget=UnfoldAdminSelectWidget(),
             )
         reviews = self.fields.get('reviews_count')
         if reviews is not None:
-            reviews.help_text = 'Біля зірок. 0 — рядок відгуків ховається.'
+            reviews.help_text = (
+                'Біля зірок, поки немає опублікованих відгуків (тоді рахуються вони). '
+                '0 — рядок відгуків ховається.'
+            )
         warranty = self.fields.get('warranty_months')
         if warranty is not None:
             warranty.help_text = '0 — не показувати гарантію на картці.'

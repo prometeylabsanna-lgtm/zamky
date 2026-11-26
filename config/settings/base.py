@@ -284,6 +284,11 @@ UNFOLD = {
                         ),
                     },
                     {
+                        'title': 'Відгуки',
+                        'icon': 'reviews',
+                        'link': _admin_link('catalog/review/'),
+                    },
+                    {
                         'title': 'Сімʼї',
                         'icon': 'account_tree',
                         'link': _admin_link('catalog/productfamily/'),
