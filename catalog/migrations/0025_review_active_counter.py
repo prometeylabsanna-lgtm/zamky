@@ -5,7 +5,6 @@ from django.db.models import Count
 def activate_and_sync_counts(apps, schema_editor):
     Review = apps.get_model('catalog', 'Review')
     Product = apps.get_model('catalog', 'Product')
-    Review.objects.filter(is_published=False).update(is_published=True)
     counted = {
         row['product_id']: row['n']
         for row in Review.objects.filter(is_published=True)
