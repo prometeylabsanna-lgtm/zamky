@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 
@@ -60,7 +61,11 @@ class SeoIndexFilesTests(TestCase):
     def test_robots_disallows_and_sitemap(self):
         body = self.client.get("/robots.txt").content.decode()
         self.assertIn("User-agent: *", body)
-        self.assertIn("Disallow: /admin/", body)
+        self.assertNotIn(settings.ADMIN_URL, body)
+        sitemap = self.client.get("/sitemap.xml").content.decode()
+        self.assertNotIn(settings.ADMIN_URL, sitemap)
+        llms = self.client.get("/llms.txt").content.decode()
+        self.assertNotIn(settings.ADMIN_URL, llms)
         self.assertIn("Disallow: /feeds/", body)
         self.assertIn("Disallow: /healthz/", body)
         self.assertIn("Disallow: /lang/", body)

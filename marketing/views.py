@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import secrets
 
-from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseNotModified
 from django.shortcuts import get_object_or_404
 from django.urls import NoReverseMatch, reverse
@@ -63,9 +62,7 @@ def _prefix_disallow(path: str, depth: int = 2) -> str:
 
 
 def _robots_disallow() -> list[str]:
-    admin_path = settings.ADMIN_URL.strip("/")
     lines = [
-        f"Disallow: /{admin_path}/",
         "Disallow: /feeds/",
         "Disallow: /healthz/",
         "Disallow: /lang/",

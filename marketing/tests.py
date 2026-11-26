@@ -2,6 +2,7 @@ import shutil
 import tempfile
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -416,7 +417,11 @@ class SeoHeadTests(TestCase):
         seo.save()
         body = self.client.get("/robots.txt").content.decode()
         self.assertIn("User-agent: *", body)
-        self.assertIn("Disallow: /admin/", body)
+        self.assertNotIn(settings.ADMIN_URL, body)
+        sitemap = self.client.get("/sitemap.xml").content.decode()
+        self.assertNotIn(settings.ADMIN_URL, sitemap)
+        llms = self.client.get("/llms.txt").content.decode()
+        self.assertNotIn(settings.ADMIN_URL, llms)
         self.assertIn("Disallow: /ua/cart/", body)
         self.assertIn("Disallow: /cart/", body)
         self.assertIn("Sitemap:", body)
