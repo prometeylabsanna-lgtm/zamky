@@ -1,3 +1,5 @@
+import sys
+
 from decouple import Csv, UndefinedValueError, config
 from django.core.exceptions import ImproperlyConfigured
 
@@ -69,14 +71,9 @@ STORAGES = {
 
 CMS_ALLOW_STATIC_FALLBACK = False
 
-try:
-    PAYMENT_WEBHOOK_SECRET = config('PAYMENT_WEBHOOK_SECRET')
-except UndefinedValueError as exc:
-    raise ImproperlyConfigured(
-        'PAYMENT_WEBHOOK_SECRET environment variable is required'
-    ) from exc
+PAYMENT_WEBHOOK_SECRET = config('PAYMENT_WEBHOOK_SECRET', default='')
 if not str(PAYMENT_WEBHOOK_SECRET).strip():
-    raise ImproperlyConfigured(
-        'PAYMENT_WEBHOOK_SECRET environment variable is required'
+    sys.stderr.write(
+        'Попередження: PAYMENT_WEBHOOK_SECRET порожній — вебхук оплати відхиляє запити.\n'
     )
 PAYMENT_STUB_ENABLED = False

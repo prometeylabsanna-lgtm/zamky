@@ -8,7 +8,7 @@ from unittest.mock import patch
 from django.core.cache import cache
 from django.core.management import call_command
 from django.db import IntegrityError
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -238,3 +238,55 @@ class PaymentCheckoutTests(TestCase):
         response = self.client.get(reverse('orders:pay_wait', args=[order.number]))
         self.assertEqual(response.status_code, 302)
         self.assertIn('step=done', response['Location'])
+
+    @override_settings(PAYMENT_WEBHOOK_SECRET='')
+    def test_webhook_without_secret_is_forbidden(self):
+        self._add_to_cart(1)
+        self._checkout('idem-no-secret')
+        order = Order.objects.get(idempotency_key='idem-no-secret')
+        response = self._webhook(order, secret='')
+        self.assertEqual(response.status_code, 403)
+        order.refresh_from_db()
+        self.assertNotEqual(order.status, Order.Status.PAID)
+
+    def test_webhook_ref_mismatch_does_not_mark_paid(self):
+        self._add_to_cart(1)
+        self._checkout('idem-ref-bad')
+        order = Order.objects.get(idempotency_key='idem-ref-bad')
+        response = self._webhook(order, ref='not-the-ref')
+        self.assertEqual(response.status_code, 403)
+        order.refresh_from_db()
+        self.assertNotEqual(order.status, Order.Status.PAID)
+
+    def test_webhook_empty_ref_does_not_mark_paid(self):
+        self._add_to_cart(1)
+        self._checkout('idem-ref-empty')
+        order = Order.objects.get(idempotency_key='idem-ref-empty')
+        response = self._webhook(order, ref='')
+        self.assertEqual(response.status_code, 403)
+        order.refresh_from_db()
+        self.assertNotEqual(order.status, Order.Status.PAID)
+
+    @override_settings(PAYMENT_STUB_ENABLED=False, PAYMENT_ONLINE_ENABLED=False)
+    def test_card_without_online_gateway_is_plain_order(self):
+        self._add_to_cart(1)
+        response = self._checkout('idem-card-offline')
+        self.assertIn('step=done', response['Location'])
+        order = Order.objects.get(idempotency_key='idem-card-offline')
+        self.assertEqual(order.status, Order.Status.NEW)
+        self.assertIsNone(order.reserved_until)
+        self.assertFalse(order.payment_ref)
+
+    @override_settings(PAYMENT_STUB_ENABLED=False, PAYMENT_ONLINE_ENABLED=False)
+    def test_wait_page_without_gateway_shows_manager_message(self):
+        self._add_to_cart(1)
+        self._checkout('idem-wait-offline-msg')
+        order = Order.objects.get(idempotency_key='idem-wait-offline-msg')
+        order.status = Order.Status.AWAITING_PAYMENT
+        order.save(update_fields=['status'])
+        response = self.client.get(reverse('orders:pay_wait', args=[order.number]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'Онлайн-оплата тимчасово недоступна. Менеджер звʼяжеться з вами, щоб узгодити оплату.',
+        )

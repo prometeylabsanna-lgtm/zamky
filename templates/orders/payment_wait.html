@@ -44,6 +44,8 @@
     <h2 class="checkout-done__title">{{ wait_title }}</h2>
     {% if cancelled %}
     <p class="checkout-done__text">{% t 'Час на оплату минув. Товар повернуто в каталог. Оформіть замовлення ще раз, якщо товар ще є в наявності.' %}</p>
+    {% elif awaiting and not online_enabled and not stub_enabled %}
+    <p class="checkout-done__text">{% t 'Онлайн-оплата тимчасово недоступна. Менеджер звʼяжеться з вами, щоб узгодити оплату.' %}</p>
     {% else %}
     <p class="checkout-done__text">{% t 'Оплатіть замовлення карткою протягом 30 хвилин. Якщо оплату не підтвердять, товар повернеться в каталог.' %}</p>
     {% endif %}

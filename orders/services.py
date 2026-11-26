@@ -10,6 +10,7 @@ from cart.services import CartService
 from catalog.models import Product
 
 from .models import Order, OrderItem
+from .payments import online_payment_enabled
 
 DELIVERY_PRICES = {
     Order.DeliveryMethod.NP: Decimal('80'),
@@ -89,7 +90,8 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
     delivery_price = DELIVERY_PRICES.get(delivery_method, Decimal('0'))
     subtotal = sum((item['line_total'] for item in items), Decimal('0'))
     payment_method = cleaned_data['payment_method']
-    if payment_method == Order.PaymentMethod.CARD:
+    card_online = payment_method == Order.PaymentMethod.CARD and online_payment_enabled()
+    if card_online:
         status = Order.Status.AWAITING_PAYMENT
         minutes = int(getattr(settings, 'PAYMENT_RESERVE_MINUTES', 30) or 30)
         reserved_until = timezone.now() + timedelta(minutes=minutes)
@@ -139,7 +141,7 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
             line_total=item['line_total'],
         )
 
-    if payment_method == Order.PaymentMethod.CARD:
+    if card_online:
         from .payments import create_payment
 
         create_payment(order)

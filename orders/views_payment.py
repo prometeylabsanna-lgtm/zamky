@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from pages.i18n_lib import tr
 
 from .models import Order
-from .payments import PaymentError, mark_order_paid, verify_webhook
+from .payments import PaymentError, mark_order_paid, online_payment_enabled, verify_webhook
 from .views import build_checkout_steps
 
 
@@ -35,6 +35,7 @@ class PaymentWaitView(View):
             'order': order,
             'cancelled': cancelled,
             'awaiting': order.status == Order.Status.AWAITING_PAYMENT,
+            'online_enabled': online_payment_enabled(),
             'stub_enabled': stub_on and order.status == Order.Status.AWAITING_PAYMENT,
             'checkout_steps': build_checkout_steps('checkout'),
             'wait_title': tr('Очікуємо оплату') if not cancelled else tr('Оплату скасовано'),

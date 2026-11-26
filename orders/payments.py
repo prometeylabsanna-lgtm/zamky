@@ -17,6 +17,12 @@ class PaymentError(Exception):
     pass
 
 
+def online_payment_enabled():
+    return bool(getattr(settings, 'PAYMENT_STUB_ENABLED', False)) or bool(
+        getattr(settings, 'PAYMENT_ONLINE_ENABLED', False)
+    )
+
+
 def create_payment(order):
     if order.payment_method != Order.PaymentMethod.CARD:
         return order
@@ -62,7 +68,7 @@ def mark_order_paid(*, number: str, payment_ref: str = ''):
     if not order:
         raise PaymentError('not found')
     ref = (payment_ref or '').strip()
-    if order.payment_ref and ref and order.payment_ref != ref:
+    if order.payment_ref and (not ref or order.payment_ref != ref):
         raise PaymentError('ref mismatch')
     if order.status == Order.Status.PAID:
         return order, False
