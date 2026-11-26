@@ -1,4 +1,4 @@
-"""Обмеження частоти POST на логін адмінки та публічні форми."""
+"""Обмеження частоти POST на логін і форми, та GET довідника Нової пошти."""
 
 from __future__ import annotations
 
@@ -20,6 +20,8 @@ LOGIN_LIMIT = 8
 LOGIN_WINDOW = 15 * 60
 FORM_LIMIT = 8
 FORM_WINDOW = 10 * 60
+NP_LIMIT = 120
+NP_WINDOW = 60
 
 FORM_PREFIXES = (
     '/checkout',
@@ -55,6 +57,11 @@ def _is_admin_login(path: str) -> bool:
     return path.rstrip('/') == f'{prefix}/login'
 
 
+def _is_np_api(path: str) -> bool:
+    raw = _strip_lang(path)
+    return raw == '/api/np' or raw.startswith('/api/np/')
+
+
 def _form_bucket(path: str) -> str | None:
     raw = _strip_lang(path)
     for prefix in FORM_PREFIXES:
@@ -81,9 +88,14 @@ def _allowed(cache_key: str, limit: int, window_sec: int) -> bool:
 
 
 def check_request(request) -> HttpResponse | None:
+    path = request.path or '/'
+    if request.method == 'GET' and _is_np_api(path):
+        key = f'rl:np:{client_ip(request)}'
+        if _allowed(key, NP_LIMIT, NP_WINDOW):
+            return None
+        return _deny()
     if request.method != 'POST':
         return None
-    path = request.path or '/'
     ip = client_ip(request)
     if _is_admin_login(path):
         key = f'rl:login:{ip}'

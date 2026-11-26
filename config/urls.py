@@ -67,6 +67,7 @@ urlpatterns += i18n_patterns(
     path('', include('catalog.urls')),
     path('cart/', include('cart.urls')),
     path('', include('orders.urls')),
+    path('api/np/', include('novaposhta.urls')),
     path('', include('pages.urls')),
     prefix_default_language=True,
 )
