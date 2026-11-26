@@ -15,6 +15,14 @@ HERO_BRAND_LOGOS = (
     ("img/v2/hero/brands/kale.png", "Kale"),
 )
 
+# Менший варіант фону для srcset (той самий кадр, 1360 px).
+HERO_SMALL_VARIANTS = {
+    "img/v2/hero/slide-home.webp": "img/v2/hero/slide-home-1360.webp",
+    "img/v2/hero/slide-promo.webp": "img/v2/hero/slide-promo-1360.webp",
+    "img/v2/hero/slide-install.webp": "img/v2/hero/slide-install-1360.webp",
+    "img/v2/hero/slide-brands.webp": "img/v2/hero/slide-brands-1360.webp",
+}
+
 HERO_FEATURES = (
     ("shield", "Оригінальна продукція"),
     ("people", "Професійна консультація"),
@@ -160,6 +168,12 @@ class HeroSlideView:
     show_features: bool = False
     show_brands: bool = False
     brands: tuple[tuple[str, str], ...] = field(default_factory=tuple)
+
+    @property
+    def image_small(self) -> str:
+        if self.image_url:
+            return ""
+        return HERO_SMALL_VARIANTS.get(self.image, "")
 
 
 def _pick(lang: str, ua: str, ru: str) -> str:

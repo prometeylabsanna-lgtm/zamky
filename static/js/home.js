@@ -58,7 +58,7 @@
 
     function start() {
       clearInterval(timer);
-      timer = setInterval(next, 6000);
+      timer = setInterval(next, 3000);
     }
 
     function stop() {

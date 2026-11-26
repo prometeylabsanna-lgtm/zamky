@@ -20,8 +20,16 @@
   }
 }
 
+/*
+ * ≥744: банер масштабується пропорційно від макета 1360×666
+ * (Claude Design, Центр замків.dc.html: heroPad 40, h1 72, heroP 20,
+ * heroBtnGap 20, pillW 268, pillGap 20, pillFs 16, badgeFs 16).
+ * 1u = 1px макета при ширині банера 1360.
+ */
 @media (min-width: 744px) {
   .home-v2 .home-hero {
+    --u: calc(100cqw / 1360);
+    container-type: inline-size;
     height: auto;
     aspect-ratio: 2576 / 1261;
     margin-top: 20px;
@@ -32,9 +40,25 @@
   }
 
   .home-hero__overlay {
-    gap: 24px;
-    padding: 32px 40px 40px;
+    gap: 0;
+    padding: calc(40 * var(--u));
     background: none;
+    letter-spacing: -0.04em;
+  }
+
+  .home-hero__badges {
+    gap: calc(4 * var(--u));
+  }
+
+  .home-hero__badge {
+    box-sizing: border-box;
+    min-height: 0;
+    height: calc(36 * var(--u));
+    padding: 0 calc(16 * var(--u));
+    border: 1px solid #e6e6e6;
+    border-radius: calc(4 * var(--u));
+    font-size: calc(16 * var(--u));
+    font-weight: 400;
   }
 
   .home-hero__bottom {
@@ -42,89 +66,115 @@
     flex-direction: row;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 32px;
+    gap: calc(40 * var(--u));
   }
 
   .home-hero__copy {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    max-width: min(780px, 62%);
+    max-width: none;
     min-width: 0;
   }
 
-  .home-hero__slide[data-hero-kind="home"] .home-hero__copy {
-    max-width: min(800px, 64%);
-    padding-left: 28px;
-  }
-
-  .home-hero__slide[data-hero-kind="promo"] .home-hero__copy {
-    max-width: min(720px, 56%);
+  .home-hero__title,
+  .home-hero__slide[data-hero-kind] .home-hero__title {
+    max-width: 11.8em;
+    font-size: calc(72 * var(--u));
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.07;
   }
 
   .home-hero__slide[data-hero-kind="promo"] .home-hero__title {
-    max-width: 9.6em;
-  }
-
-  .home-hero__slide[data-hero-kind="promo"] .home-hero__actions {
-    margin-top: 64px;
-  }
-
-  .home-hero__title {
-    max-width: 12em;
-    font-size: clamp(40px, 4.8vw, 56px);
+    max-width: 7.4em;
   }
 
   .home-hero__lead {
-    margin-top: 16px;
-    font-size: 16px;
+    max-width: calc(400 * var(--u));
+    margin-top: calc(32 * var(--u));
+    color: #e6e6e6;
+    font-size: calc(20 * var(--u));
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 0.9;
   }
 
-  .home-hero__actions {
+  .home-hero__actions,
+  .home-hero__slide[data-hero-kind] .home-hero__actions {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: stretch;
-    gap: 16px;
-    margin-top: 28px;
+    gap: calc(20 * var(--u));
+    margin-top: calc(64 * var(--u));
+  }
+
+  .home-hero__slide[data-hero-kind="home"] .home-hero__actions {
+    margin-top: calc(57 * var(--u));
   }
 
   .home-v2 .home-hero__cta-link {
     width: auto;
-    min-width: 200px;
-    max-width: 100%;
-    min-height: 48px;
-    padding: 12px 18px;
-  }
-
-  .home-hero__actions--single {
-    width: min(420px, 100%);
-  }
-
-  .home-hero__actions--single .home-hero__cta-link {
-    width: 100%;
     min-width: 0;
-    padding: 14px 20px;
+    max-width: 100%;
+    min-height: 0;
+    height: calc(48 * var(--u));
+    gap: calc(12 * var(--u));
+    padding: 0 calc(16 * var(--u));
+    border-radius: calc(6 * var(--u));
+    font-size: calc(16 * var(--u));
+    font-weight: 400;
+  }
+
+  .home-v2 .home-hero__cta-link--ghost {
+    background: transparent;
+    border: 1px solid #fff;
+  }
+
+  .home-hero__actions--single,
+  .home-hero__slide[data-hero-kind] .home-hero__actions--single {
+    width: calc(456 * var(--u));
+  }
+
+  .home-v2 .home-hero__actions--single .home-hero__cta-link {
+    width: 100%;
+    padding: 0 calc(16 * var(--u));
+  }
+
+  .home-hero__cta-arrow {
+    width: calc(20 * var(--u));
+    height: calc(12 * var(--u));
+  }
+
+  .home-hero__cta-spark {
+    width: calc(22 * var(--u));
+    height: calc(22 * var(--u));
   }
 
   .home-hero__features {
     grid-template-columns: 1fr;
-    width: 268px;
-    gap: 12px;
+    width: calc(268 * var(--u));
+    gap: calc(20 * var(--u));
     flex: none;
     align-self: flex-end;
-    margin-right: 40px;
+    margin: 0 0 calc(-4 * var(--u));
   }
 
   .home-hero__feature {
-    min-height: 48px;
-    padding: 10px 14px;
-    gap: 10px;
-    font-size: 15px;
+    box-sizing: border-box;
+    min-height: 0;
+    height: calc(48 * var(--u));
+    padding: 0 calc(14 * var(--u));
+    gap: calc(14 * var(--u));
+    border-radius: calc(8 * var(--u));
+    color: #505050;
+    font-size: calc(16 * var(--u));
+    font-weight: 400;
   }
 
   .home-hero__feature-icon {
-    width: 24px;
-    height: 24px;
+    width: calc(24 * var(--u));
+    height: calc(24 * var(--u));
   }
 
   .home-hero__brands {
@@ -150,66 +200,9 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .home-hero__overlay {
-    padding: 40px 40px 48px;
-  }
-
-  .home-hero__badge {
-    min-height: 32px;
-    padding: 6px 12px;
-    font-size: 16px;
-  }
-
-  .home-hero__title {
-    font-size: clamp(52px, 4.2vw, 64px);
-  }
-
-  .home-hero__actions--single {
-    width: min(460px, 100%);
-  }
-
-  .home-hero__lead {
-    max-width: 28ch;
-    margin-top: 20px;
-    font-size: 20px;
-  }
-
-  .home-hero__actions {
-    margin-top: 36px;
-    gap: 20px;
-  }
-
-  .home-hero__features {
-    gap: 16px;
-  }
-
-  .home-hero__feature {
-    min-height: 52px;
-    padding: 12px 16px;
-    font-size: 16px;
-  }
-}
-
 @media (min-width: 1280px) {
   .home-v2 .home-hero {
     margin-top: 0;
-  }
-
-  .home-hero__title {
-    font-size: 64px;
-  }
-
-  .home-hero__slide[data-hero-kind="home"] .home-hero__title {
-    font-size: 72px;
-  }
-
-  .home-hero__slide[data-hero-kind="promo"] .home-hero__title {
-    font-size: 72px;
-  }
-
-  .home-hero__actions--single {
-    width: min(480px, 100%);
   }
 }
 

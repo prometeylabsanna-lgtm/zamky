@@ -51,6 +51,7 @@ def build_home_cms(request) -> dict:
                 "url": slide.url,
                 "image": slide.image,
                 "image_url": slide.image_url,
+                "image_small": slide.image_small,
                 "cta_primary_label": slide.cta_primary_label,
                 "cta_primary_url": slide.cta_primary_url,
                 "cta_secondary_label": slide.cta_secondary_label,
