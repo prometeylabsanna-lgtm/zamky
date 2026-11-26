@@ -178,3 +178,59 @@ class HomePopularCmsTests(TestCase):
         self.assertEqual([p.sku for p in hits], ["HIT-1"])
         news = get_home_popular()["news"]
         self.assertEqual([p.sku for p in news], ["NEW-1"])
+
+    def test_home_demo_clones_replaced_with_access_locks(self):
+        from pages.models_cms import SiteBlock
+
+        access = Category.objects.filter(
+            name="Контроль доступу", parent__isnull=True
+        ).first() or Category.objects.create(
+            name="Контроль доступу", slug="access-pop"
+        )
+        leaf = access.children.first() or Category.objects.create(
+            name="Кодові замки", slug="code-locks-pop", parent=access
+        )
+        code = Product.objects.create(
+            category=leaf,
+            name="Кодовий замок Ylli YB-300",
+            slug="ylli-yb-300",
+            sku="15000",
+            price=Decimal("400"),
+            old_price=Decimal("520"),
+            stock=12,
+            is_active=True,
+            catalog_order=1,
+        )
+        HomePopularProduct.objects.all().delete()
+        clone_name = (
+            "Циліндр ABARO B100 60 (30*30) G латунь полірована 5 ключів"
+        )
+        for index in range(8):
+            clone = Product.objects.create(
+                category=self.cat,
+                name=clone_name,
+                slug=f"home-hit-{index}",
+                sku=f"HOME-HIT-{index}",
+                price=Decimal("400"),
+                stock=12,
+                is_hit=True,
+                is_active=True,
+                catalog_order=index,
+            )
+            HomePopularProduct.objects.create(
+                tab=HomePopularProduct.Tab.HITS,
+                product=clone,
+                sort_order=index,
+                is_active=True,
+            )
+        SiteBlock.objects.update_or_create(
+            page=READY_PAGE,
+            key=READY_KEY,
+            defaults={"text_html": "1"},
+        )
+        hits = get_home_popular()["hits"]
+        skus = [product.sku for product in hits]
+        self.assertNotIn("HOME-HIT-0", skus)
+        self.assertIn(code.sku, skus)
+        self.assertTrue(any("Ylli" in product.name for product in hits))
+        self.assertEqual(len({product.name for product in hits}), len(hits))

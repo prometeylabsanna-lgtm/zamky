@@ -174,12 +174,47 @@ def _slide_kwargs(item: dict) -> dict:
 
 def ensure_default_hero_slides() -> int:
     if HeroSlide.objects.exists():
-        return 0
+        return backfill_hero_static_fallbacks()
     created = 0
     for item in DEFAULT_HERO_SLIDES:
         HeroSlide.objects.create(**_slide_kwargs(item), is_active=True)
         created += 1
     return created
+
+
+def backfill_hero_static_fallbacks() -> int:
+    rows = list(HeroSlide.objects.order_by("sort_order", "pk"))
+    defaults = list(DEFAULT_HERO_SLIDES)
+    updated = 0
+    for index, row in enumerate(rows):
+        if index >= len(defaults):
+            break
+        item = defaults[index]
+        fields = []
+        if not (row.static_fallback or "").strip():
+            row.static_fallback = item["static_fallback"]
+            fields.append("static_fallback")
+        if not (row.headline or "").strip() and item.get("headline"):
+            row.headline = item["headline"]
+            fields.append("headline")
+        if not (row.headline_ru or "").strip() and item.get("headline_ru"):
+            row.headline_ru = item["headline_ru"]
+            fields.append("headline_ru")
+        if fields:
+            row.save(update_fields=fields)
+            updated += 1
+    return updated
+
+
+def _row_media_url(row) -> str | None:
+    from pages.cms_content import _safe_media_url
+
+    if row.media_id and row.media:
+        url = _safe_media_url(getattr(row.media, "file", None))
+        if url:
+            return url
+    url = _safe_media_url(getattr(row, "image", None))
+    return url or None
 
 
 def apply_overlay_defaults(slide, item: dict) -> None:
@@ -226,18 +261,21 @@ def _view_from_item(item: dict, lang: str) -> HeroSlideView:
 
 
 def get_hero_slides(lang: str = "ua") -> list[HeroSlideView]:
-    if _allow_static_fallback():
-        ensure_default_hero_slides()
-    rows = list(HeroSlide.objects.filter(is_active=True).order_by("sort_order", "pk"))
-    allow_static = _allow_static_fallback()
+    ensure_default_hero_slides()
+    rows = list(
+        HeroSlide.objects.filter(is_active=True)
+        .select_related("media")
+        .order_by("sort_order", "pk")
+    )
     if not rows:
-        if not allow_static:
-            return []
         return [_view_from_item(item, lang) for item in DEFAULT_HERO_SLIDES]
     result: list[HeroSlideView] = []
-    for row in rows:
-        image_url = row.resolved_image_url()
-        static_image = row.static_fallback or "" if allow_static else ""
+    defaults = list(DEFAULT_HERO_SLIDES)
+    for index, row in enumerate(rows):
+        image_url = _row_media_url(row)
+        static_image = (row.static_fallback or "").strip()
+        if not static_image and index < len(defaults):
+            static_image = defaults[index]["static_fallback"]
         alt = _pick(lang, row.alt_text, row.alt_text_ru)
         if row.media_id and row.media:
             alt = _pick(

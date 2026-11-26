@@ -134,3 +134,33 @@ class HeroCtaTests(TestCase):
         self.assertIn("home-hero__actions--single", html)
         self.assertIn("home-hero__cta-spark", html)
         self.assertIn("heroPromoSpark", html)
+
+
+@override_settings(CMS_ALLOW_STATIC_FALLBACK=False)
+class HeroStaticFallbackOnProdTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        HeroSlide.objects.all().delete()
+
+    def test_empty_db_seeds_default_webps(self):
+        from pages.hero_slides import get_hero_slides
+
+        slides = get_hero_slides("ua")
+        self.assertGreaterEqual(len(slides), 4)
+        self.assertTrue(any("slide-home.webp" in (s.image or "") for s in slides))
+        html = self.client.get("/ua/").content.decode()
+        self.assertIn("data-hero-slide", html)
+        self.assertIn("slide-home.webp", html)
+        self.assertIn("img src=", html)
+
+    def test_blank_cms_rows_backfill_static(self):
+        from pages.hero_slides import get_hero_slides
+
+        HeroSlide.objects.create(alt_text="порожній", is_active=True, sort_order=0)
+        slides = get_hero_slides("ua")
+        self.assertGreaterEqual(len(slides), 1)
+        self.assertIn("slide-home.webp", slides[0].image or "")
+        row = HeroSlide.objects.order_by("sort_order", "pk").first()
+        self.assertEqual(row.static_fallback, "img/v2/hero/slide-home.webp")
+        html = self.client.get("/ua/").content.decode()
+        self.assertIn("slide-home.webp", html)
