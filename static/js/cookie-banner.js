@@ -54,20 +54,32 @@
     return parseFloat(v) || 0;
   }
 
-  // Десктоп: відступи як у макеті; піднімаємо лише якщо cookie-банер
-  // (fixed, внизу вікна) перекрив би кнопку активного слайда — рівно
-  // настільки, щоб кнопка була над банером. Щоб заголовок не наїхав на
-  // стрілки слайдера: (1) стискаємо проміжок заголовок→кнопка до 24u,
-  // (2) решту компенсуємо, піднімаючи стрілки над заголовком (лише поки
-  // є cookie-банер). Рахуємо для scrollY=0.
+  // Десктоп: cookie-банер — компактна картка справа внизу, hero лишається
+  // як у макеті. Fallback (вузькі/низькі вікна): якщо картка все ж
+  // перекриває кнопку активного слайда — піднімаємо блок рівно настільки,
+  // щоб кнопка була над карткою. Щоб заголовок не наїхав на стрілки:
+  // (1) стискаємо проміжок заголовок→кнопка до 24u, (2) решту компенсуємо,
+  // піднімаючи стрілки (лише поки є картка). Рахуємо для scrollY=0.
   function liftHeroDesktop(hero, h) {
     clearHero();
     var overlay = hero.querySelector('.home-hero__slide.is-active .home-hero__overlay');
     if (!overlay || overlay.hidden) return;
     var heroRect = hero.getBoundingClientRect();
-    var heroBottom = heroRect.bottom + (window.pageYOffset || 0);
+    var links = overlay.querySelectorAll('.home-hero__cta-link');
+    if (!links.length) return;
+    var left = Infinity;
+    var right = -Infinity;
+    var bottom = -Infinity;
+    for (var k = 0; k < links.length; k += 1) {
+      var lr = links[k].getBoundingClientRect();
+      left = Math.min(left, lr.left);
+      right = Math.max(right, lr.right);
+      bottom = Math.max(bottom, lr.bottom);
+    }
+    var card = banner.getBoundingClientRect();
+    if (card.left >= right || card.right <= left) return; // картка не над кнопкою
     var natPad = px(window.getComputedStyle(overlay).paddingBottom);
-    var need = Math.ceil(heroBottom - (window.innerHeight - h) + DESKTOP_GAP - natPad);
+    var need = Math.ceil(bottom + (window.pageYOffset || 0) - card.top + DESKTOP_GAP);
     if (need <= 0) return;
 
     var actions = overlay.querySelector('.home-hero__actions');

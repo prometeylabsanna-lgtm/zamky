@@ -103,7 +103,7 @@ def site_context(request):
         'page_style': _safe_page_style(request),
         'cookie_consent': read_consent(request),
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261126v9',
+        'asset_v': '20261126v10',
     }
 
 

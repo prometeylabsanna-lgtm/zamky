@@ -73,37 +73,55 @@ html.has-cookie-banner .toast {
   }
 }
 
+/* Десктоп: компактна плаваюча картка в правому нижньому куті, щоб не
+   перекривати кнопку й заголовок банера (вони зліва). */
 @media (min-width: 744px) {
   .cookie-banner {
-    padding: 14px var(--pad-x) calc(14px + var(--safe-bottom));
+    left: auto;
+    right: var(--pad-x);
+    bottom: calc(20px + var(--safe-bottom));
+    width: 380px;
+    max-width: calc(100% - 2 * var(--pad-x));
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
   }
 
   .cookie-banner__inner {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    max-width: none;
+    margin: 0;
   }
 
   .cookie-banner__text {
-    flex: 1 1 auto;
-    min-width: 0;
+    font-size: 13px;
+    line-height: 1.4;
   }
 
   .cookie-banner__actions {
-    flex: 0 0 auto;
     flex-wrap: nowrap;
+    gap: 8px;
   }
 
   .cookie-banner__btn {
-    flex: 0 0 auto;
-    min-width: 160px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 40px;
+    height: 40px;
+    padding: 0 10px;
+    font-size: 14px;
+    white-space: nowrap;
   }
-}
 
-@media (min-width: 1100px) {
-  .cookie-banner__text {
-    font-size: 15px;
+  html.has-cookie-banner body {
+    padding-bottom: 0;
+  }
+
+  html.has-cookie-banner .toast {
+    bottom: calc(20px + var(--safe-bottom));
   }
 }
 
