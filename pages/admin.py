@@ -1,6 +1,7 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin, TabularInline
 
+from pages.admin_guidelines import IMAGE_HINTS, apply_form_char_hints
 from pages.admin_image_preview import admin_image_preview
 from pages.admin_mixins import TopDropdownFiltersMixin
 from pages.admin_recent_actions import patch_admin_urls
@@ -54,7 +55,22 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
 
     class Media:
         css = {"all": ("css/admin/lang_tabs.css",)}
-        js = ("js/admin/lang_tabs.js", "js/admin/image_preview.js")
+        js = ("js/admin/lang_tabs.js", "js/admin/image_preview.js", "js/admin/char_hint.js")
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        hints = {
+            "logo": IMAGE_HINTS["logo"],
+            "favicon": IMAGE_HINTS["favicon"],
+            "instagram_url": "Повне посилання з https://.",
+            "telegram_url": "Повне посилання з https://.",
+            "facebook_url": "Повне посилання з https://.",
+        }
+        for name, text in hints.items():
+            field = form.base_fields.get(name)
+            if field is not None:
+                field.help_text = text
+        return form
 
     @admin.display(description="Превʼю логотипу")
     def logo_preview(self, obj):
@@ -147,7 +163,7 @@ class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
     )
 
     class Media:
-        js = ("js/admin/image_preview.js",)
+        js = ("js/admin/image_preview.js", "js/admin/char_hint.js")
 
     def get_changeform_initial_data(self, request):
         from catalog.filter_sort import next_sort_order
@@ -162,9 +178,24 @@ class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
                 attrs={"rows": 22, "class": "cms-tinymce--tall"}
             )
             kwargs["help_text"] = (
-                "Один редактор: заголовки (H2), абзаци, списки — як на сайті."
+                "Один редактор: заголовки, абзаци, списки — як на сторінці статті."
             )
+        if db_field.name == "excerpt":
+            kwargs["help_text"] = (
+                "Короткий текст на картці блогу. Краще до 140 символів, далі може обрізатися."
+            )
+        if db_field.name == "cover":
+            from pages.admin_guidelines import IMAGE_HINTS
+
+            kwargs["help_text"] = IMAGE_HINTS["blog"]
+        if db_field.name == "is_published":
+            kwargs["help_text"] = "Без галочки стаття не видно в списку й на головній."
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        apply_form_char_hints(form)
+        return form
 
     def save_model(self, request, obj, form, change):
         obj.body = sanitize_legal_html(obj.body)

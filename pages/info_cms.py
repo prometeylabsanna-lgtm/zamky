@@ -82,6 +82,17 @@ def for_page(key: str, *, lang: str = "ua", site_blocks=None) -> dict:
     return fn(lang, blocks)
 
 
+def seo_for_page(key: str, *, lang: str = "ua", site_blocks=None) -> dict:
+    blocks = site_blocks if site_blocks is not None else get_site_blocks_map()
+    page = "about" if key == "contacts" else key
+    if page not in _ASSEMBLERS:
+        page = "about"
+    return {
+        "title": _t(page, f"{page}_seo_title", lang, blocks),
+        "description": _t(page, f"{page}_seo_description", lang, blocks),
+    }
+
+
 def is_info_page_visible(page: str, *, site_blocks=None) -> bool:
     if page == "blog":
         return is_section_visible("blog", "blog_section_visible", site_blocks)

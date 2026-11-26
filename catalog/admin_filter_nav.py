@@ -1,13 +1,12 @@
 from urllib.parse import parse_qs, urlencode, urlparse
 
-from django.db.models import Count, F
+from django.db.models import Count
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from unfold.views import ChangeList
 
-from .filter_sort import next_sort_order
 from .models import Attribute, AttributeGroup, AttributeValue
 
 NONE_GROUP = 'none'
@@ -79,8 +78,6 @@ def _with_next(url, next_url):
 def _attribute_meta(attr):
     parts = [f'{attr.value_count} знач.']
     parts.append('фільтр у каталозі' if attr.filterable else 'лише в картці товару')
-    if attr.group_id:
-        parts.append(f'група: {attr.group.name}')
     return ' · '.join(parts)
 
 
@@ -118,9 +115,7 @@ def build_filter_nav_context(attribute_id='', group_id='', hide_add=False):
         attr_qs = (
             Attribute.objects.select_related('group')
             .annotate(value_count=Count('values'))
-            .order_by(
-                F('group__sort_order').asc(nulls_last=True), 'sort_order', 'name', 'pk'
-            )
+            .order_by('sort_order', 'name', 'pk')
         )
         for attr in attr_qs:
             gkey = _group_key(attr.group)
@@ -237,17 +232,6 @@ class FilterTreeMixin:
         }
         return TemplateResponse(request, 'admin/catalog/filter_values_nav.html', context)
 
-    def get_changeform_initial_data(self, request):
-        initial = super().get_changeform_initial_data(request)
-        group_id = (request.GET.get('group') or '').strip()
-        if group_id.isdigit():
-            initial['group'] = int(group_id)
-            siblings = Attribute.objects.filter(group_id=int(group_id))
-        else:
-            siblings = Attribute.objects.filter(group__isnull=True)
-        initial['sort_order'] = next_sort_order(siblings)
-        return initial
-
 
 class FilterValuesNavMixin:
     """Рівень 3: значення обраного фільтра."""
@@ -277,7 +261,7 @@ class FilterValuesNavMixin:
 
     def get_list_display(self, request):
         if (request.GET.get('attribute') or '').strip():
-            return ('value', 'slug', 'sort_order')
+            return ('value', 'slug')
         return self.list_display
 
     def get_list_filter(self, request):
@@ -290,8 +274,4 @@ class FilterValuesNavMixin:
         attribute_id = (request.GET.get('attribute') or '').strip()
         if attribute_id.isdigit():
             initial['attribute'] = int(attribute_id)
-            siblings = AttributeValue.objects.filter(attribute_id=int(attribute_id))
-        else:
-            siblings = AttributeValue.objects.none()
-        initial['sort_order'] = next_sort_order(siblings)
         return initial

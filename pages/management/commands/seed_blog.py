@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 from pages.blog_defaults import POSTS
 from pages.models import BlogPost
+from pages.slug_utils import slug_seed
 
 
 class Command(BaseCommand):
@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         created = 0
         for row in POSTS:
-            slug = row.get('slug') or slugify(row['title']) or 'post'
+            slug = row.get('slug') or slug_seed(row['title'], 'post')
             _, was_created = BlogPost.objects.get_or_create(
                 slug=slug,
                 defaults={

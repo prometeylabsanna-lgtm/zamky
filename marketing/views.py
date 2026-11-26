@@ -1,4 +1,4 @@
-"""Публічні маркетингові URL: /feeds/<slug>.xml і /robots.txt."""
+"""Публічні маркетингові URL: /feeds/<slug>.xml, /robots.txt і /llms.txt."""
 
 from __future__ import annotations
 
@@ -9,10 +9,22 @@ from django.http import Http404, HttpResponse, HttpResponseNotModified
 from django.shortcuts import get_object_or_404
 from django.urls import NoReverseMatch, reverse
 from django.utils.http import http_date
+from django.utils.translation import override
 from django.views.decorators.http import require_GET
 
 from marketing.feeds import get_feed_payload, resolve_base_url
+from marketing.llms import build_llms_txt
 from marketing.models import ProductFeed, SeoSettings
+
+_ROBOTS_LANGS = ("ua", "ru")
+_ROBOTS_NAMED = (
+    "cart:drawer",
+    "orders:checkout",
+    "catalog:api_picker",
+    "pages:callback",
+    "pages:photo_pick",
+    "pages:install",
+)
 
 
 @require_GET
@@ -43,14 +55,47 @@ def _sitemap_url(base: str) -> str:
     return ""
 
 
+def _prefix_disallow(path: str, depth: int = 2) -> str:
+    parts = [p for p in path.split("/") if p]
+    if len(parts) < depth:
+        return path if path.endswith("/") else path + "/"
+    return "/" + "/".join(parts[:depth]) + "/"
+
+
+def _robots_disallow() -> list[str]:
+    admin_path = settings.ADMIN_URL.strip("/")
+    lines = [
+        f"Disallow: /{admin_path}/",
+        "Disallow: /feeds/",
+        "Disallow: /healthz/",
+        "Disallow: /lang/",
+    ]
+    seen = set(lines)
+    for lang in _ROBOTS_LANGS:
+        with override(lang):
+            for name in _ROBOTS_NAMED:
+                try:
+                    path = reverse(name)
+                except NoReverseMatch:
+                    continue
+                rule = f"Disallow: {_prefix_disallow(path)}"
+                if rule not in seen:
+                    seen.add(rule)
+                    lines.append(rule)
+            rule = f"Disallow: /{lang}/order/"
+            if rule not in seen:
+                seen.add(rule)
+                lines.append(rule)
+    return lines
+
+
 @require_GET
 def robots_txt(request):
     seo = SeoSettings.load()
     base = (seo.primary_domain or "").rstrip("/") or f"{request.scheme}://{request.get_host()}"
     # Глобальний noindex працює через <meta name="robots"> на кожній сторінці,
     # а не через Disallow: / (інакше бот не побачить noindex і URL лишаться в індексі).
-    admin_path = settings.ADMIN_URL.strip("/")
-    lines = ["User-agent: *", f"Disallow: /{admin_path}/"]
+    lines = ["User-agent: *", *_robots_disallow()]
     extra = [ln.strip() for ln in (seo.robots_extra or "").splitlines() if ln.strip()]
     if extra:
         lines.append("")
@@ -59,3 +104,9 @@ def robots_txt(request):
     if sitemap:
         lines += ["", f"Sitemap: {sitemap}"]
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain; charset=utf-8")
+
+
+@require_GET
+def llms_txt(request):
+    body = build_llms_txt(request)
+    return HttpResponse(body, content_type="text/plain; charset=utf-8")

@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import models
 from django.utils import timezone
 from django.urls import reverse
-from pages.slug_utils import ensure_unique_slug, should_rebuild_slug
+from pages.slug_utils import ensure_unique_slug, should_rebuild_slug, slug_has_non_ascii
 
 from .filter_sort import apply_auto_sort_order
 
@@ -80,7 +80,7 @@ class Category(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.slug or slug_has_non_ascii(self.slug):
             self.slug = ensure_unique_slug(
                 Category, self.name, instance_pk=self.pk, fallback='category'
             )
@@ -164,8 +164,7 @@ class Attribute(models.Model):
             self.slug = ensure_unique_slug(
                 Attribute, self.name, instance_pk=self.pk, fallback='attr'
             )
-        siblings = Attribute.objects.filter(group_id=self.group_id)
-        apply_auto_sort_order(self, siblings)
+        apply_auto_sort_order(self, Attribute.objects.all())
         super().save(*args, **kwargs)
 
 
@@ -304,7 +303,11 @@ class Product(models.Model):
     is_new = models.BooleanField('Новинка', default=False)
     catalog_order = models.PositiveIntegerField('Порядок у каталозі', default=0, db_index=True)
     rating = models.PositiveSmallIntegerField('Рейтинг', default=4)
-    reviews_count = models.PositiveIntegerField('Кількість відгуків', default=0)
+    reviews_count = models.PositiveIntegerField(
+        'Кількість відгуків',
+        default=0,
+        help_text='Рахується автоматично з активних відгуків.',
+    )
     warranty_months = models.PositiveSmallIntegerField('Гарантія, місяців', default=12)
     brand = models.CharField('Бренд', max_length=100, blank=True)
     color_code = models.CharField(
@@ -353,7 +356,7 @@ class Product(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.slug or slug_has_non_ascii(self.slug):
             self.slug = ensure_unique_slug(
                 Product,
                 self.name or self.sku or 'product',
@@ -515,9 +518,9 @@ class Review(models.Model):
         'Дата', default=timezone.now, help_text='Показується на сайті у форматі дд.мм.рррр.'
     )
     is_published = models.BooleanField(
-        'Опубліковано',
-        default=False,
-        help_text='Без галочки відгук бачите лише ви в адмінці.',
+        'Активний',
+        default=True,
+        help_text='Без галочки відгук не видно на сайті.',
     )
     phone = models.CharField('Телефон', max_length=32, blank=True, help_text='Не публікується.')
     email = models.EmailField('Email', blank=True, help_text='Не публікується.')

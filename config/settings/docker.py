@@ -68,3 +68,15 @@ STORAGES = {
 }
 
 CMS_ALLOW_STATIC_FALLBACK = False
+
+try:
+    PAYMENT_WEBHOOK_SECRET = config('PAYMENT_WEBHOOK_SECRET')
+except UndefinedValueError as exc:
+    raise ImproperlyConfigured(
+        'PAYMENT_WEBHOOK_SECRET environment variable is required'
+    ) from exc
+if not str(PAYMENT_WEBHOOK_SECRET).strip():
+    raise ImproperlyConfigured(
+        'PAYMENT_WEBHOOK_SECRET environment variable is required'
+    )
+PAYMENT_STUB_ENABLED = False

@@ -4,6 +4,7 @@ from django import template
 
 from pages.cms_content import get_block_text, is_section_visible
 from pages.i18n_lib import site_lang_code
+from pages.image_webp import card_image_url
 
 register = template.Library()
 
@@ -34,3 +35,8 @@ def cms(context, page, key, fallback=''):
 def cms_visible(context, page, key):
     blocks = context.get('site_blocks')
     return is_section_visible(page, key, site_blocks=blocks)
+
+
+@register.simple_tag
+def media_card(field_file):
+    return card_image_url(field_file)

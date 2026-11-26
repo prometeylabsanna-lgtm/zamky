@@ -31,24 +31,25 @@
 
 ## Canonical
 
-`primary_domain + request.path` (без query/utm, trailing slash як у Django-URL). `Product.canonical_url` — лише перевизначення (https:// або /шлях). canonical = og:url. **Sitemap у проєкті немає** — `Sitemap:` у robots.txt зʼявиться автоматично, щойно буде URL з іменем `sitemap` (тоді loc = canonical, без noindex-сторінок — це зона SEO).
+`primary_domain + request.path` (без query/utm, trailing slash як у Django-URL). `Product.canonical_url` — лише перевизначення (https:// або /шлях). canonical = og:url. `/ua/info/` канонікалізується на `/ua/info/about/`. Пошук (`?q=`, `?sku=`) і сторінки районів/міста **без canonical**. Фільтри/сортування/пагінація: canonical на чистий path.
 
-## robots.txt (новий URL `/robots.txt`, раніше 404)
+## noindex
 
-```
-User-agent: *
-Disallow: /admin/
-<robots_extra>
-Sitemap: <домен>/sitemap.xml   # лише коли sitemap існує
-```
+Сторінковий `noindex, follow`: кошик, обране, чекаут, замовлення, API, submit-форми, `/kyiv/`, пошук, фасети (`sort`, ціна, атрибути, `limit`, `page`). Глобальний прапор лишається `noindex, nofollow`. `robots.txt` не отримує `Disallow: /`.
+
+## Sitemap і llms.txt
+
+- `/sitemap.xml` (`name=sitemap`): головні ua/ru, каталог, активні категорії/товари, видимі інфо-сторінки, опубліковані статті. Без районів, кошика, чекауту, фільтрів. hreflang ua→`uk`, ru, `x-default`.
+- `/robots.txt`: `Disallow` для `/admin/`, `/feeds/`, `/healthz/`, `/lang/`, мовних `cart/`, `checkout/`, `order/`, `api/`, `callback/`, `photo-pick/`, `install/` (не `/info/install/`). `Sitemap:` додається автоматично. CSS/JS/медіа не закриті.
+- `/llms.txt`: факти з CMS, категорій, статей і контактів (порожні поля не вигадуються).
 
 ## Мови
 
-ua/ru (префікси `/ua/`, `/ru/`). og:locale `uk_UA` / `ru_RU`, og:locale:alternate — друга мова. hreflang не додавався (зона SEO).
+ua/ru (префікси `/ua/`, `/ru/`). og:locale `uk_UA` / `ru_RU`, og:locale:alternate — друга мова. hreflang (`uk` / `ru` / `x-default`) лише на індексованих URL і лише з `primary_domain`. Корінь `/` — постійний редірект на `/ua/`.
 
 ## JSON-LD
 
-`{"@context":"https://schema.org","@type":"Organization|LocalBusiness","name","url","logo","sameAs","telephone","email","address":{"@type":"PostalAddress","streetAddress","addressCountry":"UA"}}`. Без SearchAction/HowTo/FAQPage. Екранування `<>&` як у `json_script`.
+На головній: Organization/LocalBusiness (як раніше). На картці товару: Product (name, sku, price, availability, image, url; AggregateRating лише з реальних опублікованих відгуків). BreadcrumbList там, де в HTML є крихти. Без SearchAction/HowTo/FAQPage. Екранування `<>&` як у `json_script`.
 
 ## Перенесення
 

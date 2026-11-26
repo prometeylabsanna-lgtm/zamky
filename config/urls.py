@@ -5,9 +5,9 @@ from django.contrib import admin
 from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.shortcuts import redirect
 from django.urls import include, path
-from django.utils.translation import get_language
 from django.views import View
 
+from orders.views_payment import PaymentWebhookView
 from pages.views import SetLangView
 
 
@@ -16,10 +16,7 @@ def healthz(_request):
 
 
 def root_redirect(request):
-    lang = get_language() or settings.LANGUAGE_CODE
-    if lang not in dict(settings.LANGUAGES):
-        lang = settings.LANGUAGE_CODE
-    return redirect(f'/{lang}/')
+    return HttpResponsePermanentRedirect('/ua/')
 
 
 class LegacyUkRedirectView(View):
@@ -58,6 +55,7 @@ urlpatterns = [
     path('lang/', SetLangView.as_view(), name='set_lang'),
     path('uk/', LegacyUkRedirectView.as_view()),
     path('uk/<path:rest>', LegacyUkRedirectView.as_view()),
+    path('payment/webhook/', PaymentWebhookView.as_view(), name='payment_webhook'),
     # Маркетинг: фіди та robots.txt — поза i18n_patterns (стабільні URL).
     path('', include('marketing.urls')),
     path('', root_redirect),

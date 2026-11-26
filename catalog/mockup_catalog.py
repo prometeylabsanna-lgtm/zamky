@@ -5,7 +5,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
-from django.utils.text import slugify
+from pages.slug_utils import slug_seed
 
 from catalog.category_tree import MENU_TREE, TYPE_ROOT_NAMES, ensure_category_tree
 
@@ -153,7 +153,7 @@ def _attr_value(cache, slug, value):
         return None
     av = AttributeValue.objects.filter(attribute=attr, value=value).first()
     if av is None:
-        base = slugify(value) or value.lower().replace(' ', '-')
+        base = slug_seed(value, 'value')
         slug_val = base
         n = 1
         while AttributeValue.objects.filter(attribute=attr, slug=slug_val).exists():
@@ -241,7 +241,7 @@ def sync_mockup_products():
         if product is None:
             product = Product.objects.create(
                 sku=spec['sku'],
-                slug=slugify(f'mk-{spec["sku"]}-{spec["name"]}')[:300],
+                slug=slug_seed(f'mk-{spec["sku"]}-{spec["name"]}', 'product')[:300],
                 **defaults,
             )
             created += 1

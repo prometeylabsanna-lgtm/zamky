@@ -10,6 +10,8 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models
 
+from pages.image_webp import encode_raster_to_webp, is_uncommitted_upload, queue_old_file_delete
+
 
 class MediaItem(models.Model):
     class MediaType(models.TextChoices):
@@ -66,7 +68,7 @@ class MediaItem(models.Model):
         converting = bool(
             self.file
             and self.media_type == self.MediaType.IMAGE
-            and not self.content_hash
+            and (not self.content_hash or is_uncommitted_upload(self.file))
         )
         if converting:
             self._prepare_image_webp()
@@ -92,16 +94,14 @@ class MediaItem(models.Model):
             return b""
 
     def _prepare_image_webp(self) -> None:
-        try:
-            from PIL import Image
-        except ImportError:
-            return
-
         raw = self._read_bytes()
         if not raw:
             return
 
-        digest = hashlib.sha256(raw).hexdigest()
+        name = getattr(self.file, "name", "image") or "image"
+        encoded = encode_raster_to_webp(raw, source_name=name)
+        stored = encoded[0] if encoded else raw
+        digest = hashlib.sha256(stored).hexdigest()
         existing = (
             MediaItem.objects.filter(content_hash=digest).exclude(pk=self.pk).first()
         )
@@ -113,27 +113,26 @@ class MediaItem(models.Model):
             self.content_hash = digest
             return
 
-        try:
-            img = Image.open(io.BytesIO(raw))
-            img.load()
-        except Exception:
-            self.content_hash = digest
-            self.file_size = len(raw)
-            return
+        width = height = None
+        if encoded:
+            width, height = encoded[1], encoded[2]
+        else:
+            try:
+                from PIL import Image
 
-        self.width, self.height = img.size
-        has_alpha = img.mode in {"RGBA", "LA"} or (
-            img.mode == "P" and "transparency" in img.info
-        )
-        img = img.convert("RGBA" if has_alpha else "RGB")
+                img = Image.open(io.BytesIO(raw))
+                width, height = img.size
+            except Exception:
+                pass
 
-        buf = io.BytesIO()
-        img.save(buf, format="WEBP", quality=82, method=4)
-        data = buf.getvalue()
-        self.content_hash = hashlib.sha256(data).hexdigest()
-        self.file_size = len(data)
-
-        stem = Path(getattr(self.file, "name", "image") or "image").stem or "image"
-        content = ContentFile(data)
-        # FieldFile.save замінює файл без повторного читання closed upload
-        self.file.save(f"{stem}.webp", content, save=False)
+        prev = self.file.name if self.pk else ""
+        self.content_hash = digest
+        self.file_size = len(stored)
+        self.width = width
+        self.height = height
+        if encoded:
+            stem = Path(name).stem or "image"
+            self.file.save(f"{stem}.webp", ContentFile(stored), save=False)
+            new_name = self.file.name or ""
+            if prev and prev != new_name:
+                queue_old_file_delete(self, prev)

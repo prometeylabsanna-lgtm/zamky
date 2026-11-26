@@ -8,7 +8,17 @@ from django.core.validators import FileExtensionValidator
 from django.shortcuts import redirect, render
 from unfold.widgets import UnfoldAdminFileFieldWidget, UnfoldBooleanWidget
 
-from pages.admin_guidelines import help_for_key, help_for_section
+from pages.admin_guidelines import (
+    IMAGE_HINTS,
+    RU_HINT,
+    SECTION_VISIBLE_HINT,
+    STYLE_HINT,
+    URL_HINT,
+    apply_char_hint,
+    char_rule_for_key,
+    help_for_key,
+    help_for_section,
+)
 from pages.admin_footer_nav import build_footer_nav_formset
 from pages.admin_header_nav import build_header_nav_formset
 from pages.admin_hero_slides import build_hero_slide_formset
@@ -98,6 +108,7 @@ class SitePageContentForm(forms.Form):
                 required=False,
                 initial=initial,
                 label="Показувати секцію на сайті",
+                help_text=SECTION_VISIBLE_HINT,
                 widget=UnfoldBooleanWidget(),
             )
 
@@ -134,7 +145,7 @@ class SitePageContentForm(forms.Form):
                 self.fields[f"block__{page}__{key}__image"] = field_cls(
                     required=False,
                     label=label,
-                    help_text=help_text,
+                    help_text=help_text or IMAGE_HINTS.get("audience_icon" if is_icon else "hero"),
                     widget=UnfoldAdminFileFieldWidget(attrs=widget_attrs or None),
                     **extra,
                 )
@@ -145,7 +156,7 @@ class SitePageContentForm(forms.Form):
                     required=False,
                     initial=block.link_url or block.text_html or get_block_default(page, key),
                     label=label,
-                    help_text=help_text,
+                    help_text=help_text or URL_HINT,
                     widget=CmsAdminTextInputWidget(),
                 )
                 continue
@@ -176,9 +187,18 @@ class SitePageContentForm(forms.Form):
                 required=False,
                 initial=getattr(block, "text_html_ru", "") or "",
                 label=f"{label} (RU)",
-                help_text="Порожнє = український текст на вітрині.",
+                help_text=RU_HINT,
                 widget=ru_widget,
             )
+            if not is_richtext_key(page, key):
+                apply_char_hint(
+                    self.fields[f"block__{page}__{key}__text_html"],
+                    char_rule_for_key(key),
+                )
+                apply_char_hint(
+                    self.fields[f"block__{page}__{key}__text_html_ru"],
+                    char_rule_for_key(key),
+                )
 
     def _add_style_fields(self, style):
         self.fields["style_background"] = forms.CharField(
@@ -186,21 +206,21 @@ class SitePageContentForm(forms.Form):
             label="Колір фону",
             initial=(style.background_color or "").strip() or PageStyle.DEFAULT_BACKGROUND,
             widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_BACKGROUND),
-            help_text=f"За замовчуванням: {PageStyle.DEFAULT_BACKGROUND}",
+            help_text=STYLE_HINT,
         )
         self.fields["style_text"] = forms.CharField(
             required=False,
             label="Колір шрифту",
             initial=(style.text_color or "").strip() or PageStyle.DEFAULT_TEXT,
             widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_TEXT),
-            help_text=f"За замовчуванням: {PageStyle.DEFAULT_TEXT}",
+            help_text=STYLE_HINT,
         )
         self.fields["style_accent"] = forms.CharField(
             required=False,
             label="Колір підсвітки",
             initial=(style.accent_color or "").strip() or PageStyle.DEFAULT_ACCENT,
             widget=CmsAdminColorWidget(default_color=PageStyle.DEFAULT_ACCENT),
-            help_text=f"За замовчуванням: {PageStyle.DEFAULT_ACCENT}",
+            help_text=STYLE_HINT,
         )
 
     def clean_style_background(self):

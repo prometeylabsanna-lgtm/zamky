@@ -844,8 +844,13 @@ body:has(.checkout-page) .site-footer {
   -webkit-tap-highlight-color: transparent;
 }
 
-.checkout-summary__submit:hover {
+.checkout-summary__submit:hover:not(:disabled) {
   background: var(--color-accent-hover);
+}
+
+.checkout-summary__submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .checkout-summary__legal {

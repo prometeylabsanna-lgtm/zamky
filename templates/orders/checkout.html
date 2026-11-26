@@ -224,6 +224,6 @@
 
 {% block extra_js %}
 {% if not is_empty and step != 'done' %}
-<script src="{% static 'js/checkout.js' %}"></script>
+<script src="{% static 'js/checkout.js' %}" defer></script>
 {% endif %}
 {% endblock %}

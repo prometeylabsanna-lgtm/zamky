@@ -4,7 +4,7 @@
     <div class="site-footer__grid">
       <div class="site-footer__brand">
         <a href="{% url 'catalog:home' %}" class="site-footer__logo">
-          <img src="{% static 'img/logo-footer.png' %}" alt="{% t 'Центр замків' %}" width="150" height="48">
+          <img src="{% static 'img/logo-footer.webp' %}" alt="{% t 'Центр замків' %}" width="150" height="48" loading="lazy" decoding="async">
         </a>
         <p class="site-footer__about">{% if cms_footer_about_text %}{{ cms_footer_about_text }}{% else %}{% t 'Магазин, встановлення та сервіс замків, циліндрів і дверної фурнітури. Київ та область, доставка по всій Україні.' %}{% endif %}</p>
         <div class="site-footer__social">

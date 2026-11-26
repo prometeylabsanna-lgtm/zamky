@@ -28,11 +28,14 @@
  */
 @media (min-width: 744px) {
   .home-v2 .home-hero {
-    --u: calc(100cqw / 1360);
-    container-type: inline-size;
     height: auto;
     aspect-ratio: 2576 / 1261;
     margin-top: 20px;
+  }
+
+  .home-v2 .home-hero__stage {
+    --u: calc(100cqw / 1360);
+    container-type: inline-size;
   }
 
   .home-hero__nav {

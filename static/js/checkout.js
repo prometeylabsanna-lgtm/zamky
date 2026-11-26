@@ -82,5 +82,25 @@
     }
   });
 
+  var form = document.getElementById('checkout');
+  var submitting = false;
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      if (submitting) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      submitting = true;
+      var btn = document.querySelector('.checkout-summary__submit');
+      if (btn) {
+        window.setTimeout(function () {
+          btn.disabled = true;
+          btn.setAttribute('aria-busy', 'true');
+        }, 0);
+      }
+    });
+  }
+
   syncDeliveryUI();
 })();

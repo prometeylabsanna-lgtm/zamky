@@ -50,7 +50,9 @@ class PickerDoorForm(forms.ModelForm):
         self.fields["label_line2_ru"].required = False
         self.fields["image"].label = "Картинка"
         self.fields["image"].required = False
-        self.fields["image"].help_text = "Фото дверей. Порожнє = стандартне."
+        from pages.admin_guidelines import IMAGE_HINTS
+
+        self.fields["image"].help_text = IMAGE_HINTS["picker_door"]
         self.fields["categories"].label = "Категорії товарів"
         self.fields["categories"].required = False
         self.fields["categories"].queryset = Category.objects.filter(

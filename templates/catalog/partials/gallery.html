@@ -27,7 +27,7 @@
   <div class="pdp-thumbs" data-thumbs>
     {% for img in product.images.all %}
     <button type="button" class="pdp-thumbs__btn{% if forloop.first %} is-active{% endif %}" data-thumb aria-label="Фото {{ forloop.counter }}">
-      <img src="{{ img.image.url }}" alt="">
+      <img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}">
     </button>
     {% endfor %}
   </div>

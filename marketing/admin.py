@@ -128,8 +128,26 @@ class ProductFeedAdmin(ModelAdmin):
                 messages.SUCCESS,
             )
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        slug = form.base_fields.get("slug")
+        if slug is not None:
+            slug.help_text = (
+                "Частина адреси фіду. Випадкове значення ускладнює вгадування сторонніми."
+            )
+            slug.label = "Адреса фіду"
+        token = form.base_fields.get("access_token")
+        if token is not None:
+            token.help_text = (
+                "Якщо вказати ключ, фід відкриється лише з цим ключем у посиланні."
+            )
+        enabled = form.base_fields.get("is_enabled")
+        if enabled is not None:
+            enabled.help_text = "Вимкнений фід показує сторінку «не знайдено»."
+        return form
 
-COUNTER_MEDIA_JS = ("js/admin/seo_counter.js",)
+
+COUNTER_MEDIA_JS = ("js/admin/char_hint.js",)
 
 
 @admin.register(SeoSettings)
@@ -140,7 +158,7 @@ class SeoSettingsAdmin(SingletonAdmin):
             "Індексація",
             {
                 "fields": ("noindex_warning", "global_noindex", "robots_extra"),
-                "description": "robots.txt генерується автоматично: Disallow: /admin/ і Sitemap (коли sitemap є). Ваші рядки додаються після них.",
+                "description": "Файл для пошукових систем збирається автоматично: закриває адмінку і додає карту сайту. Ваші рядки йдуть після них.",
             },
         ),
         ("Домен і canonical", {"fields": ("primary_domain",)}),
@@ -169,7 +187,7 @@ class SeoSettingsAdmin(SingletonAdmin):
             },
         ),
         (
-            "Організація (JSON-LD на головній)",
+            "Організація для Google",
             {
                 "fields": ("org_type", "org_name", "org_logo", "same_as"),
                 "description": "Телефон, email, адреса та соцмережі беруться з «Налаштування → Контакти». Порожнє поле не виводиться.",
@@ -179,6 +197,40 @@ class SeoSettingsAdmin(SingletonAdmin):
 
     class Media:
         js = COUNTER_MEDIA_JS
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        from pages.admin_guidelines import IMAGE_HINTS, apply_form_char_hints
+
+        hints = {
+            "primary_domain": (
+                "Адреса сайту з https://, як на проді (з www або без). "
+                "Порожнє — картки для соцмереж і пошуку не зберуться."
+            ),
+            "title_default": "Для сторінок без власного заголовка. Краще до 60 символів разом із назвою бренду.",
+            "description_default": "Для сторінок без власного опису. Краще 70–160 символів.",
+            "og_image": IMAGE_HINTS["og"],
+            "org_logo": (
+                "Квадрат від 112 px. Порожнє — логотип з «Контакти та бренд», якщо він достатньо великий."
+            ),
+            "org_name": "Порожнє — «Назва сайту» з налаштувань.",
+            "same_as": (
+                "По одному посиланню https:// на рядок. Instagram, Telegram і Facebook з контактів додаються самі."
+            ),
+            "robots_extra": "Додаткові рядки після автоматичних. Автоматичні не затираються.",
+        }
+        for name, text in hints.items():
+            field = form.base_fields.get(name)
+            if field is not None:
+                field.help_text = text
+        org_type = form.base_fields.get("org_type")
+        if org_type is not None:
+            org_type.label = "Тип організації"
+        org_logo = form.base_fields.get("org_logo")
+        if org_logo is not None:
+            org_logo.label = "Логотип для пошуку Google"
+        apply_form_char_hints(form)
+        return form
 
     @admin.display(description="Увага")
     def noindex_warning(self, obj):
@@ -240,7 +292,7 @@ class TrackingSettingsAdmin(SingletonAdmin):
             fs[0][0],
             {
                 **fs[0][1],
-                "description": "Вводиться лише ID; код лічильника фіксований у шаблоні. Лічильник працює, коли увімкнено І вказано ID.",
+                "description": "Вкажіть ідентифікатор. Лічильник працює, коли увімкнено і поле заповнене.",
             },
         )
         return fs

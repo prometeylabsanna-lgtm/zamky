@@ -8,7 +8,7 @@
       </button>
 
       <a href="{% url 'catalog:home' %}" class="hdr-logo">
-        <img src="{% static 'img/logo.png' %}" alt="{% t 'Центр замків' %}" width="120" height="48">
+        <img src="{% static 'img/logo.webp' %}" alt="{% t 'Центр замків' %}" width="120" height="48" decoding="async" fetchpriority="low">
       </a>
 
       <form class="hdr-search hdr-search--inline" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form>

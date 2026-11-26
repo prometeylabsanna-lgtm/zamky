@@ -161,6 +161,26 @@ class CategoryAdminForm(forms.ModelForm):
         parent_field.widget = CategoryParentCascadeWidget(
             tree=build_parent_cascade_tree(exclude_pk=self.instance.pk),
         )
+        logo = self.fields.get('logo')
+        if logo is not None:
+            from pages.admin_guidelines import IMAGE_HINTS
+
+            logo.help_text = IMAGE_HINTS['category']
+        subtitle = self.fields.get('home_subtitle')
+        if subtitle is not None:
+            subtitle.help_text = 'Сірий рядок під назвою на картці головної.'
+        show_menu = self.fields.get('show_in_menu')
+        if show_menu is not None:
+            show_menu.help_text = 'Без галочки категорія не з’явиться в меню.'
+        is_active = self.fields.get('is_active')
+        if is_active is not None:
+            is_active.help_text = 'Без галочки категорія і її товари не видно в каталозі.'
+        from pages.admin_guidelines import apply_char_hint
+
+        apply_char_hint(self.fields.get('name'), {'max': 28})
+        apply_char_hint(self.fields.get('name_ru'), {'max': 28})
+        apply_char_hint(self.fields.get('home_subtitle'), {'max': 40})
+        apply_char_hint(self.fields.get('home_subtitle_ru'), {'max': 40})
 
     def clean_parent(self):
         parent = self.cleaned_data.get('parent')

@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.http import HttpResponseRedirect
 from unfold.admin import ModelAdmin, TabularInline
-from unfold.widgets import UnfoldAdminSelectWidget, UnfoldAdminTextInputWidget
+from unfold.widgets import UnfoldAdminTextInputWidget
 
 from pages.admin_image_preview import admin_image_preview
 from pages.admin_mixins import DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin
@@ -39,10 +39,6 @@ from .models import (
 )
 
 
-def _plain_fk_select():
-    return UnfoldAdminSelectWidget()
-
-
 def _no_related_menu(field):
     widget = getattr(field, 'widget', None)
     while widget is not None:
@@ -62,6 +58,17 @@ class ProductImageInline(TabularInline):
     readonly_fields = ('preview',)
     verbose_name = 'Зображення товару'
     verbose_name_plural = 'Зображення товарів'
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == 'image':
+            from pages.admin_guidelines import IMAGE_HINTS
+
+            kwargs['help_text'] = IMAGE_HINTS['product']
+        if db_field.name == 'alt':
+            kwargs['help_text'] = 'Підпис фото, якщо зображення не завантажилось.'
+        if db_field.name == 'is_primary':
+            kwargs['help_text'] = 'Головне фото в каталозі та на сторінці товару.'
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
     @admin.display(description='Превʼю')
     def preview(self, obj):
@@ -150,6 +157,7 @@ class CategoryAdmin(
         js = (
             'js/admin/lang_tabs.js',
             'js/admin/category_parent_cascade.js',
+            'js/admin/char_hint.js',
         )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -168,18 +176,11 @@ class CategoryAdmin(
 
 @admin.register(AttributeGroup)
 class AttributeGroupAdmin(FilterTreeReturnMixin, TopDropdownFiltersMixin, ModelAdmin):
-    list_display = ('name', 'slug', 'sort_order')
+    list_display = ('name', 'slug')
     search_fields = ('name', 'name_ru', 'slug')
     readonly_fields = ('slug',)
-    fields = ('name', 'name_ru', 'slug', 'sort_order')
+    fields = ('name', 'name_ru', 'slug')
     show_add_link = False
-
-    def get_changeform_initial_data(self, request):
-        from .filter_sort import next_sort_order
-
-        initial = super().get_changeform_initial_data(request)
-        initial['sort_order'] = next_sort_order(AttributeGroup.objects.all())
-        return initial
 
     def changelist_view(self, request, extra_context=None):
         from django.shortcuts import redirect
@@ -200,11 +201,11 @@ class AttributeGroupAdmin(FilterTreeReturnMixin, TopDropdownFiltersMixin, ModelA
 class AttributeAdmin(
     FilterTreeMixin, FilterTreeReturnMixin, TopDropdownFiltersMixin, ModelAdmin
 ):
-    list_display = ('name', 'slug', 'group', 'filterable', 'sort_order')
-    list_filter = ('filterable', 'group')
+    list_display = ('name', 'slug', 'filterable')
+    list_filter = ('filterable',)
     search_fields = ('name', 'name_ru', 'slug')
     readonly_fields = ('slug',)
-    fields = ('name', 'name_ru', 'filterable', 'sort_order', 'group', 'slug')
+    fields = ('name', 'name_ru', 'filterable', 'slug')
     show_add_link = False
 
     def get_form(self, request, obj=None, change=False, **kwargs):
@@ -215,27 +216,13 @@ class AttributeAdmin(
                 'Показувати як фільтр у каталозі',
                 'Без галочки характеристика видна лише в картці товару.',
             ),
-            'group': (
-                'Група (необовʼязково)',
-                'Лише для впорядкування в адмінці. На сайті назви груп не показуються.',
-            ),
-            'sort_order': ('Порядок', 'Порядок у картці товару й у фільтрах.'),
         }
         for name, (label, help_text) in labels.items():
             field = form.base_fields.get(name)
             if field is not None:
                 field.label = label
                 field.help_text = help_text
-        group = form.base_fields.get('group')
-        if group is not None:
-            _no_related_menu(group)
         return form
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'group':
-            kwargs['widget'] = _plain_fk_select()
-        field = super().formfield_for_foreignkey(db_field, request, **kwargs)
-        return _no_related_menu(field)
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         if db_field.name in {'name', 'name_ru'}:
@@ -261,11 +248,11 @@ class AttributeAdmin(
 class AttributeValueAdmin(
     FilterValuesNavMixin, FilterTreeReturnMixin, TopDropdownFiltersMixin, ModelAdmin
 ):
-    list_display = ('value', 'attribute', 'slug', 'sort_order')
+    list_display = ('value', 'attribute', 'slug')
     list_filter = ()
     search_fields = ('value', 'value_ru', 'slug')
     readonly_fields = ('slug',)
-    fields = ('attribute', 'value', 'value_ru', 'slug', 'sort_order')
+    fields = ('attribute', 'value', 'value_ru', 'slug')
     show_add_link = False
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
@@ -341,9 +328,16 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         'color_code',
     )
     search_fields = ('name', 'name_ru', 'sku', 'brand', 'color_label')
-    readonly_fields = ('slug', 'og_preview', 'created_at', 'updated_at')
+    readonly_fields = ('slug', 'og_preview', 'reviews_count', 'created_at', 'updated_at')
     inlines = [ProductImageInline, ReviewInline]
     form = ProductAdminForm
+
+    def get_inlines(self, request, obj=None):
+        from catalog.db_compat import review_table_ready
+
+        if review_table_ready():
+            return [ProductImageInline, ReviewInline]
+        return [ProductImageInline]
     list_editable = ('stock', 'is_active', 'is_hit', 'is_new')
     actions = PRODUCT_ACTIONS
     actions_on_top = True
@@ -422,6 +416,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
             'js/admin/lang_tabs.js',
             'js/admin/category_parent_cascade.js',
             'js/admin/product_core_color.js',
+            'js/admin/char_hint.js',
         )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -496,6 +491,24 @@ class ProductImageAdmin(TopDropdownFiltersMixin, ModelAdmin):
     readonly_fields = ('preview',)
     fields = ('preview', 'product', 'image', 'alt', 'sort_order', 'is_primary')
 
+    class Media:
+        js = ('js/admin/image_preview.js', 'js/admin/char_hint.js')
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        from pages.admin_guidelines import IMAGE_HINTS
+
+        image = form.base_fields.get('image')
+        if image is not None:
+            image.help_text = IMAGE_HINTS['product']
+        alt = form.base_fields.get('alt')
+        if alt is not None:
+            alt.help_text = 'Підпис фото, якщо зображення не завантажилось.'
+        primary = form.base_fields.get('is_primary')
+        if primary is not None:
+            primary.help_text = 'Головне фото в каталозі та на сторінці товару.'
+        return form
+
     @admin.display(description='Превʼю')
     def preview(self, obj):
         return admin_image_preview(getattr(obj, 'image', None), max_size=80)
@@ -513,16 +526,24 @@ class ProductImageAdmin(TopDropdownFiltersMixin, ModelAdmin):
         return initial
 
 
-@admin.action(description='Опублікувати')
+@admin.action(description='Зробити активними')
 def publish_reviews(modeladmin, request, queryset):
+    from catalog.review_stats import sync_review_stats_for_products
+
+    product_ids = list(queryset.values_list('product_id', flat=True))
     n = queryset.update(is_published=True)
-    modeladmin.message_user(request, f'Опубліковано відгуків: {n}.')
+    sync_review_stats_for_products(product_ids)
+    modeladmin.message_user(request, f'Увімкнено відгуків: {n}.')
 
 
-@admin.action(description='Зняти з публікації')
+@admin.action(description='Вимкнути')
 def unpublish_reviews(modeladmin, request, queryset):
+    from catalog.review_stats import sync_review_stats_for_products
+
+    product_ids = list(queryset.values_list('product_id', flat=True))
     n = queryset.update(is_published=False)
-    modeladmin.message_user(request, f'Знято з публікації: {n}.')
+    sync_review_stats_for_products(product_ids)
+    modeladmin.message_user(request, f'Вимкнено відгуків: {n}.')
 
 
 @admin.register(Review)
@@ -543,7 +564,12 @@ class ReviewAdmin(TopDropdownFiltersMixin, ModelAdmin):
     )
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('product')
+        from catalog.db_compat import review_table_ready
+
+        qs = super().get_queryset(request).select_related('product')
+        if not review_table_ready():
+            return qs.none()
+        return qs
 
     @admin.display(description='Оцінка', ordering='rating')
     def rating_stars(self, obj):

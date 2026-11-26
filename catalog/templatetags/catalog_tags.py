@@ -30,6 +30,7 @@ def chip_remove_query(context, key, slug=''):
     if request is None:
         return ''
     qd = request.GET.copy()
+    qd.pop('page', None)
     if key == 'price':
         qd.pop('price_min', None)
         qd.pop('price_max', None)

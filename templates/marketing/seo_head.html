@@ -1,12 +1,14 @@
 {% if head.noindex %}
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="robots" content="noindex, {% if head.nofollow %}nofollow{% else %}follow{% endif %}">
 {% endif %}{% if head.description %}
   <meta name="description" content="{{ head.description }}">
 {% endif %}{% for v in head.verifications %}
   <meta name="{{ v.name }}" content="{{ v.content }}">
 {% endfor %}{% if head.canonical %}
   <link rel="canonical" href="{{ head.canonical }}">
-{% endif %}{% if head.og %}
+{% endif %}{% for alt in head.hreflang %}
+  <link rel="alternate" hreflang="{{ alt.lang }}" href="{{ alt.href }}">
+{% endfor %}{% if head.og %}
   {% if head.og.site_name %}<meta property="og:site_name" content="{{ head.og.site_name }}">{% endif %}
   <meta property="og:locale" content="{{ head.og.locale }}">
   {% for alt in head.og.locale_alternates %}<meta property="og:locale:alternate" content="{{ alt }}">

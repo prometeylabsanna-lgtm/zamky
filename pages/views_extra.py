@@ -278,6 +278,7 @@ def blog_page_context(request, *, page_key: str = 'blog') -> dict:
             }
         )
     content = info_cms.for_page('blog', lang=lang)
+    seo = info_cms.seo_for_page('blog', lang=lang)
     return {
         'page_key': page_key,
         'page_name': content.get('h1') or tr(INFO_PAGES['blog']['name']),
@@ -285,6 +286,8 @@ def blog_page_context(request, *, page_key: str = 'blog') -> dict:
         'blog_ask': info_cms.blog_ask(lang=lang),
         'blog_title': content.get('h1', ''),
         'blog_lead': content.get('lead', ''),
+        'seo_title': seo.get('title') or '',
+        'seo_description': seo.get('description') or '',
     }
 
 
@@ -314,9 +317,13 @@ class BlogDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx.update(blog_page_context(self.request))
+        ctx['seo_title'] = ''
         ctx['more_posts'] = (
             BlogPost.objects.filter(is_published=True)
             .exclude(pk=self.object.pk)
             .order_by('sort_order', '-created_at')[:4]
         )
+        excerpt = (self.object.excerpt or '').strip()
+        if excerpt:
+            ctx['seo_description'] = excerpt
         return ctx

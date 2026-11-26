@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'django.contrib.humanize',
     'django.forms',
     'catalog.apps.CatalogConfig',
@@ -131,6 +132,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 SESSION_SAVE_EVERY_REQUEST = False
+
+PAYMENT_WEBHOOK_SECRET = config('PAYMENT_WEBHOOK_SECRET', default='')
+PAYMENT_STUB_ENABLED = False
+PAYMENT_RESERVE_MINUTES = 30
 
 DISTRICTS_JSON = BASE_DIR / 'config' / 'districts.json'
 

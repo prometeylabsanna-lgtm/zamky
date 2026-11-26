@@ -4,6 +4,7 @@ from django import forms
 from django.forms import BaseModelFormSet, modelformset_factory
 from unfold.widgets import UnfoldAdminFileFieldWidget, UnfoldBooleanWidget
 
+from pages.admin_guidelines import IMAGE_HINTS, URL_HINT, apply_form_char_hints
 from pages.admin_site_content_widgets import CmsAdminTextInputWidget
 from pages.hero_slides import ensure_default_hero_slides
 from pages.models_cms import HeroSlide
@@ -60,6 +61,40 @@ class HeroSlideForm(forms.ModelForm):
             "show_features": UnfoldBooleanWidget(),
             "show_brands": UnfoldBooleanWidget(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        image = self.fields.get("image")
+        if image is not None:
+            image.help_text = IMAGE_HINTS["hero"]
+        alt = self.fields.get("alt_text")
+        if alt is not None:
+            alt.help_text = "Короткий опис фото для тих, хто не бачить зображення."
+        link = self.fields.get("link_url")
+        if link is not None:
+            link.help_text = "Клік по фото. Порожнє — каталог. " + URL_HINT
+        accent = self.fields.get("headline_accent")
+        if accent is not None:
+            accent.help_text = "Коротке слово після заголовка оранжевим, наприклад 24/7."
+        primary_url = self.fields.get("cta_primary_url")
+        if primary_url is not None:
+            primary_url.help_text = "Порожнє — каталог. " + URL_HINT
+        secondary_url = self.fields.get("cta_secondary_url")
+        if secondary_url is not None:
+            secondary_url.help_text = "Порожнє — блок підбору на головній. " + URL_HINT
+        secondary = self.fields.get("show_secondary")
+        if secondary is not None:
+            secondary.help_text = "Друга кнопка на банері (підбір або ваше посилання)."
+        light = self.fields.get("cta_primary_light")
+        if light is not None:
+            light.help_text = "Світла кнопка замість темної — для акцій і брендів."
+        features = self.fields.get("show_features")
+        if features is not None:
+            features.help_text = "Картки переваг справа на слайді."
+        brands = self.fields.get("show_brands")
+        if brands is not None:
+            brands.help_text = "Ряд логотипів брендів під слайдом."
+        apply_form_char_hints(self)
 
     def overlay_fields(self):
         names = (

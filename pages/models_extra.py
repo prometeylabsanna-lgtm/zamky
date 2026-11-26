@@ -1,7 +1,8 @@
 from django.db import models
+from django.urls import reverse
 from pages.blog_defaults import cover_fallback_static
 from pages.legal_body import clean_legal_fragment, sanitize_legal_html
-from pages.slug_utils import ensure_unique_slug
+from pages.slug_utils import ensure_unique_slug, slug_has_non_ascii
 
 
 class CallbackRequest(models.Model):
@@ -119,12 +120,15 @@ class BlogPost(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('pages:blog_detail', kwargs={'slug': self.slug})
+
     @property
     def cover_fallback(self):
         return cover_fallback_static(self.slug)
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.slug or slug_has_non_ascii(self.slug):
             self.slug = ensure_unique_slug(
                 BlogPost, self.title, instance_pk=self.pk, fallback='post'
             )

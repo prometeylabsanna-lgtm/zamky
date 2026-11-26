@@ -1,7 +1,10 @@
+from datetime import timedelta
 from decimal import Decimal
 
-from django.db import transaction
+from django.conf import settings
+from django.db import IntegrityError, transaction
 from django.db.models import F
+from django.utils import timezone
 
 from cart.services import CartService
 from catalog.models import Product
@@ -19,10 +22,30 @@ class CheckoutError(Exception):
     pass
 
 
-@transaction.atomic
 def create_order_from_cart(request, cleaned_data, idempotency_key):
     existing = Order.objects.filter(idempotency_key=idempotency_key).first()
     if existing:
+        _clear_cart(request)
+        return existing, False
+    try:
+        return _create_order_from_cart(request, cleaned_data, idempotency_key)
+    except IntegrityError:
+        existing = Order.objects.filter(idempotency_key=idempotency_key).first()
+        if existing:
+            _clear_cart(request)
+            return existing, False
+        raise
+
+
+def _clear_cart(request):
+    CartService(request).clear()
+
+
+@transaction.atomic
+def _create_order_from_cart(request, cleaned_data, idempotency_key):
+    existing = Order.objects.filter(idempotency_key=idempotency_key).first()
+    if existing:
+        _clear_cart(request)
         return existing, False
 
     cart = CartService(request)
@@ -45,6 +68,10 @@ def create_order_from_cart(request, cleaned_data, idempotency_key):
         if qty < 1:
             continue
         if qty > product.stock:
+            raced = Order.objects.filter(idempotency_key=idempotency_key).first()
+            if raced:
+                _clear_cart(request)
+                return raced, False
             raise CheckoutError(
                 f'Недостатньо залишку для «{product.name}»: доступно {product.stock} шт.'
             )
@@ -61,6 +88,14 @@ def create_order_from_cart(request, cleaned_data, idempotency_key):
     delivery_method = cleaned_data['delivery_method']
     delivery_price = DELIVERY_PRICES.get(delivery_method, Decimal('0'))
     subtotal = sum((item['line_total'] for item in items), Decimal('0'))
+    payment_method = cleaned_data['payment_method']
+    if payment_method == Order.PaymentMethod.CARD:
+        status = Order.Status.AWAITING_PAYMENT
+        minutes = int(getattr(settings, 'PAYMENT_RESERVE_MINUTES', 30) or 30)
+        reserved_until = timezone.now() + timedelta(minutes=minutes)
+    else:
+        status = Order.Status.NEW
+        reserved_until = None
 
     city = (cleaned_data.get('city') or '').strip()
     address = (cleaned_data.get('address') or '').strip()
@@ -76,13 +111,15 @@ def create_order_from_cart(request, cleaned_data, idempotency_key):
         email=cleaned_data.get('email', ''),
         district=cleaned_data.get('district'),
         delivery_method=delivery_method,
-        payment_method=cleaned_data['payment_method'],
+        payment_method=payment_method,
         address=full_address,
         comment=cleaned_data.get('comment', ''),
         subtotal=subtotal,
         delivery_price=delivery_price,
         total=subtotal + delivery_price,
         idempotency_key=idempotency_key,
+        status=status,
+        reserved_until=reserved_until,
     )
 
     for item in items:
@@ -101,6 +138,11 @@ def create_order_from_cart(request, cleaned_data, idempotency_key):
             quantity=item['quantity'],
             line_total=item['line_total'],
         )
+
+    if payment_method == Order.PaymentMethod.CARD:
+        from .payments import create_payment
+
+        create_payment(order)
 
     cart.clear()
     return order, True

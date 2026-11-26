@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n_ui %}
+{% load static i18n_ui cms_tags %}
 
 {% block title %}{{ post.title }} — {% t 'Замки' %}{% endblock %}
 
@@ -24,9 +24,9 @@
   <div class="blog-page__grid">
     <article class="blog-page__main">
       {% if post.cover %}
-      <img class="blog-cover" src="{{ post.cover.url }}" alt="" loading="lazy" width="960" height="540">
+      <img class="blog-cover" src="{% media_card post.cover %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="960" height="540">
       {% else %}
-      <img class="blog-cover" src="{% static post.cover_fallback %}" alt="" loading="lazy" width="960" height="540">
+      <img class="blog-cover" src="{% static post.cover_fallback %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="960" height="540">
       {% endif %}
       <div class="blog-prose">{{ post.body|safe }}</div>
       {% if more_posts %}

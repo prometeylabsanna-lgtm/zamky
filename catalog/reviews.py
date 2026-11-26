@@ -1,6 +1,7 @@
 """Відгуки на сторінці товару: форма, відправка, антиспам."""
 
 from django import forms
+from django.db.utils import OperationalError, ProgrammingError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
@@ -79,13 +80,18 @@ class ReviewSubmitView(View):
                 if _rate_limited(request):
                     form.add_error(None, tr('Забагато відгуків поспіль. Спробуйте пізніше.'))
                 else:
-                    Review.objects.create(
-                        product=product,
-                        author_name=form.cleaned_data['author_name'],
-                        rating=form.cleaned_data['rating'],
-                        text=form.cleaned_data['text'],
-                        is_published=False,
-                    )
+                    try:
+                        Review.objects.create(
+                            product=product,
+                            author_name=form.cleaned_data['author_name'],
+                            rating=form.cleaned_data['rating'],
+                            text=form.cleaned_data['text'],
+                            is_published=False,
+                        )
+                    except (OperationalError, ProgrammingError):
+                        form.add_error(
+                            None, tr('Зараз відгуки недоступні. Спробуйте пізніше.')
+                        )
             if not form.errors:
                 if is_htmx:
                     return render(request, 'catalog/partials/review_thanks.html')

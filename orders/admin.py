@@ -50,6 +50,24 @@ class DeliveryDistrictAdmin(TopDropdownFiltersMixin, ModelAdmin):
         ),
     )
 
+    class Media:
+        js = ('js/admin/char_hint.js',)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        locative = form.base_fields.get('name_locative')
+        if locative is not None:
+            locative.help_text = (
+                'Наприклад «Оболонському» — у фразах «доставка в … районі».'
+            )
+        h1 = form.base_fields.get('h1')
+        if h1 is not None:
+            h1.help_text = 'Великий заголовок сторінки району. Порожнє — назва району.'
+        from pages.admin_guidelines import apply_form_char_hints
+
+        apply_form_char_hints(form)
+        return form
+
     def get_changeform_initial_data(self, request):
         from catalog.filter_sort import next_sort_order
 
@@ -83,6 +101,8 @@ class OrderAdmin(TopDropdownFiltersMixin, ModelAdmin):
     readonly_fields = (
         'number',
         'idempotency_key',
+        'payment_ref',
+        'reserved_until',
         'subtotal',
         'delivery_price',
         'total',

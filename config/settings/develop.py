@@ -10,7 +10,7 @@ SECRET_KEY = config(
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1',
+    default='localhost,127.0.0.1,[::1],testserver',
     cast=Csv(),
 )
 CSRF_TRUSTED_ORIGINS = config(
@@ -32,4 +32,10 @@ CMS_ALLOW_STATIC_FALLBACK = config(
     'CMS_ALLOW_STATIC_FALLBACK',
     default=DEBUG,
     cast=bool,
+)
+
+PAYMENT_STUB_ENABLED = True
+PAYMENT_WEBHOOK_SECRET = config(
+    'PAYMENT_WEBHOOK_SECRET',
+    default='dev-payment-webhook-secret',
 )

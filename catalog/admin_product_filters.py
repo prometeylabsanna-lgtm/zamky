@@ -7,7 +7,7 @@
 import re
 
 from django import forms
-from django.db.models import Count, F
+from django.db.models import Count
 from django.utils.html import escape, format_html
 from django.utils.safestring import mark_safe
 from unfold.widgets import UnfoldAdminSelectWidget, UnfoldAdminTextInputWidget
@@ -33,9 +33,7 @@ def product_spec_attributes():
     return (
         Attribute.objects.exclude(slug__in=SKIP_SPEC_SLUGS)
         .annotate(_value_count=Count('values'))
-        .order_by(
-            F('group__sort_order').asc(nulls_last=True), 'sort_order', 'name', 'pk'
-        )
+        .order_by('sort_order', 'name', 'pk')
     )
 
 
@@ -213,15 +211,57 @@ class ProductAdminForm(forms.ModelForm):
                 choices=RATING_CHOICES,
                 coerce=int,
                 required=True,
-                help_text='Зірки на сторінці товару, поки немає опублікованих відгуків. Коли вони є — оцінка рахується з них.',
+                help_text='Зірки на сторінці товару, поки немає активних відгуків. Коли вони є — оцінка рахується з них.',
                 widget=UnfoldAdminSelectWidget(),
             )
         reviews = self.fields.get('reviews_count')
         if reviews is not None:
-            reviews.help_text = (
-                'Біля зірок, поки немає опублікованих відгуків (тоді рахуються вони). '
-                '0 — рядок відгуків ховається.'
-            )
+            reviews.help_text = 'Рахується автоматично з активних відгуків.'
         warranty = self.fields.get('warranty_months')
         if warranty is not None:
             warranty.help_text = '0 — не показувати гарантію на картці.'
+        old_price = self.fields.get('old_price')
+        if old_price is not None:
+            old_price.help_text = (
+                'Якщо заповнити — на сайті закреслена ціна, актуальна лишається в «Ціна».'
+            )
+        stock = self.fields.get('stock')
+        if stock is not None:
+            stock.help_text = '0 — товар показується як немає в наявності.'
+        is_hit = self.fields.get('is_hit')
+        if is_hit is not None:
+            is_hit.help_text = 'Може з’явитися у вкладці «Хіти» на головній.'
+        is_new = self.fields.get('is_new')
+        if is_new is not None:
+            is_new.help_text = (
+                'Сортування «Нові» в каталозі та вкладка «Новинки» на головній.'
+            )
+        is_active = self.fields.get('is_active')
+        if is_active is not None:
+            is_active.help_text = 'Без галочки товар не видно в каталозі.'
+        seo_title = self.fields.get('seo_title')
+        if seo_title is not None:
+            seo_title.help_text = (
+                'Заголовок вкладки браузера. Порожнє — назва товару.'
+            )
+        seo_desc = self.fields.get('seo_description')
+        if seo_desc is not None:
+            seo_desc.help_text = (
+                'Опис для пошуку. Порожнє — короткий опис або загальний з SEO-налаштувань.'
+            )
+        canonical = self.fields.get('canonical_url')
+        if canonical is not None:
+            canonical.help_text = (
+                'Залиште порожнім, якщо не впевнені. Потрібне лише для особливої адреси сторінки.'
+            )
+        og = self.fields.get('og_image')
+        if og is not None:
+            from pages.admin_guidelines import IMAGE_HINTS
+
+            og.help_text = (
+                IMAGE_HINTS['og']
+                + ' Порожнє — загальна картинка з SEO-налаштувань.'
+            )
+        from pages.admin_guidelines import apply_form_char_hints
+
+        apply_form_char_hints(self)

@@ -20,12 +20,14 @@ from pages.popular_products import get_home_popular
 from pages.views_extra import _form_with_key
 
 from .listing_scope import apply_listing_scope, category_nav_chips, listing_scope
+from .pagination import ClampPageMixin
 from .chrome_cms import catalog_chrome
-from .models import Attribute, AttributeValue, Category, Product, ProductImage, Review
+from .models import Attribute, AttributeValue, Category, Product, ProductImage
 from .measure_guide import resolve_measure
 from .product_html import product_description_html
 from .product_meta import review_summary
 from .reviews import INITIAL_VISIBLE, ReviewForm
+from .db_compat import published_reviews_for
 from .product_specs import product_spec_rows
 from .product_variants import build_variant_context
 from .search import filter_queryset_by_query
@@ -51,19 +53,19 @@ HOME_CATEGORY_SUBS = [
 ]
 
 HOME_CATEGORY_IMAGES = [
-    'img/v2/p2_8.png',
-    'img/v2/p2_9.png',
-    'img/v2/p2_10.png',
-    'img/v2/p2_11.png',
-    'img/v2/p2_12.png',
-    'img/v2/p2_13.png',
+    'img/v2/p2_8.webp',
+    'img/v2/p2_9.webp',
+    'img/v2/p2_10.webp',
+    'img/v2/p2_11.webp',
+    'img/v2/p2_12.webp',
+    'img/v2/p2_13.webp',
 ]
 
 BLOG_FALLBACK_COVERS = [
-    'img/v2/article1.png',
-    'img/v2/p2_34.png',
-    'img/v2/p2_35.png',
-    'img/v2/p2_36.png',
+    'img/v2/article1.webp',
+    'img/v2/p2_34.webp',
+    'img/v2/p2_35.webp',
+    'img/v2/p2_36.webp',
 ]
 
 class HomeView(TemplateView):
@@ -145,7 +147,7 @@ class HomeView(TemplateView):
         return ctx
 
 
-class CatalogView(ListView):
+class CatalogView(ClampPageMixin, ListView):
     model = Product
     template_name = 'catalog/catalog.html'
     context_object_name = 'products'
@@ -447,9 +449,7 @@ class ProductDetailView(DetailView):
         spec_rows = product_spec_rows(product)
         description_html = product_description_html(product, self.request)
         measure_title, measure_text = resolve_measure(product.category)
-        reviews = list(
-            Review.objects.filter(product=product, is_published=True).order_by('-created_at', '-id')
-        )
+        reviews = published_reviews_for(product)
 
         accordions = []
         for block in self.ACCORDIONS:

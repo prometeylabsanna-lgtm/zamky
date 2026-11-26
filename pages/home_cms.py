@@ -8,7 +8,7 @@ from pages.cms_content import (
     get_site_blocks_map,
     is_section_visible,
 )
-from pages.hero_slides import HERO_FEATURES, get_hero_slides
+from pages.hero_slides import HERO_FEATURES, HERO_SIZES, get_hero_slides
 
 
 def _lang_from_request(request) -> str:
@@ -52,6 +52,7 @@ def build_home_cms(request) -> dict:
                 "image": slide.image,
                 "image_url": slide.image_url,
                 "image_small": slide.image_small,
+                "image_mobile": slide.image_mobile,
                 "cta_primary_label": slide.cta_primary_label,
                 "cta_primary_url": slide.cta_primary_url,
                 "cta_secondary_label": slide.cta_secondary_label,
@@ -71,6 +72,7 @@ def build_home_cms(request) -> dict:
         "site_blocks": blocks,
         "cms_lang": lang,
         "hero_slides": hero,
+        "hero_sizes": HERO_SIZES,
         "hero_features": HERO_FEATURES,
         "show_hero": vis("home", "hero_section_visible"),
         "audience": audience,

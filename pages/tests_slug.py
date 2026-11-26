@@ -21,6 +21,10 @@ class SlugSeedTests(SimpleTestCase):
         self.assertFalse(should_rebuild_slug('5', '5', 'value'))
         self.assertFalse(should_rebuild_slug('typ2', 'typ2', 'value'))
 
+    def test_rebuilds_non_ascii_slug(self):
+        self.assertTrue(should_rebuild_slug('Італія', 'італія', 'value'))
+        self.assertFalse(should_rebuild_slug('Італія', 'italiia', 'value'))
+
 
 class UniqueSlugTests(TestCase):
     def test_filter_value_slug_from_cyrillic(self):
@@ -32,3 +36,10 @@ class UniqueSlugTests(TestCase):
             fallback='value',
         )
         self.assertEqual(slug, 'typ2')
+
+    def test_attribute_value_save_rebuilds_cyrillic_slug(self):
+        attr = Attribute.objects.create(name='Країна', slug='country-ascii-test')
+        val = AttributeValue(attribute=attr, value='Італія', slug='італія')
+        val.save()
+        self.assertTrue(val.slug.isascii())
+        self.assertEqual(val.slug, slug_seed('Італія', 'value'))

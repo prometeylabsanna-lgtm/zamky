@@ -152,6 +152,16 @@ class HeroStaticFallbackOnProdTests(TestCase):
         self.assertIn("data-hero-slide", html)
         self.assertIn("slide-home.webp", html)
         self.assertIn("img src=", html)
+        self.assertIn('rel="preload"', html)
+        self.assertIn("as=\"image\"", html)
+        self.assertIn("slide-home-800.webp", html)
+        self.assertIn("data-src=", html)
+        self.assertIn("(min-width: 1440px) 1360px, 100vw", html)
+        self.assertNotIn("1310px", html)
+        self.assertNotIn("fonts.googleapis.com", html)
+        self.assertIn("inter-cyrillic.woff2", html)
+        self.assertIn("logo.webp", html)
+        self.assertIn("p2_14.webp", html)
 
     def test_blank_cms_rows_backfill_static(self):
         from pages.hero_slides import get_hero_slides

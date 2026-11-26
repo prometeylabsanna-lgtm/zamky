@@ -217,6 +217,11 @@ class CheckoutView(FormView):
             return self.form_invalid(form)
         self.request.session['last_order_id'] = order.pk
         self.request.session.pop('checkout_idempotency', None)
+        if (
+            order.payment_method == Order.PaymentMethod.CARD
+            and order.status == Order.Status.AWAITING_PAYMENT
+        ):
+            return redirect('orders:pay_wait', number=order.number)
         return redirect(f"{reverse('orders:checkout')}?step=done")
 
     def form_invalid(self, form):

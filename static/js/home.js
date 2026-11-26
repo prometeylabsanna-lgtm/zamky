@@ -39,8 +39,23 @@
     var index = 0;
     var timer;
 
+    function loadSlideImg(slide) {
+      if (!slide) return;
+      var img = slide.querySelector('img');
+      if (!img) return;
+      var srcset = img.getAttribute('data-srcset');
+      var src = img.getAttribute('data-src');
+      if (srcset && !img.getAttribute('srcset')) {
+        img.setAttribute('srcset', srcset);
+      }
+      if (src && !img.getAttribute('src')) {
+        img.setAttribute('src', src);
+      }
+    }
+
     function go(i) {
       index = (i + slides.length) % slides.length;
+      loadSlideImg(slides[index]);
       slides.forEach(function (s, si) {
         s.classList.toggle('is-active', si === index);
       });

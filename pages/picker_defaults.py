@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.templatetags.static import static
 
+from pages.image_webp import card_image_url
 from pages.models_picker import PickerDoor, PickerFilter, PickerFilterOption
 
 DEFAULT_DOORS = (
@@ -139,13 +140,22 @@ def _pick(lang: str, ua: str, ru: str) -> str:
     return ua or ""
 
 
+def _static_webp(path: str) -> str:
+    name = path or ""
+    if name.endswith(".png"):
+        return f"{name[:-4]}.webp"
+    return name
+
+
 def door_image_url(door: PickerDoor) -> tuple[str, str]:
     if door.image:
         try:
-            return door.image.url, ""
+            url = card_image_url(door.image)
+            if url:
+                return url, ""
         except Exception:
             pass
-    fallback = door.static_fallback or "img/v2/p2_14.png"
+    fallback = _static_webp(door.static_fallback or "img/v2/p2_14.png")
     return "", fallback
 
 

@@ -15,9 +15,12 @@
 }
 
 .site-content-editor__desc,
-.site-content-editor__help {
+.site-content-editor__help,
+.admin-char-hint {
   margin-top: 0.35rem;
   font-size: 0.875rem;
+  max-width: 36rem;
+  line-height: 1.35;
 }
 
 .site-content-editor__hint {

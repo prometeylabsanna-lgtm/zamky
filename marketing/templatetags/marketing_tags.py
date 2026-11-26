@@ -44,7 +44,7 @@ def seo_head(context):
     head = seo_lib.build_head(context)
     has = bool(
         head["noindex"] or head["description"] or head["verifications"]
-        or head["canonical"] or head["og"] or head["jsonld"]
+        or head["canonical"] or head.get("hreflang") or head["og"] or head["jsonld"]
     )
     return _render_if("marketing/seo_head.html", {"head": head}, has)
 

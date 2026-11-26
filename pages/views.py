@@ -146,6 +146,7 @@ class InfoView(TemplateView):
         lang = (getattr(self.request, 'LANGUAGE_CODE', None) or 'ua')[:2].lower()
         if lang == 'uk':
             lang = 'ua'
+        seo = info_cms.seo_for_page(page_key, lang=lang)
         ctx.update(
             {
                 'page_key': page_key,
@@ -155,8 +156,14 @@ class InfoView(TemplateView):
                 'info_consult': info_cms.info_consult(lang=lang),
                 'scroll_form': raw == 'contacts',
                 'form': ctx.get('form') or _new_form(self.request),
+                'seo_title': seo.get('title') or '',
+                'seo_description': seo.get('description') or '',
             }
         )
+        if not self.kwargs.get('page') or raw == 'contacts':
+            from django.urls import reverse
+
+            ctx['seo_canonical'] = reverse('pages:info_page', kwargs={'page': page_key})
         if page_key == 'install' and 'install_form' not in ctx:
             from pages.views_extra import _form_with_key
             from pages.forms_extra import InstallForm

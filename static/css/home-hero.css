@@ -50,6 +50,10 @@
   display: block;
 }
 
+.home-v2 .home-hero__slide img:not([src]) {
+  visibility: hidden;
+}
+
 .home-hero__nav {
   display: none;
 }

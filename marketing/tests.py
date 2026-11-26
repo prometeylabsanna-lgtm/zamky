@@ -334,11 +334,10 @@ class SeoHeadTests(TestCase):
         return self.client.get(url).content.decode()
 
     def test_default_title_unchanged_and_no_meta_without_settings(self):
-        html = self._get("/ua/info/blog/")
+        html = self._get("/ua/")
         self.assertIn("<title>", html)
         self.assertNotIn('rel="canonical"', html)
         self.assertNotIn('property="og:', html)
-        self.assertNotIn('name="description"', html)
 
     def test_default_title_fallback_when_page_has_none(self):
         from marketing.seo import compose_title
@@ -366,16 +365,17 @@ class SeoHeadTests(TestCase):
         seo.twitter_site = "zamky"
         seo.save()
         html = self.client.get("/ua/info/?utm_source=x").content.decode()
-        self.assertIn('<link rel="canonical" href="https://www.zamky.example/ua/info/">', html)
-        self.assertIn('<meta property="og:url" content="https://www.zamky.example/ua/info/">', html)
+        self.assertIn('<link rel="canonical" href="https://www.zamky.example/ua/info/about/">', html)
+        self.assertIn('<meta property="og:url" content="https://www.zamky.example/ua/info/about/">', html)
         self.assertIn('<meta property="og:locale" content="uk_UA">', html)
         self.assertIn('<meta property="og:locale:alternate" content="ru_RU">', html)
-        self.assertIn('name="description" content="Опис за замовчуванням', html)
+        self.assertIn('hreflang="uk"', html)
+        self.assertIn('hreflang="x-default"', html)
+        self.assertIn('name="description"', html)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', html)
         self.assertIn('<meta name="twitter:site" content="@zamky">', html)
         self.assertNotIn("utm_source", html.split("</head>")[0])
         ru = self._get("/ru/info/")
-        self.assertIn('content="Описание по умолчанию"', ru)
         self.assertIn('<meta property="og:locale" content="ru_RU">', ru)
 
     def test_verification_and_noindex(self):
@@ -406,7 +406,9 @@ class SeoHeadTests(TestCase):
         self.assertIn('"sameAs":["https://instagram.com/zamky"]', home)
         self.assertNotIn('"email"', home)
         self.assertNotIn("SearchAction", home)
-        self.assertNotIn("application/ld+json", self._get("/ua/info/"))
+        info = self._get("/ua/info/")
+        self.assertNotIn('"@type":"Organization"', info)
+        self.assertIn('"@type":"BreadcrumbList"', info)
 
     def test_robots_txt(self):
         seo = SeoSettings.load()
@@ -415,7 +417,9 @@ class SeoHeadTests(TestCase):
         body = self.client.get("/robots.txt").content.decode()
         self.assertIn("User-agent: *", body)
         self.assertIn("Disallow: /admin/", body)
+        self.assertIn("Disallow: /ua/cart/", body)
         self.assertIn("Disallow: /cart/", body)
+        self.assertIn("Sitemap:", body)
         seo.robots_extra = "<script>"
         with self.assertRaises(ValidationError):
             seo.full_clean()

@@ -98,7 +98,9 @@ class ProductPageTests(TestCase):
         self.product.warranty_months = 24
         self.product.save(update_fields=['reviews_count', 'warranty_months'])
         page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
-        self.assertContains(page, '· 2 відгуки')
+        self.assertContains(page, '>Відгуки</button>')
+        self.assertNotContains(page, 'Відгуки (2)')
+        self.assertNotContains(page, '· 2 відгуки')
         self.assertContains(page, 'Гарантія 24 місяці')
 
     def test_published_reviews_drive_counter_and_cards(self):
@@ -114,6 +116,27 @@ class ProductPageTests(TestCase):
         self.assertContains(page, '· 2 відгуки')
         self.assertContains(page, 'Ірина')
         self.assertNotContains(page, 'Прихований')
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.reviews_count, 2)
+
+    def test_review_count_follows_active_flag(self):
+        self.product.reviews_count = 2
+        self.product.save(update_fields=['reviews_count'])
+        Review.objects.create(product=self.product, author_name='Алла', rating=4, text='а')
+        Review.objects.create(product=self.product, author_name='Ніколай', rating=5, text='б')
+        hidden = Review.objects.create(product=self.product, author_name='Женя', rating=5, text='в')
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.reviews_count, 3)
+        page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
+        self.assertContains(page, '>Відгуки (3)</button>')
+        self.assertContains(page, 'Алла')
+        hidden.is_published = False
+        hidden.save(update_fields=['is_published'])
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.reviews_count, 2)
+        page = self.client.get(reverse('catalog:product', args=[self.product.slug]))
+        self.assertContains(page, '>Відгуки (2)</button>')
+        self.assertNotContains(page, 'Женя')
 
     def test_review_submit_goes_to_moderation(self):
         url = reverse('catalog:product_review', args=[self.product.slug])
@@ -399,7 +422,8 @@ class ProductAdminColorTests(TestCase):
         self.assertContains(page, f'name="spec_attr_{empty.pk}"')
         self.assertContains(page, 'name="rating"')
         self.assertContains(page, 'Рейтинг')
-        self.assertContains(page, 'name="reviews_count"')
+        self.assertContains(page, 'Кількість відгуків')
+        self.assertNotContains(page, 'name="reviews_count"')
         self.assertContains(page, 'name="warranty_months"')
         self.assertNotContains(page, 'id="id_cover"')
         self.assertNotContains(page, 'id="id_size_mm"')
@@ -498,7 +522,7 @@ class FilterValuesNavTests(TestCase):
         flat = self.client.get(hub)
         self.assertEqual(flat.status_code, 200)
         self.assertContains(flat, 'Розмір A×B')
-        self.assertContains(flat, 'група: Розміри')
+        self.assertNotContains(flat, 'група: Розміри')
         self.assertContains(flat, 'Додати характеристику')
         self.assertNotContains(flat, '30×30 мм')
         old_link = self.client.get(hub, {'group': self.group.pk})
@@ -547,14 +571,14 @@ class FilterValuesNavTests(TestCase):
         )
         self.assertEqual(other.sort_order, 1)
 
-    def test_add_filter_form_uses_group_and_values(self):
+    def test_add_filter_form_hides_group_and_order(self):
         url = reverse('admin:catalog_attribute_add')
-        page = self.client.get(url, {'group': self.group.pk})
+        page = self.client.get(url)
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, f'value="{self.group.pk}"')
-        self.assertContains(page, self.group.name)
+        self.assertNotContains(page, 'name="group"')
+        self.assertNotContains(page, 'name="sort_order"')
+        self.assertNotContains(page, 'Група (необов')
         self.assertNotContains(page, 'name="values-0-value"')
-        self.assertContains(page, self.group.name)
         self.assertNotContains(page, 'admin-autocomplete')
         self.assertNotContains(page, '_popup=1')
         self.assertNotContains(page, 'Додати ще одну Фільтр')
@@ -625,5 +649,10 @@ class FilterValuesNavTests(TestCase):
         initial = AttributeValueAdmin(
             AttributeValue, admin.site
         ).get_changeform_initial_data(request)
-        self.assertEqual(initial['sort_order'], 2)
+        self.assertNotIn('sort_order', initial)
         self.assertEqual(initial['attribute'], self.attr.pk)
+        page = self.client.get(
+            reverse('admin:catalog_attributevalue_add'),
+            {'attribute': self.attr.pk},
+        )
+        self.assertNotContains(page, 'name="sort_order"')

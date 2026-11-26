@@ -1,9 +1,9 @@
-{% load static i18n_ui %}
+{% load static i18n_ui cms_tags %}
 <a href="{% url 'pages:blog_detail' post.slug %}" class="blog-card">
   {% if post.cover %}
-  <img class="blog-card__img" src="{{ post.cover.url }}" alt="" loading="lazy" width="640" height="400">
+  <img class="blog-card__img" src="{% media_card post.cover %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="640" height="400">
   {% else %}
-  <img class="blog-card__img" src="{% static post.cover_fallback %}" alt="" loading="lazy" width="640" height="400">
+  <img class="blog-card__img" src="{% static post.cover_fallback %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="640" height="400">
   {% endif %}
   <span class="blog-card__foot">
     <span class="blog-card__copy">

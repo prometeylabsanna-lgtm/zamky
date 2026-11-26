@@ -70,8 +70,14 @@ def slug_seed(base: str, fallback: str = 'item') -> str:
     return slugify(transliterate(base)) or slugify(base) or fallback
 
 
+def slug_has_non_ascii(slug: str) -> bool:
+    return any(ord(ch) > 127 for ch in slug or '')
+
+
 def should_rebuild_slug(base: str, current: str, fallback: str = 'item') -> bool:
     if not (current or '').strip():
+        return True
+    if slug_has_non_ascii(current):
         return True
     seed = slug_seed(base, fallback)
     stripped = slugify(base or '')

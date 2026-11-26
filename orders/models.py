@@ -64,6 +64,8 @@ class DeliveryDistrict(models.Model):
 class Order(models.Model):
     class Status(models.TextChoices):
         NEW = 'new', 'Нове'
+        AWAITING_PAYMENT = 'awaiting_payment', 'Очікує оплати'
+        PAID = 'paid', 'Оплачено'
         CONFIRMED = 'confirmed', 'Підтверджено'
         SHIPPED = 'shipped', 'Відправлено'
         DONE = 'done', 'Виконано'
@@ -121,6 +123,8 @@ class Order(models.Model):
         unique=True,
         db_index=True,
     )
+    payment_ref = models.CharField('Референс оплати', max_length=64, blank=True)
+    reserved_until = models.DateTimeField('Резерв до', null=True, blank=True)
     created_at = models.DateTimeField('Створено', auto_now_add=True)
     updated_at = models.DateTimeField('Оновлено', auto_now=True)
 

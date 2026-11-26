@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils.text import slugify
+from pages.slug_utils import slug_seed
 
 from catalog.measure_guide import apply_default_measure
 from catalog.models import (
@@ -158,7 +158,7 @@ class Command(BaseCommand):
         )
         categories = {}
         for i, (name, icon, logo) in enumerate(cats_data):
-            base_slug = slugify(name) or f'cat-{i}'
+            base_slug = slug_seed(name, f'cat-{i}')
             slug = base_slug
             n = 1
             while Category.objects.filter(slug=slug).exists():
@@ -288,7 +288,7 @@ class Command(BaseCommand):
         def av(attr_key, value):
             key = (attr_key, value)
             if key not in value_cache:
-                base = slugify(value) or value.lower().replace(' ', '-')
+                base = slug_seed(value, 'value')
                 slug = base
                 i = 1
                 while AttributeValue.objects.filter(attribute=attrs[attr_key], slug=slug).exists():
@@ -399,7 +399,7 @@ class Command(BaseCommand):
                         category=leaf_cat or root_cat,
                         family=family if B['b'] == 'ABARO' else None,
                         name=name,
-                        slug=slugify(sku.lower()),
+                        slug=slug_seed(sku.lower(), 'product'),
                         sku=sku,
                         price=price,
                         old_price=old,
@@ -485,7 +485,7 @@ class Command(BaseCommand):
             product = Product.objects.create(
                 category=leaf_cat or lock_cat,
                 name=f'Замок врізний {brand} Secure {100 + i}',
-                slug=slugify(sku.lower()),
+                slug=slug_seed(sku.lower(), 'product'),
                 sku=sku,
                 price=Decimal(str(1200 + i * 250)),
                 old_price=Decimal(str(1500 + i * 250)),

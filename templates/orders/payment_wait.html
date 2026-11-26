@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load i18n_ui static checkout_tags %}
+
+{% block title %}{{ wait_title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}?v={{ asset_v }}">
+<link rel="stylesheet" href="{% static 'css/checkout-pay.css' %}?v={{ asset_v }}">
+{% endblock %}
+
+{% block content %}
+<div class="container checkout-page">
+  <nav class="breadcrumbs" aria-label="Breadcrumbs">
+    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
+    <span>{{ wait_title }}</span>
+  </nav>
+
+  <div class="checkout-head">
+    <div class="checkout-head__title">
+      <h1 class="page-title">{{ wait_title }}</h1>
+    </div>
+    <ol class="checkout-steps" aria-label="{% t 'Кроки оформлення' %}">
+      {% for s in checkout_steps %}
+      <li class="checkout-steps__item {{ s.state }}">
+        <span class="checkout-steps__mark">
+          <span class="checkout-steps__dot">{{ s.n }}</span>
+          <span>{{ s.label }}</span>
+        </span>
+        {% if not forloop.last %}<span class="checkout-steps__line" aria-hidden="true"></span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div class="checkout-done checkout-pay-wait{% if cancelled %} is-cancelled{% endif %}">
+    <div class="checkout-done__icon" aria-hidden="true">
+      {% if cancelled %}
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l14 14M19 5L5 19"></path></svg>
+      {% else %}
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      {% endif %}
+    </div>
+    <h2 class="checkout-done__title">{{ wait_title }}</h2>
+    {% if cancelled %}
+    <p class="checkout-done__text">{% t 'Час на оплату минув. Товар повернуто в каталог. Оформіть замовлення ще раз, якщо товар ще є в наявності.' %}</p>
+    {% else %}
+    <p class="checkout-done__text">{% t 'Оплатіть замовлення карткою протягом 30 хвилин. Якщо оплату не підтвердять, товар повернеться в каталог.' %}</p>
+    {% endif %}
+    <div class="checkout-done__meta">
+      <span>{% t 'Номер' %}: <strong>{{ order.number }}</strong></span>
+      <span>{% t 'Сума' %}: <strong>{{ order.total|uah }}</strong></span>
+    </div>
+    <div class="checkout-pay-actions">
+      {% if stub_enabled %}
+      <form method="post" action="{% url 'orders:pay_stub' order.number %}" class="checkout-pay-stub-form">
+        {% csrf_token %}
+        <button type="submit" class="checkout-pay-stub">{% t 'Оплатити (тест)' %}</button>
+      </form>
+      {% endif %}
+      <a href="{% url 'catalog:catalog' %}" class="btn">{% t 'До каталогу' %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -4,7 +4,7 @@
   <nav class="mnav__panel" aria-label="{% t 'Меню' %}">
     <div class="mnav__head">
       <a href="{% url 'catalog:home' %}" class="hdr-logo">
-        <img src="{% static 'img/logo.png' %}" alt="{% t 'Центр замків' %}" width="96" height="40">
+        <img src="{% static 'img/logo.webp' %}" alt="{% t 'Центр замків' %}" width="96" height="40" decoding="async" fetchpriority="low">
       </a>
       <button type="button" class="mnav__close" data-close-menu aria-label="{% t 'Закрити' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>

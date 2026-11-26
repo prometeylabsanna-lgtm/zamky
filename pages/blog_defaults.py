@@ -3,13 +3,13 @@
 from html import escape
 
 COVER_FALLBACKS: dict[str, str] = {
-    "yak-vybraty-zamok-dveri": "img/v2/article1.png",
-    "yakyi-cylindr-2026": "img/v2/p2_34.png",
-    "vydy-zamkiv": "img/v2/p2_35.png",
-    "yak-vymiryaty-cylindr": "img/v2/p2_36.png",
+    "yak-vybraty-zamok-dveri": "img/v2/article1.webp",
+    "yakyi-cylindr-2026": "img/v2/p2_34.webp",
+    "vydy-zamkiv": "img/v2/p2_35.webp",
+    "yak-vymiryaty-cylindr": "img/v2/p2_36.webp",
 }
 
-DEFAULT_COVER = "img/v2/article1.png"
+DEFAULT_COVER = "img/v2/article1.webp"
 
 BLOG_SIDEBAR_NAV = (
     "delivery",

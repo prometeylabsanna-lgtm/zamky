@@ -45,14 +45,11 @@ def warranty_label(months):
 
 
 def review_summary(product, published=None):
-    """
-    Лічильник і рейтинг біля кнопки купівлі.
-
-    Є опубліковані відгуки — рахуємо з них (кількість і середня оцінка).
-    Немає — як раніше: поля товару «Рейтинг» і «Кількість відгуків».
-    """
+    """Лічильник і середня оцінка з активних відгуків. Немає їх — лише поле «Рейтинг»."""
     if published is None:
-        published = list(product.reviews.filter(is_published=True))
+        from catalog.db_compat import published_reviews_for
+
+        published = published_reviews_for(product)
     if published:
         n = len(published)
         avg = sum(r.rating for r in published) / n
@@ -66,10 +63,10 @@ def review_summary(product, published=None):
         }
     rating = int(product.rating or 0)
     return {
-        'count': int(product.reviews_count or 0),
+        'count': 0,
         'rating': float(rating),
         'score': f'{rating}.0',
         'stars': rating,
-        'label': reviews_label(product.reviews_count),
+        'label': '',
         'from_reviews': False,
     }

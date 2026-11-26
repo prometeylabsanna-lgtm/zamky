@@ -14,12 +14,14 @@ from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
+from marketing.seo_index import hreflang_links, page_index_policy
 from pages.i18n_lib import tr
 
 OG_LOCALES = {"ua": "uk_UA", "ru": "ru_RU"}
 DEFAULT_TITLE_FALLBACK = "Центр замків"  # колишній хардкод base.html
 TITLE_WARN = 60
 DESC_MIN, DESC_MAX = 70, 160
+DESC_CLIP = 160
 
 
 def current_lang() -> str:
@@ -104,18 +106,37 @@ def description_length_warning(desc: str) -> str:
     return ""
 
 
+def clip_description(text: str, limit: int = DESC_CLIP) -> str:
+    value = " ".join((text or "").split())
+    if len(value) <= limit:
+        return value
+    cut = value[: limit - 1]
+    if " " in cut:
+        cut = cut.rsplit(" ", 1)[0]
+    return cut.rstrip(".,;:") + "…"
+
+
 def page_overrides(context, lang: str) -> dict:
     """Сторінкові SEO-поля (зараз — Product.seo_*), мають пріоритет над дефолтами."""
-    out = {"title": "", "description": "", "canonical": "", "og_image": None}
+    out = {"title": "", "description": "", "canonical": "", "og_image": None, "use_site_description": True}
     product = context.get("product")
     if product is not None and hasattr(product, "seo_title"):
         out["title"] = localized(product.seo_title, getattr(product, "seo_title_ru", ""), lang)
         out["description"] = localized(
             getattr(product, "seo_description", ""), getattr(product, "seo_description_ru", ""), lang
         )
+        if not out["description"]:
+            out["description"] = clip_description(
+                localized(
+                    getattr(product, "short_description", ""),
+                    getattr(product, "short_description_ru", ""),
+                    lang,
+                )
+            )
         out["canonical"] = (getattr(product, "canonical_url", "") or "").strip()
         og = getattr(product, "og_image", None)
         out["og_image"] = og if og else None
+        out["use_site_description"] = False
     for key in ("title", "description", "canonical"):
         explicit = context.get(f"seo_{key}")
         if explicit:
@@ -207,24 +228,31 @@ def jsonld_script(data: dict) -> str:
 
 
 def build_head(context) -> dict:
+    from marketing.schema import breadcrumb_jsonld, product_jsonld
+
     request = context.get("request")
     lang = current_lang()
     seo = get_seo(request)
     site_settings = context.get("site_settings")
     over = page_overrides(context, lang)
+    policy = page_index_policy(request)
+    global_noindex = bool(seo and seo.global_noindex)
     out = {
-        "noindex": bool(seo and seo.global_noindex),
+        "noindex": global_noindex or policy.noindex,
+        "nofollow": global_noindex,
         "description": "",
         "verifications": [],
         "canonical": "",
+        "hreflang": [],
         "og": None,
         "jsonld": "",
     }
     if seo is None:
         return out
-    out["description"] = over["description"] or localized(
-        seo.description_default, seo.description_default_ru, lang
-    )
+    if over["description"]:
+        out["description"] = over["description"]
+    elif over.get("use_site_description", True):
+        out["description"] = localized(seo.description_default, seo.description_default_ru, lang)
     for name, value in (
         ("google-site-verification", seo.google_verification),
         ("msvalidate.01", seo.bing_verification),
@@ -236,8 +264,10 @@ def build_head(context) -> dict:
     domain = (seo.primary_domain or "").rstrip("/")
     if not domain or request is None:
         return out
-    canonical = canonical_for(domain, request.path, over["canonical"])
-    out["canonical"] = canonical
+    if not policy.skip_canonical:
+        out["canonical"] = canonical_for(domain, request.path, over["canonical"])
+    if not out["noindex"]:
+        out["hreflang"] = hreflang_links(request.path, domain)
     image = None
     image_alt = ""
     if over["og_image"]:
@@ -247,24 +277,37 @@ def build_head(context) -> dict:
         image = _image_info(seo.og_image)
         image_alt = seo.og_image_alt
     locale = OG_LOCALES.get(lang, "uk_UA")
-    out["og"] = {
-        "site_name": (seo.org_name or getattr(site_settings, "site_name", "") or "").strip(),
-        "locale": locale,
-        "locale_alternates": [v for k, v in OG_LOCALES.items() if v != locale],
-        "type": "website",
-        "title": context.render_context.get("marketing_title", ""),
-        "description": out["description"],
-        "url": canonical,
-        "image": _abs(domain, image["url"]) if image else "",
-        "image_width": image["width"] if image else None,
-        "image_height": image["height"] if image else None,
-        "image_alt": image_alt if image else "",
-        "twitter_card": seo.twitter_card or "summary_large_image",
-        "twitter_site": ("@" + seo.twitter_site.lstrip("@")) if seo.twitter_site else "",
-    }
+    og_type = "product" if context.get("product") is not None else "website"
+    if out["canonical"]:
+        out["og"] = {
+            "site_name": (seo.org_name or getattr(site_settings, "site_name", "") or "").strip(),
+            "locale": locale,
+            "locale_alternates": [v for k, v in OG_LOCALES.items() if v != locale],
+            "type": og_type,
+            "title": context.render_context.get("marketing_title", ""),
+            "description": out["description"],
+            "url": out["canonical"],
+            "image": _abs(domain, image["url"]) if image else "",
+            "image_width": image["width"] if image else None,
+            "image_height": image["height"] if image else None,
+            "image_alt": image_alt if image else "",
+            "twitter_card": seo.twitter_card or "summary_large_image",
+            "twitter_site": ("@" + seo.twitter_site.lstrip("@")) if seo.twitter_site else "",
+        }
+    scripts: list[str] = []
     match = getattr(request, "resolver_match", None)
-    if match is not None and match.url_name == "home":
+    if match is not None and match.url_name == "home" and not out["noindex"]:
         data = organization_jsonld(seo, site_settings, domain)
         if data:
-            out["jsonld"] = jsonld_script(data)
+            scripts.append(jsonld_script(data))
+    product = context.get("product")
+    if product is not None and not out["noindex"]:
+        prod = product_jsonld(product, domain, lang, context.get("review_stats"))
+        if prod:
+            scripts.append(prod)
+    if not out["noindex"]:
+        crumbs = breadcrumb_jsonld(request, context, domain, lang)
+        if crumbs:
+            scripts.append(crumbs)
+    out["jsonld"] = mark_safe("\n".join(str(s) for s in scripts if s))
     return out

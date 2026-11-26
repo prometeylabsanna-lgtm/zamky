@@ -62,8 +62,14 @@ class HomeCategoryCardForm(forms.ModelForm):
         self.fields["logo"].required = False
         self.fields["is_active"].label = "Показувати на головній"
         self.fields["is_active"].required = False
-        self.fields["home_subtitle"].help_text = "Сірий рядок під назвою на картці."
-        self.fields["logo"].help_text = "Квадратне фото або лого. Порожнє = стандартне."
+        from pages.admin_guidelines import IMAGE_HINTS, apply_char_hint
+
+        self.fields["home_subtitle"].help_text = "Сірий рядок під назвою на картці головної."
+        self.fields["logo"].help_text = IMAGE_HINTS["category"]
+        apply_char_hint(self.fields["name"], {"max": 28})
+        apply_char_hint(self.fields["name_ru"], {"max": 28})
+        apply_char_hint(self.fields["home_subtitle"], {"max": 40})
+        apply_char_hint(self.fields["home_subtitle_ru"], {"max": 40})
 
 
 def _section_url(cat: Category | None = None, *, new: bool = False) -> str:
