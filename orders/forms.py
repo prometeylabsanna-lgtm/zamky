@@ -1,9 +1,14 @@
+import logging
+
 from django import forms
+from django.utils.translation import get_language
 
 from config.validators import clean_person_name, clean_ua_phone
 from pages.i18n_lib import tr, tr_lazy
 
 from .models import DeliveryDistrict, Order
+
+logger = logging.getLogger(__name__)
 
 
 class CheckoutForm(forms.Form):
@@ -63,6 +68,7 @@ class CheckoutForm(forms.Form):
             attrs={
                 'placeholder': 'Київ',
                 'data-validate': 'city',
+                'data-np-city': '1',
                 'autocomplete': 'address-level2',
             }
         ),
@@ -94,10 +100,13 @@ class CheckoutForm(forms.Form):
             attrs={
                 'placeholder': '№ відділення',
                 'data-addr-input': '1',
+                'data-np-warehouse': '1',
                 'data-validate': 'address',
             }
         ),
     )
+    np_city_ref = forms.CharField(required=False, max_length=36, widget=forms.HiddenInput())
+    np_warehouse_ref = forms.CharField(required=False, max_length=36, widget=forms.HiddenInput())
     comment = forms.CharField(
         label=tr_lazy('Коментар'),
         required=False,
@@ -142,11 +151,65 @@ class CheckoutForm(forms.Form):
         method = cleaned.get('delivery_method')
         city = (cleaned.get('city') or '').strip()
         address = (cleaned.get('address') or '').strip()
+        city_ref = (cleaned.get('np_city_ref') or '').strip()
+        warehouse_ref = (cleaned.get('np_warehouse_ref') or '').strip()
         cleaned['city'] = city
         cleaned['address'] = address
-        if method in {Order.DeliveryMethod.NP, Order.DeliveryMethod.COURIER}:
-            if not city:
+        cleaned['np_city_ref'] = ''
+        cleaned['np_warehouse_ref'] = ''
+        cleaned['np_warehouse_snapshot'] = ''
+        if method == Order.DeliveryMethod.NP and self._np_directory_ready():
+            self._apply_np_warehouse(cleaned, city_ref, warehouse_ref)
+        elif method in {Order.DeliveryMethod.NP, Order.DeliveryMethod.COURIER}:
+            if not cleaned['city']:
                 self.add_error('city', tr('Вкажіть місто.'))
-            if not address:
+            if not cleaned['address']:
+                self.add_error('address', tr('Вкажіть адресу або відділення.'))
+        if method == Order.DeliveryMethod.NP and self._np_directory_ready():
+            if not cleaned.get('city'):
+                self.add_error('city', tr('Вкажіть місто.'))
+            if not cleaned.get('address') and 'address' not in self.errors:
                 self.add_error('address', tr('Вкажіть адресу або відділення.'))
         return cleaned
+
+    def _np_directory_ready(self) -> bool:
+        if hasattr(self, '_np_ready'):
+            return self._np_ready
+        try:
+            from novaposhta.search import has_data
+
+            self._np_ready = bool(has_data())
+        except Exception:
+            logger.exception('np directory check failed')
+            self._np_ready = False
+        return self._np_ready
+
+    def _apply_np_warehouse(self, cleaned, city_ref, warehouse_ref):
+        from novaposhta.models import NPWarehouse
+        from novaposhta.present import warehouse_public
+
+        if not warehouse_ref:
+            self.add_error('address', tr('Оберіть відділення зі списку'))
+            return
+        warehouse = (
+            NPWarehouse.objects.filter(
+                ref=warehouse_ref,
+                is_active=True,
+                is_selectable=True,
+            )
+            .exclude(category='Cargo')
+            .first()
+        )
+        if warehouse is None:
+            self.add_error('address', tr('Оберіть відділення зі списку'))
+            return
+        if city_ref and warehouse.city_ref != city_ref:
+            self.add_error('address', tr('Відділення не належить обраному місту'))
+            return
+        lang = (get_language() or 'ua')[:2]
+        public = warehouse_public(warehouse, lang)
+        cleaned['city'] = (public['city'] or cleaned.get('city') or '')[:120]
+        cleaned['address'] = (public['label'] or '')[:300]
+        cleaned['np_city_ref'] = warehouse.city_ref or ''
+        cleaned['np_warehouse_ref'] = warehouse.ref
+        cleaned['np_warehouse_snapshot'] = cleaned['address']

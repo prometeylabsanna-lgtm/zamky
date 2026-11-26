@@ -5,12 +5,17 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/checkout.css' %}?v={{ asset_v }}">
+{% if not is_empty and step != 'done' %}
+<link rel="stylesheet" href="{% static 'css/np-autocomplete.css' %}?v={{ asset_v }}">
+{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="container checkout-page"
   {% if not is_empty and step != 'done' %}
   data-checkout
+  data-np-cities-url="{% url 'novaposhta:cities' %}"
+  data-np-warehouses-url="{% url 'novaposhta:warehouses' %}"
   data-price-np="{{ delivery_prices.np }}"
   data-price-courier="{{ delivery_prices.courier }}"
   data-price-pickup="{{ delivery_prices.pickup }}"
@@ -77,6 +82,8 @@
         {{ form.idempotency_key }}
         {{ form.delivery_method }}
         {{ form.payment_method }}
+        {{ form.np_city_ref }}
+        {{ form.np_warehouse_ref }}
         {% if form.non_field_errors %}<ul class="errorlist">{{ form.non_field_errors }}</ul>{% endif %}
 
         <section class="checkout-card">
@@ -136,12 +143,19 @@
           </div>
           <div class="checkout-fields checkout-addr{% if delivery_method == 'pickup' %} is-hidden{% endif %}" data-checkout-addr>
             <label class="field{% if form.city.errors %} is-invalid{% endif %}">
-              <span>{% t 'Місто*' %}</span>{{ form.city }}
+              <span>{% t 'Місто*' %}</span>
+              <span class="np-ac" data-np-box="city">
+                {{ form.city }}
+                <ul class="np-ac__list" id="np-city-list" role="listbox" hidden></ul>
+              </span>
               <span class="field__err" data-field-error>{{ form.city.errors.0 }}</span>
             </label>
             <label class="field{% if form.address.errors %} is-invalid{% endif %}">
               <span data-checkout-addr-label>{{ addr_label }}*</span>
-              {{ form.address }}
+              <span class="np-ac" data-np-box="warehouse">
+                {{ form.address }}
+                <ul class="np-ac__list" id="np-wh-list" role="listbox" hidden></ul>
+              </span>
               <span class="field__err" data-field-error>{{ form.address.errors.0 }}</span>
             </label>
           </div>
@@ -224,6 +238,7 @@
 
 {% block extra_js %}
 {% if not is_empty and step != 'done' %}
-<script src="{% static 'js/checkout.js' %}" defer></script>
+<script src="{% static 'js/checkout.js' %}?v={{ asset_v }}" defer></script>
+<script src="{% static 'js/np-autocomplete.js' %}?v={{ asset_v }}" defer></script>
 {% endif %}
 {% endblock %}

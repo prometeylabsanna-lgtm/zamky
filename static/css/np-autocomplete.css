@@ -1,0 +1,113 @@
+/* Підказки відділень Нової пошти на чекауті. Mobile-first, iOS Safari. */
+
+.np-ac {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.np-ac.is-open {
+  z-index: 20;
+}
+
+.checkout-card.is-np-open {
+  position: relative;
+  z-index: 20;
+}
+
+.np-ac__list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  display: block;
+  max-height: 50vh;
+  max-height: 50dvh;
+  margin: 0;
+  padding: 4px 0 calc(4px + env(safe-area-inset-bottom, 0px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-dropdown);
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+
+.np-ac__list[hidden] {
+  display: none;
+}
+
+.np-ac__list.is-up {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.np-ac__opt {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--color-fg);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow-wrap: anywhere;
+}
+
+.np-ac__opt + .np-ac__opt {
+  border-top: 1px solid var(--color-border-soft);
+}
+
+.np-ac__opt.is-active {
+  background: var(--color-accent-soft);
+}
+
+.np-ac__opt.is-empty {
+  color: var(--color-muted);
+  cursor: default;
+}
+
+.np-ac__opt:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .np-ac__opt:hover:not(.is-empty) {
+    background: var(--color-surface);
+  }
+
+  .np-ac__opt.is-active:hover {
+    background: var(--color-accent-soft);
+  }
+}
+
+@media (min-width: 720px) {
+  .np-ac__list {
+    max-height: min(50vh, 360px);
+    max-height: min(50dvh, 360px);
+  }
+
+  .np-ac__opt {
+    padding: 10px 16px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .np-ac__list {
+    max-height: min(50vh, 420px);
+    max-height: min(50dvh, 420px);
+  }
+}

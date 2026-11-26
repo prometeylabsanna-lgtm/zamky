@@ -108,5 +108,45 @@ class OrderAdmin(TopDropdownFiltersMixin, ModelAdmin):
         'total',
         'created_at',
         'updated_at',
+        'np_city_ref',
+        'np_warehouse_ref',
+        'np_warehouse_snapshot',
+    )
+    fieldsets = (
+        (
+            'Замовлення',
+            {'fields': ('number', 'status', 'created_at', 'updated_at')},
+        ),
+        (
+            'Покупець',
+            {'fields': ('first_name', 'last_name', 'phone', 'email', 'comment')},
+        ),
+        (
+            'Доставка',
+            {
+                'fields': (
+                    'delivery_method',
+                    'district',
+                    'address',
+                    'np_city_ref',
+                    'np_warehouse_ref',
+                    'np_warehouse_snapshot',
+                ),
+            },
+        ),
+        (
+            'Оплата',
+            {
+                'fields': (
+                    'payment_method',
+                    'payment_ref',
+                    'reserved_until',
+                    'subtotal',
+                    'delivery_price',
+                    'total',
+                    'idempotency_key',
+                ),
+            },
+        ),
     )
     inlines = [OrderItemInline]

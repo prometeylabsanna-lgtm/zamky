@@ -105,6 +105,7 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
         full_address = f'{city}, {address}'
     else:
         full_address = city or address
+    full_address = (full_address or '')[:300]
 
     order = Order.objects.create(
         first_name=cleaned_data['first_name'],
@@ -115,6 +116,9 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
         delivery_method=delivery_method,
         payment_method=payment_method,
         address=full_address,
+        np_city_ref=(cleaned_data.get('np_city_ref') or '')[:36],
+        np_warehouse_ref=(cleaned_data.get('np_warehouse_ref') or '')[:36],
+        np_warehouse_snapshot=(cleaned_data.get('np_warehouse_snapshot') or '')[:300],
         comment=cleaned_data.get('comment', ''),
         subtotal=subtotal,
         delivery_price=delivery_price,

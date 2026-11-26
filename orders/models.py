@@ -113,6 +113,9 @@ class Order(models.Model):
         default=PaymentMethod.COD,
     )
     address = models.CharField('Адреса / відділення', max_length=300, blank=True)
+    np_city_ref = models.CharField('Ref міста НП', max_length=36, blank=True, default='')
+    np_warehouse_ref = models.CharField('Ref відділення НП', max_length=36, blank=True, default='')
+    np_warehouse_snapshot = models.CharField('Відділення НП', max_length=300, blank=True, default='')
     comment = models.TextField('Коментар', blank=True)
     subtotal = models.DecimalField('Сума товарів', max_digits=12, decimal_places=2, default=Decimal('0'))
     delivery_price = models.DecimalField('Доставка', max_digits=10, decimal_places=2, default=Decimal('0'))
