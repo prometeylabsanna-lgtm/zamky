@@ -26,13 +26,38 @@
   }
 
   var MOBILE = window.matchMedia ? window.matchMedia('(max-width: 743px)') : null;
+  // Мінімальний зазор між кнопкою банера та cookie-банером (десктоп).
+  var DESKTOP_GAP = 2;
+
+  function clearHero() {
+    var overlays = document.querySelectorAll('.home-hero__overlay');
+    for (var i = 0; i < overlays.length; i += 1) {
+      overlays[i].style.paddingBottom = '';
+    }
+    return overlays;
+  }
 
   function liftHero(overlap) {
-    var overlays = document.querySelectorAll('.home-hero__overlay');
-    var lift = MOBILE ? MOBILE.matches : false;
-    var pad = lift && overlap > 0 ? overlap + 12 + 'px' : '';
+    var overlays = clearHero();
+    if (!(overlap > 0)) return;
+    var pad = overlap + 12 + 'px';
     for (var i = 0; i < overlays.length; i += 1) {
       overlays[i].style.paddingBottom = pad;
+    }
+  }
+
+  // Десктоп: відступ як у макеті, а піднімаємо лише якщо cookie-банер
+  // (fixed, внизу вікна) перекрив би кнопку: підняти рівно настільки,
+  // щоб низ контенту банера був над cookie-банером. Рахуємо для scrollY=0.
+  function liftHeroDesktop(hero, h) {
+    var overlays = clearHero();
+    var heroBottom = hero.getBoundingClientRect().bottom + (window.pageYOffset || 0);
+    var bannerTop = window.innerHeight - h;
+    var need = Math.ceil(heroBottom - bannerTop + DESKTOP_GAP);
+    if (need <= 0) return;
+    for (var i = 0; i < overlays.length; i += 1) {
+      var natural = parseFloat(window.getComputedStyle(overlays[i]).paddingBottom) || 0;
+      if (need > natural) overlays[i].style.paddingBottom = need + 'px';
     }
   }
 
@@ -45,9 +70,12 @@
       liftHero(0);
       return;
     }
-    var bottom = hero.getBoundingClientRect().bottom;
-    var overlap = Math.max(0, Math.ceil(bottom - (window.innerHeight - h)));
-    liftHero(overlap);
+    if (MOBILE && MOBILE.matches) {
+      var bottom = hero.getBoundingClientRect().bottom;
+      liftHero(Math.max(0, Math.ceil(bottom - (window.innerHeight - h))));
+    } else {
+      liftHeroDesktop(hero, h);
+    }
   }
 
   var existing = readCookie(COOKIE);
@@ -59,6 +87,12 @@
   document.documentElement.classList.add('has-cookie-banner');
   syncHeight();
   window.addEventListener('resize', syncHeight);
+  // Шапка/шрифти можуть змінити позицію банера після першого розрахунку.
+  window.addEventListener('load', syncHeight);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeight);
+  if (window.ResizeObserver) {
+    new ResizeObserver(syncHeight).observe(document.documentElement);
+  }
 
   banner.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-cookie-consent]');
