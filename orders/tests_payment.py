@@ -290,3 +290,12 @@ class PaymentCheckoutTests(TestCase):
             response,
             'Онлайн-оплата тимчасово недоступна. Менеджер звʼяжеться з вами, щоб узгодити оплату.',
         )
+
+    def test_done_step_redirects_unpaid_card_to_wait(self):
+        self._add_to_cart(1)
+        self._checkout('idem-done-wait')
+        order = Order.objects.get(idempotency_key='idem-done-wait')
+        self.assertEqual(order.status, Order.Status.AWAITING_PAYMENT)
+        response = self.client.get(reverse('orders:checkout') + '?step=done')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('orders:pay_wait', args=[order.number]), response['Location'])

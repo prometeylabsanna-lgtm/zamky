@@ -77,6 +77,19 @@ class CheckoutView(FormView):
             self.step = 'checkout'
         return super().dispatch(request, *args, **kwargs)
 
+    def get(self, request, *args, **kwargs):
+        if self.step == 'done':
+            order_id = request.session.get('last_order_id')
+            if order_id:
+                order = Order.objects.filter(pk=order_id).first()
+                if (
+                    order
+                    and order.payment_method == Order.PaymentMethod.CARD
+                    and order.status == Order.Status.AWAITING_PAYMENT
+                ):
+                    return redirect('orders:pay_wait', number=order.number)
+        return super().get(request, *args, **kwargs)
+
     def get_initial(self):
         initial = super().get_initial()
         initial['idempotency_key'] = self.request.session.get('checkout_idempotency') or uuid.uuid4().hex
