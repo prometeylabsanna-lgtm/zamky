@@ -11,7 +11,8 @@ from novaposhta.normalize import has_latin, latin_to_cyr, normalize, parse_numbe
 
 _HAS_DATA_KEY = 'novaposhta.has_data'
 _HAS_DATA_TTL = 300
-_CARGO = 'Cargo'
+# Не для отримувачів: вантажні термінали та склади фулфілменту.
+EXCLUDED_CATEGORIES = ('Cargo', 'Fulfillment')
 
 
 def has_data() -> bool:
@@ -93,7 +94,7 @@ def _search_warehouses(query, city_ref, limit, allow_layout):
 
 
 def _warehouse_query(normalized, tokens, number, city_ref, limit):
-    qs = NPWarehouse.objects.filter(is_active=True, is_selectable=True).exclude(category=_CARGO)
+    qs = NPWarehouse.objects.filter(is_active=True, is_selectable=True).exclude(category__in=EXCLUDED_CATEGORIES)
     if city_ref:
         qs = qs.filter(city_ref=city_ref)
     text_q = Q()

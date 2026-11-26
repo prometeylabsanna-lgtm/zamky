@@ -187,6 +187,7 @@ class CheckoutForm(forms.Form):
     def _apply_np_warehouse(self, cleaned, city_ref, warehouse_ref):
         from novaposhta.models import NPWarehouse
         from novaposhta.present import warehouse_public
+        from novaposhta.search import EXCLUDED_CATEGORIES
 
         if not warehouse_ref:
             self.add_error('address', tr('Оберіть відділення зі списку'))
@@ -197,7 +198,7 @@ class CheckoutForm(forms.Form):
                 is_active=True,
                 is_selectable=True,
             )
-            .exclude(category='Cargo')
+            .exclude(category__in=EXCLUDED_CATEGORIES)
             .first()
         )
         if warehouse is None:
