@@ -17,6 +17,13 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.docker
 
+  payment-holds:
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.docker
+
   db:
     restart: always
     env_file:

@@ -1,3 +1,11 @@
+x-backend-env: &backend-env
+  DJANGO_SETTINGS_MODULE: config.settings.docker
+  POSTGRES_DB: ${POSTGRES_DB:-app}
+  POSTGRES_USER: ${POSTGRES_USER:-app}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+  DB_HOST: db
+  DB_PORT: "5432"
+
 services:
   nginx:
     build:
@@ -26,13 +34,7 @@ services:
         "--timeout",
         "120",
       ]
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.docker
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
-      DB_HOST: db
-      DB_PORT: "5432"
+    environment: *backend-env
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
@@ -53,6 +55,19 @@ services:
       timeout: 5s
       retries: 3
       start_period: 180s
+
+  payment-holds:
+    build:
+      context: .
+      dockerfile: ./deploy/backend/Dockerfile
+    command: ["sh", "-c", "while true; do python manage.py release_payment_holds || true; sleep 300; done"]
+    environment: *backend-env
+    volumes:
+      - static_volume:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   db:
     image: postgres:16-alpine
