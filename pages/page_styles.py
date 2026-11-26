@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import re
 
-from django.core.cache import cache
-
+from config.cache_safe import cache_get, cache_set
 from pages.models_cms import SiteBlock
 from pages.models_page_style import PAGE_STYLES_CACHE_KEY, PageStyle, clear_page_styles_cache
 
@@ -97,7 +96,7 @@ def resolve_page_key(request) -> str | None:
 
 
 def _styles_map() -> dict[str, dict[str, str]]:
-    cached = cache.get(PAGE_STYLES_CACHE_KEY)
+    cached = cache_get(PAGE_STYLES_CACHE_KEY)
     if cached is not None:
         return cached
     data: dict[str, dict[str, str]] = {}
@@ -107,7 +106,7 @@ def _styles_map() -> dict[str, dict[str, str]]:
             "text": (row.text_color or "").strip(),
             "accent": (row.accent_color or "").strip(),
         }
-    cache.set(PAGE_STYLES_CACHE_KEY, data, 300)
+    cache_set(PAGE_STYLES_CACHE_KEY, data, 300)
     return data
 
 

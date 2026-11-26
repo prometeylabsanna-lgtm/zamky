@@ -1,6 +1,5 @@
 """Стилі сторінок CMS: фон / шрифт / підсвітка."""
 
-from django.core.cache import cache
 from django.db import models
 
 from pages.models_cms import SiteBlock, clear_site_blocks_cache
@@ -9,7 +8,9 @@ PAGE_STYLES_CACHE_KEY = "zamky_page_styles_v1"
 
 
 def clear_page_styles_cache() -> None:
-    cache.delete(PAGE_STYLES_CACHE_KEY)
+    from config.cache_safe import cache_delete
+
+    cache_delete(PAGE_STYLES_CACHE_KEY)
 
 
 class PageStyle(models.Model):

@@ -62,6 +62,20 @@ class LegalBodyCmsTests(TestCase):
         self.assertIn("<h2>T</h2>", clean)
         self.assertNotIn("script", clean.lower())
 
+    def test_sanitize_href_allowlist(self):
+        clean = sanitize_legal_html(
+            '<a href="javascript:alert(1)">x</a>'
+            '<a href="data:text/html,hi">y</a>'
+            '<a href="vbscript:x">z</a>'
+            '<a href="https://ok.example/p">ok</a>'
+            '<a href="/ua/catalog/">rel</a>'
+        )
+        self.assertNotIn("javascript", clean.lower())
+        self.assertNotIn("data:", clean.lower())
+        self.assertNotIn("vbscript", clean.lower())
+        self.assertIn("https://ok.example/p", clean)
+        self.assertIn("/ua/catalog/", clean)
+
     def test_default_html_has_structure(self):
         html = default_offer_html("ua")
         self.assertIn("<h2>", html)

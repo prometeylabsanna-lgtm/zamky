@@ -90,6 +90,17 @@ class CheckoutView(FormView):
         initial.setdefault('delivery_method', Order.DeliveryMethod.NP)
         return initial
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        key = self.request.session.get('checkout_idempotency') or uuid.uuid4().hex
+        self.request.session['checkout_idempotency'] = key
+        data = kwargs.get('data')
+        if data is not None:
+            data = data.copy()
+            data['idempotency_key'] = key
+            kwargs['data'] = data
+        return kwargs
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         method = (
@@ -226,13 +237,23 @@ class OrderSuccessView(View):
 
 class QuickOrderView(View):
     def post(self, request, pk):
-        from config.validators import MSG_PHONE, normalize_ua_phone
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from config.validators import MSG_PHONE, clean_person_name, normalize_ua_phone
 
         product = get_object_or_404(Product, pk=pk, is_active=True)
         raw = (request.POST.get('phone') or '').strip()
         phone = normalize_ua_phone(raw)
         if not phone:
             context = {'error': tr(MSG_PHONE), 'product': product, 'phone_value': raw}
+            if request.headers.get('HX-Request') == 'true':
+                return render(request, 'orders/partials/quick_order_form.html', context)
+            return HttpResponseBadRequest(context['error'])
+        try:
+            name = clean_person_name(request.POST.get('name') or '', required=False)[:100]
+        except DjangoValidationError as exc:
+            error = ' '.join(exc.messages) if getattr(exc, 'messages', None) else str(exc)
+            context = {'error': error, 'product': product, 'phone_value': raw}
             if request.headers.get('HX-Request') == 'true':
                 return render(request, 'orders/partials/quick_order_form.html', context)
             return HttpResponseBadRequest(context['error'])
@@ -261,7 +282,7 @@ class QuickOrderView(View):
         QuickOrder.objects.create(
             product=product,
             phone=phone,
-            name=(request.POST.get('name') or '').strip(),
+            name=name,
             quantity=qty,
         )
         if request.headers.get('HX-Request') == 'true':

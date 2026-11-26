@@ -1,0 +1,117 @@
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 62;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 8px var(--pad-x) calc(8px + var(--safe-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.cookie-banner[hidden] {
+  display: none;
+}
+
+.cookie-banner__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
+.cookie-banner__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--color-fg);
+}
+
+.cookie-banner__link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cookie-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cookie-banner__btn {
+  flex: 1 1 calc(50% - 8px);
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
+  padding: 0 12px;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html.has-cookie-banner body {
+  padding-bottom: var(--cookie-banner-h, 128px);
+}
+
+html.has-cookie-banner .toast {
+  bottom: calc(var(--cookie-banner-h, 128px) + 12px);
+}
+
+html.has-cookie-banner .home-hero__overlay {
+  padding-bottom: calc(var(--cookie-banner-h, 128px) + 12px);
+}
+
+@media (min-width: 744px) {
+  .cookie-banner {
+    padding: 14px var(--pad-x) calc(14px + var(--safe-bottom));
+  }
+
+  .cookie-banner__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .cookie-banner__text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .cookie-banner__actions {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+  }
+
+  .cookie-banner__btn {
+    flex: 0 0 auto;
+    min-width: 160px;
+  }
+}
+
+@media (min-width: 1100px) {
+  .cookie-banner__text {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-banner {
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+
+@media print {
+  .cookie-banner {
+    display: none;
+  }
+}

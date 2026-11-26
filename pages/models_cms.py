@@ -1,6 +1,5 @@
 """CMS-моделі: SiteSettings, SiteBlock, HeroSlide."""
 
-from django.core.cache import cache
 from django.core.validators import RegexValidator
 from django.db import models
 
@@ -266,4 +265,6 @@ class HeroSlide(models.Model):
 
 
 def clear_site_blocks_cache() -> None:
-    cache.delete(SITE_BLOCKS_CACHE_KEY)
+    from config.cache_safe import cache_delete
+
+    cache_delete(SITE_BLOCKS_CACHE_KEY)

@@ -30,10 +30,6 @@ def _attach_logo(category, rel_path, force=False):
         return
     if current == src.name and not force:
         return
-    if getattr(settings, 'IS_VERCEL', False):
-        category.logo.name = f'img/{rel_path}'
-        category.save(update_fields=['logo'])
-        return
     with src.open('rb') as fh:
         category.logo.save(src.name, File(fh), save=True)
 

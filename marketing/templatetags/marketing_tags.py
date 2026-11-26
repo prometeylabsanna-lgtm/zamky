@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
 from marketing import seo as seo_lib
+from marketing.consent import allows_pixels
 
 register = template.Library()
 
@@ -64,10 +65,13 @@ def _tracking_ctx(context):
 @register.simple_tag(takes_context=True)
 def tracking_head(context):
     ctx = _tracking_ctx(context)
-    return _render_if("marketing/tracking_head.html", ctx, any(ctx.values()))
+    ctx["allow_pixels"] = allows_pixels(context.get("request"))
+    return mark_safe("\n  " + render_to_string("marketing/tracking_head.html", ctx).strip())
 
 
 @register.simple_tag(takes_context=True)
 def tracking_body(context):
+    if not allows_pixels(context.get("request")):
+        return ""
     ctx = _tracking_ctx(context)
     return _render_if("marketing/tracking_body.html", ctx, bool(ctx["gtm"] or ctx["meta"]))

@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from django.core.cache import cache
-
+from config.cache_safe import cache_get, cache_set
 from pages.block_defaults import STATIC_FALLBACKS, get_block_default
 from pages.models_cms import SITE_BLOCKS_CACHE_KEY, SiteBlock
 
@@ -18,11 +17,11 @@ def _lang_code(lang: str | None) -> str:
 
 
 def get_site_blocks_map() -> dict[str, SiteBlock]:
-    cached = cache.get(SITE_BLOCKS_CACHE_KEY)
+    cached = cache_get(SITE_BLOCKS_CACHE_KEY)
     if cached is not None:
         return cached
     mapping = {f"{b.page}.{b.key}": b for b in SiteBlock.objects.filter(is_active=True)}
-    cache.set(SITE_BLOCKS_CACHE_KEY, mapping, 60 * 10)
+    cache_set(SITE_BLOCKS_CACHE_KEY, mapping, 60 * 10)
     return mapping
 
 

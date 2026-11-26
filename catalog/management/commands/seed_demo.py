@@ -178,12 +178,8 @@ class Command(BaseCommand):
             if logo:
                 src = settings.BASE_DIR / 'static' / 'img' / logo
                 if src.exists():
-                    if getattr(settings, 'IS_VERCEL', False):
-                        cat.logo.name = f'img/{logo}'
-                        cat.save(update_fields=['logo'])
-                    else:
-                        with src.open('rb') as fh:
-                            cat.logo.save(logo, File(fh), save=True)
+                    with src.open('rb') as fh:
+                        cat.logo.save(logo, File(fh), save=True)
             if name not in categories:
                 categories[name] = cat
 
@@ -325,18 +321,6 @@ class Command(BaseCommand):
 
     def _attach_image(self, product, src, dest_name, alt, sort_order, primary=False):
         if not src.exists():
-            return
-        # Vercel: посилання на static/img (CDN), без копіювання в /tmp.
-        if getattr(settings, 'IS_VERCEL', False):
-            rel = str(src.relative_to(settings.BASE_DIR / 'static'))
-            obj = ProductImage(
-                product=product,
-                alt=alt,
-                sort_order=sort_order,
-                is_primary=primary,
-            )
-            obj.image.name = rel
-            obj.save()
             return
         media_seed = Path(settings.MEDIA_ROOT) / 'products'
         media_seed.mkdir(parents=True, exist_ok=True)

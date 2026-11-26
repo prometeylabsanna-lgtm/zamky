@@ -2,6 +2,7 @@ Django>=5.2.18,<6
 django-unfold>=0.40
 python-decouple>=3.8
 Pillow>=10.0
+pillow-heif>=0.18
 lxml>=5.0
 gunicorn==23.0.0
 psycopg2-binary==2.9.10

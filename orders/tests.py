@@ -261,3 +261,26 @@ class CheckoutTests(TestCase):
         from orders.models import QuickOrder
 
         self.assertEqual(QuickOrder.objects.count(), 0)
+
+    def test_quick_order_long_name_truncated(self):
+        from orders.models import QuickOrder
+
+        response = self.client.post(
+            reverse('orders:quick', args=[self.product.pk]),
+            {'phone': '0670000002', 'quantity': 1, 'name': 'О' * 150},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        qo = QuickOrder.objects.get()
+        self.assertEqual(len(qo.name), 100)
+
+    def test_quick_order_rejects_digits_in_name(self):
+        from orders.models import QuickOrder
+
+        response = self.client.post(
+            reverse('orders:quick', args=[self.product.pk]),
+            {'phone': '0670000002', 'quantity': 1, 'name': 'Oleg123'},
+            HTTP_HX_REQUEST='true',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(QuickOrder.objects.count(), 0)

@@ -1,9 +1,12 @@
 import uuid
+from io import BytesIO
 
+from django.core.files.base import ContentFile
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import DetailView, ListView
+from PIL import Image, UnidentifiedImageError
 
 from pages.i18n_lib import tr
 
@@ -18,7 +21,54 @@ from .models_extra import (
 
 MAX_PICKER_PHOTOS = 5
 MAX_PICKER_BYTES = 5 * 1024 * 1024
-ALLOWED_IMAGE_TYPES = ('image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif')
+ALLOWED_IMAGE_TYPES = (
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/heic',
+    'image/heif',
+)
+_PICKER_FORMATS = {'JPEG': 'jpg', 'PNG': 'png', 'WEBP': 'webp'}
+_HEIF_FORMATS = {'HEIF', 'HEIC'}
+_heif_registered = False
+
+
+def _register_heif() -> None:
+    global _heif_registered
+    if _heif_registered:
+        return
+    try:
+        from pillow_heif import register_heif_opener
+
+        register_heif_opener()
+        _heif_registered = True
+    except Exception:
+        return
+
+
+def _picker_image_file(fh):
+    _register_heif()
+    try:
+        fh.seek(0)
+        with Image.open(fh) as img:
+            img.load()
+            fmt = (img.format or '').upper()
+            if fmt in _HEIF_FORMATS:
+                rgb = img.convert('RGB')
+                buf = BytesIO()
+                rgb.save(buf, format='JPEG', quality=88)
+                return ContentFile(buf.getvalue(), name=f'{uuid.uuid4().hex}.jpg')
+    except (UnidentifiedImageError, OSError, ValueError):
+        return None
+    ext = _PICKER_FORMATS.get(fmt)
+    if not ext:
+        return None
+    try:
+        fh.seek(0)
+        payload = fh.read()
+    except Exception:
+        return None
+    return ContentFile(payload, name=f'{uuid.uuid4().hex}.{ext}')
 
 
 def _session_key(prefix):
@@ -31,9 +81,8 @@ def _form_with_key(request, form_cls, prefix, data=None):
     request.session[sk] = key
     if data is None:
         return form_cls(initial={'idempotency_key': key})
-    if 'idempotency_key' not in data:
-        data = data.copy()
-        data['idempotency_key'] = key
+    data = data.copy()
+    data['idempotency_key'] = key
     return form_cls(data)
 
 
@@ -98,7 +147,7 @@ class PhotoPickSubmitView(View):
     def post(self, request):
         form = _form_with_key(request, PhotoPickForm, 'photo_pick', request.POST)
         files = request.FILES.getlist('photos') or request.FILES.getlist('images')
-        file_errors = self._validate_files(files)
+        file_errors, converted = self._validate_files(files)
         if file_errors:
             for msg in file_errors:
                 form.add_error(None, msg)
@@ -113,9 +162,9 @@ class PhotoPickSubmitView(View):
                     'note': form.cleaned_data.get('note') or '',
                 },
             )
-            if created and files:
-                for fh in files[:MAX_PICKER_PHOTOS]:
-                    PhotoPickImage.objects.create(request=obj, image=fh)
+            if created and converted:
+                for item in converted:
+                    PhotoPickImage.objects.create(request=obj, image=item)
             request.session.pop(_session_key('photo_pick'), None)
             channel_label = dict(PhotoPickRequest.Channel.choices).get(
                 obj.channel, obj.channel
@@ -142,22 +191,28 @@ class PhotoPickSubmitView(View):
 
     def _validate_files(self, files):
         errors = []
+        converted = []
         if not files:
-            errors.append(tr('Додайте хоча б одне фото'))
-            return errors
+            return [tr('Додайте хоча б одне фото')], converted
         if len(files) > MAX_PICKER_PHOTOS:
             errors.append(
                 tr('Максимум {n} зображень').format(n=MAX_PICKER_PHOTOS)
             )
+            return errors, converted
         for fh in files[:MAX_PICKER_PHOTOS]:
             ctype = (getattr(fh, 'content_type', '') or '').split(';')[0].lower()
             if ctype and ctype not in ALLOWED_IMAGE_TYPES:
                 errors.append(tr('Дозволені лише зображення JPEG, PNG або WebP'))
-                break
+                return errors, converted
             if fh.size > MAX_PICKER_BYTES:
                 errors.append(tr('Кожне фото — не більше 5 МБ'))
-                break
-        return errors
+                return errors, converted
+            item = _picker_image_file(fh)
+            if item is None:
+                errors.append(tr('Дозволені лише зображення JPEG, PNG або WebP'))
+                return errors, converted
+            converted.append(item)
+        return errors, converted
 
 
 class InstallSubmitView(View):

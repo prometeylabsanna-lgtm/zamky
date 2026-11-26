@@ -173,15 +173,6 @@ def _attach_img(product, rel_path):
     if product.images.exists():
         return
     dest_name = f'{product.sku.lower()}-{src.name}'
-    if getattr(settings, 'IS_VERCEL', False):
-        ProductImage.objects.create(
-            product=product,
-            image=f'img/{rel_path}',
-            alt=product.name,
-            sort_order=1,
-            is_primary=True,
-        )
-        return
     with src.open('rb') as fh:
         ProductImage.objects.create(
             product=product,

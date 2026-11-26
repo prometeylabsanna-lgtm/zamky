@@ -59,6 +59,7 @@ class ContactForm(forms.Form):
     )
     message = forms.CharField(
         label=tr_lazy('Повідомлення*'),
+        max_length=4000,
         widget=forms.Textarea(
             attrs={
                 'rows': 5,

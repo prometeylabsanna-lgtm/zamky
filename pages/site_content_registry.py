@@ -102,7 +102,7 @@ def _blog_nested_items(admin_prefix: str) -> list[dict]:
 
 
 def _section_to_item(section: ContentSection, admin_prefix: str = "admin/") -> dict:
-    # Рядок, не reverse: Vercel серіалізує settings у JSON до AppRegistry.
+    # Рядок, не reverse: Unfold бере link як готовий шлях.
     prefix = admin_prefix.strip("/")
     item = {
         "title": _sidebar_item_title(section),

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from django import forms
 from django.contrib import messages
-from django.core.cache import cache
 from django.core.validators import FileExtensionValidator
 from django.shortcuts import redirect, render
 from unfold.widgets import UnfoldAdminFileFieldWidget, UnfoldBooleanWidget
@@ -31,7 +30,7 @@ from pages.block_defaults import (
     is_richtext_key,
     is_visibility_key,
 )
-from pages.models_cms import SITE_BLOCKS_CACHE_KEY, SiteBlock, SiteSettings
+from pages.models_cms import SiteBlock, SiteSettings, clear_site_blocks_cache
 from pages.models_page_style import PageStyle
 from pages.page_styles import clean_color
 from pages.site_content_registry import get_section
@@ -266,7 +265,7 @@ class SitePageContentForm(forms.Form):
             style.accent_color = self.cleaned_data.get("style_accent", "")
             style.save()
 
-        cache.delete(SITE_BLOCKS_CACHE_KEY)
+        clear_site_blocks_cache()
 
 
 def site_content_section_view(request, page_slug: str, section_slug: str, model_admin=None):

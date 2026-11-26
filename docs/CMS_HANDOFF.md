@@ -84,7 +84,7 @@ python3 manage.py cms_audit_manifest    # G8 audit (blockers=0)
 python3 manage.py check
 ```
 
-На Vercel bootstrap додатково викликає `seed_cms_content` після `seed_demo`.
+На DigitalOcean після `migrate` запустіть `seed_cms_content`, якщо CMS ще порожня.
 
 ---
 

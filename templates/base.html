@@ -1,6 +1,6 @@
 {% load static i18n_ui marketing_tags %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'ua' }}" data-asset-v="{{ asset_v }}">
+<html lang="{{ LANGUAGE_CODE|default:'ua' }}" data-asset-v="{{ asset_v }}"{% if not cookie_consent %} class="has-cookie-banner"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="{% static 'css/footer.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/cart-drawer.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ asset_v }}">
+  <link rel="stylesheet" href="{% static 'css/cookie-banner.css' %}?v={{ asset_v }}">
   <link rel="stylesheet" href="{% static 'css/product-card.css' %}?v={{ asset_v }}">
   {% if page_style.bg or page_style.text or page_style.accent %}
   <style id="page-style-vars">
@@ -60,12 +61,14 @@
   </main>
   {% include 'partials/footer.html' %}
   {% include 'partials/header_mnav.html' %}
+  {% include 'partials/cookie_banner.html' %}
   <div id="cart-toast" class="toast" aria-live="polite"></div>
   <script src="{% static 'vendor/htmx.min.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/header.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/search.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/main.js' %}?v={{ asset_v }}"></script>
   <script src="{% static 'js/form-validation.js' %}?v={{ asset_v }}"></script>
+  <script src="{% static 'js/cookie-banner.js' %}?v={{ asset_v }}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

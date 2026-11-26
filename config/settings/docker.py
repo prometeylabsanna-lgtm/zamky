@@ -39,11 +39,24 @@ SECURE_SSL_REDIRECT = False
 
 USE_HTTPS = config('USE_HTTPS', default=False, cast=bool)
 SESSION_COOKIE_SECURE = USE_HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = USE_HTTPS
+CSRF_COOKIE_SAMESITE = 'Lax'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 if USE_HTTPS:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache_table',
+    }
+}
 
 STORAGES = {
     'default': {

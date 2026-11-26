@@ -4,6 +4,7 @@ import uuid
 from django.conf import settings
 
 from catalog.menu import menu_payload
+from marketing.consent import read_consent
 from pages.footer_nav import get_footer_nav
 from pages.header_nav import get_header_nav_links
 from orders.models import DeliveryDistrict
@@ -100,8 +101,9 @@ def site_context(request):
         'js_i18n': js_i18n_dict(),
         'callback_idempotency': cb_key,
         'page_style': _safe_page_style(request),
+        'cookie_consent': read_consent(request),
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261126v3',
+        'asset_v': '20261126v6',
     }
 
 

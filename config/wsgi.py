@@ -11,7 +11,3 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 application = get_wsgi_application()
-
-from config.vercel_bootstrap import bootstrap_if_needed  # noqa: E402
-
-bootstrap_if_needed()

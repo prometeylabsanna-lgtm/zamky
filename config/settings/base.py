@@ -32,6 +32,7 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'config.middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'config.middleware.AdminUkrainianLocaleMiddleware',
@@ -172,7 +173,7 @@ UNFOLD = {
     'SITE_TITLE': 'Замки',
     'SITE_HEADER': 'Замки — адмінка',
     'SITE_SYMBOL': 'lock',
-    # Plain paths — Vercel JSON-сериалізує settings (без reverse/static callables).
+    # Plain paths — без reverse/static callables у settings.
     'SITE_FAVICONS': [
         {
             'rel': 'icon',

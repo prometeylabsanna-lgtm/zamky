@@ -101,6 +101,7 @@ class CheckoutForm(forms.Form):
     comment = forms.CharField(
         label=tr_lazy('Коментар'),
         required=False,
+        max_length=4000,
         widget=forms.Textarea(
             attrs={
                 'rows': 3,

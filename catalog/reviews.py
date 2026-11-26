@@ -1,9 +1,10 @@
 """Відгуки на сторінці товару: форма, відправка, антиспам."""
 
 from django import forms
-from django.core.cache import cache
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+
+from config.cache_safe import cache_add, cache_incr, cache_set
 
 from pages.i18n_lib import tr, tr_lazy
 
@@ -56,12 +57,11 @@ def _client_ip(request):
 
 def _rate_limited(request):
     key = f'review-rl:{_client_ip(request)}'
-    if cache.add(key, 1, RATE_WINDOW):
+    if cache_add(key, 1, RATE_WINDOW):
         return False
-    try:
-        n = cache.incr(key)
-    except ValueError:
-        cache.set(key, 1, RATE_WINDOW)
+    n = cache_incr(key)
+    if n is None:
+        cache_set(key, 1, RATE_WINDOW)
         return False
     return n > RATE_LIMIT
 

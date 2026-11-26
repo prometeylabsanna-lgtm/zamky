@@ -282,7 +282,8 @@ class TrackingTests(TestCase):
 
     def test_nothing_by_default(self):
         html = self._home()
-        for marker in ("googletagmanager", "fbq(", "ttq.load", "gtag("):
+        self.assertIn("gtag('consent','default'", html)
+        for marker in ("googletagmanager", "fbq(", "ttq.load", "gtag('config'"):
             self.assertNotIn(marker, html)
 
     def test_enabled_requires_id(self):
@@ -309,10 +310,15 @@ class TrackingTests(TestCase):
         t.ga4_enabled = t.meta_pixel_enabled = t.gtm_enabled = t.tiktok_enabled = True
         t.save()
         html = self._home()
+        self.assertNotIn("G-ABC123XYZ", html)
+        self.assertIn('id="cookie-banner"', html)
+        self.client.cookies["zamky_consent"] = "all"
+        html = self._home()
         self.assertIn("gtag('config','G-ABC123XYZ')", html)
         self.assertIn("fbq('init','123456789012')", html)
         self.assertIn("ns.html?id=GTM-ABC1234", html)
         self.assertIn("ttq.load('C4ABCDEFGHIJ12345678')", html)
+        self.assertNotIn('id="cookie-banner"', html)
 
     def test_tampered_id_not_rendered(self):
         TrackingSettings.objects.update_or_create(pk=1, defaults={"ga4_enabled": True, "ga4_id": "G-x'</script>"})

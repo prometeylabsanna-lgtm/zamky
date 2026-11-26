@@ -69,6 +69,8 @@ def _new_form(request, data=None):
     lang = _form_lang(request)
     if data is None:
         return ContactForm(initial={'idempotency_key': key}, lang=lang)
+    data = data.copy()
+    data['idempotency_key'] = key
     return ContactForm(data, lang=lang)
 
 

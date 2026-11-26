@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.core.cache import cache
+from config.cache_safe import cache_get, cache_incr, cache_set
 from django.db.models import Prefetch
 from django.utils import timezone, translation
 from django.utils.html import strip_tags
@@ -86,18 +86,16 @@ class FeedPayload:
 # ---------- helpers ----------
 
 def feeds_version() -> int:
-    value = cache.get(VERSION_KEY)
+    value = cache_get(VERSION_KEY)
     if value is None:
         value = 1
-        cache.set(VERSION_KEY, value, None)
+        cache_set(VERSION_KEY, value, None)
     return int(value)
 
 
 def bump_feeds_version() -> None:
-    try:
-        cache.incr(VERSION_KEY)
-    except ValueError:
-        cache.set(VERSION_KEY, 2, None)
+    if cache_incr(VERSION_KEY) is None:
+        cache_set(VERSION_KEY, 2, None)
 
 
 def money(value) -> Decimal:
@@ -419,7 +417,7 @@ def _cache_key(feed: ProductFeed, base_url: str) -> str:
 def get_feed_payload(feed: ProductFeed, base_url: str, *, force: bool = False) -> FeedPayload:
     key = _cache_key(feed, base_url)
     if not force:
-        cached = cache.get(key)
+        cached = cache_get(key)
         if cached is not None:
             return cached
     body, result = render_feed(feed, base_url)
@@ -432,7 +430,7 @@ def get_feed_payload(feed: ProductFeed, base_url: str, *, force: bool = False) -
         reasons=result.reasons,
         warnings=result.warnings,
     )
-    cache.set(key, payload, max(1, min(6, feed.cache_hours or 3)) * 3600)
+    cache_set(key, payload, max(1, min(6, feed.cache_hours or 3)) * 3600)
     # Статистика для адмінки; update() не чіпає updated_at → кеш-ключ стабільний.
     ProductFeed.objects.filter(pk=feed.pk).update(
         last_generated_at=payload.last_modified,

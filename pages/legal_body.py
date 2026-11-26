@@ -199,6 +199,16 @@ def clean_legal_fragment(text: str) -> str:
     return _TRAIL_ONES.sub("", (text or "").strip()).strip()
 
 
+def _href_allowed(value: str) -> bool:
+    href = (value or "").strip()
+    if not href:
+        return False
+    lower = href.lower()
+    if lower.startswith(("https:", "http:", "mailto:", "tel:")):
+        return True
+    return href.startswith(("/", "./", "../", "#"))
+
+
 def sanitize_legal_html(raw: str) -> str:
     text = (raw or "").strip()
     if not text:
@@ -218,9 +228,7 @@ def sanitize_legal_html(raw: str) -> str:
         for attr in list(el.attrib):
             if attr not in allowed:
                 del el.attrib[attr]
-            elif attr == "href" and str(el.attrib[attr]).strip().lower().startswith(
-                "javascript:"
-            ):
+            elif attr == "href" and not _href_allowed(str(el.attrib[attr])):
                 del el.attrib[attr]
     return "".join(
         lhtml.tostring(child, encoding="unicode", method="html") for child in root
