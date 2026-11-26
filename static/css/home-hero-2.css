@@ -46,6 +46,21 @@
     letter-spacing: -0.04em;
   }
 
+  /* Відступи за растрами макета (banner1-4.png, 1u = 1px при 1360):
+     кнопка від низу — Замки 40, Установка 32, Акції 40, Бренди 38;
+     бейджі від верху — 40, а на Акціях 36. */
+  .home-hero__slide[data-hero-kind="install"] .home-hero__overlay {
+    padding-bottom: calc(32 * var(--u));
+  }
+
+  .home-hero__slide[data-hero-kind="brands"] .home-hero__overlay {
+    padding-bottom: calc(38 * var(--u));
+  }
+
+  .home-hero__slide[data-hero-kind="promo"] .home-hero__overlay {
+    padding-top: calc(36 * var(--u));
+  }
+
   .home-hero__badges {
     gap: calc(4 * var(--u));
   }

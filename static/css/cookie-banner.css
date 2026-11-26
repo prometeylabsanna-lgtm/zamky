@@ -65,8 +65,12 @@ html.has-cookie-banner .toast {
   bottom: calc(var(--cookie-banner-h, 128px) + 12px);
 }
 
-html.has-cookie-banner .home-hero__overlay {
-  padding-bottom: calc(var(--cookie-banner-h, 128px) + 12px);
+/* Лише мобайл: підняти CTA над банером. На ≥744 відступ тексту банера
+   лишається як у макеті (40u), cookie-банер його не зсуває. */
+@media (max-width: 743px) {
+  html.has-cookie-banner .home-hero__overlay {
+    padding-bottom: calc(var(--cookie-banner-h, 128px) + 12px);
+  }
 }
 
 @media (min-width: 744px) {

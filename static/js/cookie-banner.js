@@ -25,9 +25,12 @@
     liftHero(0);
   }
 
+  var MOBILE = window.matchMedia ? window.matchMedia('(max-width: 743px)') : null;
+
   function liftHero(overlap) {
     var overlays = document.querySelectorAll('.home-hero__overlay');
-    var pad = overlap > 0 ? overlap + 12 + 'px' : '';
+    var lift = MOBILE ? MOBILE.matches : false;
+    var pad = lift && overlap > 0 ? overlap + 12 + 'px' : '';
     for (var i = 0; i < overlays.length; i += 1) {
       overlays[i].style.paddingBottom = pad;
     }
