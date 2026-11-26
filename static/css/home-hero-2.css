@@ -39,6 +39,11 @@
     display: block;
   }
 
+  /* cookie-banner.js піднімає стрілки лише на низьких вікнах, поки видно банер */
+  .home-hero__arrow {
+    margin-top: calc(-24px - var(--hero-arrow-lift, 0px));
+  }
+
   .home-hero__overlay {
     gap: 0;
     padding: calc(40 * var(--u));

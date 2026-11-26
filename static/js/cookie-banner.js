@@ -33,7 +33,11 @@
     var overlays = document.querySelectorAll('.home-hero__overlay');
     for (var i = 0; i < overlays.length; i += 1) {
       overlays[i].style.paddingBottom = '';
+      var act = overlays[i].querySelector('.home-hero__actions');
+      if (act) act.style.marginTop = '';
     }
+    var hero = document.querySelector('.home-hero');
+    if (hero) hero.style.removeProperty('--hero-arrow-lift');
     return overlays;
   }
 
@@ -46,19 +50,58 @@
     }
   }
 
-  // Десктоп: відступ як у макеті, а піднімаємо лише якщо cookie-банер
-  // (fixed, внизу вікна) перекрив би кнопку: підняти рівно настільки,
-  // щоб низ контенту банера був над cookie-банером. Рахуємо для scrollY=0.
+  function px(v) {
+    return parseFloat(v) || 0;
+  }
+
+  // Десктоп: відступи як у макеті; піднімаємо лише якщо cookie-банер
+  // (fixed, внизу вікна) перекрив би кнопку активного слайда — рівно
+  // настільки, щоб кнопка була над банером. Щоб заголовок не наїхав на
+  // стрілки слайдера: (1) стискаємо проміжок заголовок→кнопка до 24u,
+  // (2) решту компенсуємо, піднімаючи стрілки над заголовком (лише поки
+  // є cookie-банер). Рахуємо для scrollY=0.
   function liftHeroDesktop(hero, h) {
-    var overlays = clearHero();
-    var heroBottom = hero.getBoundingClientRect().bottom + (window.pageYOffset || 0);
-    var bannerTop = window.innerHeight - h;
-    var need = Math.ceil(heroBottom - bannerTop + DESKTOP_GAP);
+    clearHero();
+    var overlay = hero.querySelector('.home-hero__slide.is-active .home-hero__overlay');
+    if (!overlay || overlay.hidden) return;
+    var heroRect = hero.getBoundingClientRect();
+    var heroBottom = heroRect.bottom + (window.pageYOffset || 0);
+    var natPad = px(window.getComputedStyle(overlay).paddingBottom);
+    var need = Math.ceil(heroBottom - (window.innerHeight - h) + DESKTOP_GAP - natPad);
     if (need <= 0) return;
-    for (var i = 0; i < overlays.length; i += 1) {
-      var natural = parseFloat(window.getComputedStyle(overlays[i]).paddingBottom) || 0;
-      if (need > natural) overlays[i].style.paddingBottom = need + 'px';
+
+    var actions = overlay.querySelector('.home-hero__actions');
+    var natMargin = actions ? px(window.getComputedStyle(actions).marginTop) : 0;
+    var minMargin = (24 * heroRect.width) / 1360;
+    var maxCut = Math.max(0, natMargin - minMargin);
+    var cut = Math.min(need, maxCut);
+    var titleLift = need - cut;
+
+    var title = overlay.querySelector('.home-hero__title');
+    var arrow = hero.querySelector('.home-hero__arrow');
+    var shift = 0;
+    if (title && arrow && arrow.offsetParent !== null) {
+      var tr = title.getBoundingClientRect();
+      var ar = arrow.getBoundingClientRect();
+      if (tr.left < ar.right && tr.right > ar.left) {
+        shift = Math.max(0, ar.bottom - (tr.top - titleLift - 8));
+        var badges = overlay.querySelector('.home-hero__badges');
+        var minTop = badges ? badges.getBoundingClientRect().bottom + 8 : heroRect.top;
+        var maxShift = Math.max(0, ar.top - minTop);
+        if (shift > maxShift) {
+          // Не вміщається: зменшуємо підйом, щоб заголовок не наїхав на стрілку.
+          var excess = shift - maxShift;
+          shift = maxShift;
+          titleLift -= excess;
+          need -= excess;
+          cut = Math.min(cut, need);
+        }
+      }
     }
+    if (need <= 0) return;
+    overlay.style.paddingBottom = natPad + need + 'px';
+    if (actions && cut > 0) actions.style.marginTop = natMargin - cut + 'px';
+    if (shift > 0) hero.style.setProperty('--hero-arrow-lift', shift + 'px');
   }
 
   function syncHeight() {
@@ -92,6 +135,15 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeight);
   if (window.ResizeObserver) {
     new ResizeObserver(syncHeight).observe(document.documentElement);
+  }
+  // Зміна активного слайда (home.js): інша висота заголовка.
+  var track = document.querySelector('.home-hero__track');
+  if (track && window.MutationObserver) {
+    new MutationObserver(syncHeight).observe(track, {
+      attributes: true,
+      attributeFilter: ['class', 'hidden'],
+      subtree: true,
+    });
   }
 
   banner.addEventListener('click', function (e) {
