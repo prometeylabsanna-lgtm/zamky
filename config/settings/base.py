@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'catalog.apps.CatalogConfig',
     'cart.apps.CartConfig',
     'orders.apps.OrdersConfig',
+    'novaposhta.apps.NovaposhtaConfig',
     'pages.apps.PagesConfig',
     'marketing.apps.MarketingConfig',
 ]
