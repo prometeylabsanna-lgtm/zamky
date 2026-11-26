@@ -51,7 +51,7 @@
 }
 
 .home-v2 .home-hero__slide img:not([src]) {
-  visibility: hidden;
+  display: none;
 }
 
 .home-hero__nav {

@@ -56,6 +56,7 @@
     function go(i) {
       index = (i + slides.length) % slides.length;
       loadSlideImg(slides[index]);
+      loadSlideImg(slides[(index + 1) % slides.length]);
       slides.forEach(function (s, si) {
         s.classList.toggle('is-active', si === index);
       });
@@ -104,6 +105,9 @@
     root.addEventListener('mouseleave', start);
     go(0);
     start();
+    window.addEventListener('load', function () {
+      loadSlideImg(slides[1]);
+    }, { once: true });
   })();
 
   /* Popular tabs + slider */
