@@ -336,6 +336,28 @@ UNFOLD = {
                 ],
             },
             {
+                'title': 'Нова Пошта',
+                'separator': True,
+                'collapsible': True,
+                'items': [
+                    {
+                        'title': 'Відділення НП',
+                        'icon': 'local_shipping',
+                        'link': _admin_link('novaposhta/npwarehouse/'),
+                    },
+                    {
+                        'title': 'Міста НП',
+                        'icon': 'location_city',
+                        'link': _admin_link('novaposhta/npcity/'),
+                    },
+                    {
+                        'title': 'Синхронізації НП',
+                        'icon': 'sync',
+                        'link': _admin_link('novaposhta/npsyncrun/'),
+                    },
+                ],
+            },
+            {
                 'title': 'Заявки',
                 'separator': True,
                 'collapsible': True,
