@@ -142,6 +142,13 @@ PAYMENT_ONLINE_ENABLED = config('PAYMENT_ONLINE_ENABLED', default=False, cast=bo
 LIQPAY_PUBLIC_KEY = config('LIQPAY_PUBLIC_KEY', default='')
 LIQPAY_PRIVATE_KEY = config('LIQPAY_PRIVATE_KEY', default='')
 
+# Довідник відділень працює і з порожнім ключем. Ключ бізнес-кабінету — для ТТН.
+NOVA_POSHTA_API_KEY = config('NOVA_POSHTA_API_KEY', default='')
+NOVA_POSHTA_API_URL = config(
+    'NOVA_POSHTA_API_URL',
+    default='https://api.novaposhta.ua/v2.0/json/',
+)
+
 DISTRICTS_JSON = BASE_DIR / 'config' / 'districts.json'
 
 
