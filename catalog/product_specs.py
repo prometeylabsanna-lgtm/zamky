@@ -1,92 +1,104 @@
-"""Характеристики на сторінці товару.
+"""Характеристики на сторінці товару — плоский список, як у макеті.
 
-Артикул, довжина, A×B і покриття беруться з полів картки товару
-(варіанти / кошик). Решта рядків — з обраних фільтрів.
+Системні рядки (Бренд, Категорія, Артикул, Гарантія, розміри, покриття)
+беруться з полів товару. Решта — з характеристик товару (Attribute →
+AttributeValue). Назви груп на сайт не виводяться: група лишається лише
+необовʼязковою позначкою в адмінці.
 """
 
-from .models import AttributeGroup
+from .product_meta import plural_months
 
-PRODUCT_FIELD_ATTR_SLUGS = frozenset({'sku-attr', 'size-ab', 'length', 'cover'})
+# Атрибути, які дублюють поля товару — показуємо лише системний рядок.
+PRODUCT_FIELD_ATTR_SLUGS = frozenset({'sku-attr', 'size-ab', 'length', 'cover', 'brand'})
 
-_GROUP_FALLBACK = {
-    'zagalne': ('Загальне', 1),
-    'rozmiry': ('Розміри', 2),
-    'material': ('Матеріал', 3),
-}
+# Порядок як у макеті (Центр замків.dc.html → P.specs):
+# Бренд, Країна виробництва, Категорія, Тип механізму, Розмір / модель,
+# Колір/покриття, Артикул, Гарантія. Далі — решта за sort_order.
+MOCKUP_ORDER = (
+    'sys:brand',
+    'country',
+    'sys:category',
+    'mech',
+    'model',
+    'sys:len',
+    'sys:ab',
+    'color',
+    'sys:cover',
+    'sys:sku',
+    'sys:warranty',
+)
+_RANK = {key: i for i, key in enumerate(MOCKUP_ORDER)}
+_REST = len(MOCKUP_ORDER)
 
 
-def product_spec_groups(product):
+def _category_label(category):
+    from django.utils.translation import get_language
+
+    if category is None:
+        return ''
+    lang = get_language() or 'ua'
+    name = category.card_name(lang)
+    parent = category.parent
+    if parent is not None:
+        return f'{parent.card_name(lang)} / {name}'
+    return name
+
+
+def _brand_value(product, attr_values):
+    brand = (product.brand or '').strip()
+    if brand:
+        return brand
+    for av in attr_values:
+        if av.attribute.slug == 'brand':
+            return av.display_value()
+    return ''
+
+
+def product_spec_rows(product):
+    """Плоский список {'k', 'v', 'spec'} у порядку макета."""
     from pages.i18n_lib import tr
 
-    groups_by_slug = {g.slug: g for g in AttributeGroup.objects.all()}
-    rows_by_group = {}
+    attr_values = list(product.attributes.all())
+    rows = []
 
-    def bucket(slug, fallback_title, fallback_order):
-        group = groups_by_slug.get(slug)
-        if group:
-            key = group.pk
-            title = group.display_name()
-            order = group.sort_order
-        else:
-            key = f'v:{slug}'
-            title = tr(fallback_title)
-            order = fallback_order
-        return rows_by_group.setdefault(
-            key, {'title': title, 'order': order, 'rows': []}
+    def add(key, label, value, spec='', order=(0, 0)):
+        value = (value or '').strip() if isinstance(value, str) else value
+        if not value:
+            return
+        rank = _RANK.get(key, _REST)
+        rows.append(
+            {'k': label, 'v': value, 'spec': spec, '_rank': (rank, order, label)}
         )
 
-    for slug, label, spec, value, row_order in _product_field_rows(product):
-        title, grp_order = _GROUP_FALLBACK[slug]
-        bucket(slug, title, grp_order)['rows'].append(
-            {
-                'k': tr(label),
-                'v': tr(value),
-                'order': row_order,
-                'spec': spec,
-            }
-        )
+    add('sys:brand', tr('Бренд'), _brand_value(product, attr_values))
+    add('sys:category', tr('Категорія'), _category_label(product.category))
+    if product.size_mm:
+        add('sys:len', tr('Загальна довжина'), f'{product.size_mm} {tr("мм")}', 'len')
+    if product.size_label:
+        add('sys:ab', tr('Розмір A×B'), f'{product.size_label} {tr("мм")}', 'ab')
+    cover = (product.cover or '').strip()
+    add('sys:sku', tr('Артикул'), (product.sku or '').strip(), 'sku')
+    months = int(product.warranty_months or 0)
+    if months > 0:
+        add('sys:warranty', tr('Гарантія'), f'{months} {plural_months(months)}')
 
-    for av in product.attributes.all():
+    seen_values = set()
+    for av in attr_values:
         attr = av.attribute
         if attr.slug in PRODUCT_FIELD_ATTR_SLUGS:
             continue
-        group = attr.group
-        if group:
-            key = group.pk
-            title = group.display_name()
-            grp_order = group.sort_order
-        else:
-            key = 0
-            title = tr('Інше')
-            grp_order = 999
-        bucket_rows = rows_by_group.setdefault(
-            key, {'title': title, 'order': grp_order, 'rows': []}
-        )
-        bucket_rows['rows'].append(
-            {
-                'k': attr.display_name(),
-                'v': av.display_value(),
-                'order': 100 + attr.sort_order,
-                'spec': '',
-            }
-        )
+        value = av.display_value()
+        if attr.slug == 'color':
+            seen_values.add(value.strip().lower())
+        grp = attr.group.sort_order if attr.group_id and attr.group else 999
+        add(attr.slug, attr.display_name(), value, order=(grp, attr.sort_order))
 
-    groups = sorted(rows_by_group.values(), key=lambda g: g['order'])
-    for g in groups:
-        g['rows'] = sorted(g['rows'], key=lambda r: r['order'])
-        for i, row in enumerate(g['rows']):
-            row['zebra'] = i % 2 == 1
-    return groups
+    # Покриття з поля товару, якщо воно не повторює «Колір/покриття».
+    if cover and cover.lower() not in seen_values:
+        add('sys:cover', tr('Покриття'), tr(cover), 'cover')
 
+    rows.sort(key=lambda r: r['_rank'])
+    for r in rows:
+        r.pop('_rank', None)
+    return rows
 
-def _product_field_rows(product):
-    sku = (product.sku or '').strip()
-    if sku:
-        yield 'zagalne', 'Артикул', 'sku', sku, 0
-    if product.size_mm:
-        yield 'rozmiry', 'Загальна довжина', 'len', f'{product.size_mm} мм', 0
-    if product.size_label:
-        yield 'rozmiry', 'Розмір A×B', 'ab', f'{product.size_label} мм', 1
-    cover = (product.cover or '').strip()
-    if cover:
-        yield 'material', 'Покриття', 'cover', cover, 1

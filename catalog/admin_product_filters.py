@@ -1,10 +1,16 @@
-"""Одна вкладка характеристик: випадаючий список на кожен фільтр."""
+"""Вкладка «Характеристики» товару: один рядок на характеристику.
+
+Значення вводиться текстом з підказками з довідника; нове значення
+створюється в довіднику автоматично. Групи на порядок і вигляд не впливають.
+"""
 
 import re
 
 from django import forms
-from django.db.models import Count
-from unfold.widgets import UnfoldAdminSelectWidget
+from django.db.models import Count, F
+from django.utils.html import escape, format_html
+from django.utils.safestring import mark_safe
+from unfold.widgets import UnfoldAdminSelectWidget, UnfoldAdminTextInputWidget
 
 from .admin_parent_cascade import (
     CategoryParentCascadeWidget,
@@ -23,17 +29,41 @@ def spec_field_name(attr_pk):
 
 
 def product_spec_attributes():
+    """Усі характеристики плоским списком (групи на порядок не впливають)."""
     return (
-        Attribute.objects.select_related('group')
-        .exclude(slug__in=SKIP_SPEC_SLUGS)
+        Attribute.objects.exclude(slug__in=SKIP_SPEC_SLUGS)
         .annotate(_value_count=Count('values'))
-        .filter(_value_count__gt=0)
-        .order_by('group__sort_order', 'sort_order', 'name')
+        .order_by(
+            F('group__sort_order').asc(nulls_last=True), 'sort_order', 'name', 'pk'
+        )
     )
 
 
 def spec_fieldset_fields():
     return tuple(spec_field_name(attr.pk) for attr in product_spec_attributes())
+
+
+class SpecValueWidget(UnfoldAdminTextInputWidget):
+    """Текстове поле + підказки з довідника (datalist): обрати або ввести нове."""
+
+    def __init__(self, choices=(), list_id='', attrs=None):
+        attrs = {**(attrs or {}), 'autocomplete': 'off'}
+        if list_id:
+            attrs['list'] = list_id
+        super().__init__(attrs=attrs)
+        self.choices = list(choices)
+        self.list_id = list_id
+
+    def render(self, name, value, attrs=None, renderer=None):
+        html = super().render(name, value, attrs, renderer)
+        if not self.list_id:
+            return html
+        options = ''.join(
+            format_html('<option value="{}"></option>', text) for text in self.choices
+        )
+        return mark_safe(
+            f'{html}<datalist id="{escape(self.list_id)}">{options}</datalist>'
+        )
 
 
 def add_spec_fields(form, product):
@@ -42,26 +72,43 @@ def add_spec_fields(form, product):
         rows = product.product_attributes.select_related('attribute_value')
         for row in rows:
             attr_id = row.attribute_value.attribute_id
-            selected.setdefault(attr_id, row.attribute_value_id)
-    value_qs = AttributeValue.objects.order_by('sort_order', 'value')
+            selected.setdefault(attr_id, row.attribute_value.value)
+    values_by_attr = {}
+    for attr_id, text in AttributeValue.objects.order_by(
+        'sort_order', 'value'
+    ).values_list('attribute_id', 'value'):
+        values_by_attr.setdefault(attr_id, []).append(text)
     for attr in product_spec_attributes():
         name = spec_field_name(attr.pk)
-        group_name = attr.group.name if attr.group_id else 'Інше'
-        field = forms.ModelChoiceField(
-            queryset=value_qs.filter(attribute=attr),
+        hint = 'Показується у фільтрах каталогу.' if attr.filterable else ''
+        field = forms.CharField(
             required=False,
+            max_length=200,
             label=attr.name,
-            empty_label='Не обрано',
-            widget=UnfoldAdminSelectWidget(
-                attrs={
-                    'data-filter-group': group_name,
-                }
+            help_text=hint,
+            widget=SpecValueWidget(
+                choices=values_by_attr.get(attr.pk, ()),
+                list_id=f'spec-values-{attr.pk}',
+                attrs={'placeholder': 'Не вказано — оберіть або введіть нове'},
             ),
         )
-        field.label_from_instance = lambda obj: obj.value
         if attr.pk in selected:
             field.initial = selected[attr.pk]
         form.fields[name] = field
+
+
+def resolve_spec_value(attr, raw):
+    """Знаходить значення в довіднику (без регістру) або створює нове."""
+    if isinstance(raw, AttributeValue):
+        return raw
+    text = ' '.join(str(raw or '').split())
+    if not text:
+        return None
+    wanted = text.casefold()
+    for existing in AttributeValue.objects.filter(attribute=attr).order_by('pk'):
+        if ' '.join((existing.value or '').split()).casefold() == wanted:
+            return existing
+    return AttributeValue.objects.create(attribute=attr, value=text)
 
 
 def apply_product_spec_fields(product, cleaned_data):
@@ -77,7 +124,7 @@ def apply_product_spec_fields(product, cleaned_data):
         attr = attrs.get(attr_id)
         if not attr:
             continue
-        value = raw if isinstance(raw, AttributeValue) else None
+        value = resolve_spec_value(attr, raw)
         _replace_attr_value(product, attr, value)
         changed.extend(_sync_product_field(product, attr, value))
     if changed:

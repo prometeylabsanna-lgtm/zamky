@@ -274,7 +274,7 @@ UNFOLD = {
                         'link': _admin_link('catalog/category/'),
                     },
                     {
-                        'title': 'Фільтри',
+                        'title': 'Характеристики',
                         'icon': 'tune',
                         'link': _admin_link('catalog/attribute/'),
                         'active': _admin_nav_active_any(

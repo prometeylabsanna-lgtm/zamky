@@ -434,3 +434,59 @@
   bindGalleryGestures();
   applyVariant(current(), false);
 })();
+
+/* Таби «Опис | Характеристики | Відгуки» на сторінці товару */
+(function () {
+  'use strict';
+  var root = document.querySelector('[data-pdp-tabs]');
+  if (!root) return;
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-pdp-tab]'));
+  var panels = Array.prototype.slice.call(root.querySelectorAll('[data-pdp-panel]'));
+
+  function show(key, focus) {
+    var found = false;
+    tabs.forEach(function (tab) {
+      var on = tab.getAttribute('data-pdp-tab') === key;
+      if (on) found = true;
+      tab.classList.toggle('is-active', on);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      if (on && focus) tab.focus();
+    });
+    if (!found) return false;
+    panels.forEach(function (panel) {
+      panel.hidden = panel.getAttribute('data-pdp-panel') !== key;
+    });
+    return true;
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () {
+      show(tab.getAttribute('data-pdp-tab'));
+    });
+    tab.addEventListener('keydown', function (e) {
+      var dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      var next = tabs[(i + dir + tabs.length) % tabs.length];
+      show(next.getAttribute('data-pdp-tab'), true);
+    });
+  });
+
+  function openFromHash() {
+    if (window.location.hash === '#reviews' && show('reviews')) {
+      root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  document.querySelectorAll('a[href="#reviews"]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      if (show('reviews')) {
+        e.preventDefault();
+        root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
+})();

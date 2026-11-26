@@ -24,7 +24,7 @@ from .chrome_cms import catalog_chrome
 from .models import Attribute, AttributeValue, Category, Product, ProductImage
 from .measure_guide import resolve_measure
 from .product_html import product_description_html
-from .product_specs import product_spec_groups
+from .product_specs import product_spec_rows
 from .product_variants import build_variant_context
 from .search import filter_queryset_by_query
 
@@ -442,7 +442,7 @@ class ProductDetailView(DetailView):
         wishlist = WishlistService(self.request)
         variants, colors, sizes = build_variant_context(product)
 
-        spec_groups = product_spec_groups(product)
+        spec_rows = product_spec_rows(product)
         description_html = product_description_html(product, self.request)
         measure_title, measure_text = resolve_measure(product.category)
 
@@ -460,7 +460,7 @@ class ProductDetailView(DetailView):
         ctx.update(
             {
                 'in_wishlist': wishlist.contains(product.pk),
-                'spec_groups': spec_groups,
+                'spec_rows': spec_rows,
                 'description_html': description_html,
                 'accordions': accordions,
                 'variant_colors': colors,

@@ -187,8 +187,32 @@ class AttributeAdmin(
     list_filter = ('filterable', 'group')
     search_fields = ('name', 'name_ru', 'slug')
     readonly_fields = ('slug',)
-    fields = ('name', 'name_ru', 'slug', 'group', 'filterable', 'sort_order')
+    fields = ('name', 'name_ru', 'filterable', 'sort_order', 'group', 'slug')
     show_add_link = False
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change=change, **kwargs)
+        labels = {
+            'name': ('Назва характеристики', 'Як на сайті: «Країна виробництва», «Тип механізму».'),
+            'filterable': (
+                'Показувати як фільтр у каталозі',
+                'Без галочки характеристика видна лише в картці товару.',
+            ),
+            'group': (
+                'Група (необовʼязково)',
+                'Лише для впорядкування в адмінці. На сайті назви груп не показуються.',
+            ),
+            'sort_order': ('Порядок', 'Порядок у картці товару й у фільтрах.'),
+        }
+        for name, (label, help_text) in labels.items():
+            field = form.base_fields.get(name)
+            if field is not None:
+                field.label = label
+                field.help_text = help_text
+        group = form.base_fields.get('group')
+        if group is not None:
+            _no_related_menu(group)
+        return form
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'group':
@@ -202,13 +226,6 @@ class AttributeAdmin(
                 attrs={'autocomplete': 'off'}
             )
         return super().formfield_for_dbfield(db_field, request, **kwargs)
-
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change=change, **kwargs)
-        group = form.base_fields.get('group')
-        if group is not None:
-            _no_related_menu(group)
-        return form
 
     def response_post_save_add(self, request, obj):
         return HttpResponseRedirect(_attribute_url(_group_key(obj.group), obj.pk))
@@ -386,7 +403,6 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
         }
         js = (
             'js/admin/lang_tabs.js',
-            'js/admin/product_spec_filters.js',
             'js/admin/category_parent_cascade.js',
             'js/admin/product_core_color.js',
         )
@@ -419,8 +435,9 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
                     {
                         'classes': ('tab', 'product-specs-tab'),
                         'description': (
-                            'Кожен фільтр — список уже створених значень. '
-                            'Нові варіанти додавайте в «Фільтри».'
+                            'Одна характеристика — один рядок. Почніть вводити значення: '
+                            'оберіть з підказок або впишіть нове — його буде додано '
+                            'в довідник «Характеристики». Порожнє поле — не показувати.'
                         ),
                         'fields': spec_fields,
                     },

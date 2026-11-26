@@ -85,10 +85,12 @@ class ProductPageTests(TestCase):
         self.assertLess(body.index('pdp-cart-btn'), body.index('Колір серцевини'))
         self.assertContains(response, 'Як виміряти циліндр?')
         self.assertContains(response, 'Швидке замовлення в 1 клік')
-        self.assertContains(response, 'Загальне')
+        self.assertContains(response, 'data-pdp-tabs')
+        self.assertNotContains(response, 'pdp-specs__group')
         self.assertContains(response, self.product.sku)
         self.assertContains(response, 'Гарантія 12 місяців')
-        self.assertNotContains(response, 'відгук')
+        self.assertNotContains(response, '· 0')
+        self.assertContains(response, '>Відгуки</button>')
 
     def test_product_reviews_and_warranty_from_fields(self):
         self.product.reviews_count = 2
@@ -183,7 +185,7 @@ class ProductPageTests(TestCase):
         self.assertContains(page, '<li>список2</li>')
         self.assertNotContains(page, 'список1 список2')
 
-    def test_spec_groups(self):
+    def test_spec_rows_flat_like_mockup(self):
         sizes = AttributeGroup.objects.create(name='Розміри', slug='rozmiry', sort_order=2)
         size_ab = Attribute.objects.create(
             name='Розмір A×B', slug='size-ab', group=sizes, filterable=False
@@ -192,24 +194,36 @@ class ProductPageTests(TestCase):
             attribute=size_ab, value='45×45 мм', slug='45x45'
         )
         ProductAttribute.objects.create(product=self.product, attribute_value=fake_ab)
+        filters = AttributeGroup.objects.create(name='Фільтри', slug='filters', sort_order=10)
+        country = Attribute.objects.create(
+            name='Країна виробництва', slug='country', group=filters, sort_order=1
+        )
+        av_country = AttributeValue.objects.create(
+            attribute=country, value='Україна', slug='ua'
+        )
+        ProductAttribute.objects.create(product=self.product, attribute_value=av_country)
 
         response = self.client.get(reverse('catalog:product', args=[self.product.slug]))
-        groups = response.context['spec_groups']
-        self.assertTrue(groups)
-        self.assertEqual(groups[0]['title'], 'Загальне')
-        rows = {r['k']: r for g in groups for r in g['rows']}
-        self.assertEqual(rows['Артикул']['v'], self.product.sku)
-        self.assertEqual(rows['Артикул']['spec'], 'sku')
-        self.assertEqual(rows['Розмір A×B']['v'], '30×30 мм')
-        self.assertEqual(rows['Загальна довжина']['v'], '60 мм')
-        self.assertEqual(rows['Покриття']['v'], 'Полірована латунь')
-        self.assertEqual(rows['Бренд']['v'], 'ABARO')
-        self.assertNotIn('45×45 мм', {r['v'] for g in groups for r in g['rows']})
-        page = response
-        self.assertContains(page, 'data-spec-sku')
-        self.assertContains(page, 'data-spec-ab')
-        self.assertContains(page, 'data-spec-len')
-        self.assertContains(page, 'data-spec-cover')
+        rows = response.context['spec_rows']
+        keys = [r['k'] for r in rows]
+        self.assertEqual(keys[:3], ['Бренд', 'Країна виробництва', 'Категорія'])
+        self.assertEqual(keys.count('Бренд'), 1)
+        by_key = {r['k']: r for r in rows}
+        self.assertEqual(by_key['Бренд']['v'], 'ABARO')
+        self.assertEqual(by_key['Категорія']['v'], 'Циліндри')
+        self.assertEqual(by_key['Артикул']['v'], self.product.sku)
+        self.assertEqual(by_key['Артикул']['spec'], 'sku')
+        self.assertEqual(by_key['Гарантія']['v'], '12 місяців')
+        self.assertEqual(by_key['Розмір A×B']['v'], '30×30 мм')
+        self.assertEqual(by_key['Загальна довжина']['v'], '60 мм')
+        self.assertEqual(by_key['Покриття']['v'], 'Полірована латунь')
+        self.assertNotIn('45×45 мм', {r['v'] for r in rows})
+        self.assertLess(keys.index('Артикул'), keys.index('Гарантія'))
+        self.assertNotContains(response, '>Фільтри<')
+        self.assertContains(response, 'data-spec-sku')
+        self.assertContains(response, 'data-spec-ab')
+        self.assertContains(response, 'data-spec-len')
+        self.assertContains(response, 'data-spec-cover')
 
     def test_spec_groups_russian(self):
         safety = AttributeGroup.objects.create(
@@ -233,7 +247,7 @@ class ProductPageTests(TestCase):
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, 'Количество ключей')
         self.assertContains(page, 'Общая длина')
-        self.assertContains(page, 'Безопасность и комплектация')
+        self.assertNotContains(page, 'Безопасность и комплектация')
 
     def test_color_code_sets_label(self):
         self.product.color_code = 'N'
@@ -348,13 +362,14 @@ class ProductAdminColorTests(TestCase):
         url = reverse('admin:catalog_product_change', args=[self.product.pk])
         page = self.client.get(url)
         self.assertContains(page, f'name="spec_attr_{keys.pk}"')
-        self.assertContains(page, 'data-filter-group')
+        self.assertContains(page, f'list="spec-values-{keys.pk}"')
+        self.assertNotContains(page, 'data-filter-group')
         self.assertContains(page, 'Кількість ключів')
-        self.assertContains(page, '>5<')
+        self.assertContains(page, '<option value="5">')
         self.assertNotContains(page, 'Оздоблення')
         self.assertNotContains(page, 'data-attr-master')
         self.assertNotContains(page, f'name="spec_attr_{sku_attr.pk}"')
-        self.assertNotContains(page, f'name="spec_attr_{empty.pk}"')
+        self.assertContains(page, f'name="spec_attr_{empty.pk}"')
         self.assertContains(page, 'name="rating"')
         self.assertContains(page, 'Рейтинг')
         self.assertContains(page, 'name="reviews_count"')
@@ -380,6 +395,23 @@ class ProductAdminColorTests(TestCase):
             ).exists()
         )
 
+    def test_apply_spec_fields_creates_new_value(self):
+        from catalog.admin_product_filters import apply_product_spec_fields, spec_field_name
+
+        country = Attribute.objects.create(name='Країна виробництва', slug='country')
+        AttributeValue.objects.create(attribute=country, value='Україна', slug='ua')
+        apply_product_spec_fields(self.product, {spec_field_name(country.pk): ' україна '})
+        self.assertEqual(AttributeValue.objects.filter(attribute=country).count(), 1)
+        apply_product_spec_fields(self.product, {spec_field_name(country.pk): 'Італія'})
+        values = set(
+            self.product.attributes.filter(attribute=country).values_list('value', flat=True)
+        )
+        self.assertEqual(values, {'Італія'})
+        self.assertEqual(AttributeValue.objects.filter(attribute=country).count(), 2)
+        apply_product_spec_fields(self.product, {spec_field_name(country.pk): ''})
+        self.assertFalse(self.product.attributes.filter(attribute=country).exists())
+        self.assertEqual(AttributeValue.objects.filter(attribute=country).count(), 2)
+
     def test_filter_groups_in_admin_nav(self):
         from django.conf import settings
         from django.test import RequestFactory
@@ -389,7 +421,7 @@ class ProductAdminColorTests(TestCase):
         nav = settings.UNFOLD['SIDEBAR']['navigation']
         catalog = next(g for g in nav if g.get('title') == 'Каталог')
         titles = [item['title'] for item in catalog['items']]
-        self.assertIn('Фільтри', titles)
+        self.assertIn('Характеристики', titles)
         self.assertIn('Сімʼї', titles)
         self.assertNotIn('Групи фільтрів', titles)
         self.assertNotIn('Значення фільтрів', titles)
@@ -403,7 +435,8 @@ class ProductAdminColorTests(TestCase):
         self.assertTrue(group_active(on_group))
         self.assertFalse(attr_active(on_group))
         page = self.client.get(reverse('admin:catalog_attribute_changelist'))
-        self.assertContains(page, 'Додати групу')
+        self.assertContains(page, 'Додати характеристику')
+        self.assertNotContains(page, 'Додати групу')
         groups = self.client.get(reverse('admin:catalog_attributegroup_changelist'))
         self.assertEqual(groups.status_code, 302)
 
@@ -435,15 +468,14 @@ class FilterValuesNavTests(TestCase):
     def test_groups_then_filters_then_values(self):
         hub = reverse('admin:catalog_attribute_changelist')
         values_url = reverse('admin:catalog_attributevalue_changelist')
-        groups = self.client.get(hub)
-        self.assertEqual(groups.status_code, 200)
-        self.assertContains(groups, 'Розміри')
-        self.assertContains(groups, 'Додати групу')
-        self.assertNotContains(groups, '30×30 мм')
-        filters = self.client.get(hub, {'group': self.group.pk})
-        self.assertContains(filters, 'Розмір A×B')
-        self.assertContains(filters, 'Додати фільтр')
-        self.assertNotContains(filters, '30×30 мм')
+        flat = self.client.get(hub)
+        self.assertEqual(flat.status_code, 200)
+        self.assertContains(flat, 'Розмір A×B')
+        self.assertContains(flat, 'група: Розміри')
+        self.assertContains(flat, 'Додати характеристику')
+        self.assertNotContains(flat, '30×30 мм')
+        old_link = self.client.get(hub, {'group': self.group.pk})
+        self.assertContains(old_link, 'Розмір A×B')
         values = self.client.get(
             values_url, {'group': self.group.pk, 'attribute': self.attr.pk}
         )
@@ -516,7 +548,7 @@ class FilterValuesNavTests(TestCase):
         self.assertContains(page, 'name="attribute"')
         self.assertContains(page, f'value="{self.attr.pk}"')
         self.assertContains(page, self.attr.name)
-        self.assertContains(page, self.group.name)
+        self.assertContains(page, 'Характеристики')
         self.assertNotContains(page, '---------')
         self.assertNotContains(page, 'admin-autocomplete')
 

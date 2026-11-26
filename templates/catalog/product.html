@@ -26,37 +26,39 @@
     {% include 'catalog/partials/gallery.html' %}
     {% include 'catalog/partials/buy_box.html' %}
     <div class="pdp-info">
-      {% if description_html %}
-      <section class="pdp-desc">
-        <h2>{% t 'Опис' %}</h2>
-        <div class="pdp-desc__body">{{ description_html|safe }}</div>
-      </section>
-      {% endif %}
-      {% if spec_groups %}
-      <section class="pdp-specs">
-        <h2>{% t 'Характеристики' %}</h2>
-        <div class="pdp-specs__groups" data-spec-groups>
-          {% for g in spec_groups %}
-          <div class="pdp-specs__group">
-            <h3>{{ g.title }}</h3>
-            <dl class="pdp-specs__table">
-              {% for r in g.rows %}
-              <div class="pdp-specs__row{% if r.zebra %} is-zebra{% endif %}">
-                <dt>{{ r.k }}</dt>
-                <dd{% if r.spec == 'sku' %} data-spec-sku{% endif %}{% if r.spec == 'cover' %} data-spec-cover{% endif %}{% if r.spec == 'len' %} data-spec-len{% endif %}{% if r.spec == 'ab' %} data-spec-ab{% endif %}>{{ r.v|tr }}</dd>
-              </div>
-              {% endfor %}
-            </dl>
-          </div>
-          {% endfor %}
+      <section class="pdp-tabs" data-pdp-tabs aria-label="{% t 'Інформація про товар' %}">
+        <div class="pdp-tabs__bar" role="tablist">
+          {% if description_html %}
+          <button type="button" class="pdp-tabs__tab is-active" role="tab" id="pdp-tab-desc" aria-controls="pdp-panel-desc" aria-selected="true" data-pdp-tab="desc">{% t 'Опис' %}</button>
+          {% endif %}
+          <button type="button" class="pdp-tabs__tab{% if not description_html %} is-active{% endif %}" role="tab" id="pdp-tab-specs" aria-controls="pdp-panel-specs" aria-selected="{% if description_html %}false{% else %}true{% endif %}" data-pdp-tab="specs">{% t 'Характеристики' %}</button>
+          <button type="button" class="pdp-tabs__tab" role="tab" id="pdp-tab-reviews" aria-controls="reviews" aria-selected="false" data-pdp-tab="reviews">{% t 'Відгуки' %}{% if product.reviews_count %} ({{ product.reviews_count }}){% endif %}</button>
+        </div>
+        {% if description_html %}
+        <div class="pdp-tabs__panel pdp-desc" role="tabpanel" id="pdp-panel-desc" aria-labelledby="pdp-tab-desc" data-pdp-panel="desc">
+          <div class="pdp-desc__body">{{ description_html|safe }}</div>
+        </div>
+        {% endif %}
+        <div class="pdp-tabs__panel pdp-specs" role="tabpanel" id="pdp-panel-specs" aria-labelledby="pdp-tab-specs" data-pdp-panel="specs"{% if description_html %} hidden{% endif %}>
+          <dl class="pdp-specs__list" data-spec-list>
+            {% for r in spec_rows %}
+            <div class="pdp-specs__row">
+              <dt>{{ r.k }}</dt>
+              <dd{% if r.spec == 'sku' %} data-spec-sku{% endif %}{% if r.spec == 'cover' %} data-spec-cover{% endif %}{% if r.spec == 'len' %} data-spec-len{% endif %}{% if r.spec == 'ab' %} data-spec-ab{% endif %}>{{ r.v|tr }}</dd>
+            </div>
+            {% endfor %}
+          </dl>
+        </div>
+        <div class="pdp-tabs__panel pdp-reviews" role="tabpanel" id="reviews" aria-labelledby="pdp-tab-reviews" data-pdp-panel="reviews" hidden>
+          <p class="pdp-reviews__empty">{% t 'Відгуки про цей товар зʼявляться тут. Поділіться враженням — ми опублікуємо ваш відгук.' %}</p>
+          <a class="pdp-reviews__btn" href="{% url 'pages:info_page' 'contacts' %}">{% t 'Залишити відгук' %}</a>
         </div>
       </section>
-      {% endif %}
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/product.js' %}"></script>
+<script src="{% static 'js/product.js' %}?v={{ asset_v }}"></script>
 {% endblock %}
