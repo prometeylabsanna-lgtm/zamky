@@ -127,6 +127,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+TEST_RUNNER = 'config.test_runner.TempMediaDiscoverRunner'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
