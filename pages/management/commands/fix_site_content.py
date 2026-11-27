@@ -4,6 +4,7 @@
 """
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
 from pages.models_cms import SiteBlock, SiteSettings, clear_site_blocks_cache
 from pages.phone import DEFAULT_EMAIL, DEFAULT_HOURS
@@ -188,9 +189,9 @@ def step_delivery_prices(stdout, dry_run: bool) -> str:
             block.text_html_ru or "", allowed
         ):
             removed += 1
-            stdout.write(f"ціна {page}.{key}: прибрано (береться з оформлення)")
-            if not dry_run:
-                block.delete()
+            stdout.write(
+                f"ціна {page}.{key}: рядок не використовується (ціна з оформлення), не видаляю"
+            )
         else:
             kept += 1
             stdout.write(f"ціна {page}.{key}: не чіпаю — текст змінено")
@@ -354,6 +355,10 @@ class Command(BaseCommand):
         dry_run = bool(options["dry_run"])
         if dry_run:
             self.stdout.write("dry-run: запису не буде")
-        for step in STEPS:
-            step(self.stdout, dry_run)
+            for step in STEPS:
+                step(self.stdout, dry_run)
+        else:
+            with transaction.atomic():
+                for step in STEPS:
+                    step(self.stdout, dry_run)
         self.stdout.write(self.style.SUCCESS(f"Кроків: {len(STEPS)}"))

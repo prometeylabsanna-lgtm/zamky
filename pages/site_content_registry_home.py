@@ -13,6 +13,7 @@ CONTENT_SECTIONS_HOME: tuple[ContentSection, ...] = (
         visibility_key="hero_section_visible",
         blocks=_b(
             "home",
+            "home_seo_title",
             "hero_section_visible",
             "hero_badge_1",
             "hero_badge_2",
@@ -22,6 +23,7 @@ CONTENT_SECTIONS_HOME: tuple[ContentSection, ...] = (
             "hero_feature_4",
         ),
         field_groups=(
+            FieldGroup("SEO title головної", ("home_seo_title",)),
             FieldGroup("Видимість", ("hero_section_visible",)),
             FieldGroup(
                 "Плашки і рядки справа",

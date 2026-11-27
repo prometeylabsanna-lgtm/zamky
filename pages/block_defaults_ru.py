@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
+    ("home", "home_seo_title"): "Замки для дверей и мебели — купить в Киеве",
     ("home", "audience_1_title"): "Для дома",
     ("home", "audience_1_text"): "Квартиры, частные дома",
     ("home", "audience_2_title"): "Для бизнеса",

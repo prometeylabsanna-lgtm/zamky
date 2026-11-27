@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n_ui static cms_tags %}
 
-{% block title %}{% t 'Замки для дверей та меблів — купити в Києві' %}{% endblock %}
+{% block title %}{% cms 'home' 'home_seo_title' 'Замки для дверей та меблів — купити в Києві' %}{% endblock %}
 
 {% block extra_css %}
 {% if show_hero and hero_slides %}

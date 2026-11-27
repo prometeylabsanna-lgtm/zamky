@@ -153,8 +153,8 @@ class FeedCategoryMapping(models.Model):
 
 class SeoSettings(SingletonModel):
     class OrgType(models.TextChoices):
-        ORGANIZATION = "Organization", "Organization (без фізичної точки)"
-        LOCAL_BUSINESS = "LocalBusiness", "LocalBusiness (є магазин / адреса)"
+        ORGANIZATION = "Organization", "Організація (без фізичної точки)"
+        LOCAL_BUSINESS = "LocalBusiness", "Локальний бізнес (є магазин / адреса)"
 
     primary_domain = models.CharField(
         "Основний домен",
@@ -169,7 +169,7 @@ class SeoSettings(SingletonModel):
         max_length=255,
         blank=True,
         default="",
-        help_text="Для сторінок без власного title. Рекомендовано до 60 символів разом із суфіксом.",
+        help_text="Використовується, коли сторінка не має власного title.",
     )
     title_default_ru = models.CharField(
         "Title за замовчуванням (RU)", max_length=255, blank=True, default=""
@@ -201,13 +201,13 @@ class SeoSettings(SingletonModel):
     )
     og_image_alt = models.CharField("Alt OG-картинки", max_length=125, blank=True, default="")
     twitter_card = models.CharField(
-        "twitter:card",
+        "Тип картки X (Twitter)",
         max_length=32,
         default="summary_large_image",
         choices=[("summary_large_image", "summary_large_image"), ("summary", "summary")],
     )
     twitter_site = models.CharField(
-        "twitter:site (handle)",
+        "Акаунт X (Twitter), напр. @centerzamkiv",
         max_length=16,
         blank=True,
         default="",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 BLOCK_LABELS: dict[tuple[str, str], str] = {
+    ("home", "home_seo_title"): "SEO title головної",
     ("home", "hero_section_visible"): "Показувати банер",
     ("home", "audience_section_visible"): "Показувати «Для кого»",
     ("home", "audience_1_icon"): "Картка 1 — іконка",
@@ -145,6 +146,7 @@ BLOCK_DEFAULTS: dict[tuple[str, str], str] = {
 }
 
 INLINE_KEYS: set[tuple[str, str]] = {
+    ("home", "home_seo_title"),
     ("home", "audience_1_title"),
     ("home", "audience_2_title"),
     ("home", "audience_3_title"),

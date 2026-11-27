@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from html import escape
 
+from django.utils.html import linebreaks
 from lxml import html as lhtml
 
 from pages.translations import RU_MAP
@@ -213,6 +214,8 @@ def sanitize_legal_html(raw: str) -> str:
     text = (raw or "").strip()
     if not text:
         return ""
+    if not re.search(r'<[a-zA-Z/!][^>]*>', text):
+        text = linebreaks(text, autoescape=True)
     try:
         root = lhtml.fromstring(f"<div>{text}</div>")
     except Exception:

@@ -36,7 +36,13 @@ class Category(models.Model):
         'Іконка',
         max_length=32,
         blank=True,
-        help_text='cyl | pad | shield | brand',
+        choices=[
+            ('', 'Без іконки'),
+            ('cyl', 'Циліндр'),
+            ('pad', 'Навісний замок'),
+            ('shield', 'Броненакладка'),
+            ('brand', 'Бренд'),
+        ],
     )
     home_subtitle = models.CharField(
         'Підпис на головній',

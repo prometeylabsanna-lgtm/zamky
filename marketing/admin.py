@@ -219,7 +219,7 @@ class SeoSettingsAdmin(SingletonAdmin):
                 )
             },
         ),
-        ("Open Graph / X (Twitter)", {"fields": ("og_preview", "og_image", "og_image_alt", "twitter_card", "twitter_site")}),
+        ("Поширення в соцмережах (Open Graph / X)", {"fields": ("og_preview", "og_image", "og_image_alt", "twitter_card", "twitter_site")}),
         (
             "Коди підтвердження (лише значення content)",
             {
