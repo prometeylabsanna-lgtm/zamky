@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static cms_tags %}
+
+{% block title %}{% cms 'errors' 'err403_title' 'Доступ заборонено' %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ asset_v }}">
+{% endblock %}
+
+{% block content %}
+<div class="container err-page">
+  <p class="err-page__code">403</p>
+  <h1 class="err-page__title">{% cms 'errors' 'err403_title' 'Доступ заборонено' %}</h1>
+  <p class="err-page__text">{% cms 'errors' 'err403_text' 'Сторінка недоступна. Якщо ви заповнювали форму — оновіть сторінку і спробуйте ще раз.' %}</p>
+  <div class="err-page__actions">
+    <a class="btn" href="{% url 'catalog:home' %}">{% cms 'errors' 'err_home_btn' 'На головну' %}</a>
+    <a class="btn btn--ghost" href="{% url 'catalog:catalog' %}">{% cms 'errors' 'err_catalog_btn' 'До каталогу' %}</a>
+  </div>
+</div>
+{% endblock %}

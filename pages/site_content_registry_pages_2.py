@@ -356,4 +356,36 @@ CONTENT_SECTIONS_PAGES_2: tuple[ContentSection, ...] = (
         ),
         hide_from_sidebar=True,
     ),
+    ContentSection(
+        slug="body",
+        page_slug="errors",
+        title="Сторінки помилок",
+        sidebar_icon="error",
+        sidebar_group="Інфосторінки",
+        preview_url="/ua/404-preview-not-exists/",
+        include_style=False,
+        blocks=_b(
+            "errors",
+            "err404_title",
+            "err404_text",
+            "err403_title",
+            "err403_text",
+            "err_home_btn",
+            "err_catalog_btn",
+        ),
+        field_groups=(
+            FieldGroup(
+                "404",
+                ("err404_title", "err404_text"),
+            ),
+            FieldGroup(
+                "403",
+                ("err403_title", "err403_text"),
+            ),
+            FieldGroup(
+                "Кнопки",
+                ("err_home_btn", "err_catalog_btn"),
+            ),
+        ),
+    ),
 )

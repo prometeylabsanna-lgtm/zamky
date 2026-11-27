@@ -75,3 +75,7 @@ urlpatterns += i18n_patterns(
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
+handler404 = 'pages.views_errors.page_not_found'
+handler403 = 'pages.views_errors.permission_denied'
+handler500 = 'pages.views_errors.server_error'

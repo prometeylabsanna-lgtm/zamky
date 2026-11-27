@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{% if lang == 'ru' %}ru{% else %}uk{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% if lang == 'ru' %}Что-то пошло не так{% else %}Щось пішло не так{% endif %}</title>
+  <style>
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      padding: calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+      background: #fff;
+      color: #505050;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-align: center;
+    }
+    .err {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 36rem;
+    }
+    .err__logo { width: 180px; max-width: 70%; height: auto; }
+    .err__code {
+      margin: 4px 0 0;
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.25; letter-spacing: -0.02em; }
+    p { margin: 0; font-size: 15px; line-height: 1.5; color: #6f6f6f; }
+    .err__btn {
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 320px;
+      min-height: 48px;
+      margin-top: 8px;
+      padding: 0 20px;
+      border-radius: 8px;
+      background: #f97f0c;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      -webkit-appearance: none;
+      appearance: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @media (min-width: 720px) {
+      .err { gap: 16px; }
+      .err__code { font-size: 88px; }
+      h1 { font-size: 28px; }
+      .err__btn { width: auto; min-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="err">
+    <img class="err__logo" src="{% static 'img/logo-footer.webp' %}" alt="{% if lang == 'ru' %}Центр замков{% else %}Центр замків{% endif %}" width="180" height="48">
+    <p class="err__code">500</p>
+    <h1>{% if lang == 'ru' %}Что-то пошло не так{% else %}Щось пішло не так{% endif %}</h1>
+    <p>{% if lang == 'ru' %}Мы уже знаем о проблеме. Попробуйте обновить страницу через минуту.{% else %}Ми вже знаємо про проблему. Спробуйте оновити сторінку за хвилину.{% endif %}</p>
+    <a class="err__btn" href="{% if lang == 'ru' %}/ru/{% else %}/ua/{% endif %}">{% if lang == 'ru' %}На главную{% else %}На головну{% endif %}</a>
+  </main>
+</body>
+</html>

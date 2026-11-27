@@ -149,6 +149,25 @@ _reg(
     kind="inline",
 )
 
+# --- errors ---
+_reg("errors", "err404_title", "404 — заголовок", "Сторінку не знайдено", kind="inline")
+_reg(
+    "errors",
+    "err404_text",
+    "404 — текст",
+    "Можливо, її видалили або адресу введено з помилкою. "
+    "Спробуйте пошук або перейдіть до каталогу.",
+)
+_reg("errors", "err403_title", "403 — заголовок", "Доступ заборонено", kind="inline")
+_reg(
+    "errors",
+    "err403_text",
+    "403 — текст",
+    "Сторінка недоступна. Якщо ви заповнювали форму — оновіть сторінку і спробуйте ще раз.",
+)
+_reg("errors", "err_home_btn", "Кнопка «На головну»", "На головну", kind="inline")
+_reg("errors", "err_catalog_btn", "Кнопка «До каталогу»", "До каталогу", kind="inline")
+
 # quiet linters for unused richtext set (kept for merge API)
 assert RICHTEXT is not None
 assert LABELS and DEFAULTS and INLINE and MULTILINE

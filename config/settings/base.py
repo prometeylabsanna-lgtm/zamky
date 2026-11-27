@@ -46,6 +46,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+CSRF_FAILURE_VIEW = 'pages.views_errors.csrf_failure'
 
 TEMPLATES = [
     {

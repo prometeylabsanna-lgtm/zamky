@@ -4,6 +4,18 @@ from __future__ import annotations
 
 BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
     ("home", "home_seo_title"): "Замки для дверей и мебели — купить в Киеве",
+    ("errors", "err404_title"): "Страница не найдена",
+    ("errors", "err404_text"): (
+        "Возможно, её удалили или адрес введён с ошибкой. "
+        "Попробуйте поиск или перейдите в каталог."
+    ),
+    ("errors", "err403_title"): "Доступ запрещён",
+    ("errors", "err403_text"): (
+        "Страница недоступна. Если вы заполняли форму — "
+        "обновите страницу и попробуйте ещё раз."
+    ),
+    ("errors", "err_home_btn"): "На главную",
+    ("errors", "err_catalog_btn"): "В каталог",
     ("home", "audience_1_title"): "Для дома",
     ("home", "audience_1_text"): "Квартиры, частные дома",
     ("home", "audience_2_title"): "Для бизнеса",
