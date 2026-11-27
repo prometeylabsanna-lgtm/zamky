@@ -366,6 +366,11 @@ def repair_cylinder_products():
 
 
 def reassign_products_to_menu():
+    from catalog.models import Product
+
+    # exists() не вибирає колонки живої моделі (reviews_avg з 0028 ще немає).
+    if not Product.objects.exists():
+        return 0
     allowed = _allowed_ids()
     moved = 0
     if allowed:
