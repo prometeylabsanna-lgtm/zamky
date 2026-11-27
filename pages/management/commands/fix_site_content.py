@@ -201,7 +201,59 @@ def step_delivery_prices(stdout, dry_run: bool) -> str:
     return line
 
 
-STEPS = [step_email, step_hours_address, step_social, step_plaques, step_delivery_prices]
+def translate_product_names(stdout, dry_run: bool) -> str:
+    from catalog.models import Category, Product
+    from catalog.ru_names import has_ukrainian_leftover, translate_name
+
+    def fill(model, label: str) -> tuple[int, int, int]:
+        filled = 0
+        kept = 0
+        skipped = 0
+        for obj in model.objects.all().only("pk", "name", "name_ru"):
+            if (obj.name_ru or "").strip():
+                kept += 1
+                continue
+            ru = translate_name(obj.name or "")
+            if not ru:
+                skipped += 1
+                stdout.write(f"{label} {obj.pk}: порожня назва — пропуск")
+                continue
+            if has_ukrainian_leftover(ru):
+                skipped += 1
+                stdout.write(
+                    f"{label} {obj.pk}: лишились українські літери — пропуск ({ru})"
+                )
+                continue
+            filled += 1
+            stdout.write(f"{label} {obj.pk}: name_ru ← {ru}")
+            if dry_run:
+                continue
+            updated = model.objects.filter(pk=obj.pk, name_ru=obj.name_ru).update(
+                name_ru=ru
+            )
+            if not updated:
+                stdout.write(f"{label} {obj.pk}: name_ru вже змінено — не чіпаю")
+        return filled, kept, skipped
+
+    product_filled, product_kept, product_skipped = fill(Product, "товар")
+    category_filled, category_kept, category_skipped = fill(Category, "категорія")
+    line = (
+        f"назви RU: товари заповнено {product_filled}, уже були {product_kept}, "
+        f"пропуск {product_skipped}; категорії заповнено {category_filled}, "
+        f"уже були {category_kept}, пропуск {category_skipped}"
+    )
+    stdout.write(line)
+    return line
+
+
+STEPS = [
+    step_email,
+    step_hours_address,
+    step_social,
+    step_plaques,
+    step_delivery_prices,
+    translate_product_names,
+]
 
 
 class Command(BaseCommand):
