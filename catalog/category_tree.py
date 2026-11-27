@@ -2,8 +2,6 @@
 
 from django.db.models import Prefetch
 
-from catalog.filter_i18n import localized_text
-
 MENU_MAX_DEPTH = 2
 
 TYPE_ROOT_NAMES = (
@@ -241,18 +239,18 @@ def menu_payload():
         lock = icon if icon in {'cyl', 'pad', 'shield'} else ''
         rows.append(
             {
-                'name': localized_text(root.name, root.name_ru),
+                'name': root.card_name(),
                 'url': root.get_absolute_url(),
                 'lock': lock,
                 'logo_url': category_logo_url(root),
                 'subs': [
                     {
-                        'name': localized_text(sub.name, sub.name_ru),
+                        'name': sub.card_name(),
                         'url': sub.get_absolute_url(),
                         'logo_url': category_logo_url(sub),
                         'leaves': [
                             {
-                                'name': localized_text(leaf.name, leaf.name_ru),
+                                'name': leaf.card_name(),
                                 'url': leaf.get_absolute_url(),
                             }
                             for leaf in sub.children.all()

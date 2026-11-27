@@ -70,20 +70,49 @@
     return '';
   }
 
-  function catMark(cat, size) {
-    if (!cat) return '';
+  function setCatMark(el, cat, size) {
+    if (!el) return;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    if (!cat) return;
     if (cat.logo_url) {
-      var w = size > 40 ? 54 : 48;
-      var h = size > 40 ? 44 : 40;
-      return '<img src="' + cat.logo_url + '" alt="" width="' + w + '" height="' + h + '">';
+      var img = document.createElement('img');
+      img.alt = '';
+      img.width = size > 40 ? 54 : 48;
+      img.height = size > 40 ? 44 : 40;
+      img.src = String(cat.logo_url);
+      el.appendChild(img);
+      return;
     }
-    if (cat.lock) return lockIcon(cat.lock, size);
+    if (cat.lock) el.insertAdjacentHTML('beforeend', lockIcon(cat.lock, size));
+  }
+
+  var MEGA_ARROW =
+    '<svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>';
+  var MNAV_ARROW =
+    '<svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>';
+
+  function rowLabel(row) {
+    if (typeof row === 'string') return row;
+    if (row && row.name) return String(row.name);
     return '';
   }
 
-  function rowHtml(name, idx, attr) {
-    return '<li><button type="button" class="mega__row" ' + attr + '="' + idx + '"><span class="mega__name">' +
-      name + '</span><svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button></li>';
+  function fillNameRows(list, rows, attr, rowClass, arrowHtml) {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    (rows || []).forEach(function (row, i) {
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = rowClass;
+      btn.setAttribute(attr, String(i));
+      var span = document.createElement('span');
+      span.className = 'mega__name';
+      span.textContent = rowLabel(row);
+      btn.appendChild(span);
+      btn.insertAdjacentHTML('beforeend', arrowHtml);
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
   }
 
   function goCatalog(url) {
@@ -106,12 +135,10 @@
           n.textContent = name;
         });
         var ico = qs('[data-mega-title-ico]', colSubs);
-        if (ico) ico.innerHTML = catMark(cat, 44);
+        setCatMark(ico, cat, 44);
         var list = qs('[data-mega-subs]', colSubs);
         if (list) {
-          list.innerHTML = cat.subs.map(function (s, i) {
-            return rowHtml(s.name, i, 'data-mega-sub');
-          }).join('');
+          fillNameRows(list, cat.subs, 'data-mega-sub', 'mega__row', MEGA_ARROW);
           qsa('[data-mega-sub]', list).forEach(function (btn) {
             btn.classList.toggle('is-active', Number(btn.getAttribute('data-mega-sub')) === megaState.sub);
           });
@@ -131,12 +158,10 @@
           n.textContent = sub.name;
         });
         var ico2 = qs('[data-mega-leaf-ico]', colLeaves);
-        if (ico2) ico2.innerHTML = catMark(sub, 44) || catMark(cat, 44);
+        setCatMark(ico2, (sub && (sub.logo_url || sub.lock)) ? sub : cat, 44);
         var leaves = qs('[data-mega-leaves]', colLeaves);
         if (leaves) {
-          leaves.innerHTML = sub.leaves.map(function (n, i) {
-            return rowHtml(n.name || n, i, 'data-mega-leaf');
-          }).join('');
+          fillNameRows(leaves, sub.leaves, 'data-mega-leaf', 'mega__row', MEGA_ARROW);
         }
         var find = qs('[data-mega-find]', colLeaves);
         if (find) find.setAttribute('href', sub.url || '/ua/catalog/');
@@ -230,13 +255,10 @@
       var title = qs('[data-mnav-title]', mnav);
       if (title) title.textContent = cat.name;
       var ico = qs('[data-mnav-ico]', mnav);
-      if (ico) ico.innerHTML = catMark(cat, 40);
+      setCatMark(ico, cat, 40);
       var list = qs('[data-mnav-subs]', mnav);
       if (list) {
-        list.innerHTML = cat.subs.map(function (s, i) {
-          return '<li><button type="button" class="mnav__row" data-mnav-sub="' + i + '"><span class="mega__name">' +
-            s.name + '</span><svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button></li>';
-        }).join('');
+        fillNameRows(list, cat.subs, 'data-mnav-sub', 'mnav__row', MNAV_ARROW);
       }
       return;
     }
@@ -247,14 +269,10 @@
     var subTitle = qs('[data-mnav-sub-title]', mnav);
     if (subTitle) subTitle.textContent = sub.name;
     var ico2 = qs('[data-mnav-leaf-ico]', mnav);
-    if (ico2) ico2.innerHTML = catMark(sub, 40) || catMark(cat, 40);
+    setCatMark(ico2, (sub && (sub.logo_url || sub.lock)) ? sub : cat, 40);
     var leaves = qs('[data-mnav-leaves]', mnav);
     if (leaves) {
-      leaves.innerHTML = sub.leaves.map(function (n, i) {
-        var label = n.name || n;
-        return '<li><button type="button" class="mnav__row" data-mnav-leaf="' + i + '"><span class="mega__name">' +
-          label + '</span><svg class="mega__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5L10.5 8 6 12.5"></path></svg></button></li>';
-      }).join('');
+      fillNameRows(leaves, sub.leaves, 'data-mnav-leaf', 'mnav__row', MNAV_ARROW);
     }
     var find = qs('[data-mnav-find]', mnav);
     if (find) find.setAttribute('href', sub.url || '/ua/catalog/');

@@ -4,11 +4,11 @@
 <div class="checkout-row">
   <a href="{{ item.product.get_absolute_url }}" class="checkout-row__img">
     {% if item.product.primary_image %}
-    <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name|tr }}">
+    <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.card_name }}">
     {% endif %}
   </a>
   <div class="checkout-row__info">
-    <a href="{{ item.product.get_absolute_url }}" class="checkout-row__name">{{ item.product.name|tr }}</a>
+    <a href="{{ item.product.get_absolute_url }}" class="checkout-row__name">{{ item.product.card_name }}</a>
     <div class="checkout-row__meta">
       {% if item.product.color_label %}
       <span class="checkout-row__color">

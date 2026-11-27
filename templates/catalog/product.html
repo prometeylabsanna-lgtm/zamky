@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n_ui cms_tags static %}
 
-{% block title %}{{ product.name|tr }}{% endblock %}
+{% block title %}{{ product.card_name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/product.css' %}?v={{ asset_v }}">
@@ -19,7 +19,7 @@
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <a href="{% url 'catalog:catalog' %}">{% cms 'product' 'crumb_catalog' 'Каталог товарів' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <span data-crumb-title>{{ product.name|tr }}</span>
+    <span data-crumb-title>{{ product.card_name }}</span>
   </nav>
 
   <div class="pdp-layout">

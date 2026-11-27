@@ -15,7 +15,7 @@
       {% include 'cart/partials/wishlist_btn.html' with product_id=product.pk in_wishlist=in_wishlist %}
     </div>
 
-    <h1 data-product-title>{{ product.name|tr }}</h1>
+    <h1 data-product-title>{{ product.card_name }}</h1>
 
     <div class="pdp-meta">
       {% if product.brand %}

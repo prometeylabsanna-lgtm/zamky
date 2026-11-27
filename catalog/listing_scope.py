@@ -57,7 +57,7 @@ def category_nav_chips(category):
         return []
     return [
         {
-            'name': child.name,
+            'name': child.card_name(),
             'url': child.get_absolute_url(),
             'active': False,
         }

@@ -147,7 +147,7 @@ def _picker_item(product):
     old = product.old_price
     return {
         'id': product.pk,
-        'name': product.name,
+        'name': product.card_name(),
         'slug': product.slug,
         'url': reverse('catalog:product', kwargs={'slug': product.slug}),
         'image': image_url,

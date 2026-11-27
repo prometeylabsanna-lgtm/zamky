@@ -5,12 +5,12 @@
     <div class="cart-row">
       <a href="{{ item.product.get_absolute_url }}" class="cart-row__img">
         {% if item.product.primary_image %}
-          <img src="{{ item.product.primary_image.image.url }}" alt="">
+          <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.card_name }}">
         {% endif %}
       </a>
       <div class="cart-row__body">
         <div class="cart-row__top">
-          <p class="cart-row__name">{{ item.product.name|tr }}</p>
+          <p class="cart-row__name">{{ item.product.card_name }}</p>
           <form hx-post="{% url 'cart:update' item.product.pk %}" hx-target="#cart-drawer-body" hx-swap="innerHTML">
             {% csrf_token %}
             <input type="hidden" name="action" value="remove">

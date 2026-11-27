@@ -131,7 +131,11 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse('catalog:category', kwargs={'slug': self.slug})
 
-    def card_name(self, lang: str = 'ua') -> str:
+    def card_name(self, lang: str | None = None) -> str:
+        if lang is None:
+            from django.utils.translation import get_language
+
+            lang = get_language() or 'ua'
         if str(lang).lower().startswith('ru') and (self.name_ru or '').strip():
             return self.name_ru.strip()
         return self.name
@@ -351,6 +355,15 @@ class Product(models.Model):
 
     def get_absolute_url(self):
         return reverse('catalog:product', kwargs={'slug': self.slug})
+
+    def card_name(self, lang: str | None = None) -> str:
+        if lang is None:
+            from django.utils.translation import get_language
+
+            lang = get_language() or 'ua'
+        if str(lang).lower().startswith('ru') and (self.name_ru or '').strip():
+            return self.name_ru.strip()
+        return self.name
 
     @property
     def stock_status(self):

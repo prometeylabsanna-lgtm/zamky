@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.db.models import Case, IntegerField, When
 
 from catalog.models import Category, Product
+from pages.i18n_lib import tr
 
 
 def norm(text: str) -> str:
@@ -60,12 +61,18 @@ def _word_score(word: str, q: str) -> int:
 
 
 def _haystacks(product: Product) -> list[str]:
-    cat = product.category.name if getattr(product, 'category_id', None) and product.category else ''
+    cat = ''
+    cat_ru = ''
+    if getattr(product, 'category_id', None) and product.category:
+        cat = product.category.name or ''
+        cat_ru = product.category.name_ru or ''
     return [
         product.name or '',
+        product.name_ru or '',
         product.sku or '',
         product.brand or '',
         cat,
+        cat_ru,
         product.color_label or '',
         product.short_description or '',
     ]
@@ -163,14 +170,22 @@ def suggest(query: str, *, limit: int = 8) -> list[dict]:
 
     qn = norm(q)
     for cat in Category.objects.filter(is_active=True).order_by('sort_order', 'name'):
-        cn = norm(cat.name)
-        if cn.startswith(qn) or qn in cn or _word_score(cn.split()[0] if cn else '', qn):
+        matched = False
+        for raw in (cat.name, cat.name_ru):
+            cn = norm(raw)
+            if not cn:
+                continue
+            first = cn.split()[0] if cn else ''
+            if cn.startswith(qn) or qn in cn or _word_score(first, qn):
+                matched = True
+                break
+        if matched:
             add(
                 f'cat:{cat.pk}',
                 {
                     'type': 'category',
-                    'label': cat.name,
-                    'meta': 'Категорія',
+                    'label': cat.card_name(),
+                    'meta': tr('Категорія'),
                     'url': cat.get_absolute_url(),
                 },
             )
@@ -190,7 +205,7 @@ def suggest(query: str, *, limit: int = 8) -> list[dict]:
                 {
                     'type': 'brand',
                     'label': brand,
-                    'meta': 'Бренд',
+                    'meta': tr('Бренд'),
                     'url': '',  # підставляє SearchSuggestApiView через reverse
                 },
             )
@@ -200,7 +215,7 @@ def suggest(query: str, *, limit: int = 8) -> list[dict]:
             f'product:{product.pk}',
             {
                 'type': 'product',
-                'label': product.name,
+                'label': product.card_name(),
                 'meta': product.brand or product.sku,
                 'url': product.get_absolute_url(),
                 'score': score,

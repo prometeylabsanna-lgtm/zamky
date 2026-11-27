@@ -56,9 +56,9 @@
       <a href="{{ c.get_absolute_url }}" class="home-cat-card">
         <div class="home-cat-card__img">
           {% if c.logo %}
-          <img src="{% media_card c.logo %}" alt="{{ c.name|tr }}" width="240" height="240" loading="lazy" decoding="async">
+          <img src="{% media_card c.logo %}" alt="{{ c.card_name }}" width="240" height="240" loading="lazy" decoding="async">
           {% else %}
-          <img src="{% static card.fallback_image %}" alt="{{ c.name|tr }}" width="240" height="240" loading="lazy" decoding="async">
+          <img src="{% static card.fallback_image %}" alt="{{ c.card_name }}" width="240" height="240" loading="lazy" decoding="async">
           {% endif %}
         </div>
         <div class="home-cat-card__foot">

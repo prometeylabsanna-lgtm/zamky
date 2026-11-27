@@ -105,7 +105,7 @@ class CartService:
                     dirty = True
                     self.last_warnings.append(
                         tr('«{name}» більше немає в наявності та видалено з кошика.').format(
-                            name=tr(product.name)
+                            name=product.card_name()
                         )
                     )
                     continue
@@ -113,7 +113,7 @@ class CartService:
                 dirty = True
                 self.last_warnings.append(
                     tr('Кількість «{name}» зменшено до {n} шт.').format(
-                        name=tr(product.name), n=qty
+                        name=product.card_name(), n=qty
                     )
                 )
             line_total = product.price * qty
@@ -147,7 +147,7 @@ class CartService:
             if item['quantity'] > product.stock:
                 problems.append(
                     tr('{name}: доступно {n} шт.').format(
-                        name=tr(product.name), n=product.stock
+                        name=product.card_name(), n=product.stock
                     )
                 )
         return problems

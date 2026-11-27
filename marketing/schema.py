@@ -12,6 +12,9 @@ from pages.i18n_lib import tr
 
 
 def _product_name(product, lang: str) -> str:
+    card = getattr(product, "card_name", None)
+    if callable(card):
+        return card(lang) or product.name
     return localized(product.name, getattr(product, "name_ru", ""), lang) or product.name
 
 
@@ -91,6 +94,43 @@ def product_jsonld(product, domain: str, lang: str, review_stats: dict | None) -
     return jsonld_script(data)
 
 
+def article_jsonld(post, domain: str, lang: str) -> str:
+    if not domain or post is None:
+        return ""
+    title = post.card_title(lang) if hasattr(post, "card_title") else (getattr(post, "title", "") or "")
+    title = (title or "").strip()
+    if not title:
+        return ""
+    url = _abs(domain, post.get_absolute_url())
+    data: dict = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": title,
+        "inLanguage": "ru" if lang == "ru" else "uk",
+        "mainEntityOfPage": url,
+        "url": url,
+    }
+    excerpt = ""
+    if hasattr(post, "card_excerpt"):
+        excerpt = (post.card_excerpt(lang) or "").strip()
+    if excerpt:
+        data["description"] = excerpt
+    created = getattr(post, "created_at", None)
+    if created is not None:
+        data["datePublished"] = created.isoformat()
+    updated = getattr(post, "updated_at", None)
+    if updated is not None:
+        data["dateModified"] = updated.isoformat()
+    cover = getattr(post, "cover", None)
+    if cover:
+        try:
+            if cover.url:
+                data["image"] = _abs(domain, cover.url)
+        except Exception:
+            pass
+    return jsonld_script(data)
+
+
 def _crumb(name: str, url: str) -> dict:
     return {"name": name, "url": url}
 
@@ -133,7 +173,10 @@ def breadcrumb_items(request, context, domain: str, lang: str) -> list[dict]:
         return [
             home,
             _crumb(blog_label, _abs(domain, reverse("pages:blog_list"))),
-            _crumb(post.title, _abs(domain, request.path)),
+            _crumb(
+                post.card_title(lang) if hasattr(post, "card_title") else post.title,
+                _abs(domain, request.path),
+            ),
         ]
     return []
 

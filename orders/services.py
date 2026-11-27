@@ -77,7 +77,7 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
                 _clear_cart(request)
                 return raced, False
             raise CheckoutError(
-                f'Недостатньо залишку для «{product.name}»: доступно {product.stock} шт.'
+                f'Недостатньо залишку для «{product.card_name()}»: доступно {product.stock} шт.'
             )
         items.append(
             {
@@ -132,7 +132,9 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
             stock=F('stock') - item['quantity']
         )
         if not updated:
-            raise CheckoutError(f'Не вдалося списати залишок для «{product.name}».')
+            raise CheckoutError(
+                f'Не вдалося списати залишок для «{product.card_name()}».'
+            )
         OrderItem.objects.create(
             order=order,
             product=product,

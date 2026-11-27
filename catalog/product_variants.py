@@ -6,8 +6,9 @@ from .models import ProductImage
 
 
 def variant_payload(product):
+    name = product.card_name()
     imgs = [
-        {'src': img.image.url, 'alt': img.alt or product.name}
+        {'src': img.image.url, 'alt': img.alt or name}
         for img in product.images.all()
         if img.image
     ]
@@ -16,7 +17,7 @@ def variant_payload(product):
         'sku': product.sku,
         'slug': product.slug,
         'url': product.get_absolute_url(),
-        'name': tr(product.name),
+        'name': name,
         'price': int(product.price),
         'old_price': int(product.old_price) if product.old_price else None,
         'discount': product.discount_percent,
