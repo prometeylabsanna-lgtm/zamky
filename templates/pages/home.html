@@ -196,12 +196,12 @@
       {% cycle 'img/v2/article1.webp' 'img/v2/p2_34.webp' 'img/v2/p2_35.webp' 'img/v2/p2_36.webp' as blog_cover silent %}
       <a href="{% url 'pages:blog_detail' post.slug %}" class="home-blog-card">
         {% if post.cover %}
-        <img class="home-blog-card__img" src="{% media_card post.cover %}" alt="{{ post.title|tr }}" width="800" height="536" loading="lazy" decoding="async">
+        <img class="home-blog-card__img" src="{% media_card post.cover %}" alt="{{ post.card_title }}" width="800" height="536" loading="lazy" decoding="async">
         {% else %}
-        <img class="home-blog-card__img" src="{% static blog_cover %}" alt="{{ post.title|tr }}" width="800" height="536" loading="lazy" decoding="async">
+        <img class="home-blog-card__img" src="{% static blog_cover %}" alt="{{ post.card_title }}" width="800" height="536" loading="lazy" decoding="async">
         {% endif %}
         <span class="home-blog-card__foot">
-          <span class="home-blog-card__title">{{ post.title|tr }}</span>
+          <span class="home-blog-card__title">{{ post.card_title }}</span>
           <span class="home-blog-card__go" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg>
           </span>

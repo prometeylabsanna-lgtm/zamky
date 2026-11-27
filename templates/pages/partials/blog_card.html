@@ -1,14 +1,14 @@
 {% load static i18n_ui cms_tags %}
 <a href="{% url 'pages:blog_detail' post.slug %}" class="blog-card">
   {% if post.cover %}
-  <img class="blog-card__img" src="{% media_card post.cover %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="640" height="400">
+  <img class="blog-card__img" src="{% media_card post.cover %}" alt="{{ post.card_title }}" loading="lazy" decoding="async" width="640" height="400">
   {% else %}
-  <img class="blog-card__img" src="{% static post.cover_fallback %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="640" height="400">
+  <img class="blog-card__img" src="{% static post.cover_fallback %}" alt="{{ post.card_title }}" loading="lazy" decoding="async" width="640" height="400">
   {% endif %}
   <span class="blog-card__foot">
     <span class="blog-card__copy">
-      <span class="blog-card__title">{{ post.title }}</span>
-      {% if post.excerpt %}<span class="blog-card__excerpt">{{ post.excerpt }}</span>{% endif %}
+      <span class="blog-card__title">{{ post.card_title }}</span>
+      {% if post.card_excerpt %}<span class="blog-card__excerpt">{{ post.card_excerpt }}</span>{% endif %}
     </span>
     <span class="blog-card__go" aria-hidden="true">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 12h16m-6-6 6 6-6 6"></path></svg>

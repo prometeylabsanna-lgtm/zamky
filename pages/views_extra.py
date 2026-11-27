@@ -329,13 +329,19 @@ class BlogDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx.update(blog_page_context(self.request))
-        ctx['seo_title'] = ''
+        from marketing.seo import clip_description, localized
+
+        lang = request_lang(self.request)
+        post = self.object
+        ctx['seo_title'] = localized(post.seo_title, post.seo_title_ru, lang)
+        desc = localized(post.seo_description, post.seo_description_ru, lang)
+        if not desc:
+            desc = clip_description(post.card_excerpt(lang))
+        if desc:
+            ctx['seo_description'] = desc
         ctx['more_posts'] = (
             BlogPost.objects.filter(is_published=True)
-            .exclude(pk=self.object.pk)
+            .exclude(pk=post.pk)
             .order_by('sort_order', '-created_at')[:4]
         )
-        excerpt = (self.object.excerpt or '').strip()
-        if excerpt:
-            ctx['seo_description'] = excerpt
         return ctx

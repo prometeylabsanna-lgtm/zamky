@@ -148,22 +148,56 @@ class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
     list_display = ("cover_thumb", "title", "slug", "is_published", "sort_order", "created_at")
     list_display_links = ("title",)
     list_filter = ("is_published", "created_at")
-    search_fields = ("title", "slug", "excerpt", "body")
+    search_fields = ("title", "title_ru", "slug", "excerpt", "excerpt_ru", "body")
     readonly_fields = ("slug", "cover_preview", "created_at", "updated_at")
     fieldsets = (
         (
             "Шапка",
-            {"fields": ("title", "slug", "excerpt", "cover_preview", "cover")},
+            {
+                "classes": ("tab",),
+                "fields": (
+                    "title",
+                    "title_ru",
+                    "slug",
+                    "excerpt",
+                    "excerpt_ru",
+                    "cover_preview",
+                    "cover",
+                ),
+            },
         ),
-        ("Текст", {"fields": ("body",)}),
+        (
+            "Текст",
+            {"classes": ("tab",), "fields": ("body", "body_ru")},
+        ),
+        (
+            "SEO",
+            {
+                "classes": ("tab",),
+                "fields": (
+                    "seo_title",
+                    "seo_title_ru",
+                    "seo_description",
+                    "seo_description_ru",
+                ),
+            },
+        ),
         (
             "Публікація",
-            {"fields": ("is_published", "sort_order", "created_at", "updated_at")},
+            {
+                "classes": ("tab",),
+                "fields": ("is_published", "sort_order", "created_at", "updated_at"),
+            },
         ),
     )
 
     class Media:
-        js = ("js/admin/image_preview.js", "js/admin/char_hint.js")
+        css = {"all": ("css/admin/lang_tabs.css",)}
+        js = (
+            "js/admin/lang_tabs.js",
+            "js/admin/image_preview.js",
+            "js/admin/char_hint.js",
+        )
 
     def get_changeform_initial_data(self, request):
         from catalog.filter_sort import next_sort_order
@@ -173,16 +207,28 @@ class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
         return initial
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == "body":
+        if db_field.name in {"body", "body_ru"}:
             kwargs["widget"] = CmsTinyMCEWidget(
                 attrs={"rows": 22, "class": "cms-tinymce--tall"}
             )
             kwargs["help_text"] = (
                 "Один редактор: заголовки, абзаци, списки — як на сторінці статті."
             )
-        if db_field.name == "excerpt":
+        if db_field.name in {"excerpt", "excerpt_ru"}:
             kwargs["help_text"] = (
                 "Короткий текст на картці блогу. Краще до 140 символів, далі може обрізатися."
+            )
+        if db_field.name in {"seo_title", "seo_title_ru"}:
+            kwargs["help_text"] = (
+                "Заголовок вкладки браузера. Порожнє — заголовок статті."
+            )
+        if db_field.name in {"seo_description", "seo_description_ru"}:
+            kwargs["help_text"] = (
+                "Опис для пошуку. Порожнє — короткий опис статті."
+            )
+        if db_field.name == "title_ru":
+            kwargs["help_text"] = (
+                "Порожнє — на російській вітрині показується український заголовок."
             )
         if db_field.name == "cover":
             from pages.admin_guidelines import IMAGE_HINTS
@@ -199,6 +245,7 @@ class BlogPostAdmin(TopDropdownFiltersMixin, ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         obj.body = sanitize_legal_html(obj.body)
+        obj.body_ru = sanitize_legal_html(obj.body_ru)
         super().save_model(request, obj, form, change)
 
     def _cover_preview(self, obj, max_size: int):

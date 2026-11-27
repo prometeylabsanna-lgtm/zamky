@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static i18n_ui cms_tags %}
 
-{% block title %}{{ post.title }} — {{ site_settings.site_name }}{% endblock %}
+{% block title %}{{ post.card_title }} — {{ site_settings.site_name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
@@ -15,20 +15,20 @@
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <a href="{% url 'pages:blog_list' %}">{% t 'Корисне для вибору' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <span>{{ post.title }}</span>
+    <span>{{ post.card_title }}</span>
   </nav>
 
-  <h1 class="blog-page__h1">{{ post.title }}</h1>
-  {% if post.excerpt %}<p class="blog-page__lead">{{ post.excerpt }}</p>{% endif %}
+  <h1 class="blog-page__h1">{{ post.card_title }}</h1>
+  {% if post.card_excerpt %}<p class="blog-page__lead">{{ post.card_excerpt }}</p>{% endif %}
 
   <div class="blog-page__grid">
     <article class="blog-page__main">
       {% if post.cover %}
-      <img class="blog-cover" src="{% media_card post.cover %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="960" height="540">
+      <img class="blog-cover" src="{% media_card post.cover %}" alt="{{ post.card_title }}" loading="lazy" decoding="async" width="960" height="540">
       {% else %}
-      <img class="blog-cover" src="{% static post.cover_fallback %}" alt="{{ post.title }}" loading="lazy" decoding="async" width="960" height="540">
+      <img class="blog-cover" src="{% static post.cover_fallback %}" alt="{{ post.card_title }}" loading="lazy" decoding="async" width="960" height="540">
       {% endif %}
-      <div class="blog-prose">{{ post.body|safe }}</div>
+      <div class="blog-prose">{{ post.card_body|safe }}</div>
       {% if more_posts %}
       <section class="blog-page__more" aria-labelledby="blog-more-title">
         <h2 class="blog-page__more-h" id="blog-more-title">{% cms 'blog' 'blog_more' 'Інші статті' %}</h2>

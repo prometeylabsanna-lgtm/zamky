@@ -103,9 +103,22 @@ class InstallRequest(models.Model):
 
 class BlogPost(models.Model):
     title = models.CharField('Заголовок', max_length=300)
+    title_ru = models.CharField('Заголовок (RU)', max_length=300, blank=True, default='')
     slug = models.SlugField('Слаг', max_length=320, unique=True)
     excerpt = models.TextField('Короткий опис')
+    excerpt_ru = models.TextField('Короткий опис (RU)', blank=True, default='')
     body = models.TextField('Текст статті')
+    body_ru = models.TextField('Текст статті (RU)', blank=True, default='')
+    seo_title = models.CharField('SEO заголовок', max_length=200, blank=True, default='')
+    seo_title_ru = models.CharField(
+        'SEO заголовок (RU)', max_length=200, blank=True, default=''
+    )
+    seo_description = models.CharField(
+        'SEO опис', max_length=320, blank=True, default=''
+    )
+    seo_description_ru = models.CharField(
+        'SEO опис (RU)', max_length=320, blank=True, default=''
+    )
     cover = models.ImageField('Обкладинка', upload_to='blog/', blank=True)
     is_published = models.BooleanField('Опубліковано', default=True)
     sort_order = models.PositiveIntegerField('Порядок', default=0, db_index=True)
@@ -123,6 +136,24 @@ class BlogPost(models.Model):
     def get_absolute_url(self):
         return reverse('pages:blog_detail', kwargs={'slug': self.slug})
 
+    def _localized(self, ua: str, ru: str, lang: str | None = None) -> str:
+        if lang is None:
+            from django.utils.translation import get_language
+
+            lang = get_language() or 'ua'
+        if str(lang).lower().startswith('ru') and (ru or '').strip():
+            return ru.strip()
+        return ua or ''
+
+    def card_title(self, lang: str | None = None) -> str:
+        return self._localized(self.title, self.title_ru, lang)
+
+    def card_excerpt(self, lang: str | None = None) -> str:
+        return self._localized(self.excerpt, self.excerpt_ru, lang)
+
+    def card_body(self, lang: str | None = None) -> str:
+        return self._localized(self.body, self.body_ru, lang)
+
     @property
     def cover_fallback(self):
         return cover_fallback_static(self.slug)
@@ -133,8 +164,15 @@ class BlogPost(models.Model):
                 BlogPost, self.title, instance_pk=self.pk, fallback='post'
             )
         self.title = clean_legal_fragment(self.title)
+        self.title_ru = clean_legal_fragment(self.title_ru)
         self.excerpt = clean_legal_fragment(self.excerpt)
+        self.excerpt_ru = clean_legal_fragment(self.excerpt_ru)
+        self.seo_title = clean_legal_fragment(self.seo_title)
+        self.seo_title_ru = clean_legal_fragment(self.seo_title_ru)
+        self.seo_description = clean_legal_fragment(self.seo_description)
+        self.seo_description_ru = clean_legal_fragment(self.seo_description_ru)
         self.body = sanitize_legal_html(self.body)
+        self.body_ru = sanitize_legal_html(self.body_ru)
         from catalog.filter_sort import apply_auto_sort_order
 
         apply_auto_sort_order(self, BlogPost.objects.all())

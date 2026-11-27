@@ -228,7 +228,7 @@ def jsonld_script(data: dict) -> str:
 
 
 def build_head(context) -> dict:
-    from marketing.schema import breadcrumb_jsonld, product_jsonld
+    from marketing.schema import article_jsonld, breadcrumb_jsonld, product_jsonld
 
     request = context.get("request")
     lang = current_lang()
@@ -276,8 +276,26 @@ def build_head(context) -> dict:
     if image is None and seo.og_image:
         image = _image_info(seo.og_image)
         image_alt = seo.og_image_alt
+    match = getattr(request, "resolver_match", None)
+    is_article = (
+        match is not None
+        and match.namespace == "pages"
+        and match.url_name == "blog_detail"
+    )
     locale = OG_LOCALES.get(lang, "uk_UA")
-    og_type = "product" if context.get("product") is not None else "website"
+    og_type = "website"
+    if context.get("product") is not None:
+        og_type = "product"
+    elif is_article:
+        og_type = "article"
+        post = context.get("post")
+        cover = getattr(post, "cover", None) if post is not None else None
+        if cover:
+            cover_info = _image_info(cover)
+            if cover_info:
+                image = cover_info
+                if hasattr(post, "card_title"):
+                    image_alt = post.card_title(lang)
     if out["canonical"]:
         out["og"] = {
             "site_name": (seo.org_name or getattr(site_settings, "site_name", "") or "").strip(),
@@ -295,7 +313,6 @@ def build_head(context) -> dict:
             "twitter_site": ("@" + seo.twitter_site.lstrip("@")) if seo.twitter_site else "",
         }
     scripts: list[str] = []
-    match = getattr(request, "resolver_match", None)
     if match is not None and match.url_name == "home" and not out["noindex"]:
         data = organization_jsonld(seo, site_settings, domain)
         if data:
@@ -305,6 +322,10 @@ def build_head(context) -> dict:
         prod = product_jsonld(product, domain, lang, context.get("review_stats"))
         if prod:
             scripts.append(prod)
+    if is_article and not out["noindex"]:
+        article = article_jsonld(context.get("post"), domain, lang)
+        if article:
+            scripts.append(article)
     if not out["noindex"]:
         crumbs = breadcrumb_jsonld(request, context, domain, lang)
         if crumbs:
