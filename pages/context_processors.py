@@ -46,6 +46,7 @@ def site_context(request):
         'contact_tel': contacts['tel'],
         'contact_email': contacts['email'],
         'contact_hours': contacts['hours'],
+        'contact_address': contacts['address'],
         'cms_header_catalog': cms('site', 'header_catalog_label', 'Каталог товарів'),
         'cms_header_search': cms(
             'site', 'header_search_placeholder', 'Пошук замків, циліндрів…'

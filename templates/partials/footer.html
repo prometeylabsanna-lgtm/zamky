@@ -54,7 +54,7 @@
         <a class="site-footer__tel" href="tel:{{ contact_tel }}">{{ contact_phone }}</a>
         <span class="site-footer__muted">{{ contact_hours }}</span>
         <a class="site-footer__muted" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
-        <span class="site-footer__muted">{% if site_settings and site_settings.address %}{% if cms_lang == 'ru' and site_settings.address_ru %}{{ site_settings.address_ru }}{% else %}{{ site_settings.address }}{% endif %}{% else %}{% t 'м. Київ' %}{% endif %}</span>
+        <span class="site-footer__muted">{% if contact_address %}{{ contact_address }}{% else %}{% t 'м. Київ' %}{% endif %}</span>
         {% for item in footer_nav.action %}
         {% if item.is_callback %}
         <button type="button" class="site-footer__cb" data-open-callback>{{ item.name }}</button>

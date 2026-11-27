@@ -24,26 +24,53 @@ def normalize_ua_tel(value: str) -> str:
     return f"+{digits}"
 
 
+def translate_ru(text: str) -> str:
+    """UA-рядок через tr() за активної російської мови (словник RU_MAP)."""
+    if not text:
+        return text
+    from django.utils.translation import override
+
+    from pages.i18n_lib import tr
+
+    with override("ru"):
+        return tr(text)
+
+
+def _is_ru(lang: str) -> bool:
+    return str(lang or "").lower()[:2] == "ru"
+
+
 def contacts_from_settings(site_settings, lang: str = "ua") -> dict[str, str]:
     if site_settings is None:
-        return {
-            "phone": DEFAULT_PHONE_DISPLAY,
-            "tel": DEFAULT_PHONE_TEL,
-            "email": DEFAULT_EMAIL,
-            "hours": DEFAULT_HOURS,
-        }
-    phone = (site_settings.phone or "").strip() or DEFAULT_PHONE_DISPLAY
-    tel = (
-        normalize_ua_tel(site_settings.phone)
-        or normalize_ua_tel(site_settings.phone_raw)
-        or DEFAULT_PHONE_TEL
-    )
-    email = (site_settings.email or "").strip() or DEFAULT_EMAIL
-    hours = (site_settings.work_hours or "").strip()
-    if str(lang).lower()[:2] == "ru":
+        phone = DEFAULT_PHONE_DISPLAY
+        tel = DEFAULT_PHONE_TEL
+        email = DEFAULT_EMAIL
+        hours_ua = DEFAULT_HOURS
+        hours_ru = ""
+        address_ua = ""
+        address_ru = ""
+    else:
+        phone = (site_settings.phone or "").strip() or DEFAULT_PHONE_DISPLAY
+        tel = (
+            normalize_ua_tel(site_settings.phone)
+            or normalize_ua_tel(site_settings.phone_raw)
+            or DEFAULT_PHONE_TEL
+        )
+        email = (site_settings.email or "").strip() or DEFAULT_EMAIL
+        hours_ua = (site_settings.work_hours or "").strip() or DEFAULT_HOURS
         hours_ru = (site_settings.work_hours_ru or "").strip()
-        if hours_ru:
-            hours = hours_ru
-    if not hours:
-        hours = DEFAULT_HOURS
-    return {"phone": phone, "tel": tel, "email": email, "hours": hours}
+        address_ua = (site_settings.address or "").strip()
+        address_ru = (site_settings.address_ru or "").strip()
+    if _is_ru(lang):
+        hours = hours_ru or translate_ru(hours_ua)
+        address = address_ru or (translate_ru(address_ua) if address_ua else "")
+    else:
+        hours = hours_ua
+        address = address_ua
+    return {
+        "phone": phone,
+        "tel": tel,
+        "email": email,
+        "hours": hours,
+        "address": address,
+    }
