@@ -2,7 +2,7 @@
 
 DEFAULT_PHONE_DISPLAY = "(067) 000 00 00"
 DEFAULT_PHONE_TEL = "+380670000000"
-DEFAULT_EMAIL = "info@centrzamkiv.ua"
+DEFAULT_EMAIL = "info@centerzamkiv.com.ua"
 DEFAULT_HOURS = "Щоденно 8:00-21:00"
 
 

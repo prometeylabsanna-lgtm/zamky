@@ -12,6 +12,7 @@ from pages.header_nav import ensure_default_header_nav
 from pages.hero_slides import ensure_default_hero_slides
 from pages.popular_products import ensure_default_popular
 from pages.models_cms import SiteBlock, SiteSettings, clear_site_blocks_cache
+from pages.phone import DEFAULT_EMAIL
 from pages.seed_parity import collect_parity
 from pages.site_content_registry import all_registry_block_keys
 
@@ -41,7 +42,7 @@ class Command(BaseCommand):
                 "site_name": "Замки",
                 "phone": "(067) 000 00 00",
                 "phone_raw": "+380670000000",
-                "email": "info@centrzamkiv.ua",
+                "email": DEFAULT_EMAIL,
                 "address": "м. Київ",
                 "work_hours": "Щоденно 8:00-21:00",
                 "work_hours_ru": "Ежедневно 8:00-21:00",
@@ -54,7 +55,7 @@ class Command(BaseCommand):
             for field, value in (
                 ("phone", "(067) 000 00 00"),
                 ("phone_raw", "+380670000000"),
-                ("email", "info@centrzamkiv.ua"),
+                ("email", DEFAULT_EMAIL),
                 ("address", "м. Київ"),
                 ("work_hours", "Щоденно 8:00-21:00"),
             ):
