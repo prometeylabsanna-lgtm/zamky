@@ -23,10 +23,15 @@
     };
   }
 
-  function typeLabel(type) {
-    if (type === 'category') return 'Категорія';
-    if (type === 'brand') return 'Бренд';
-    return 'Товар';
+  function i18nAttr(form, name, fallback) {
+    var value = form.getAttribute('data-i18n-' + name);
+    return value ? value : fallback;
+  }
+
+  function typeLabel(form, type) {
+    if (type === 'category') return i18nAttr(form, 'category', 'Категорія');
+    if (type === 'brand') return i18nAttr(form, 'brand', 'Бренд');
+    return i18nAttr(form, 'product', 'Товар');
   }
 
   function bindForm(form) {
@@ -41,7 +46,7 @@
 
     function hide() {
       box.hidden = true;
-      box.innerHTML = '';
+      box.replaceChildren();
       active = -1;
       items = [];
       input.setAttribute('aria-expanded', 'false');
@@ -53,32 +58,39 @@
         hide();
         return;
       }
-      var html = '<ul class="hdr-search__list" role="listbox">';
+      var list = document.createElement('ul');
+      list.className = 'hdr-search__list';
+      list.setAttribute('role', 'listbox');
       items.forEach(function (item, i) {
-        html +=
-          '<li role="option" class="hdr-search__item" data-idx="' +
-          i +
-          '">' +
-          '<a class="hdr-search__link" href="' +
-          item.url +
-          '">' +
-          '<span class="hdr-search__label">' +
-          item.label +
-          '</span>' +
-          '<span class="hdr-search__meta">' +
-          (item.meta || typeLabel(item.type)) +
-          '</span>' +
-          '</a></li>';
+        var row = document.createElement('li');
+        row.className = 'hdr-search__item';
+        row.setAttribute('role', 'option');
+        row.setAttribute('data-idx', String(i));
+        var link = document.createElement('a');
+        link.className = 'hdr-search__link';
+        link.href = item.url || '#';
+        var label = document.createElement('span');
+        label.className = 'hdr-search__label';
+        label.textContent = item.label || '';
+        var meta = document.createElement('span');
+        meta.className = 'hdr-search__meta';
+        meta.textContent = item.meta || typeLabel(form, item.type);
+        link.appendChild(label);
+        link.appendChild(meta);
+        row.appendChild(link);
+        list.appendChild(row);
       });
       if (payload.all_url) {
-        html +=
-          '<li class="hdr-search__item hdr-search__item--all">' +
-          '<a class="hdr-search__link" href="' +
-          payload.all_url +
-          '">Показати всі результати</a></li>';
+        var allRow = document.createElement('li');
+        allRow.className = 'hdr-search__item hdr-search__item--all';
+        var allLink = document.createElement('a');
+        allLink.className = 'hdr-search__link';
+        allLink.href = payload.all_url;
+        allLink.textContent = i18nAttr(form, 'all', 'Показати всі результати');
+        allRow.appendChild(allLink);
+        list.appendChild(allRow);
       }
-      html += '</ul>';
-      box.innerHTML = html;
+      box.replaceChildren(list);
       box.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       active = -1;

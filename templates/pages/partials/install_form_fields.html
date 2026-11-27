@@ -1,4 +1,4 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 {% if form.non_field_errors %}
 <ul class="info-form-errors">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
 {% endif %}
@@ -23,4 +23,4 @@
   </label>
   {{ form.idempotency_key }}
 </div>
-<button type="submit" class="cb-modal__submit">{% t 'Замовити установку' %}</button>
+<button type="submit" class="cb-modal__submit">{% cms 'install' 'install_submit' 'Замовити установку' %}</button>

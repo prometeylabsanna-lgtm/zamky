@@ -29,6 +29,28 @@ BLOCK_DEFAULTS_RU: dict[tuple[str, str], str] = {
     ("site", "header_catalog_label"): "Каталог товаров",
     ("site", "header_search_placeholder"): "Поиск замков, цилиндров…",
     ("site", "header_callback_label"): "Перезвоните мне",
+    ("site", "header_search_btn"): "Найти",
+    ("site", "header_contacts_label"): "Контакты",
+    ("site", "header_search_cat"): "Категория",
+    ("site", "header_search_brand"): "Бренд",
+    ("site", "header_search_product"): "Товар",
+    ("site", "header_search_all"): "Показать все результаты",
+    ("home", "picker_any"): "Любой",
+    ("home", "picker_model_one"): "модель",
+    ("home", "picker_model_few"): "модели",
+    ("home", "picker_model_many"): "моделей",
+    ("home", "picker_for_door"): "Для дверей",
+    ("home", "picker_fallback"): "Точных совпадений нет — популярные модели",
+    ("home", "picker_recommend"): "Рекомендуем популярные",
+    ("home", "picker_picked"): "Подобрали",
+    ("home", "picker_none"): "Ничего не найдено",
+    ("home", "picker_reset"): "Сбросить",
+    ("home", "picker_catalog"): "Перейти в каталог",
+    ("home", "picker_empty_title"): "По этим параметрам замков нет",
+    ("home", "picker_empty_text"): "Измените параметры или загрузите фото ниже, и мы подберём аналог",
+    ("home", "picker_reset_all"): "Сбросить параметры",
+    ("home", "picker_stock"): "В наличии",
+    ("home", "picker_best"): "Лучшее совпадение",
     ("site", "footer_about_text"): "Замки, цилиндры и фурнитура с доставкой по Киеву.",
     ("site", "footer_catalog_title"): "Каталог",
     ("site", "footer_info_title"): "Информация",
@@ -82,9 +104,11 @@ BLOCK_DEFAULTS_RU[("blog", "blog_ask_text")] = (
 )
 BLOCK_DEFAULTS_RU[("blog", "blog_ask_cta")] = "Заказать звонок"
 
+from pages.block_defaults_forms import RU as _FORM_RU  # noqa: E402
 from pages.block_defaults_shop import RU as _SHOP_RU  # noqa: E402
 
 BLOCK_DEFAULTS_RU.update(_SHOP_RU)
+BLOCK_DEFAULTS_RU.update(_FORM_RU)
 
 
 def get_block_default_ru(page: str, key: str) -> str:

@@ -36,9 +36,15 @@ def get_block_text(
     blocks = site_blocks if site_blocks is not None else get_site_blocks_map()
     block = blocks.get(f"{page}.{key}")
     default = fallback if fallback is not None else get_block_default(page, key)
-    if block is None:
-        return default
     code = _lang_code(lang)
+    if block is None:
+        if code == "ru":
+            from pages.block_defaults_ru import get_block_default_ru
+
+            ru_default = (get_block_default_ru(page, key) or "").strip()
+            if ru_default:
+                return ru_default
+        return default
     ua = block.text_html or default
     if code == "ru":
         ru = (block.text_html_ru or "").strip()

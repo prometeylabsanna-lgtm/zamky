@@ -26,6 +26,22 @@ BLOCK_LABELS: dict[tuple[str, str], str] = {
     ("home", "picker_photo_text"): "Текст підбору за фото",
     ("home", "picker_photo_cta"): "Кнопка підбору за фото",
     ("home", "picker_submit"): "Кнопка «Показати»",
+    ("home", "picker_any"): "Підбір — будь-який",
+    ("home", "picker_model_one"): "Підбір — одна модель",
+    ("home", "picker_model_few"): "Підбір — кілька моделей",
+    ("home", "picker_model_many"): "Підбір — багато моделей",
+    ("home", "picker_for_door"): "Підбір — для дверей",
+    ("home", "picker_fallback"): "Підбір — немає точних збігів",
+    ("home", "picker_recommend"): "Підбір — рекомендуємо",
+    ("home", "picker_picked"): "Підбір — підібрали",
+    ("home", "picker_none"): "Підбір — нічого не знайдено",
+    ("home", "picker_reset"): "Підбір — скинути",
+    ("home", "picker_catalog"): "Підбір — у каталог",
+    ("home", "picker_empty_title"): "Підбір — порожній заголовок",
+    ("home", "picker_empty_text"): "Підбір — порожній текст",
+    ("home", "picker_reset_all"): "Підбір — скинути параметри",
+    ("home", "picker_stock"): "Підбір — в наявності",
+    ("home", "picker_best"): "Підбір — найкращий збіг",
     ("home", "popular_section_visible"): "Показувати популярні",
     ("home", "popular_title"): "Заголовок популярних",
     ("home", "popular_tab_hits"): "Вкладка «Хіти»",
@@ -37,6 +53,12 @@ BLOCK_LABELS: dict[tuple[str, str], str] = {
     ("site", "header_catalog_label"): "Кнопка каталогу",
     ("site", "header_search_placeholder"): "Плейсхолдер пошуку",
     ("site", "header_callback_label"): "Кнопка «Передзвоніть»",
+    ("site", "header_search_btn"): "Кнопка «Знайти»",
+    ("site", "header_contacts_label"): "Підпис «Контакти»",
+    ("site", "header_search_cat"): "Пошук — категорія",
+    ("site", "header_search_brand"): "Пошук — бренд",
+    ("site", "header_search_product"): "Пошук — товар",
+    ("site", "header_search_all"): "Пошук — усі результати",
     ("site", "header_phone_visible"): "Показувати телефон",
     ("site", "header_cart_visible"): "Показувати кошик",
     ("site", "header_wishlist_visible"): "Показувати обране",
@@ -76,6 +98,22 @@ BLOCK_DEFAULTS: dict[tuple[str, str], str] = {
     ),
     ("home", "picker_photo_cta"): "Підбір за фото",
     ("home", "picker_submit"): "Показати моделі",
+    ("home", "picker_any"): "Будь-який",
+    ("home", "picker_model_one"): "модель",
+    ("home", "picker_model_few"): "моделі",
+    ("home", "picker_model_many"): "моделей",
+    ("home", "picker_for_door"): "Для дверей",
+    ("home", "picker_fallback"): "Точних збігів немає — популярні моделі",
+    ("home", "picker_recommend"): "Рекомендуємо популярні",
+    ("home", "picker_picked"): "Підібрали",
+    ("home", "picker_none"): "Нічого не знайдено",
+    ("home", "picker_reset"): "Скинути",
+    ("home", "picker_catalog"): "Перейти в каталог",
+    ("home", "picker_empty_title"): "За цими параметрами замків немає",
+    ("home", "picker_empty_text"): "Змініть параметри або завантажте фото нижче, і ми підберемо аналог",
+    ("home", "picker_reset_all"): "Скинути параметри",
+    ("home", "picker_stock"): "В наявності",
+    ("home", "picker_best"): "Найкращий збіг",
     ("home", "popular_section_visible"): "1",
     ("home", "popular_title"): "Популярні товари",
     ("home", "popular_tab_hits"): "Хіти продажу",
@@ -87,6 +125,12 @@ BLOCK_DEFAULTS: dict[tuple[str, str], str] = {
     ("site", "header_catalog_label"): "Каталог товарів",
     ("site", "header_search_placeholder"): "Пошук замків, циліндрів…",
     ("site", "header_callback_label"): "Передзвоніть мені",
+    ("site", "header_search_btn"): "Знайти",
+    ("site", "header_contacts_label"): "Контакти",
+    ("site", "header_search_cat"): "Категорія",
+    ("site", "header_search_brand"): "Бренд",
+    ("site", "header_search_product"): "Товар",
+    ("site", "header_search_all"): "Показати всі результати",
     ("site", "header_phone_visible"): "1",
     ("site", "header_cart_visible"): "1",
     ("site", "header_wishlist_visible"): "1",
@@ -117,6 +161,26 @@ INLINE_KEYS: set[tuple[str, str]] = {
     ("site", "header_catalog_label"),
     ("site", "header_search_placeholder"),
     ("site", "header_callback_label"),
+    ("site", "header_search_btn"),
+    ("site", "header_contacts_label"),
+    ("site", "header_search_cat"),
+    ("site", "header_search_brand"),
+    ("site", "header_search_product"),
+    ("site", "header_search_all"),
+    ("home", "picker_any"),
+    ("home", "picker_model_one"),
+    ("home", "picker_model_few"),
+    ("home", "picker_model_many"),
+    ("home", "picker_for_door"),
+    ("home", "picker_recommend"),
+    ("home", "picker_picked"),
+    ("home", "picker_none"),
+    ("home", "picker_reset"),
+    ("home", "picker_catalog"),
+    ("home", "picker_empty_title"),
+    ("home", "picker_reset_all"),
+    ("home", "picker_stock"),
+    ("home", "picker_best"),
     ("site", "footer_catalog_title"),
     ("site", "footer_info_title"),
     ("site", "footer_contacts_title"),
@@ -132,6 +196,8 @@ MULTILINE_KEYS: set[tuple[str, str]] = {
     ("home", "audience_4_text"),
     ("home", "picker_lead"),
     ("home", "picker_photo_text"),
+    ("home", "picker_fallback"),
+    ("home", "picker_empty_text"),
     ("site", "footer_about_text"),
     ("catalog", "catalog_empty"),
 }
@@ -149,15 +215,20 @@ URL_KEYS: set[tuple[str, str]] = set()
 # Інфосторінки: структуровані поля (картки / таблиці / кроки).
 from pages import block_defaults_info_1 as _info1  # noqa: E402
 from pages import block_defaults_info_2 as _info2  # noqa: E402,F401
+from pages import block_defaults_forms as _forms  # noqa: E402
 from pages import block_defaults_shop as _shop  # noqa: E402
 
 BLOCK_LABELS.update(_info1.LABELS)
 BLOCK_LABELS.update(_shop.LABELS)
+BLOCK_LABELS.update(_forms.LABELS)
 BLOCK_DEFAULTS.update(_info1.DEFAULTS)
 BLOCK_DEFAULTS.update(_shop.DEFAULTS)
+BLOCK_DEFAULTS.update(_forms.DEFAULTS)
 INLINE_KEYS.update(_info1.INLINE)
+INLINE_KEYS.update(_forms.INLINE)
 MULTILINE_KEYS.update(_info1.MULTILINE)
 MULTILINE_KEYS.update(_shop.MULTILINE)
+MULTILINE_KEYS.update(_forms.MULTILINE)
 RICHTEXT_KEYS.update(_info1.RICHTEXT)
 
 

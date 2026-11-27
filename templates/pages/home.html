@@ -78,7 +78,7 @@
   {% endif %}
 
   {% if show_picker %}
-  <section class="home-picker" id="picker" data-picker data-picker-api="{% url 'catalog:api_picker' %}">
+  <section class="home-picker" id="picker" data-picker data-picker-api="{% url 'catalog:api_picker' %}" data-i18n-any="{% cms 'home' 'picker_any' 'Будь-який' %}" data-i18n-model1="{% cms 'home' 'picker_model_one' 'модель' %}" data-i18n-model2="{% cms 'home' 'picker_model_few' 'моделі' %}" data-i18n-model5="{% cms 'home' 'picker_model_many' 'моделей' %}" data-i18n-fordoor="{% cms 'home' 'picker_for_door' 'Для дверей' %}" data-i18n-fallback="{% cms 'home' 'picker_fallback' 'Точних збігів немає — популярні моделі' %}" data-i18n-recommend="{% cms 'home' 'picker_recommend' 'Рекомендуємо популярні' %}" data-i18n-picked="{% cms 'home' 'picker_picked' 'Підібрали' %}" data-i18n-none="{% cms 'home' 'picker_none' 'Нічого не знайдено' %}" data-i18n-reset="{% cms 'home' 'picker_reset' 'Скинути' %}" data-i18n-catalog="{% cms 'home' 'picker_catalog' 'Перейти в каталог' %}" data-i18n-empty-title="{% cms 'home' 'picker_empty_title' 'За цими параметрами замків немає' %}" data-i18n-empty-text="{% cms 'home' 'picker_empty_text' 'Змініть параметри або завантажте фото нижче, і ми підберемо аналог' %}" data-i18n-reset-all="{% cms 'home' 'picker_reset_all' 'Скинути параметри' %}" data-i18n-stock="{% cms 'home' 'picker_stock' 'В наявності' %}" data-i18n-best="{% cms 'home' 'picker_best' 'Найкращий збіг' %}">
     <h2 class="home-v2__h2">{{ picker_title }}</h2>
     <p class="home-v2__sub">{{ picker_lead }}</p>
     <h3 class="home-picker__step">{{ picker_step1 }}</h3>

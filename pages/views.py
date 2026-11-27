@@ -7,6 +7,8 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from config.redirects import safe_next_url
+from pages.block_defaults_forms import DEFAULTS as FORM_DEFAULTS
+from pages.cms_text import cms_text, request_lang
 from pages.i18n_lib import tr
 
 from pages import info_cms
@@ -195,7 +197,31 @@ class ContactSubmitView(View):
         if form.is_valid():
             obj = _save_contact(form)
             request.session.pop('contact_idempotency', None)
-            ctx = {'done_name': obj.name, 'done_phone': obj.phone}
+            lang = request_lang(request)
+            ctx = {
+                'done_name': obj.name,
+                'done_phone': obj.phone,
+                'done_title': cms_text(
+                    'about',
+                    'about_form_done_title',
+                    lang,
+                    FORM_DEFAULTS[('about', 'about_form_done_title')],
+                    name=obj.name,
+                ),
+                'done_text': cms_text(
+                    'about',
+                    'about_form_done_text',
+                    lang,
+                    FORM_DEFAULTS[('about', 'about_form_done_text')],
+                    phone=obj.phone,
+                ),
+                'done_again': cms_text(
+                    'about',
+                    'about_form_done_again',
+                    lang,
+                    FORM_DEFAULTS[('about', 'about_form_done_again')],
+                ),
+            }
             if hx:
                 return render(request, 'pages/partials/contact_success.html', ctx)
             return render(

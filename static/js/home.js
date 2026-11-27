@@ -171,6 +171,18 @@
   (function initPicker() {
     var root = qs('[data-picker]');
     if (!root) return;
+
+    function i18n(name, fallback) {
+      var value = root.getAttribute('data-i18n-' + name);
+      return value ? value : fallback;
+    }
+
+    function node(tag, className, text) {
+      var el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text != null) el.textContent = text;
+      return el;
+    }
     var apiUrl = root.getAttribute('data-picker-api');
     var options = readJson('picker-options') || {};
     var firstDoor = qs('[data-door-id]', root);
@@ -244,7 +256,7 @@
       var anyBtn = document.createElement('button');
       anyBtn.type = 'button';
       anyBtn.className = 'home-filter__opt' + (!state[key] ? ' is-active' : '');
-      anyBtn.textContent = t('Будь-який');
+      anyBtn.textContent = i18n('any', 'Будь-який');
       anyBtn.addEventListener('click', function () {
         setFilter(key, '', '');
       });
@@ -276,57 +288,63 @@
     function pluralModels(n) {
       var a = n % 10;
       var b = n % 100;
-      if (a === 1 && b !== 11) return t('модель');
-      if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return t('моделі');
-      return t('моделей');
+      if (a === 1 && b !== 11) return i18n('model1', 'модель');
+      if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return i18n('model2', 'моделі');
+      return i18n('model5', 'моделей');
     }
 
     function renderResults(data) {
       if (!resultsEl) return;
       resultsEl.hidden = false;
+      resultsEl.replaceChildren();
       var count = data.count || 0;
       var items = data.items || [];
       var fallback = !!data.fallback;
-      var subParts = [t('Для дверей') + ': ' + doorLabel()];
+      var subParts = [i18n('fordoor', 'Для дверей') + ': ' + doorLabel()];
       filterKeys.forEach(function (key) {
         if (state[key]) subParts.push(findLabel(key, state[key]));
       });
       if (fallback) {
-        subParts.unshift(t('Точних збігів немає — популярні моделі'));
+        subParts.unshift(i18n('fallback', 'Точних збігів немає — популярні моделі'));
       }
-
-      var html = '<div class="home-picker__results-head">';
-      html += '<div><div class="home-picker__results-title">';
-      html += fallback
-        ? t('Рекомендуємо популярні')
+      var titleText = fallback
+        ? i18n('recommend', 'Рекомендуємо популярні')
         : count > 0
-          ? t('Підібрали') + ' ' + count + ' ' + pluralModels(count)
-          : t('Нічого не знайдено');
-      html += '</div><div class="home-picker__results-sub">' + subParts.join(' · ') + '</div></div>';
-      html += '<div class="home-picker__results-actions">';
-      html +=
-        '<button type="button" class="home-btn-soft" data-picker-reset>' +
-        t('Скинути') +
-        '</button>';
-      html +=
-        '<a class="home-btn-outline" href="' +
-        catalogHref() +
-        '">' +
-        t('Перейти в каталог') +
-        '</a></div></div>';
+          ? i18n('picked', 'Підібрали') + ' ' + count + ' ' + pluralModels(count)
+          : i18n('none', 'Нічого не знайдено');
+
+      var head = node('div', 'home-picker__results-head');
+      var titles = node('div');
+      titles.appendChild(node('div', 'home-picker__results-title', titleText));
+      titles.appendChild(node('div', 'home-picker__results-sub', subParts.join(' · ')));
+      var actions = node('div', 'home-picker__results-actions');
+      var resetBtn = node('button', 'home-btn-soft', i18n('reset', 'Скинути'));
+      resetBtn.type = 'button';
+      resetBtn.setAttribute('data-picker-reset', '');
+      var catalogLink = node('a', 'home-btn-outline', i18n('catalog', 'Перейти в каталог'));
+      catalogLink.href = catalogHref();
+      actions.appendChild(resetBtn);
+      actions.appendChild(catalogLink);
+      head.appendChild(titles);
+      head.appendChild(actions);
+      resultsEl.appendChild(head);
 
       if (!count) {
-        html += '<div class="home-picker__empty"><p class="home-picker__empty-title">' + t('За цими параметрами замків немає') + '</p>';
-        html += '<p class="home-picker__empty-text">' + t('Змініть параметри або завантажте фото нижче, і ми підберемо аналог') + '</p>';
-        html += '<button type="button" class="home-btn-solid" data-picker-reset>' + t('Скинути параметри') + '</button></div>';
+        var empty = node('div', 'home-picker__empty');
+        empty.appendChild(node('p', 'home-picker__empty-title', i18n('empty-title', 'За цими параметрами замків немає')));
+        empty.appendChild(node('p', 'home-picker__empty-text', i18n('empty-text', 'Змініть параметри або завантажте фото нижче, і ми підберемо аналог')));
+        var resetAll = node('button', 'home-btn-solid', i18n('reset-all', 'Скинути параметри'));
+        resetAll.type = 'button';
+        resetAll.setAttribute('data-picker-reset', '');
+        empty.appendChild(resetAll);
+        resultsEl.appendChild(empty);
       } else {
-        html += '<div class="home-picker__cards">';
+        var cards = node('div', 'home-picker__cards');
         items.slice(0, 4).forEach(function (item, i) {
-          html += renderCard(item, !fallback && i === 0);
+          cards.appendChild(renderCard(item, !fallback && i === 0));
         });
-        html += '</div>';
+        resultsEl.appendChild(cards);
       }
-      resultsEl.innerHTML = html;
 
       qsa('[data-picker-reset]', resultsEl).forEach(function (btn) {
         btn.addEventListener('click', resetPicker);
@@ -346,48 +364,45 @@
     function renderCard(item, best) {
       var tags = [];
       if (item.brand) tags.push(item.brand);
-      if (item.in_stock) tags.push(item.stock_label || t('В наявності'));
-      var tagHtml = tags
-        .map(function (tg) {
-          return '<span class="home-pk-card__tag">' + tg + '</span>';
-        })
-        .join('');
+      if (item.in_stock) tags.push(item.stock_label || i18n('stock', 'В наявності'));
       var cartUrl = item.add_url || '/cart/add/' + item.id + '/';
       var pref = (location.pathname.match(/^\/(ua|ru)(?=\/|$)/) || [])[0] || '';
       if (pref && cartUrl.indexOf(pref) !== 0) cartUrl = pref + cartUrl;
 
-      return (
-        '<article class="home-pk-card' +
-        (best ? ' is-best' : '') +
-        '">' +
-        (best ? '<span class="home-pk-card__badge">' + t('Найкращий збіг') + '</span>' : '') +
-        '<a class="home-pk-card__img" href="' +
-        item.url +
-        '"><img src="' +
-        item.image +
-        '" alt=""></a>' +
-        '<div class="home-pk-card__tags">' +
-        tagHtml +
-        '</div>' +
-        '<a class="home-pk-card__name" href="' +
-        item.url +
-        '">' +
-        item.name +
-        '</a>' +
-        '<div class="home-pk-card__foot"><div><div class="home-pk-card__old">' +
-        (item.old_price || '') +
-        '</div><div class="home-pk-card__price">' +
-        item.price +
-        '</div></div>' +
-        (item.in_stock
-          ? '<button type="button" class="home-pk-card__cart" data-pk-add data-cart-url="' +
-            cartUrl +
-            '" aria-label="' +
-            t('До кошика') +
-            '"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8.5 4.5 6 8M15.5 4.5 18 8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><path d="M2.5 8.6h19" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><path d="M4 10h16l-1.6 7.2A3.5 3.5 0 0 1 15 20H9a3.5 3.5 0 0 1-3.4-2.8z" fill="#fff"></path></svg></button>'
-          : '') +
-        '</div></article>'
-      );
+      var card = node('article', 'home-pk-card' + (best ? ' is-best' : ''));
+      if (best) card.appendChild(node('span', 'home-pk-card__badge', i18n('best', 'Найкращий збіг')));
+      var imgLink = node('a', 'home-pk-card__img');
+      imgLink.href = item.url || '#';
+      var img = document.createElement('img');
+      img.src = item.image || '';
+      img.alt = '';
+      imgLink.appendChild(img);
+      card.appendChild(imgLink);
+      var tagBox = node('div', 'home-pk-card__tags');
+      tags.forEach(function (tg) {
+        tagBox.appendChild(node('span', 'home-pk-card__tag', tg));
+      });
+      card.appendChild(tagBox);
+      var nameLink = node('a', 'home-pk-card__name', item.name || '');
+      nameLink.href = item.url || '#';
+      card.appendChild(nameLink);
+      var foot = node('div', 'home-pk-card__foot');
+      var prices = node('div');
+      prices.appendChild(node('div', 'home-pk-card__old', item.old_price || ''));
+      prices.appendChild(node('div', 'home-pk-card__price', item.price || ''));
+      foot.appendChild(prices);
+      if (item.in_stock) {
+        var cart = document.createElement('button');
+        cart.type = 'button';
+        cart.className = 'home-pk-card__cart';
+        cart.setAttribute('data-pk-add', '');
+        cart.setAttribute('data-cart-url', cartUrl);
+        cart.setAttribute('aria-label', t('До кошика'));
+        cart.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8.5 4.5 6 8M15.5 4.5 18 8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><path d="M2.5 8.6h19" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path><path d="M4 10h16l-1.6 7.2A3.5 3.5 0 0 1 15 20H9a3.5 3.5 0 0 1-3.4-2.8z" fill="#fff"></path></svg>';
+        foot.appendChild(cart);
+      }
+      card.appendChild(foot);
+      return card;
     }
 
     function findLabel(key, slug) {

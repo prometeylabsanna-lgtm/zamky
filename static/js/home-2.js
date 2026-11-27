@@ -180,7 +180,8 @@
               if (done) done.hidden = false;
               if (doneMsg) {
                 doneMsg.textContent =
-                  t('Майстер перегляне фото і надішле варіанти протягом 15 хвилин.');
+                  modal.getAttribute('data-i18n-sent') ||
+                  'Майстер перегляне фото і надішле варіанти протягом 15 хвилин.';
               }
             } else if (global) {
               global.textContent = t('Не вдалося надіслати. Перевірте дані.');

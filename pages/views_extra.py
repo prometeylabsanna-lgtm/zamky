@@ -8,6 +8,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView
 from PIL import Image, UnidentifiedImageError
 
+from pages.cms_text import cms_text, request_lang
 from pages.i18n_lib import tr
 
 from .forms_extra import CallbackForm, InstallForm, PhotoPickForm
@@ -122,11 +123,16 @@ class CallbackSubmitView(View):
                 },
             )
             request.session.pop(_session_key('callback'), None)
+            lang = request_lang(request)
             ctx = {
-                'title': tr('Дякуємо!'),
-                'message': tr(
-                    'Менеджер передзвонить вам на номер {phone} протягом 15 хвилин.'
-                ).format(phone=obj.phone),
+                'title': cms_text('site', 'cb_done_title', lang, 'Дякуємо!'),
+                'message': cms_text(
+                    'site',
+                    'cb_done_text',
+                    lang,
+                    'Менеджер передзвонить вам на номер {phone} протягом 15 хвилин.',
+                    phone=obj.phone,
+                ),
             }
             return _respond(
                 request,
@@ -166,14 +172,15 @@ class PhotoPickSubmitView(View):
                 for item in converted:
                     PhotoPickImage.objects.create(request=obj, image=item)
             request.session.pop(_session_key('photo_pick'), None)
-            channel_label = dict(PhotoPickRequest.Channel.choices).get(
-                obj.channel, obj.channel
-            )
+            lang = request_lang(request)
             ctx = {
-                'title': tr('Фото надіслано!'),
-                'message': tr(
-                    'Майстер перегляне фото і надішле варіанти ({channel}) протягом 15 хвилин.'
-                ).format(channel=tr(channel_label)),
+                'title': cms_text('site', 'photo_sent_title', lang, 'Фото надіслано!'),
+                'message': cms_text(
+                    'site',
+                    'photo_sent_text',
+                    lang,
+                    'Майстер перегляне фото і надішле варіанти протягом 15 хвилин.',
+                ),
             }
             return _respond(
                 request,
@@ -230,11 +237,16 @@ class InstallSubmitView(View):
                 },
             )
             request.session.pop(_session_key('install'), None)
+            lang = request_lang(request)
             ctx = {
-                'title': tr('Заявку прийнято!'),
-                'message': tr(
-                    'Менеджер звʼяжеться з вами за номером {phone}, щоб узгодити час виїзду.'
-                ).format(phone=obj.phone),
+                'title': cms_text('install', 'install_done_title', lang, 'Заявку прийнято!'),
+                'message': cms_text(
+                    'install',
+                    'install_done_text',
+                    lang,
+                    'Менеджер звʼяжеться з вами за номером {phone}, щоб узгодити час виїзду.',
+                    phone=obj.phone,
+                ),
             }
             return _respond(
                 request,

@@ -1,4 +1,4 @@
-{% load static i18n_ui %}
+{% load static i18n_ui cms_tags %}
 {{ header_menu|json_script:"header-menu-data" }}
 <div class="site-header" data-site-header>
   <header class="site-header__inner">
@@ -15,7 +15,7 @@
         {% endif %}
       </a>
 
-      <form class="hdr-search hdr-search--inline" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form>
+      <form class="hdr-search hdr-search--inline" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form data-i18n-category="{% cms 'site' 'header_search_cat' 'Категорія' %}" data-i18n-brand="{% cms 'site' 'header_search_brand' 'Бренд' %}" data-i18n-product="{% cms 'site' 'header_search_product' 'Товар' %}" data-i18n-all="{% cms 'site' 'header_search_all' 'Показати всі результати' %}">
         <div class="hdr-search__field">
           <input type="search" name="q" placeholder="{{ cms_header_search }}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search" data-search-input>
           <div class="hdr-search__suggest" data-search-suggest hidden></div>
@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <form class="hdr-search hdr-search--below" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form>
+    <form class="hdr-search hdr-search--below" action="{% url 'catalog:catalog' %}" method="get" role="search" data-search-form data-i18n-category="{% cms 'site' 'header_search_cat' 'Категорія' %}" data-i18n-brand="{% cms 'site' 'header_search_brand' 'Бренд' %}" data-i18n-product="{% cms 'site' 'header_search_product' 'Товар' %}" data-i18n-all="{% cms 'site' 'header_search_all' 'Показати всі результати' %}">
       <div class="hdr-search__field">
         <input type="search" name="q" placeholder="{{ cms_header_search }}" value="{{ request.GET.q }}" autocomplete="off" enterkeyhint="search" data-search-input>
         <div class="hdr-search__suggest" data-search-suggest hidden></div>

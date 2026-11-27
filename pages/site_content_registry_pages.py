@@ -131,6 +131,9 @@ CONTENT_SECTIONS_PAGES: tuple[ContentSection, ...] = (
             "about_form_consent",
             "about_form_consent_link",
             "about_form_err_required",
+            "about_form_done_title",
+            "about_form_done_text",
+            "about_form_done_again",
         ),
         field_groups=(
             FieldGroup("Видимість", ("about_form_visible",)),
@@ -175,6 +178,15 @@ CONTENT_SECTIONS_PAGES: tuple[ContentSection, ...] = (
                     "about_form_consent_link",
                     "about_form_err_required",
                 ),
+            ),
+            FieldGroup(
+                "Після відправки",
+                (
+                    "about_form_done_title",
+                    "about_form_done_text",
+                    "about_form_done_again",
+                ),
+                "У заголовку не прибирайте {name}, у тексті — {phone}.",
             ),
         ),
     ),

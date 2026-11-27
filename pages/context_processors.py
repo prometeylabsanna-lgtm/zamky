@@ -52,6 +52,8 @@ def site_context(request):
             'site', 'header_search_placeholder', 'Пошук замків, циліндрів…'
         ),
         'cms_header_callback': cms('site', 'header_callback_label', 'Передзвоніть мені'),
+        'cms_header_search_btn': cms('site', 'header_search_btn', 'Знайти'),
+        'cms_header_contacts': cms('site', 'header_contacts_label', 'Контакти'),
         'cms_footer_about_text': cms('site', 'footer_about_text'),
         'cms_footer_catalog_title': cms('site', 'footer_catalog_title', 'Каталог'),
         'cms_footer_info_title': cms('site', 'footer_info_title', 'Інформація'),
@@ -67,7 +69,7 @@ def site_context(request):
         'page_style': _safe_page_style(request),
         'cookie_consent': read_consent(request),
         # bump when CSS/JS change so browsers drop stale DevTools cache
-        'asset_v': '20261127v19',
+        'asset_v': '20261127v20',
     }
 
 

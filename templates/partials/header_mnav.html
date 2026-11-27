@@ -17,7 +17,7 @@
     <div class="mnav__body">
       <div class="mnav__level is-active" data-mnav-level="0">
         <a href="{% url 'catalog:catalog' %}" class="mnav__catalog-btn">
-          <span>{% t 'Каталог товарів' %}</span>
+          <span>{{ cms_header_catalog }}</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="0.5"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="0.5"></rect><path d="M14 5h7M14 9h4.5M14 15.5h7M14 19.5h4.5"></path></svg>
         </a>
         <ul class="mnav__list">
@@ -39,11 +39,11 @@
           {% endfor %}
         </div>
         <div class="mnav__phones">
-          <span class="mnav__phones-label">{% t 'Контакти' %}</span>
+          <span class="mnav__phones-label">{{ cms_header_contacts }}</span>
           <a href="tel:{{ contact_tel }}">{{ contact_phone }}</a>
           <span class="mnav__hours">{{ contact_hours }}</span>
           <a class="mnav__mail" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
-          <button type="button" class="mnav__cb" data-open-callback data-close-menu>{% t 'Замовити дзвінок' %}</button>
+          <button type="button" class="mnav__cb" data-open-callback data-close-menu>{{ cms_header_callback }}</button>
         </div>
         <div class="mnav__langs">
           <button type="button" class="mnav__lang {% if site_lang == 'UA' %}is-active{% endif %}" data-set-lang="ua">UA</button>
@@ -53,7 +53,7 @@
       <div class="mnav__level" data-mnav-level="1" hidden>
         <button type="button" class="mnav__back" data-mnav-back="0">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
-          {% t 'Каталог товарів' %}
+          {{ cms_header_catalog }}
         </button>
         <div class="mnav__title">
           <span class="mega__title-ico" data-mnav-ico></span>
@@ -71,7 +71,7 @@
           <span data-mnav-sub-title></span>
         </div>
         <ul class="mnav__list" data-mnav-leaves></ul>
-        <a class="mnav__find" href="{% url 'catalog:catalog' %}" data-mnav-find>{% t 'Знайти' %}</a>
+        <a class="mnav__find" href="{% url 'catalog:catalog' %}" data-mnav-find>{{ cms_header_search_btn }}</a>
       </div>
     </div>
   </nav>
