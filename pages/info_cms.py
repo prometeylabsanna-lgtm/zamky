@@ -38,18 +38,36 @@ def assemble_about(lang: str, blocks) -> dict:
     }
 
 
+def _ship_cost(key: str, lang: str, fallback: str) -> str:
+    from decimal import Decimal, InvalidOperation
+
+    from orders.utils import format_uah
+
+    raw = (_t("checkout", key, lang, None) or fallback).replace(" ", "").replace(",", ".")
+    try:
+        amount = Decimal(raw)
+    except (InvalidOperation, ValueError):
+        amount = Decimal(fallback)
+    if amount == 0:
+        return _t("checkout", "ship_free", lang, None) or "Безкоштовно"
+    return format_uah(amount)
+
+
 def assemble_delivery(lang: str, blocks) -> dict:
     p = "delivery"
     g = lambda k: _t(p, k, lang, blocks)  # noqa: E731
+    np_cost = _ship_cost("ship_np_price", lang, "80")
+    courier_cost = _ship_cost("ship_courier_price", lang, "150")
+    pickup_cost = _ship_cost("ship_pickup_price", lang, "0")
     return {
         "h1": g("delivery_title"),
         "lead": g("delivery_lead"),
         "methods_title": g("delivery_methods_title"),
         "head": (g("delivery_head_1"), g("delivery_head_2"), g("delivery_head_3")),
         "rows": [
-            (g("delivery_row_1_a"), g("delivery_row_1_b"), g("delivery_row_1_c")),
-            (g("delivery_row_2_a"), g("delivery_row_2_b"), g("delivery_row_2_c")),
-            (g("delivery_row_3_a"), g("delivery_row_3_b"), g("delivery_row_3_c")),
+            (g("delivery_row_1_a"), g("delivery_row_1_b"), np_cost),
+            (g("delivery_row_2_a"), g("delivery_row_2_b"), courier_cost),
+            (g("delivery_row_3_a"), g("delivery_row_3_b"), pickup_cost),
         ],
         "note": g("delivery_note"),
         "pay_title": g("delivery_pay_title"),

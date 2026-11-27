@@ -165,7 +165,43 @@ def step_plaques(stdout, dry_run: bool) -> str:
     return line
 
 
-STEPS = [step_email, step_hours_address, step_social, step_plaques]
+PRICE_BLOCKS = (
+    ("delivery", "delivery_row_1_c", frozenset({"80 ₴", "80"})),
+    ("delivery", "delivery_row_2_c", frozenset({"150 ₴", "150"})),
+    ("delivery", "delivery_row_3_c", frozenset({"Безкоштовно", "Бесплатно", "0"})),
+)
+
+
+def _price_is_stub(value: str, allowed: frozenset[str]) -> bool:
+    text = (value or "").strip()
+    return text == "" or text in allowed
+
+
+def step_delivery_prices(stdout, dry_run: bool) -> str:
+    removed = 0
+    kept = 0
+    for page, key, allowed in PRICE_BLOCKS:
+        block = SiteBlock.objects.filter(page=page, key=key).first()
+        if block is None:
+            continue
+        if _price_is_stub(block.text_html or "", allowed) and _price_is_stub(
+            block.text_html_ru or "", allowed
+        ):
+            removed += 1
+            stdout.write(f"ціна {page}.{key}: прибрано (береться з оформлення)")
+            if not dry_run:
+                block.delete()
+        else:
+            kept += 1
+            stdout.write(f"ціна {page}.{key}: не чіпаю — текст змінено")
+    if removed and not dry_run:
+        clear_site_blocks_cache()
+    line = f"ціни доставки: прибрано {removed}, залишено змінені {kept}"
+    stdout.write(line)
+    return line
+
+
+STEPS = [step_email, step_hours_address, step_social, step_plaques, step_delivery_prices]
 
 
 class Command(BaseCommand):

@@ -206,13 +206,10 @@ _reg("delivery", "delivery_head_2", "Таблиця — колонка 2", "Те
 _reg("delivery", "delivery_head_3", "Таблиця — колонка 3", "Вартість", kind="inline")
 _reg("delivery", "delivery_row_1_a", "Доставка 1 — спосіб", "Нова Пошта, відділення або поштомат", kind="inline")
 _reg("delivery", "delivery_row_1_b", "Доставка 1 — термін", "1–2 дні", kind="inline")
-_reg("delivery", "delivery_row_1_c", "Доставка 1 — вартість", "80 ₴", kind="inline")
 _reg("delivery", "delivery_row_2_a", "Доставка 2 — спосіб", "Кур’єр по Києву", kind="inline")
 _reg("delivery", "delivery_row_2_b", "Доставка 2 — термін", "в день замовлення", kind="inline")
-_reg("delivery", "delivery_row_2_c", "Доставка 2 — вартість", "150 ₴", kind="inline")
 _reg("delivery", "delivery_row_3_a", "Доставка 3 — спосіб", "Самовивіз з магазину", kind="inline")
 _reg("delivery", "delivery_row_3_b", "Доставка 3 — термін", "через 2 години", kind="inline")
-_reg("delivery", "delivery_row_3_c", "Доставка 3 — вартість", "Безкоштовно", kind="inline")
 _reg(
     "delivery",
     "delivery_note",
