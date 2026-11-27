@@ -182,6 +182,20 @@ LABELS: dict[tuple[str, str], str] = {
     ("product", "acc_w_row2_b"): "Гарантія, рядок 2 — опис",
     ("product", "acc_w_row3_a"): "Гарантія, рядок 3 — назва",
     ("product", "acc_w_row3_b"): "Гарантія, рядок 3 — опис",
+    ("product", "spec_brand_label"): "Бренд — назва рядка",
+    ("product", "spec_brand_visible"): "Бренд — показувати",
+    ("product", "spec_category_label"): "Категорія — назва рядка",
+    ("product", "spec_category_visible"): "Категорія — показувати",
+    ("product", "spec_len_label"): "Загальна довжина — назва рядка",
+    ("product", "spec_len_visible"): "Загальна довжина — показувати",
+    ("product", "spec_ab_label"): "Розмір A×B — назва рядка",
+    ("product", "spec_ab_visible"): "Розмір A×B — показувати",
+    ("product", "spec_sku_label"): "Артикул — назва рядка",
+    ("product", "spec_sku_visible"): "Артикул — показувати",
+    ("product", "spec_warranty_label"): "Гарантія — назва рядка",
+    ("product", "spec_warranty_visible"): "Гарантія — показувати",
+    ("product", "spec_cover_label"): "Покриття — назва рядка",
+    ("product", "spec_cover_visible"): "Покриття — показувати",
 }
 
 DEFAULTS: dict[tuple[str, str], str] = {
@@ -364,6 +378,20 @@ DEFAULTS: dict[tuple[str, str], str] = {
     ("product", "acc_w_row2_b"): "14 днів",
     ("product", "acc_w_row3_a"): "Сервісна заміна ключів",
     ("product", "acc_w_row3_b"): "за кодовою карткою",
+    ("product", "spec_brand_label"): "Бренд",
+    ("product", "spec_brand_visible"): "1",
+    ("product", "spec_category_label"): "Категорія",
+    ("product", "spec_category_visible"): "1",
+    ("product", "spec_len_label"): "Загальна довжина",
+    ("product", "spec_len_visible"): "1",
+    ("product", "spec_ab_label"): "Розмір A×B",
+    ("product", "spec_ab_visible"): "1",
+    ("product", "spec_sku_label"): "Артикул",
+    ("product", "spec_sku_visible"): "1",
+    ("product", "spec_warranty_label"): "Гарантія",
+    ("product", "spec_warranty_visible"): "1",
+    ("product", "spec_cover_label"): "Покриття",
+    ("product", "spec_cover_visible"): "1",
 }
 
 RU: dict[tuple[str, str], str] = {
@@ -542,6 +570,20 @@ RU: dict[tuple[str, str], str] = {
     ("product", "acc_w_row2_b"): "14 дней",
     ("product", "acc_w_row3_a"): "Сервисная замена ключей",
     ("product", "acc_w_row3_b"): "по кодовой карте",
+    ("product", "spec_brand_label"): "Бренд",
+    ("product", "spec_brand_visible"): "1",
+    ("product", "spec_category_label"): "Категория",
+    ("product", "spec_category_visible"): "1",
+    ("product", "spec_len_label"): "Общая длина",
+    ("product", "spec_len_visible"): "1",
+    ("product", "spec_ab_label"): "Размер A×B",
+    ("product", "spec_ab_visible"): "1",
+    ("product", "spec_sku_label"): "Артикул",
+    ("product", "spec_sku_visible"): "1",
+    ("product", "spec_warranty_label"): "Гарантия",
+    ("product", "spec_warranty_visible"): "1",
+    ("product", "spec_cover_label"): "Покрытие",
+    ("product", "spec_cover_visible"): "1",
 }
 
 MULTILINE: set[tuple[str, str]] = {

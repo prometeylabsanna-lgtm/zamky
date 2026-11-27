@@ -59,6 +59,16 @@ def product_brand(product):
 def product_spec_rows(product):
     """Плоский список {'k', 'v', 'spec'} у порядку макета."""
     from pages.i18n_lib import tr
+    from django.utils.translation import get_language
+    from pages.cms_content import get_block_text
+
+    lang = get_language() or 'ua'
+
+    def sys_label(name, fallback):
+        return (get_block_text('product', f'spec_{name}_label', lang=lang) or '').strip() or tr(fallback)
+
+    def sys_on(name):
+        return (get_block_text('product', f'spec_{name}_visible', lang='ua') or '1').strip() != '0'
 
     attr_values = list(product.attributes.all())
     rows = []
@@ -72,17 +82,17 @@ def product_spec_rows(product):
             {'k': label, 'v': value, 'spec': spec, '_rank': (rank, order, label)}
         )
 
-    add('sys:brand', tr('Бренд'), _brand_value(product, attr_values))
-    add('sys:category', tr('Категорія'), _category_label(product.category))
-    if product.size_mm:
-        add('sys:len', tr('Загальна довжина'), f'{product.size_mm} {tr("мм")}', 'len')
-    if product.size_label:
-        add('sys:ab', tr('Розмір A×B'), f'{product.size_label} {tr("мм")}', 'ab')
+    if sys_on('brand'): add('sys:brand', sys_label('brand', 'Бренд'), _brand_value(product, attr_values))
+    if sys_on('category'): add('sys:category', sys_label('category', 'Категорія'), _category_label(product.category))
+    if product.size_mm and sys_on('len'):
+        add('sys:len', sys_label('len', 'Загальна довжина'), f'{product.size_mm} {tr("мм")}', 'len')
+    if product.size_label and sys_on('ab'):
+        add('sys:ab', sys_label('ab', 'Розмір A×B'), f'{product.size_label} {tr("мм")}', 'ab')
     cover = (product.cover or '').strip()
-    add('sys:sku', tr('Артикул'), (product.sku or '').strip(), 'sku')
+    if sys_on('sku'): add('sys:sku', sys_label('sku', 'Артикул'), (product.sku or '').strip(), 'sku')
     months = int(product.warranty_months or 0)
-    if months > 0:
-        add('sys:warranty', tr('Гарантія'), f'{months} {plural_months(months)}')
+    if months > 0 and sys_on('warranty'):
+        add('sys:warranty', sys_label('warranty', 'Гарантія'), f'{months} {plural_months(months)}')
 
     seen_values = set()
     for av in attr_values:
@@ -96,8 +106,8 @@ def product_spec_rows(product):
         add(attr.slug, attr.display_name(), value, order=(grp, attr.sort_order))
 
     # Покриття з поля товару, якщо воно не повторює «Колір/покриття».
-    if cover and cover.lower() not in seen_values:
-        add('sys:cover', tr('Покриття'), tr(cover), 'cover')
+    if cover and cover.lower() not in seen_values and sys_on('cover'):
+        add('sys:cover', sys_label('cover', 'Покриття'), tr(cover), 'cover')
 
     rows.sort(key=lambda r: r['_rank'])
     for r in rows:
