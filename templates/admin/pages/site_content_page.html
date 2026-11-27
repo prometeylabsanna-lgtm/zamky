@@ -57,7 +57,7 @@
               </div>
             </div>
             {% else %}
-            <div class="site-content-editor__field">
+            <div class="site-content-editor__field{% if field.field.widget.input_type == 'checkbox' %} site-content-editor__field--check{% endif %}">
               <label class="text-font-important-light dark:text-font-important-dark" for="{{ field.id_for_label }}">{{ field.label }}</label>
               {% if item.preview_url %}
                 <div class="site-content-editor__img-preview{% if item.preview_icon %} site-content-editor__img-preview--icon{% endif %}">

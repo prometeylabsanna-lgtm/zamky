@@ -1,4 +1,4 @@
-{% load static i18n_ui %}
+{% load static i18n_ui cms_tags %}
 <div id="mobile-menu" class="mnav" aria-hidden="true">
   <div class="mnav__backdrop" data-close-menu></div>
   <nav class="mnav__panel" aria-label="{% t 'Меню' %}">
@@ -40,7 +40,10 @@
         </div>
         <div class="mnav__phones">
           <span class="mnav__phones-label">{{ cms_header_contacts }}</span>
+          {% cms_visible 'site' 'header_phone_visible' as show_phone %}
+          {% if show_phone %}
           <a href="tel:{{ contact_tel }}">{{ contact_phone }}</a>
+          {% endif %}
           <span class="mnav__hours">{{ contact_hours }}</span>
           <a class="mnav__mail" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
           <button type="button" class="mnav__cb" data-open-callback data-close-menu>{{ cms_header_callback }}</button>

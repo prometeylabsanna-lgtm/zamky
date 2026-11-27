@@ -25,6 +25,8 @@
         </button>
       </form>
 
+      {% cms_visible 'site' 'header_phone_visible' as show_phone %}
+      {% if show_phone %}
       <div class="hdr-phone">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7.6 2.8c.6-.1 1.2.2 1.5.8l1.5 3.3c.3.6.1 1.3-.4 1.7l-1.6 1.3a12 12 0 0 0 5.5 5.5l1.3-1.6c.4-.5 1.1-.7 1.7-.4l3.3 1.5c.6.3.9.9.8 1.5l-.4 2.4c-.2 1-1 1.7-2 1.7C10.6 20.5 3.5 13.4 3.5 5.2c0-1 .7-1.8 1.7-2z"></path></svg>
         <div class="hdr-phone__meta">
@@ -33,17 +35,24 @@
           <button type="button" class="hdr-phone__cb" data-open-callback>{{ cms_header_callback }}</button>
         </div>
       </div>
+      {% endif %}
 
       <div class="hdr-actions">
         {% include 'partials/header_lang.html' with compact=1 %}
+        {% cms_visible 'site' 'header_wishlist_visible' as show_wish %}
+        {% if show_wish %}
         <a href="{% url 'cart:wishlist_page' %}" class="hdr-icon-btn" aria-label="{% t 'Обране' %}">
           {% include 'cart/partials/wishlist_badge.html' with badge_id='wishlist-badge' %}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.6c-.3 0-.6-.1-.8-.3C5.6 15.7 2.5 12.8 2.5 8.9 2.5 6 4.7 3.8 7.5 3.8c1.8 0 3.4.9 4.5 2.4 1.1-1.5 2.7-2.4 4.5-2.4 2.8 0 5 2.2 5 5.1 0 3.9-3.1 6.8-8.7 11.4-.2.2-.5.3-.8.3z"></path></svg>
         </a>
+        {% endif %}
+        {% cms_visible 'site' 'header_cart_visible' as show_cart %}
+        {% if show_cart %}
         <button type="button" class="hdr-icon-btn" data-open-cart aria-label="{% t 'Кошик' %}">
           {% include 'cart/partials/badge.html' %}
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.5 4.5 6 8M15.5 4.5 18 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M2.5 8.6h19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M4 10h16l-1.6 7.2A3.5 3.5 0 0 1 15 20H9a3.5 3.5 0 0 1-3.4-2.8z" fill="currentColor"></path><path d="M10.3 12.8v3.2M13.7 12.8v3.2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"></path></svg>
         </button>
+        {% endif %}
       </div>
     </div>
 
