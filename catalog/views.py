@@ -380,48 +380,41 @@ class CatalogView(ClampPageMixin, ListView):
         return ctx
 
 
+def _product_accordions(lang):
+    from pages.cms_content import get_block_text
+    from pages.info_cms import _ship_cost
+
+    def g(key):
+        return (get_block_text('product', key, lang=lang) or '').strip()
+
+    def on(key):
+        return g(key) != '0'
+
+    out = []
+    if on('acc_d_visible'):
+        rows = []
+        for name, price_key, fb in (('np', 'ship_np_price', '80'), ('courier', 'ship_courier_price', '150'), ('pickup', 'ship_pickup_price', '0')):
+            label = g(f'acc_d_{name}_label')
+            if not label:
+                continue
+            price = _ship_cost(price_key, lang, fb)
+            term = g(f'acc_d_{name}_term')
+            rows.append((label, f'{term} · {price}' if term else price))
+        out.append({'id': 'd', 'icon': 'truck', 'title': g('acc_d_title'), 'hint': g('acc_d_hint'), 'rows': rows})
+    for pid, icon, n in (('p', 'card', 4), ('w', 'shield', 3)):
+        if not on(f'acc_{pid}_visible'):
+            continue
+        rows = [(g(f'acc_{pid}_row{i}_a'), g(f'acc_{pid}_row{i}_b')) for i in range(1, n + 1)]
+        rows = [r for r in rows if r[0]]
+        out.append({'id': pid, 'icon': icon, 'title': g(f'acc_{pid}_title'), 'hint': g(f'acc_{pid}_hint'), 'rows': rows})
+    return out
+
+
 class ProductDetailView(DetailView):
     model = Product
     template_name = 'catalog/product.html'
     context_object_name = 'product'
     slug_url_kwarg = 'slug'
-
-    ACCORDIONS = [
-        {
-            'id': 'd',
-            'icon': 'truck',
-            'title': 'Доставка',
-            'hint': 'від 1 дня',
-            'rows': [
-                ('Нова Пошта, відділення', '1–2 дні · за тарифами'),
-                ('Кур’єр по Києву', 'в день замовлення'),
-                ('Самовивіз з магазину', 'безкоштовно'),
-            ],
-        },
-        {
-            'id': 'p',
-            'icon': 'card',
-            'title': 'Оплата',
-            'hint': 'карткою або при отриманні',
-            'rows': [
-                ('Карткою онлайн', 'Visa, Mastercard'),
-                ('Apple Pay / Google Pay', 'миттєво'),
-                ('Накладений платіж', 'при отриманні'),
-                ('Безготівковий розрахунок', 'для юросіб'),
-            ],
-        },
-        {
-            'id': 'w',
-            'icon': 'shield',
-            'title': 'Гарантія',
-            'hint': '12 місяців',
-            'rows': [
-                ('Гарантія виробника', '12 місяців'),
-                ('Обмін та повернення', '14 днів'),
-                ('Сервісна заміна ключів', 'за кодовою карткою'),
-            ],
-        },
-    ]
 
     def get_queryset(self):
         return Product.objects.filter(is_active=True).select_related(
@@ -445,23 +438,12 @@ class ProductDetailView(DetailView):
         measure_title, measure_text = resolve_measure(product.category)
         reviews = published_reviews_for(product)
 
-        accordions = []
-        for block in self.ACCORDIONS:
-            accordions.append(
-                {
-                    **block,
-                    'title': tr(block['title']),
-                    'hint': tr(block['hint']),
-                    'rows': [(tr(a), tr(b)) for a, b in block['rows']],
-                }
-            )
-
         ctx.update(
             {
                 'in_wishlist': wishlist.contains(product.pk),
                 'spec_rows': spec_rows,
                 'description_html': description_html,
-                'accordions': accordions,
+                'accordions': _product_accordions(get_language() or 'ua'),
                 'variant_colors': colors,
                 'variant_sizes': sizes,
                 'variants_json': json.dumps(variants, ensure_ascii=False),
