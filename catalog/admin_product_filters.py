@@ -146,15 +146,22 @@ def _sync_product_field(product, attr, value):
     if slug == 'cover' and text:
         product.cover = text
         return ['cover']
-    if slug == 'brand' and text:
+    if slug == 'brand':
         product.brand = text
         return ['brand']
-    if slug == 'length' and text:
+    if slug == 'length':
+        if not text:
+            product.size_mm = None
+            return ['size_mm']
         size_mm = _parse_int(text)
         if size_mm:
             product.size_mm = size_mm
             return ['size_mm']
-    if slug == 'size-ab' and text:
+    if slug == 'size-ab':
+        if not text:
+            product.size_a = None
+            product.size_b = None
+            return ['size_a', 'size_b']
         size_a, size_b = _parse_ab(text)
         if size_a and size_b:
             product.size_a = size_a

@@ -246,6 +246,57 @@ def translate_product_names(stdout, dry_run: bool) -> str:
     return line
 
 
+def step_brand_size_to_specs(stdout, dry_run: bool) -> str:
+    """Поля brand/size_* → характеристики, якщо рядка атрибута ще немає."""
+    from catalog.admin_product_filters import resolve_spec_value
+    from catalog.models import Attribute, Product, ProductAttribute
+
+    slug_attr = {}
+    for slug in ('brand', 'length', 'size-ab'):
+        attr = Attribute.objects.filter(slug=slug).first()
+        if attr is None:
+            stdout.write(f'атрибут «{slug}»: немає в БД — пропуск')
+            continue
+        slug_attr[slug] = attr
+
+    existing = {
+        slug: set(
+            ProductAttribute.objects.filter(
+                attribute_value__attribute__slug=slug
+            ).values_list('product_id', flat=True)
+        )
+        for slug in slug_attr
+    }
+    created = 0
+    existed = 0
+    for product in Product.objects.only('id', 'brand', 'size_mm', 'size_a', 'size_b'):
+        jobs = []
+        brand = (product.brand or '').strip()
+        if brand and 'brand' in slug_attr:
+            jobs.append(('brand', brand))
+        if product.size_mm and 'length' in slug_attr:
+            jobs.append(('length', f'{product.size_mm}'))
+        if product.size_a and product.size_b and 'size-ab' in slug_attr:
+            jobs.append(('size-ab', f'{product.size_a}×{product.size_b}'))
+        for slug, raw in jobs:
+            if product.pk in existing[slug]:
+                existed += 1
+                continue
+            created += 1
+            if dry_run:
+                continue
+            value = resolve_spec_value(slug_attr[slug], raw)
+            if value is None:
+                continue
+            ProductAttribute.objects.get_or_create(
+                product=product, attribute_value=value
+            )
+
+    line = f'бренд/розміри → характеристики: створено {created}, уже були {existed}'
+    stdout.write(line)
+    return line
+
+
 STEPS = [
     step_email,
     step_hours_address,
@@ -253,6 +304,7 @@ STEPS = [
     step_plaques,
     step_delivery_prices,
     translate_product_names,
+    step_brand_size_to_specs,
 ]
 
 

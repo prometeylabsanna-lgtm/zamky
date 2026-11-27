@@ -45,13 +45,15 @@ def _category_label(category):
 
 
 def _brand_value(product, attr_values):
-    brand = (product.brand or '').strip()
-    if brand:
-        return brand
     for av in attr_values:
         if av.attribute.slug == 'brand':
-            return av.display_value()
-    return ''
+            return (av.display_value() or '').strip()
+    return (product.brand or '').strip()
+
+
+def product_brand(product):
+    """Бренд із характеристики slug=brand, інакше зі старого поля товару."""
+    return _brand_value(product, product.attributes.all())
 
 
 def product_spec_rows(product):

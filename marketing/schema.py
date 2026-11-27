@@ -79,7 +79,9 @@ def product_jsonld(product, domain: str, lang: str, review_stats: dict | None) -
     image = _product_image(product, domain)
     if image:
         data["image"] = image
-    brand = (getattr(product, "brand", "") or "").strip()
+    from catalog.product_specs import product_brand
+
+    brand = product_brand(product)
     if brand:
         data["brand"] = {"@type": "Brand", "name": brand}
     stats = review_stats or {}

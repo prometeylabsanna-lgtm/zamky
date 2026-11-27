@@ -27,7 +27,7 @@ from .product_html import product_description_html
 from .product_meta import review_summary
 from .reviews import INITIAL_VISIBLE, ReviewForm
 from .db_compat import published_reviews_for
-from .product_specs import product_spec_rows
+from .product_specs import product_brand, product_spec_rows
 from .product_variants import build_variant_context
 from .search import filter_queryset_by_query
 
@@ -460,6 +460,7 @@ class ProductDetailView(DetailView):
                 'reviews': reviews,
                 'reviews_visible': INITIAL_VISIBLE,
                 'review_stats': review_summary(product, reviews),
+                'product_brand': product_brand(product),
                 'review_form': ReviewForm(),
                 'review_sent': self.request.GET.get('review') == 'sent',
             }
