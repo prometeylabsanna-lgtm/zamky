@@ -1,7 +1,8 @@
 import json
 from decimal import Decimal, InvalidOperation
 
-from django.db.models import Count, Max, Min, Prefetch
+from django.db.models import Count, DecimalField, Max, Min, Prefetch
+from django.db.models.functions import Cast, Coalesce
 from django.shortcuts import get_object_or_404
 from django.utils.translation import get_language
 from django.views.generic import DetailView, ListView, TemplateView
@@ -36,7 +37,7 @@ SORT_MAP = {
     'cheap': ('price', 'catalog_order'),
     'expensive': ('-price', 'catalog_order'),
     'new': ('-is_new', 'catalog_order'),
-    'rating': ('-rating', 'catalog_order'),
+    'rating': ('-_sort_rating', 'catalog_order'),
 }
 
 PAGE_SIZE = 12
@@ -169,11 +170,22 @@ class CatalogView(ClampPageMixin, ListView):
             qs = filter_queryset_by_query(qs, q)
             if sort and sort != 'default':
                 ordering = SORT_MAP.get(sort, SORT_MAP['default'])
-                return qs.order_by(*ordering).distinct()
+                return self._with_rating_sort(qs, sort).order_by(*ordering).distinct()
             return qs.distinct()
 
         ordering = SORT_MAP.get(sort, SORT_MAP['default'])
-        return qs.distinct().order_by(*ordering)
+        return self._with_rating_sort(qs, sort).distinct().order_by(*ordering)
+
+    def _with_rating_sort(self, qs, sort):
+        if sort != 'rating':
+            return qs
+        return qs.annotate(
+            _sort_rating=Coalesce(
+                'reviews_avg',
+                Cast('rating', DecimalField(max_digits=3, decimal_places=1)),
+                output_field=DecimalField(max_digits=3, decimal_places=1),
+            )
+        )
 
     def _decimal(self, raw):
         if raw in (None, ''):

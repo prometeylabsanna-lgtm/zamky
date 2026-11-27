@@ -297,6 +297,37 @@ def step_brand_size_to_specs(stdout, dry_run: bool) -> str:
     return line
 
 
+def step_review_avg(stdout, dry_run: bool) -> str:
+    """Перерахувати reviews_avg лише там, де є опубліковані відгуки і значення інше."""
+    from django.db.models import Avg
+
+    from catalog.models import Product, Review
+    from catalog.review_stats import quantize_review_avg
+
+    rows = (
+        Review.objects.filter(is_published=True)
+        .values('product_id')
+        .annotate(avg=Avg('rating'))
+    )
+    ids = [row['product_id'] for row in rows]
+    products = Product.objects.in_bulk(ids)
+    changed = 0
+    for row in rows:
+        product = products.get(row['product_id'])
+        if product is None:
+            continue
+        new_avg = quantize_review_avg(row['avg'])
+        if product.reviews_avg == new_avg:
+            continue
+        changed += 1
+        if dry_run:
+            continue
+        Product.objects.filter(pk=product.pk).update(reviews_avg=new_avg)
+    line = f'середня оцінка відгуків: оновлено {changed}'
+    stdout.write(line)
+    return line
+
+
 STEPS = [
     step_email,
     step_hours_address,
@@ -305,6 +336,7 @@ STEPS = [
     step_delivery_prices,
     translate_product_names,
     step_brand_size_to_specs,
+    step_review_avg,
 ]
 
 

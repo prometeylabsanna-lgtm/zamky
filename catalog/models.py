@@ -291,6 +291,14 @@ class Product(models.Model):
         default=0,
         help_text='Рахується автоматично з активних відгуків.',
     )
+    reviews_avg = models.DecimalField(
+        'Середня оцінка відгуків',
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        editable=False,
+    )
     warranty_months = models.PositiveSmallIntegerField('Гарантія, місяців', default=12)
     brand = models.CharField('Бренд', max_length=100, blank=True)
     color_code = models.CharField(
@@ -412,6 +420,20 @@ class Product(models.Model):
         from catalog.product_meta import reviews_label as _reviews_label
 
         return _reviews_label(self.reviews_count)
+
+    @property
+    def display_rating(self):
+        if (self.reviews_count or 0) > 0 and self.reviews_avg is not None:
+            return float(self.reviews_avg)
+        return float(self.rating or 0)
+
+    @property
+    def display_stars(self):
+        return int(self.display_rating + 0.5)
+
+    @property
+    def display_score(self):
+        return f'{self.display_rating:.1f}'
 
     @property
     def warranty_label(self):
