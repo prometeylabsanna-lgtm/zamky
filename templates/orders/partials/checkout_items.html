@@ -1,4 +1,4 @@
-{% load i18n_ui checkout_tags %}
+{% load i18n_ui checkout_tags cms_tags %}
 {% if oob_updates %}{% include 'cart/partials/badge.html' %}{% endif %}
 {% for item in cart_items %}
 <div class="checkout-row">
@@ -84,7 +84,7 @@
 {% endif %}
 <span id="summary-subtotal" class="visually-hidden" hx-swap-oob="true">{{ cart_subtotal|uah }}</span>
 {% if delivery_price is not None %}
-<span id="summary-delivery" hx-swap-oob="true">{% if delivery_price == 0 %}Безкоштовно{% else %}{{ delivery_price|uah }}{% endif %}</span>
+<span id="summary-delivery" hx-swap-oob="true">{% if delivery_price == 0 %}{% cms 'checkout' 'ship_free' 'Безкоштовно' %}{% else %}{{ delivery_price|uah }}{% endif %}</span>
 {% endif %}
 {% if order_total is not None %}
 <span id="summary-total" class="checkout-summary__total-value" hx-swap-oob="true">{{ order_total|uah }}</span>

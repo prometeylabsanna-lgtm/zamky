@@ -58,7 +58,8 @@
     var ship = prices[method] != null ? prices[method] : prices.np;
     var shipEl = qs('#summary-delivery');
     if (shipEl) {
-      shipEl.textContent = ship === 0 ? (window.t ? window.t('Безкоштовно') : 'Безкоштовно') : fmt(ship);
+      var freeLabel = root.getAttribute('data-ship-free') || 'Безкоштовно';
+      shipEl.textContent = ship === 0 ? freeLabel : fmt(ship);
       shipEl.classList.toggle('is-ship-free', ship === 0);
       shipEl.classList.remove('is-ship-muted');
     }

@@ -202,6 +202,12 @@ CONTENT_SECTIONS_SHOP: tuple[ContentSection, ...] = (
             "checkout",
             "chk_title",
             "chk_thanks",
+            "chk_crumb_done",
+            "chk_trust_1",
+            "chk_trust_2",
+            "chk_goods",
+            "chk_back",
+            "chk_email",
             "chk_empty_title",
             "chk_empty_text",
             "chk_to_catalog",
@@ -256,7 +262,7 @@ CONTENT_SECTIONS_SHOP: tuple[ContentSection, ...] = (
             "pay_wait_catalog",
         ),
         field_groups=(
-            FieldGroup("Сторінка", ("chk_title", "chk_thanks")),
+            FieldGroup("Сторінка", ("chk_title", "chk_thanks", "chk_crumb_done")),
             FieldGroup("Порожній кошик", (
                 "chk_empty_title",
                 "chk_empty_text",
@@ -269,6 +275,7 @@ CONTENT_SECTIONS_SHOP: tuple[ContentSection, ...] = (
                 "chk_name",
                 "chk_lastname",
                 "chk_phone",
+                "chk_email",
                 "chk_delivery",
                 "chk_city",
                 "chk_pay",
@@ -276,12 +283,15 @@ CONTENT_SECTIONS_SHOP: tuple[ContentSection, ...] = (
             )),
             FieldGroup("Підсумок", (
                 "chk_summary",
+                "chk_goods",
                 "chk_discount",
                 "chk_ship",
                 "chk_total",
+                "chk_back",
                 "chk_submit",
                 "chk_legal",
             )),
+            FieldGroup("Довіра", ("chk_trust_1", "chk_trust_2")),
             FieldGroup(
                 "Самовивіз і сторінка після замовлення",
                 (
