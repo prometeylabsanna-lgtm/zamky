@@ -7,7 +7,9 @@ def align_mockup_menu(apps, schema_editor):
     from pages.header_nav import sync_default_header_nav
 
     sync_category_tree()
-    reassign_products_to_menu()
+    # Живі моделі мають колонки з пізніших міграцій (напр. reviews_avg) — на чистій базі товарів немає, пропускаємо.
+    if apps.get_model('catalog', 'Product').objects.exists():
+        reassign_products_to_menu()
     sync_default_header_nav()
     sync_default_footer_nav()
     SiteBlock = apps.get_model('pages', 'SiteBlock')
