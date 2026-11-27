@@ -1,7 +1,7 @@
-{% load static i18n_ui %}
+{% load static i18n_ui cms_tags %}
 <div id="mega-menu" class="mega" hidden>
   <div class="mega__backdrop" data-close-mega></div>
-  <div class="mega__panel" role="dialog" aria-label="{% t 'Каталог' %}">
+  <div class="mega__panel" role="dialog" aria-label="{% cms 'site' 'header_mega_catalog' 'Каталог' %}">
     <div class="mega__col mega__col--cats">
       <a href="{% url 'catalog:catalog' %}" class="mega__head">
         <span>{{ cms_header_catalog }}</span>
@@ -24,7 +24,7 @@
     <div class="mega__col mega__col--subs" hidden>
       <button type="button" class="mega__back" data-mega-back="cats">
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5L5.5 8l4.5 4.5"></path></svg>
-        <span>{% t 'Каталог' %}</span>
+        <span>{% cms 'site' 'header_mega_catalog' 'Каталог' %}</span>
       </button>
       <div class="mega__title">
         <span class="mega__title-ico" data-mega-title-ico></span>

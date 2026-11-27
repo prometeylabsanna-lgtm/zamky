@@ -253,6 +253,9 @@ CONTENT_SECTIONS_HOME: tuple[ContentSection, ...] = (
         blocks=_b(
             "site",
             "header_catalog_label",
+            "header_mega_catalog",
+            "header_lang_ua",
+            "header_lang_ru",
             "header_search_placeholder",
             "header_callback_label",
             "header_search_btn",
@@ -270,6 +273,9 @@ CONTENT_SECTIONS_HOME: tuple[ContentSection, ...] = (
                 "Підписи",
                 (
                     "header_catalog_label",
+                    "header_mega_catalog",
+                    "header_lang_ua",
+                    "header_lang_ru",
                     "header_search_btn",
                     "header_contacts_label",
                     "header_callback_label",
