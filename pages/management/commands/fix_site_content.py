@@ -69,7 +69,39 @@ def step_hours_address(stdout, dry_run: bool) -> str:
     return line
 
 
-STEPS = [step_email, step_hours_address]
+SOCIAL_DEFAULTS = (
+    ("instagram_url", "https://www.instagram.com/"),
+    ("telegram_url", "https://t.me/"),
+    ("viber_url", "https://www.viber.com/"),
+    ("facebook_url", "https://www.facebook.com/"),
+)
+
+
+def step_social(stdout, dry_run: bool) -> str:
+    obj = SiteSettings.objects.filter(pk=1).first()
+    if obj is None:
+        line = "соцмережі: немає SiteSettings — пропуск"
+        stdout.write(line)
+        return line
+    updates: dict[str, str] = {}
+    notes: list[str] = []
+    for field, url in SOCIAL_DEFAULTS:
+        current = (getattr(obj, field) or "").strip()
+        if current:
+            notes.append(f"{field}: уже є")
+            continue
+        updates[field] = url
+        notes.append(f"{field}: порожньо → {url}")
+    if updates and not dry_run:
+        for field, value in updates.items():
+            setattr(obj, field, value)
+        obj.save(update_fields=list(updates))
+    line = "; ".join(notes)
+    stdout.write(line)
+    return line
+
+
+STEPS = [step_email, step_hours_address, step_social]
 
 
 class Command(BaseCommand):
