@@ -6,6 +6,7 @@ from pages.cms_content import get_block_text, get_site_blocks_map, is_section_vi
 from pages.info_cms_2 import assemble_blog, assemble_blog_ask, assemble_install
 from pages.info_cms_2 import assemble_offer, assemble_privacy, assemble_promos
 from pages.info_cms_2 import assemble_returns, assemble_warranty, consult_context
+from pages.phone import load_contacts, plaque_value
 
 
 def _t(page: str, key: str, lang: str, blocks) -> str:
@@ -15,6 +16,7 @@ def _t(page: str, key: str, lang: str, blocks) -> str:
 def assemble_about(lang: str, blocks) -> dict:
     p = "about"
     g = lambda k: _t(p, k, lang, blocks)  # noqa: E731
+    contacts = load_contacts(lang)
     return {
         "h1": g("about_title"),
         "lead": g("about_lead"),
@@ -28,10 +30,10 @@ def assemble_about(lang: str, blocks) -> dict:
         "bullets": [g("about_bullet_1"), g("about_bullet_2"), g("about_bullet_3")],
         "shop_title": g("about_shop_title"),
         "rows": [
-            (g("about_row_1_label"), g("about_row_1_value")),
-            (g("about_row_2_label"), g("about_row_2_value")),
-            (g("about_row_3_label"), g("about_row_3_value")),
-            (g("about_row_4_label"), g("about_row_4_value")),
+            (g("about_row_1_label"), plaque_value(blocks, p, "about_row_1_value", lang, contacts)),
+            (g("about_row_2_label"), plaque_value(blocks, p, "about_row_2_value", lang, contacts)),
+            (g("about_row_3_label"), plaque_value(blocks, p, "about_row_3_value", lang, contacts)),
+            (g("about_row_4_label"), plaque_value(blocks, p, "about_row_4_value", lang, contacts)),
         ],
     }
 

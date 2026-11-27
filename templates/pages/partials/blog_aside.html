@@ -18,7 +18,7 @@
     <span class="blog-aside__ask-text">{{ blog_ask.text }}</span>
     {% endif %}
     {% if blog_ask.phone %}
-    <a href="tel:{{ blog_ask.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="blog-aside__ask-phone">{{ blog_ask.phone }}</a>
+    <a href="tel:{{ blog_ask.tel }}" class="blog-aside__ask-phone">{{ blog_ask.phone }}</a>
     {% endif %}
     {% if blog_ask.hours %}
     <span class="blog-aside__ask-hours">{{ blog_ask.hours }}</span>

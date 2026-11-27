@@ -184,7 +184,18 @@ class SitePageContentForm(forms.Form):
                 widget=widget,
             )
             ru_help = RU_HINT
-            if help_text and key in {
+            if key in {
+                "about_row_1_value",
+                "about_row_2_value",
+                "about_row_3_value",
+                "about_row_4_value",
+                "info_consult_phone",
+                "info_consult_hours",
+                "blog_ask_phone",
+                "blog_ask_hours",
+            }:
+                ru_help = help_text or "Порожнє — береться з Налаштувань сайту."
+            elif help_text and key in {
                 "stock_note_low",
                 "chk_done_title",
                 "chk_done_text",

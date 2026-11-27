@@ -45,7 +45,7 @@ class ContactForm(forms.Form):
         required=False,
         widget=forms.EmailInput(
             attrs={
-                'placeholder': 'mail@example.com',
+                'placeholder': '',
                 'autocomplete': 'email',
                 'data-validate': 'email',
             }

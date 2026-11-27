@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pages.cms_content import get_block_text
 from pages.legal_body import sanitize_legal_html
+from pages.phone import load_contacts, plaque_tel, plaque_value
 
 
 def _t(page: str, key: str, lang: str, blocks) -> str:
@@ -210,10 +211,13 @@ def assemble_blog(lang: str, blocks) -> dict:
 
 def consult_context(lang: str, blocks) -> dict:
     g = lambda k: _t("site", k, lang, blocks)  # noqa: E731
+    contacts = load_contacts(lang)
+    phone = plaque_value(blocks, "site", "info_consult_phone", lang, contacts)
     return {
         "hint": g("info_consult_hint"),
-        "phone": g("info_consult_phone"),
-        "hours": g("info_consult_hours"),
+        "phone": phone,
+        "tel": plaque_tel(phone, contacts),
+        "hours": plaque_value(blocks, "site", "info_consult_hours", lang, contacts),
         "cta": g("info_consult_cta"),
     }
 
@@ -222,11 +226,14 @@ def assemble_blog_ask(lang: str, blocks) -> dict:
     from pages.cms_content import is_section_visible
 
     g = lambda k: _t("blog", k, lang, blocks)  # noqa: E731
+    contacts = load_contacts(lang)
+    phone = plaque_value(blocks, "blog", "blog_ask_phone", lang, contacts)
     return {
         "title": g("blog_ask_title"),
         "text": g("blog_ask_text"),
-        "phone": g("blog_ask_phone"),
-        "hours": g("blog_ask_hours"),
+        "phone": phone,
+        "tel": plaque_tel(phone, contacts),
+        "hours": plaque_value(blocks, "blog", "blog_ask_hours", lang, contacts),
         "cta": g("blog_ask_cta"),
         "visible": is_section_visible("blog", "blog_ask_visible", blocks),
     }

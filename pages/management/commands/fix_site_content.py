@@ -5,7 +5,7 @@
 
 from django.core.management.base import BaseCommand
 
-from pages.models_cms import SiteSettings
+from pages.models_cms import SiteBlock, SiteSettings, clear_site_blocks_cache
 from pages.phone import DEFAULT_EMAIL, DEFAULT_HOURS
 
 OLD_EMAIL = "info@centrzamkiv.ua"
@@ -101,7 +101,71 @@ def step_social(stdout, dry_run: bool) -> str:
     return line
 
 
-STEPS = [step_email, step_hours_address, step_social]
+PLAQUE_KEYS = (
+    ("about", "about_row_1_value"),
+    ("about", "about_row_2_value"),
+    ("about", "about_row_3_value"),
+    ("about", "about_row_4_value"),
+    ("about", "about_form_email_ph"),
+    ("blog", "blog_ask_phone"),
+    ("blog", "blog_ask_hours"),
+    ("site", "info_consult_phone"),
+    ("site", "info_consult_hours"),
+)
+
+# Старі дефолти-заглушки. Порівняння точне (і після strip країв).
+PLAQUE_STUBS = frozenset(
+    {
+        "067 00 00 00",
+        "067 00 00 00, 066 00 00 00",
+        "xxx@gmail.com",
+        "mail@example.com",
+        "м. Київ, [вулиця, будинок]",
+        "г. Киев, [улица, дом]",
+        "Пн–Пт 9:00–19:00\nСб 10:00–17:00\nНд — вихідний",
+        "Пн–Пт 9:00–19:00, Сб 10:00–17:00, Нд — вихідний",
+        "Пн–Пт 9:00–19:00, Сб 10:00–17:00, Вс — выходной",
+        "Пн–Пт 9:00–19:00\nСб 10:00–17:00\nВс — выходной",
+        "Пн–Сб, 9:00–19:00",
+    }
+)
+
+
+def _is_stub(value: str) -> bool:
+    return value in PLAQUE_STUBS or value.strip() in PLAQUE_STUBS
+
+
+def step_plaques(stdout, dry_run: bool) -> str:
+    cleared = 0
+    kept = 0
+    missing = 0
+    for page, key in PLAQUE_KEYS:
+        block = SiteBlock.objects.filter(page=page, key=key).first()
+        if block is None:
+            missing += 1
+            continue
+        fields: list[str] = []
+        if _is_stub(block.text_html or ""):
+            block.text_html = ""
+            fields.append("text_html")
+        if _is_stub(block.text_html_ru or ""):
+            block.text_html_ru = ""
+            fields.append("text_html_ru")
+        if not fields:
+            kept += 1
+            continue
+        cleared += 1
+        stdout.write(f"плашка {page}.{key}: очищено {', '.join(fields)}")
+        if not dry_run:
+            block.save(update_fields=fields)
+    if cleared and not dry_run:
+        clear_site_blocks_cache()
+    line = f"плашки: очищено {cleared}, без заглушки {kept}, немає блоку {missing}"
+    stdout.write(line)
+    return line
+
+
+STEPS = [step_email, step_hours_address, step_social, step_plaques]
 
 
 class Command(BaseCommand):

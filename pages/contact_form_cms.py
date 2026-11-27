@@ -42,7 +42,7 @@ def get_contact_form_copy(lang: str | None = "ua", site_blocks=None) -> dict:
         "phone_label": g("about_form_phone_label", "Телефон*"),
         "phone_ph": g("about_form_phone_ph", "+38 (0__) ___ __ __"),
         "email_label": g("about_form_email_label", "Email"),
-        "email_ph": g("about_form_email_ph", "mail@example.com"),
+        "email_ph": g("about_form_email_ph", ""),
         "topic_label": g("about_form_topic_label", "Тема"),
         "topics": [(value, g(key)) for value, key in TOPIC_KEYS],
         "message_label": g("about_form_message_label", "Повідомлення*"),

@@ -87,24 +87,13 @@ _reg(
 )
 _reg("about", "about_shop_title", "Торгова точка — заголовок", "Торгова точка", kind="inline")
 _reg("about", "about_row_1_label", "Рядок 1 — назва", "Адреса", kind="inline")
-_reg("about", "about_row_1_value", "Рядок 1 — значення", "м. Київ, [вулиця, будинок]", kind="inline")
+_reg("about", "about_row_1_value", "Рядок 1 — значення", "", kind="inline")
 _reg("about", "about_row_2_label", "Рядок 2 — назва", "Графік роботи", kind="inline")
-_reg(
-    "about",
-    "about_row_2_value",
-    "Рядок 2 — значення",
-    "Пн–Пт 9:00–19:00\nСб 10:00–17:00\nНд — вихідний",
-)
+_reg("about", "about_row_2_value", "Рядок 2 — значення", "")
 _reg("about", "about_row_3_label", "Рядок 3 — назва", "Телефони", kind="inline")
-_reg(
-    "about",
-    "about_row_3_value",
-    "Рядок 3 — значення",
-    "067 00 00 00, 066 00 00 00",
-    kind="inline",
-)
+_reg("about", "about_row_3_value", "Рядок 3 — значення", "", kind="inline")
 _reg("about", "about_row_4_label", "Рядок 4 — назва", "Email", kind="inline")
-_reg("about", "about_row_4_value", "Рядок 4 — значення", "xxx@gmail.com", kind="inline")
+_reg("about", "about_row_4_value", "Рядок 4 — значення", "", kind="inline")
 _reg("about", "about_form_visible", "Показувати форму", "1", kind="inline")
 _reg(
     "about",
@@ -144,13 +133,7 @@ _reg(
     kind="inline",
 )
 _reg("about", "about_form_email_label", "Email — підпис", "Email", kind="inline")
-_reg(
-    "about",
-    "about_form_email_ph",
-    "Email — плейсхолдер",
-    "mail@example.com",
-    kind="inline",
-)
+_reg("about", "about_form_email_ph", "Email — плейсхолдер", "", kind="inline")
 _reg("about", "about_form_topic_label", "Тема — підпис", "Тема", kind="inline")
 _reg(
     "about",

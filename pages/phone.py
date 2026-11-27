@@ -74,3 +74,49 @@ def contacts_from_settings(site_settings, lang: str = "ua") -> dict[str, str]:
         "hours": hours,
         "address": address,
     }
+
+
+# Порожнє значення плашки = контакт із Налаштувань сайту.
+PLAQUE_FIELDS = {
+    ("about", "about_row_1_value"): "address",
+    ("about", "about_row_2_value"): "hours",
+    ("about", "about_row_3_value"): "phone",
+    ("about", "about_row_4_value"): "email",
+    ("site", "info_consult_phone"): "phone",
+    ("site", "info_consult_hours"): "hours",
+    ("blog", "blog_ask_phone"): "phone",
+    ("blog", "blog_ask_hours"): "hours",
+}
+
+
+def load_contacts(lang: str = "ua") -> dict[str, str]:
+    from pages.models_cms import SiteSettings
+
+    try:
+        settings_obj = SiteSettings.load()
+    except Exception:
+        settings_obj = None
+    return contacts_from_settings(settings_obj, lang=lang)
+
+
+def block_own_text(blocks, page: str, key: str, lang: str) -> str:
+    """Текст саме цієї мови. Порожній RU не підміняється українським."""
+    if not blocks:
+        return ""
+    block = blocks.get(f"{page}.{key}")
+    if block is None:
+        return ""
+    if _is_ru(lang):
+        return block.text_html_ru or ""
+    return block.text_html or ""
+
+
+def plaque_value(blocks, page: str, key: str, lang: str, contacts: dict[str, str]) -> str:
+    own = block_own_text(blocks, page, key, lang)
+    if own.strip():
+        return own
+    return contacts.get(PLAQUE_FIELDS[(page, key)], "")
+
+
+def plaque_tel(display: str, contacts: dict[str, str]) -> str:
+    return normalize_ua_tel(display) or contacts.get("tel") or ""

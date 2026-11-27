@@ -127,8 +127,8 @@ _reg(
     "Текст",
     "Консультуємо щодня в телефоні, Viber та Telegram",
 )
-_reg("blog", "blog_ask_phone", "Телефон", "067 00 00 00", kind="inline")
-_reg("blog", "blog_ask_hours", "Графік", "Пн–Сб, 9:00–19:00", kind="inline")
+_reg("blog", "blog_ask_phone", "Телефон", "", kind="inline")
+_reg("blog", "blog_ask_hours", "Графік", "", kind="inline")
 _reg("blog", "blog_ask_cta", "Текст кнопки", "Замовити дзвінок", kind="inline")
 
 # --- shared consult (site) ---
@@ -139,14 +139,8 @@ _reg(
     "Потрібна консультація?",
     kind="inline",
 )
-_reg("site", "info_consult_phone", "Телефон", "067 00 00 00", kind="inline")
-_reg(
-    "site",
-    "info_consult_hours",
-    "Графік",
-    "Пн–Сб, 9:00–19:00",
-    kind="inline",
-)
+_reg("site", "info_consult_phone", "Телефон", "", kind="inline")
+_reg("site", "info_consult_hours", "Графік", "", kind="inline")
 _reg(
     "site",
     "info_consult_cta",

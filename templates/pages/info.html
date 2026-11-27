@@ -31,7 +31,7 @@
       </ul>
       <div class="info-consult">
         <span class="info-consult__hint">{{ info_consult.hint }}</span>
-        <a href="tel:{{ info_consult.phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" class="info-consult__phone">{{ info_consult.phone }}</a>
+        <a href="tel:{{ info_consult.tel }}" class="info-consult__phone">{{ info_consult.phone }}</a>
         <span class="info-consult__hours">{{ info_consult.hours }}</span>
         <a href="#form" class="info-consult__btn" data-to-form>{{ info_consult.cta }}</a>
       </div>
