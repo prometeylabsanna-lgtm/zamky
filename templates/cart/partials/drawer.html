@@ -1,4 +1,4 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 {% if cart_items %}
   <div class="cart-drawer__items">
     {% for item in cart_items %}
@@ -55,23 +55,23 @@
     {% endfor %}
   </div>
   <div class="cart-drawer__foot">
-    <div class="cart-drawer__line"><span>Товари ({{ cart_count }})</span><span>{{ cart_subtotal|floatformat:0 }} ₴</span></div>
+    <div class="cart-drawer__line"><span>{% cms 'cart' 'cart_goods' 'Товари' %} ({{ cart_count }})</span><span>{{ cart_subtotal|floatformat:0 }} ₴</span></div>
     <div class="cart-drawer__cta">
-      <span>{% t 'Разом' %}</span>
+      <span>{% cms 'cart' 'cart_total' 'Разом' %}</span>
       <strong>{{ cart_subtotal|floatformat:0 }} ₴</strong>
     </div>
     <a href="{% url 'orders:checkout' %}?step=checkout" class="btn cart-drawer__order">
-      Оформити замовлення
+      {% cms 'cart' 'cart_checkout' 'Оформити замовлення' %}
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     </a>
-    <button type="button" class="cart-drawer__continue" data-close-cart>{% t 'Продовжити покупки' %}</button>
+    <button type="button" class="cart-drawer__continue" data-close-cart>{% cms 'cart' 'cart_continue' 'Продовжити покупки' %}</button>
   </div>
 {% else %}
   <div class="cart-drawer__empty">
     <div class="cart-drawer__empty-ico">{% include 'partials/icon_cart.html' with size=36 %}</div>
-    <p class="cart-drawer__empty-title">{% t 'Кошик порожній' %}</p>
-    <p>{% t 'Оберіть замок або серцевину в каталозі — товари з’являться тут.' %}</p>
-    <button type="button" class="btn" data-close-cart>{% t 'Перейти до покупок' %}</button>
+    <p class="cart-drawer__empty-title">{% cms 'cart' 'cart_empty_title' 'Кошик порожній' %}</p>
+    <p>{% cms 'cart' 'cart_empty_text' 'Оберіть замок або серцевину в каталозі — товари з’являться тут.' %}</p>
+    <button type="button" class="btn" data-close-cart>{% cms 'cart' 'cart_empty_cta' 'Перейти до покупок' %}</button>
   </div>
 {% endif %}
 {% if cart_warning %}

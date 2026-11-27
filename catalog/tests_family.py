@@ -3,15 +3,9 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 
-from catalog.models import (
-    Category,
-    FamilyColorSwatch,
-    Product,
-    ProductFamily,
-    ProductImage,
-)
+from catalog.models import Category, Product, ProductImage
 from catalog.product_variants import build_variant_context
 
 _PNG = (
@@ -26,78 +20,56 @@ def _png(name='swatch.png'):
     return SimpleUploadedFile(name, _PNG, content_type='image/png')
 
 
-class FamilySwatchTests(TestCase):
+class OwnVariantTests(TestCase):
     def setUp(self):
-        self.cat = Category.objects.create(name='Циліндри', slug='cyl-fam')
-        self.family = ProductFamily.objects.create(name='ABARO B100', slug='abaro-fam')
-        self.p_g = Product.objects.create(
+        self.cat = Category.objects.create(name='Циліндри', slug='cyl-own')
+        self.product = Product.objects.create(
             category=self.cat,
-            family=self.family,
             name='Циліндр латунь',
-            slug='fam-g',
-            sku='FAM-G',
+            slug='own-g',
+            sku='OWN-G',
             price=Decimal('100'),
             color_code='G',
             size_mm=60,
             size_a=30,
             size_b=30,
         )
-        self.p_n = Product.objects.create(
+        Product.objects.create(
             category=self.cat,
-            family=self.family,
             name='Циліндр нікель',
-            slug='fam-n',
-            sku='FAM-N',
+            slug='own-n',
+            sku='OWN-N',
             price=Decimal('110'),
             color_code='N',
-            size_mm=60,
-            size_a=30,
-            size_b=30,
+            size_mm=70,
+            size_a=35,
+            size_b=35,
         )
 
-    def test_solo_uses_product_photo(self):
-        solo = Product.objects.create(
-            category=self.cat,
-            name='тест',
-            slug='solo-tone',
-            sku='SOLO-TONE',
-            price=Decimal('50'),
-            color_code='B',
-            size_mm=22,
-            size_a=25,
-            size_b=26,
-        )
-        ProductImage.objects.create(product=solo, image=_png('solo.png'))
-        _variants, colors, _sizes = build_variant_context(solo)
+    def test_own_color_and_size_only(self):
+        variants, colors, sizes = build_variant_context(self.product)
+        self.assertEqual(len(variants), 1)
         self.assertEqual(len(colors), 1)
+        self.assertEqual(colors[0]['code'], 'G')
+        self.assertEqual(len(sizes), 1)
+        self.assertEqual(sizes[0]['len'], 60)
+
+    def test_swatch_from_product_photo(self):
+        ProductImage.objects.create(product=self.product, image=_png('prod.png'))
+        _variants, colors, _sizes = build_variant_context(self.product)
         self.assertTrue(colors[0]['img'])
-
-    def test_family_falls_back_to_product_photo(self):
-        ProductImage.objects.create(product=self.p_g, image=_png('prod.png'))
-        _variants, colors, _sizes = build_variant_context(self.p_g)
-        by_code = {c['code']: c for c in colors}
-        self.assertTrue(by_code['G']['img'])
-        self.assertEqual(by_code['N']['img'], '')
-
-    def test_family_swatch_from_admin_image(self):
-        FamilyColorSwatch.objects.create(
-            family=self.family, color_code='G', image=_png('brass.png')
-        )
-        _variants, colors, _sizes = build_variant_context(self.p_g)
-        by_code = {c['code']: c for c in colors}
-        self.assertTrue(by_code['G']['img'])
-        self.assertEqual(by_code['N']['img'], '')
 
     def test_pdp_has_no_family_label(self):
         page = self.client.get(
-            reverse('catalog:product', args=[self.p_g.slug]), follow=True
+            reverse('catalog:product', args=[self.product.slug]), follow=True
         )
         self.assertEqual(page.status_code, 200)
         self.assertNotContains(page, 'Сімʼя')
         self.assertNotContains(page, 'Плашка кольору')
+        self.assertContains(page, 'Колір серцевини')
 
 
-class FamilyAdminTests(TestCase):
+class FamilyAdminGoneTests(TestCase):
     def setUp(self):
         User = get_user_model()
         self.user = User.objects.create_superuser(
@@ -106,7 +78,6 @@ class FamilyAdminTests(TestCase):
         self.client = Client()
         self.client.force_login(self.user)
         self.cat = Category.objects.create(name='Циліндри', slug='cyl-fam-admin')
-        self.family = ProductFamily.objects.create(name='Модель X', slug='model-x')
         self.product = Product.objects.create(
             category=self.cat,
             name='Варіант 70 чорний',
@@ -117,40 +88,11 @@ class FamilyAdminTests(TestCase):
             size_mm=70,
         )
 
-    def test_family_changelist_and_form(self):
-        listing = self.client.get(reverse('admin:catalog_productfamily_changelist'))
-        self.assertEqual(listing.status_code, 200)
-        self.assertContains(listing, 'Модель X')
-        page = self.client.get(
-            reverse('admin:catalog_productfamily_change', args=[self.family.pk])
-        )
-        self.assertEqual(page.status_code, 200)
-        self.assertContains(page, 'Плашки кольорів')
-        self.assertContains(page, 'id_products')
-        self.assertContains(page, 'Варіанти')
+    def test_family_admin_removed(self):
+        with self.assertRaises(NoReverseMatch):
+            reverse('admin:catalog_productfamily_changelist')
 
-    def test_assign_products_from_family_admin(self):
-        url = reverse(
-            'admin:catalog_productfamily_change', args=[self.family.pk]
-        )
-        payload = {
-            'name': self.family.name,
-            'slug': self.family.slug,
-            'brand': '',
-            'short_description': '',
-            'description': '',
-            'products': [str(self.product.pk)],
-            'color_swatches-TOTAL_FORMS': '0',
-            'color_swatches-INITIAL_FORMS': '0',
-            'color_swatches-MIN_NUM_FORMS': '0',
-            'color_swatches-MAX_NUM_FORMS': '3',
-        }
-        response = self.client.post(url, payload)
-        self.assertEqual(response.status_code, 302)
-        self.product.refresh_from_db()
-        self.assertEqual(self.product.family_id, self.family.pk)
-
-    def test_product_admin_hides_family(self):
+    def test_product_admin_has_no_family_field(self):
         page = self.client.get(
             reverse('admin:catalog_product_change', args=[self.product.pk])
         )

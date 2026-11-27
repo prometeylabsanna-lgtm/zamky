@@ -1,4 +1,4 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 {% if form_kind == 'callback' or form_id == 'callback-form' %}
   {% if form and form.non_field_errors %}
   <ul class="cb-modal__errors">
@@ -7,17 +7,17 @@
   {% endif %}
   <div class="cb-modal__fields">
     <label class="cb-field">
-      <span>{% t 'Телефон*' %}</span>
+      <span>{% cms 'site' 'cb_phone' 'Телефон*' %}</span>
       <input type="tel" name="phone" value="{% if form %}{{ form.phone.value|default:'' }}{% endif %}" placeholder="+38 (0__) ___ __ __" maxlength="32" autocomplete="tel" inputmode="tel" data-validate="phone" required>
       <span class="cb-field__err" data-field-error>{% if form and form.phone.errors %}{{ form.phone.errors.0 }}{% endif %}</span>
     </label>
     <label class="cb-field">
-      <span>{% t 'Імʼя' %}</span>
-      <input type="text" name="name" value="{% if form %}{{ form.name.value|default:'' }}{% endif %}" placeholder="{% t 'Олександр' %}" autocomplete="name" data-validate="name-optional" maxlength="120">
+      <span>{% cms 'site' 'cb_name' 'Імʼя' %}</span>
+      <input type="text" name="name" value="{% if form %}{{ form.name.value|default:'' }}{% endif %}" placeholder="{% cms 'site' 'cb_name_ph' 'Олександр' %}" autocomplete="name" data-validate="name-optional" maxlength="120">
       <span class="cb-field__err" data-field-error>{% if form and form.name.errors %}{{ form.name.errors.0 }}{% endif %}</span>
     </label>
     <input type="hidden" name="idempotency_key" value="{% if form and form.idempotency_key.value %}{{ form.idempotency_key.value }}{% else %}{{ callback_idempotency }}{% endif %}" id="callback-idem">
-    <button type="submit" class="cb-modal__submit">{% t 'Передзвоніть мені' %}</button>
+    <button type="submit" class="cb-modal__submit">{% cms 'site' 'cb_submit' 'Передзвоніть мені' %}</button>
   </div>
 {% else %}
   {% if form.non_field_errors %}

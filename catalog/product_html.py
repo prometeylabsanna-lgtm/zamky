@@ -18,8 +18,6 @@ def product_description_html(product, request) -> str:
         ru = (getattr(product, "description_ru", None) or "").strip()
         if ru:
             raw = ru
-    if not raw and getattr(product, "family_id", None):
-        raw = (product.family.description or "").strip()
     html = plain_text_to_html(raw)
     if not _TAGS.sub("", html).strip():
         return ""

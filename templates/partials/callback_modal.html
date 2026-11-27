@@ -1,11 +1,11 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 <dialog class="cb-modal" id="callback-modal" aria-labelledby="cb-modal-title">
   <form class="cb-modal__card" method="post" action="{% url 'pages:callback' %}" id="callback-form" data-validate-form novalidate hx-post="{% url 'pages:callback' %}" hx-target="#callback-form-body" hx-swap="innerHTML">
     {% csrf_token %}
     <div class="cb-modal__head">
       <div>
-        <h2 id="cb-modal-title">{% t 'Замовити дзвінок' %}</h2>
-        <p>{% t 'Залиште номер — передзвонимо протягом 15 хвилин' %}</p>
+        <h2 id="cb-modal-title">{% cms 'site' 'cb_title' 'Замовити дзвінок' %}</h2>
+        <p>{% cms 'site' 'cb_lead' 'Залиште номер — передзвонимо протягом 15 хвилин' %}</p>
       </div>
       <button type="button" class="hdr-icon-btn" data-close-callback aria-label="{% t 'Закрити' %}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n_ui %}
+{% load static i18n_ui cms_tags %}
 
 {% block title %}{{ blog_title|default:page_name }} — {% t 'Замки' %}{% endblock %}
 
@@ -25,7 +25,7 @@
         {% for post in posts %}
         <li>{% include 'pages/partials/blog_card.html' %}</li>
         {% empty %}
-        <li>{% t 'Статті незабаром зʼявляться.' %}</li>
+        <li>{% cms 'blog' 'blog_empty' 'Статті незабаром зʼявляться.' %}</li>
         {% endfor %}
       </ul>
     </div>

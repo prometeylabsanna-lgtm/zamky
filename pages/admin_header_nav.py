@@ -28,13 +28,15 @@ class CmsAdminNumberWidget(forms.NumberInput):
 class HeaderNavLinkForm(forms.ModelForm):
     class Meta:
         model = HeaderNavLink
-        fields = ("key", "name", "name_ru", "url", "sort_order", "is_active")
+        fields = ("key", "name", "name_ru", "url", "sort_order", "in_header", "in_mobile", "is_active")
         widgets = {
             "key": forms.HiddenInput(),
             "name": CmsAdminTextInputWidget(),
             "name_ru": CmsAdminTextInputWidget(),
             "url": CmsAdminTextInputWidget(),
             "sort_order": CmsAdminNumberWidget(),
+            "in_header": UnfoldBooleanWidget(),
+            "in_mobile": UnfoldBooleanWidget(),
             "is_active": UnfoldBooleanWidget(),
         }
 
@@ -50,7 +52,11 @@ class HeaderNavLinkForm(forms.ModelForm):
         self.fields["name_ru"].label = "Назва (RU)"
         self.fields["url"].label = "Посилання"
         self.fields["sort_order"].label = "Порядок"
+        self.fields["in_header"].label = "Під пошуком"
+        self.fields["in_mobile"].label = "У меню телефону"
         self.fields["is_active"].label = "Показувати"
+        self.fields["in_header"].required = False
+        self.fields["in_mobile"].required = False
 
     def clean(self):
         cleaned = super().clean()

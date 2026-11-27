@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load i18n_ui static catalog_tags %}
+{% load i18n_ui cms_tags static catalog_tags %}
 
-{% block title %}{{ title }} — {% t 'Замки' %}{% endblock %}
+{% block title %}{{ title }} — {{ site_settings.site_name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ asset_v }}">
@@ -15,9 +15,9 @@
      data-cur-min="{{ current_price_min }}"
      data-cur-max="{{ current_price_max }}">
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
-    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
+    <a href="{% url 'catalog:home' %}">{% cms 'product' 'crumb_home' 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товарів' %}</a>
+    <a href="{% url 'catalog:catalog' %}">{% cms 'product' 'crumb_catalog' 'Каталог товарів' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <span>{{ title }}</span>
   </nav>
@@ -35,7 +35,7 @@
       </button>
       <div class="dropdown catalog-sort">
         <button type="button" class="sort-btn" data-dropdown-toggle>
-          <span class="sort-btn__prefix" data-sort-prefix>{% t 'Сортування:' %}</span>
+          <span class="sort-btn__prefix" data-sort-prefix>{% cms 'catalog' 'sort_prefix' 'Сортування:' %}</span>
           <span class="sort-btn__label">{{ sort_label }}</span>
           <svg class="sort-btn__chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5l3 3 3-3"></path></svg>
         </button>
@@ -113,15 +113,15 @@
         {% endfor %}
 
         <div class="filter-sku">
-          <div class="filter-sku__title">{% t 'Артикул' %}</div>
+          <div class="filter-sku__title">{% cms 'catalog' 'filter_sku' 'Артикул' %}</div>
           <label class="filter-sku__field">
             <svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="1" width="20" height="14" rx="2.5"></rect><path d="M5 5h1M8 5h1M11 5h1M14 5h1M17 5h0M5 8h1M8 8h1M11 8h1M14 8h1M6 11h10" stroke-linecap="round"></path></svg>
-            <input type="text" name="sku" value="{{ current_sku }}" placeholder="{% t 'Введіть артикул товару' %}" autocomplete="off">
+            <input type="text" name="sku" value="{{ current_sku }}" placeholder="{% cms 'catalog' 'filter_sku_ph' 'Введіть артикул товару' %}" autocomplete="off">
           </label>
         </div>
 
         <div class="filter-price" data-price-range>
-          <div class="filter-price__title">{% t 'Ціна' %}</div>
+          <div class="filter-price__title">{% cms 'catalog' 'filter_price' 'Ціна' %}</div>
           <div class="price-slider" data-price-track>
             <span class="price-slider__rail"></span>
             <span class="price-slider__range" data-price-fill></span>
@@ -129,20 +129,20 @@
             <span class="price-slider__thumb" data-thumb="hi" tabindex="0" role="slider" aria-label="{% t 'Макс. ціна' %}"></span>
           </div>
           <div class="filter-price__inputs">
-            <span class="filter-price__hint">{% t 'Від:' %}</span>
+            <span class="filter-price__hint">{% cms 'catalog' 'filter_from' 'Від:' %}</span>
             <input type="text" inputmode="numeric" name="price_min" value="{{ current_price_min }}" data-price-lo autocomplete="off">
-            <span class="filter-price__hint">{% t 'До:' %}</span>
+            <span class="filter-price__hint">{% cms 'catalog' 'filter_to' 'До:' %}</span>
             <input type="text" inputmode="numeric" name="price_max" value="{{ current_price_max }}" data-price-hi autocomplete="off">
           </div>
         </div>
 
-        <button type="submit" class="btn filters__apply">{% t 'Застосувати фільтри' %}</button>
+        <button type="submit" class="btn filters__apply">{% cms 'catalog' 'filter_apply' 'Застосувати фільтри' %}</button>
         {% if selected_chips %}
         <a href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}{% if current_sort %}?sort={{ current_sort }}{% endif %}"
            class="filters__reset"
            hx-get="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}{% if current_sort %}?sort={{ current_sort }}{% endif %}"
            hx-target="#catalog-grid"
-           hx-push-url="true">{% t 'Скинути фільтри' %}</a>
+           hx-push-url="true">{% cms 'catalog' 'filter_reset' 'Скинути фільтри' %}</a>
         {% endif %}
       </form>
     </aside>
@@ -164,7 +164,7 @@
            href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}{% if current_sort %}?sort={{ current_sort }}{% endif %}"
            hx-get="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:catalog' %}{% endif %}{% if current_sort %}?sort={{ current_sort }}{% endif %}"
            hx-target="#catalog-grid"
-           hx-push-url="true">{% t 'Скинути всі' %}</a>
+           hx-push-url="true">{% cms 'catalog' 'filter_reset_all' 'Скинути всі' %}</a>
       </div>
       {% endif %}
       <div id="catalog-grid">

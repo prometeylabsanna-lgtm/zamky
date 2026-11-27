@@ -36,7 +36,6 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
             {
                 "fields": (
                     "phone",
-                    "phone_raw",
                     "email",
                     "address",
                     "address_ru",
@@ -47,7 +46,7 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
         ),
         (
             "Соцмережі",
-            {"fields": ("instagram_url", "telegram_url", "facebook_url")},
+            {"fields": ("instagram_url", "telegram_url", "viber_url", "facebook_url")},
         ),
         # SEO за замовчуванням перенесено в «Маркетинг → SEO-налаштування»
         # (marketing/0002 копіює значення). Поля meta_* лишаються в БД, не видалені.
@@ -62,9 +61,10 @@ class SiteSettingsAdmin(SingletonModelAdminMixin, ModelAdmin):
         hints = {
             "logo": IMAGE_HINTS["logo"],
             "favicon": IMAGE_HINTS["favicon"],
-            "instagram_url": "Повне посилання з https://.",
-            "telegram_url": "Повне посилання з https://.",
-            "facebook_url": "Повне посилання з https://.",
+            "instagram_url": "Повне посилання з https://. Порожнє — кнопки внизу сайту немає.",
+            "telegram_url": "Повне посилання з https://. Порожнє — кнопки внизу сайту немає.",
+            "facebook_url": "Повне посилання з https://. Порожнє — кнопки внизу сайту немає.",
+            "viber_url": "Повне посилання з https://. Порожнє — кнопки внизу сайту немає.",
         }
         for name, text in hints.items():
             field = form.base_fields.get(name)

@@ -176,3 +176,66 @@ class CatalogChromeSettings(SiteSettings):
         proxy = True
         verbose_name = "Каталог — оболонка"
         verbose_name_plural = "Каталог — оболонка"
+
+
+class CatalogSortSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Каталог — сортування"
+        verbose_name_plural = "Каталог — сортування"
+
+
+class ProductChromeSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Картка товару"
+        verbose_name_plural = "Картка товару"
+
+
+class CartChromeSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Кошик"
+        verbose_name_plural = "Кошик"
+
+
+class WishlistChromeSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Обране"
+        verbose_name_plural = "Обране"
+
+
+class CheckoutChromeSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Оформлення замовлення"
+        verbose_name_plural = "Оформлення замовлення"
+
+
+class SiteCookieSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Файли cookie"
+        verbose_name_plural = "Файли cookie"
+
+
+class SitePhotoSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Підбір за фото"
+        verbose_name_plural = "Підбір за фото"
+
+
+class SiteCallbackSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Замовити дзвінок"
+        verbose_name_plural = "Замовити дзвінок"
+
+
+class BlogLabelsSettings(SiteSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Блог — підписи"
+        verbose_name_plural = "Блог — підписи"

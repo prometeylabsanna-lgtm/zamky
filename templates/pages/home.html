@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n_ui static cms_tags %}
 
-{% block title %}{% if district %}{{ district.h1|tr }}{% else %}{% t 'Замки для дверей та меблів — купити в Києві' %}{% endif %}{% endblock %}
+{% block title %}{% t 'Замки для дверей та меблів — купити в Києві' %}{% endblock %}
 
 {% block extra_css %}
 {% if show_hero and hero_slides %}
@@ -26,20 +26,6 @@
 
 {% block content %}
 <div class="home-v2">
-  {% if district or is_city %}
-  <nav class="home-v2__crumbs breadcrumbs" aria-label="Breadcrumbs">
-    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"></path></svg>
-    {% if district %}
-    <a href="{% url 'catalog:city' %}">{{ site_city.name }}</a>
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"></path></svg>
-    <span>{{ district.name }}</span>
-    {% else %}
-    <span>{{ site_city.name }}</span>
-    {% endif %}
-  </nav>
-  {% endif %}
-
   {% if show_hero %}
   {% include "pages/includes/home_hero.html" %}
   {% endif %}
@@ -143,7 +129,6 @@
     <div class="home-popular__head">
       <div class="home-popular__tabs ic-scroll" role="tablist">
         <button type="button" class="home-popular__tab is-active" role="tab" aria-selected="true" data-pop-tab="hits">{{ popular_tab_hits }}</button>
-        <button type="button" class="home-popular__tab" role="tab" aria-selected="false" data-pop-tab="news">{{ popular_tab_news }}</button>
         <button type="button" class="home-popular__tab" role="tab" aria-selected="false" data-pop-tab="sales">{{ popular_tab_sales }}</button>
       </div>
       <div class="home-popular__arrows">
@@ -162,13 +147,6 @@
         {% endfor %}
       </div>
     </div>
-    <div class="home-popular__panel" data-pop-panel="news" hidden>
-      <div class="home-popular__track ic-scroll" data-pop-track>
-        {% for product in news %}
-        <div class="home-popular__item">{% include 'partials/product_card.html' with home_card=True %}</div>
-        {% endfor %}
-      </div>
-    </div>
     <div class="home-popular__panel" data-pop-panel="sales" hidden>
       <div class="home-popular__track ic-scroll" data-pop-track>
         {% for product in sales %}
@@ -179,10 +157,41 @@
   </section>
   {% endif %}
 
+  {% if show_popular and news %}
+  <section class="home-popular home-news" data-home-carousel aria-roledescription="carousel" aria-label="{{ popular_tab_news }}">
+    <div class="home-carousel__head">
+      <h2 class="home-v2__h2">{{ popular_tab_news }}</h2>
+      <div class="home-carousel__arrows">
+        <button type="button" class="home-icon-btn" data-carousel-prev aria-label="{% t 'Назад' %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"></path></svg>
+        </button>
+        <button type="button" class="home-icon-btn" data-carousel-next aria-label="{% t 'Далі' %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div class="home-popular__track ic-scroll" data-carousel-track>
+      {% for product in news %}
+      <div class="home-popular__item">{% include 'partials/product_card.html' with home_card=True %}</div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   {% if show_blog %}
-  <section class="home-blog" aria-label="{{ blog_title }}">
-    <h2 class="home-v2__h2">{{ blog_title }}</h2>
-    <div class="home-blog__scroll ic-scroll">
+  <section class="home-blog" data-home-carousel aria-roledescription="carousel" aria-label="{{ blog_title }}">
+    <div class="home-carousel__head">
+      <h2 class="home-v2__h2">{{ blog_title }}</h2>
+      <div class="home-carousel__arrows">
+        <button type="button" class="home-icon-btn" data-carousel-prev aria-label="{% t 'Назад' %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"></path></svg>
+        </button>
+        <button type="button" class="home-icon-btn" data-carousel-next aria-label="{% t 'Далі' %}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div class="home-blog__scroll ic-scroll" data-carousel-track>
       {% for post in blog_posts %}
       {% cycle 'img/v2/article1.webp' 'img/v2/p2_34.webp' 'img/v2/p2_35.webp' 'img/v2/p2_36.webp' as blog_cover silent %}
       <a href="{% url 'pages:blog_detail' post.slug %}" class="home-blog-card">
@@ -214,36 +223,6 @@
     </div>
   </section>
   {% endif %}
-
-  {% if district and show_district %}
-  <section class="home-district" aria-label="{% t 'Інформація про район' %}">
-    <div class="home-district__grid">
-      <div class="home-district__seo">
-        <h2>{% t 'Замки в' %} {{ district.name_locative|tr }} {% t 'районі' %} {{ site_city.name_genitive|default:'Києва'|tr }}</h2>
-        <p>{{ district.seo_text|tr }}</p>
-        <div class="home-district__areas">
-          {% for a in district.areas %}
-          <span class="home-district__area">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>
-            {{ a }}
-          </span>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="home-district__others">
-        <h3>{{ district_others_title }}</h3>
-        <div class="home-district__list">
-          {% for o in other_districts %}
-          <a href="{% url 'catalog:district' o.slug %}">
-            <span>{{ o.name|tr }}</span>
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-          </a>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  </section>
-  {% endif %}
 </div>
 
 {% include 'pages/partials/home_photo_modal.html' with photo_pick_form=photo_pick_form %}
@@ -253,4 +232,5 @@
 {% block extra_js %}
 <script src="{% static 'js/home.js' %}?v={{ asset_v }}" defer></script>
 <script src="{% static 'js/home-2.js' %}?v={{ asset_v }}" defer></script>
+<script src="{% static 'js/home-carousel.js' %}?v={{ asset_v }}" defer></script>
 {% endblock %}

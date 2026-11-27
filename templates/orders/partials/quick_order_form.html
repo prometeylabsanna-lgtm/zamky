@@ -1,4 +1,4 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 <form class="pdp-quick__form" data-quick-form data-validate-form
   hx-post="{% url 'orders:quick' product.pk %}"
   hx-target="[data-quick-root]"
@@ -14,8 +14,8 @@
     <span class="field__err" data-field-error>{% if error %}{{ error }}{% endif %}</span>
   </div>
   <input type="hidden" name="quantity" value="1" data-quick-qty>
-  <button type="submit" class="pdp-quick__submit">{% t 'Замовити' %}</button>
+  <button type="submit" class="pdp-quick__submit">{% cms 'product' 'quick_submit' 'Замовити' %}</button>
 </form>
 {% if not error %}
-<p class="pdp-quick__note">{% t 'Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.' %}</p>
+<p class="pdp-quick__note">{% cms 'product' 'quick_note' 'Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.' %}</p>
 {% endif %}

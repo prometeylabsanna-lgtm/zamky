@@ -4,7 +4,11 @@
   <nav class="mnav__panel" aria-label="{% t 'Меню' %}">
     <div class="mnav__head">
       <a href="{% url 'catalog:home' %}" class="hdr-logo">
-        <img src="{% static 'img/logo.webp' %}" alt="{% t 'Центр замків' %}" width="96" height="40" decoding="async" fetchpriority="low">
+        {% if site_settings.logo %}
+        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" width="96" height="40" decoding="async" fetchpriority="low">
+        {% else %}
+        <img src="{% static 'img/logo.webp' %}" alt="{{ site_settings.site_name }}" width="96" height="40" decoding="async" fetchpriority="low">
+        {% endif %}
       </a>
       <button type="button" class="mnav__close" data-close-menu aria-label="{% t 'Закрити' %}">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"></path></svg>
@@ -29,17 +33,10 @@
           </li>
           {% endfor %}
         </ul>
-        <div class="mnav__links mnav__links--grid">
-          <a href="{% url 'pages:info_page' 'promos' %}">{% t 'Акції' %}</a>
-          <a href="{% url 'pages:info_page' 'install' %}">{% t 'Установка' %}</a>
-        </div>
         <div class="mnav__links">
-          <a href="{% url 'cart:wishlist_page' %}">{% t 'Обране' %}</a>
-          <a href="{% url 'pages:info_page' 'delivery' %}">{% t 'Доставка та оплата' %}</a>
-          <a href="{% url 'pages:info_page' 'warranty' %}">{% t 'Гарантія' %}</a>
-          <a href="{% url 'pages:blog_list' %}">{% t 'Корисне для вибору' %}</a>
-          <a class="mnav__links--muted" href="{% url 'pages:info_page' 'offer' %}">{% t 'Публічна оферта' %}</a>
-          <a class="mnav__links--muted" href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
+          {% for item in header_nav_mobile %}
+          <a href="{{ item.href }}">{{ item.name }}</a>
+          {% endfor %}
         </div>
         <div class="mnav__phones">
           <span class="mnav__phones-label">{% t 'Контакти' %}</span>

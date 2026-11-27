@@ -1,14 +1,14 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 {% if cookie_consent != 'all' and cookie_consent != 'necessary' %}
 <aside id="cookie-banner" class="cookie-banner" role="region" aria-labelledby="cookie-banner-title">
   <div class="cookie-banner__inner">
     <p id="cookie-banner-title" class="cookie-banner__text">
-      {% t 'Ми використовуємо файли cookie для роботи сайту та аналітики.' %}
+      {% cms 'site' 'cookie_text' 'Ми використовуємо файли cookie для роботи сайту та аналітики.' %}
       <a class="cookie-banner__link" href="{% url 'pages:info_page' 'privacy' %}">{% t 'Політика конфіденційності' %}</a>
     </p>
     <div class="cookie-banner__actions">
-      <button type="button" class="btn cookie-banner__btn" data-cookie-consent="all">{% t 'Прийняти' %}</button>
-      <button type="button" class="btn btn--ghost cookie-banner__btn" data-cookie-consent="necessary">{% t 'Лише необхідні' %}</button>
+      <button type="button" class="btn cookie-banner__btn" data-cookie-consent="all">{% cms 'site' 'cookie_accept' 'Прийняти' %}</button>
+      <button type="button" class="btn btn--ghost cookie-banner__btn" data-cookie-consent="necessary">{% cms 'site' 'cookie_necessary' 'Лише необхідні' %}</button>
     </div>
   </div>
 </aside>

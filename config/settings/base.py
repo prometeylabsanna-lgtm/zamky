@@ -149,9 +149,6 @@ NOVA_POSHTA_API_URL = config(
     default='https://api.novaposhta.ua/v2.0/json/',
 )
 
-DISTRICTS_JSON = BASE_DIR / 'config' / 'districts.json'
-
-
 def _content_sidebar_groups():
     from pages.site_content_registry import build_content_sidebar_groups
 
@@ -307,9 +304,9 @@ UNFOLD = {
                         'link': _admin_link('catalog/review/'),
                     },
                     {
-                        'title': 'Сімʼї',
-                        'icon': 'account_tree',
-                        'link': _admin_link('catalog/productfamily/'),
+                        'title': 'Оболонка',
+                        'icon': 'storefront',
+                        'link': _admin_link('pages/catalogchromesettings/'),
                     },
                 ],
             },
@@ -327,33 +324,6 @@ UNFOLD = {
                         'title': 'Швидкі замовлення',
                         'icon': 'bolt',
                         'link': _admin_link('orders/quickorder/'),
-                    },
-                    {
-                        'title': 'Райони доставки',
-                        'icon': 'map',
-                        'link': _admin_link('orders/deliverydistrict/'),
-                    },
-                ],
-            },
-            {
-                'title': 'Нова Пошта',
-                'separator': True,
-                'collapsible': True,
-                'items': [
-                    {
-                        'title': 'Відділення НП',
-                        'icon': 'local_shipping',
-                        'link': _admin_link('novaposhta/npwarehouse/'),
-                    },
-                    {
-                        'title': 'Міста НП',
-                        'icon': 'location_city',
-                        'link': _admin_link('novaposhta/npcity/'),
-                    },
-                    {
-                        'title': 'Синхронізації НП',
-                        'icon': 'sync',
-                        'link': _admin_link('novaposhta/npsyncrun/'),
                     },
                 ],
             },

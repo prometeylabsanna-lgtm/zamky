@@ -6,7 +6,6 @@ from django.test import TestCase
 
 from catalog.models import Category, Product
 from marketing.models import SeoSettings
-from orders.models import DeliveryDistrict
 from pages.models_extra import BlogPost
 
 
@@ -95,12 +94,6 @@ class SeoNoindexCanonicalTests(TestCase):
         seo = SeoSettings.load()
         seo.primary_domain = "https://zamky.example"
         seo.save()
-        DeliveryDistrict.objects.create(
-            slug="obolon",
-            name="Оболонський",
-            short="Оболонь",
-            is_active=True,
-        )
         Category.objects.create(name="Каталог", slug="cat-seo")
 
     def _head(self, url):
@@ -116,16 +109,11 @@ class SeoNoindexCanonicalTests(TestCase):
         self.assertIn("noindex", head)
         self.assertNotIn("nofollow", head.split("noindex")[1][:40])
 
-    def test_district_noindex_without_canonical(self):
-        head = self._head("/ua/kyiv/obolon/")
-        self.assertIn("noindex", head)
-        self.assertNotIn('rel="canonical"', head)
-        self.assertNotIn('hreflang="uk"', head)
-
-    def test_city_noindex(self):
-        head = self._head("/ua/kyiv/")
-        self.assertIn("noindex", head)
-        self.assertNotIn('rel="canonical"', head)
+    def test_kyiv_urls_are_gone(self):
+        city = self.client.get("/ua/kyiv/")
+        self.assertEqual(city.status_code, 404)
+        district = self.client.get("/ua/kyiv/obolon/")
+        self.assertEqual(district.status_code, 404)
 
     def test_search_noindex_without_canonical_to_listing(self):
         head = self._head("/ua/catalog/?q=замок")

@@ -229,6 +229,11 @@
     height: 48px;
   }
 
+  .home-carousel__arrows .home-icon-btn {
+    width: 48px;
+    height: 48px;
+  }
+
   .home-audience {
     margin-top: 12px;
     gap: 12px;

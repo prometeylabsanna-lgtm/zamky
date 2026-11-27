@@ -17,7 +17,7 @@ POPULAR_TYPE_ROOT = TYPE_ROOT_NAMES[5]
 
 POPULAR_TABS: tuple[tuple[str, str], ...] = (
     (HomePopularProduct.Tab.HITS, "Вкладка «Хіти»"),
-    (HomePopularProduct.Tab.NEWS, "Вкладка «Новинки»"),
+    (HomePopularProduct.Tab.NEWS, "Карусель «Новинки»"),
     (HomePopularProduct.Tab.SALES, "Вкладка «Знижки»"),
 )
 
@@ -65,9 +65,6 @@ def _root_key(product) -> str:
 
 
 def _product_name_key(product) -> str:
-    family_id = getattr(product, "family_id", None)
-    if family_id:
-        return f"f:{family_id}"
     return (product.name or "").strip() or f"id:{product.pk}"
 
 

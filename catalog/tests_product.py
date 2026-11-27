@@ -18,7 +18,6 @@ from catalog.models import (
     Category,
     Product,
     ProductAttribute,
-    ProductFamily,
     Review,
 )
 from orders.models import QuickOrder
@@ -35,12 +34,7 @@ class ProductPageTests(TestCase):
             measure_text=MEASURE_TEXT_UA,
             measure_text_ru=MEASURE_TEXT_RU,
         )
-        self.family = ProductFamily.objects.create(
-            name='ABARO B100',
-            slug='abaro-b100',
-            brand='ABARO',
-            description='Абзац один.\n\nАбзац два.\n\nАбзац три.',
-        )
+        self.desc = 'Абзац один.\n\nАбзац два.\n\nАбзац три.'
         group = AttributeGroup.objects.create(name='Загальне', slug='zagalne', sort_order=1)
         brand_attr = Attribute.objects.create(
             name='Бренд', slug='brand', group=group, filterable=True, sort_order=1
@@ -55,7 +49,6 @@ class ProductPageTests(TestCase):
                 sku = f'ABR-B100-{size}-{color}'
                 p = Product.objects.create(
                     category=self.cat,
-                    family=self.family,
                     name=f'Циліндр ABARO B100 {size} ({a}*{b}) {label}',
                     slug=sku.lower(),
                     sku=sku,
@@ -69,7 +62,7 @@ class ProductPageTests(TestCase):
                     size_mm=size,
                     size_a=a,
                     size_b=b,
-                    description=self.family.description,
+                    description=self.desc,
                 )
                 ProductAttribute.objects.create(product=p, attribute_value=self.av_brand)
                 self.variants.append(p)
@@ -154,9 +147,10 @@ class ProductPageTests(TestCase):
         response = self.client.get(reverse('catalog:product', args=[self.product.slug]))
         colors = response.context['variant_colors']
         sizes = response.context['variant_sizes']
-        self.assertEqual(len(colors), 2)
-        self.assertEqual(len(sizes), 2)
-        self.assertIn('Нікель', [c['label'] for c in colors])
+        self.assertEqual(len(colors), 1)
+        self.assertEqual(len(sizes), 1)
+        self.assertEqual(colors[0]['code'], self.product.color_code)
+        self.assertEqual(sizes[0]['len'], self.product.size_mm)
 
     def test_solo_product_shows_core_color(self):
         solo = Product.objects.create(
@@ -300,10 +294,16 @@ class ProductPageTests(TestCase):
         self.assertNotContains(page, 'Безопасность и комплектация')
 
     def test_color_code_sets_label(self):
+        self.product.color_label = ''
         self.product.color_code = 'N'
         self.product.save()
         self.product.refresh_from_db()
         self.assertEqual(self.product.color_label, 'Нікель')
+        self.product.color_label = 'антична латунь'
+        self.product.color_code = 'G'
+        self.product.save()
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.color_label, 'антична латунь')
         self.product.color_code = ''
         self.product.color_label = 'чорний'
         self.product.description = 'Звичайний текст'
@@ -473,7 +473,7 @@ class ProductAdminColorTests(TestCase):
         catalog = next(g for g in nav if g.get('title') == 'Каталог')
         titles = [item['title'] for item in catalog['items']]
         self.assertIn('Характеристики', titles)
-        self.assertIn('Сімʼї', titles)
+        self.assertNotIn('Сімʼї', titles)
         self.assertNotIn('Групи фільтрів', titles)
         self.assertNotIn('Значення фільтрів', titles)
         factory = RequestFactory()

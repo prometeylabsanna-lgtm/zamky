@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load i18n_ui static %}
+{% load i18n_ui cms_tags static %}
 
-{% block title %}{% t 'Обране' %} — {% t 'Центр замків' %}{% endblock %}
+{% block title %}{% cms 'wishlist' 'wish_title' 'Обране' %} — {{ site_settings.site_name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/wishlist.css' %}?v={{ asset_v }}">
@@ -11,7 +11,7 @@
 <section class="wishlist-page">
   <div class="wishlist-page__inner">
     <header class="wishlist-page__head">
-      <h1 class="wishlist-page__title">{% t 'Обране' %}</h1>
+      <h1 class="wishlist-page__title">{% cms 'wishlist' 'wish_title' 'Обране' %}</h1>
       {% if products %}
       <p class="wishlist-page__count" data-wishlist-count-label>{{ products|length }}</p>
       {% endif %}

@@ -27,10 +27,19 @@ class HeroCtaTests(TestCase):
         start = html.index('class="home-hero__overlay"')
         return html[start: html.index("</section>", start)]
 
-    def test_fallback_texts_and_urls(self):
+    def test_empty_labels_hide_buttons(self):
         cta = self._cta_html()
         self.assertEqual(cta.count("data-hero-cta"), 2)
-        self.assertEqual(cta.count("Перейти до каталогу"), 2)
+        self.assertNotIn("Перейти до каталогу", cta)
+        self.assertNotIn("Підібрати замок за 2 хв", cta)
+        self.assertNotIn("home-hero__cta-link", cta)
+        self.s1.cta_primary_label = "Перейти до каталогу"
+        self.s1.cta_secondary_label = "Підібрати замок за 2 хв"
+        self.s1.show_secondary = True
+        self.s1.save()
+        cta = self._cta_html()
+        self.assertEqual(cta.count("Перейти до каталогу"), 1)
+        self.assertEqual(cta.count("Підібрати замок за 2 хв"), 1)
         self.assertIn('href="/ua/catalog/"', cta)
         self.assertIn('href="#picker"', cta)
         self.assertEqual(cta.count("data-hero-cta hidden"), 1)
@@ -44,7 +53,7 @@ class HeroCtaTests(TestCase):
         self.s2.show_secondary = True
         self.s2.save()
         cta = self._cta_html()
-        self.assertIn("Перейти до каталогу", cta)  # слайд 1 — фолбек
+        self.assertNotIn("Перейти до каталогу", cta)
         self.assertIn("Акція −20%", cta)
         self.assertIn('href="/ua/catalog/cyl/"', cta)
         self.assertIn('href="tel:+380441234567"', cta)
@@ -114,6 +123,8 @@ class HeroCtaTests(TestCase):
         self.assertIn('name="hero_slides-TOTAL_FORMS"', html[start:end])
 
     def test_hero_overlay_is_html_not_image_only(self):
+        self.s1.cta_primary_label = "До каталогу"
+        self.s1.save()
         html = self.client.get("/ua/").content.decode()
         self.assertIn("home-hero__overlay", html)
         self.assertIn("home-hero__cta-link", html)

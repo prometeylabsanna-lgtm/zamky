@@ -8,9 +8,13 @@ from pages.site_content_registry_base import ContentSection
 from pages.site_content_registry_home import CONTENT_SECTIONS_HOME
 from pages.site_content_registry_pages import CONTENT_SECTIONS_PAGES
 from pages.site_content_registry_pages_2 import CONTENT_SECTIONS_PAGES_2
+from pages.site_content_registry_shop import CONTENT_SECTIONS_SHOP
 
 CONTENT_SECTIONS: tuple[ContentSection, ...] = (
-    CONTENT_SECTIONS_HOME + CONTENT_SECTIONS_PAGES + CONTENT_SECTIONS_PAGES_2
+    CONTENT_SECTIONS_HOME
+    + CONTENT_SECTIONS_PAGES
+    + CONTENT_SECTIONS_PAGES_2
+    + CONTENT_SECTIONS_SHOP
 )
 
 _SIDEBAR_GROUPS: tuple[tuple[str, frozenset[str]], ...] = (
@@ -33,7 +37,7 @@ _SIDEBAR_GROUPS: tuple[tuple[str, frozenset[str]], ...] = (
             }
         ),
     ),
-    ("Каталог (CMS)", frozenset({"catalog", "product"})),
+    ("Магазин", frozenset({"catalog", "product", "cart"})),
 )
 
 _TITLE_PREFIXES = (

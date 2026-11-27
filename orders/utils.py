@@ -31,31 +31,61 @@ COLOR_SWATCH = {
 }
 
 
+def cms_checkout(key: str) -> str:
+    from pages.cms_content import get_block_text
+    from pages.i18n_lib import site_lang_code
+
+    return get_block_text('checkout', key, lang=site_lang_code())
+
+
+def cms_price(key: str, fallback: str) -> Decimal:
+    raw = (cms_checkout(key) or fallback).replace(' ', '').replace(',', '.')
+    try:
+        return Decimal(raw)
+    except (InvalidOperation, ValueError):
+        return Decimal(fallback)
+
+
 def delivery_meta():
     return {
         'np': {
-            'note': tr('Відділення або поштомат · 1–2 дні'),
-            'addr_label': tr('Відділення / поштомат'),
-            'addr_ph': tr('№ відділення'),
+            'title': cms_checkout('ship_np'),
+            'note': cms_checkout('ship_np_note'),
+            'addr_label': cms_checkout('ship_np_addr'),
+            'addr_ph': cms_checkout('ship_np_addr_ph'),
+            'price': cms_price('ship_np_price', '80'),
         },
         'courier': {
-            'note': tr('В день замовлення'),
-            'addr_label': tr('Адреса'),
-            'addr_ph': tr('Вулиця, будинок, квартира'),
+            'title': cms_checkout('ship_courier'),
+            'note': cms_checkout('ship_courier_note'),
+            'addr_label': cms_checkout('ship_courier_addr'),
+            'addr_ph': cms_checkout('ship_courier_addr_ph'),
+            'price': cms_price('ship_courier_price', '150'),
         },
         'pickup': {
-            'note': tr('З магазину в Києві · сьогодні'),
+            'title': cms_checkout('ship_pickup'),
+            'note': cms_checkout('ship_pickup_note'),
             'addr_label': '',
             'addr_ph': '',
+            'price': cms_price('ship_pickup_price', '0'),
         },
     }
 
 
 def payment_meta():
     return {
-        'card': {'note': 'Visa, Mastercard, Apple Pay, Google Pay'},
-        'cod': {'note': tr('Оплата при отриманні')},
-        'invoice': {'note': tr('Рахунок для юридичних осіб')},
+        'card': {
+            'title': cms_checkout('pay_card'),
+            'note': cms_checkout('pay_card_note'),
+        },
+        'cod': {
+            'title': cms_checkout('pay_cod'),
+            'note': cms_checkout('pay_cod_note'),
+        },
+        'invoice': {
+            'title': cms_checkout('pay_invoice'),
+            'note': cms_checkout('pay_invoice_note'),
+        },
     }
 
 

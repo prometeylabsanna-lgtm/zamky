@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from catalog.models import Product
 from config.redirects import safe_next_url
 from orders.models import Order
-from orders.services import DELIVERY_PRICES
+from orders.services import delivery_prices
 
 from .services import CartError, CartService, WishlistService
 
@@ -117,8 +117,9 @@ class CartUpdateView(View):
             page = request.POST.get('page')
             if page in {'checkout', 'cart'}:
                 delivery_method = request.POST.get('delivery_method') or Order.DeliveryMethod.NP
-                delivery_price = DELIVERY_PRICES.get(
-                    delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP]
+                prices = delivery_prices()
+                delivery_price = prices.get(
+                    delivery_method, prices[Order.DeliveryMethod.NP]
                 )
                 context.update(
                     {

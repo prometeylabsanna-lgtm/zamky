@@ -24,8 +24,6 @@ TRACKING_PARAMS = frozenset(
 
 NOINDEX_ROUTES = frozenset(
     {
-        ("catalog", "city"),
-        ("catalog", "district"),
         ("catalog", "api_picker"),
         ("catalog", "api_search"),
         ("catalog", "product_review"),
@@ -37,7 +35,6 @@ NOINDEX_ROUTES = frozenset(
         ("cart", "wishlist"),
         ("orders", "checkout"),
         ("orders", "success"),
-        ("orders", "set_district"),
         ("orders", "quick"),
         ("orders", "pay_wait"),
         ("orders", "pay_return"),
@@ -49,7 +46,6 @@ NOINDEX_ROUTES = frozenset(
     }
 )
 NOINDEX_URL_NAMES = frozenset({"set_lang"})
-SKIP_CANONICAL_ROUTES = frozenset({("catalog", "city"), ("catalog", "district")})
 CATALOG_LISTING = frozenset({("catalog", "catalog"), ("catalog", "category")})
 HREFLANG_MAP = {"ua": "uk", "ru": "ru"}
 LANG_PREFIX_RE = re.compile(r"^/(ua|uk|ru)(?=/|$)")
@@ -87,10 +83,7 @@ def page_index_policy(request) -> IndexPolicy:
         return IndexPolicy()
     ns, name = route_of(request)
     if name in NOINDEX_URL_NAMES or (ns, name) in NOINDEX_ROUTES:
-        return IndexPolicy(
-            noindex=True,
-            skip_canonical=(ns, name) in SKIP_CANONICAL_ROUTES,
-        )
+        return IndexPolicy(noindex=True)
     if is_search_request(request):
         return IndexPolicy(noindex=True, skip_canonical=True)
     if has_index_noise_query(request):

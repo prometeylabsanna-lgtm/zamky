@@ -31,11 +31,11 @@
 
 ## Canonical
 
-`primary_domain + request.path` (без query/utm, trailing slash як у Django-URL). `Product.canonical_url` — лише перевизначення (https:// або /шлях). canonical = og:url. `/ua/info/` канонікалізується на `/ua/info/about/`. Пошук (`?q=`, `?sku=`) і сторінки районів/міста **без canonical**. Фільтри/сортування/пагінація: canonical на чистий path.
+`primary_domain + request.path` (без query/utm, trailing slash як у Django-URL). `Product.canonical_url` — лише перевизначення (https:// або /шлях). canonical = og:url. `/ua/info/` канонікалізується на `/ua/info/about/`. Пошук (`?q=`, `?sku=`) **без canonical**. Фільтри/сортування/пагінація: canonical на чистий path.
 
 ## noindex
 
-Сторінковий `noindex, follow`: кошик, обране, чекаут, замовлення, API, submit-форми, `/kyiv/`, пошук, фасети (`sort`, ціна, атрибути, `limit`, `page`). Глобальний прапор лишається `noindex, nofollow`. `robots.txt` не отримує `Disallow: /`.
+Сторінковий `noindex, follow`: кошик, обране, чекаут, замовлення, API, submit-форми, пошук, фасети (`sort`, ціна, атрибути, `limit`, `page`). Сторінок `/kyiv/` немає. Глобальний прапор лишається `noindex, nofollow`. `robots.txt` не отримує `Disallow: /`.
 
 ## Sitemap і llms.txt
 

@@ -183,11 +183,21 @@ class SitePageContentForm(forms.Form):
                 help_text=help_text,
                 widget=widget,
             )
+            ru_help = RU_HINT
+            if help_text and key in {
+                "stock_note_low",
+                "chk_done_title",
+                "chk_done_text",
+                "ship_np_price",
+                "ship_courier_price",
+                "ship_pickup_price",
+            }:
+                ru_help = f"{help_text} {RU_HINT}"
             self.fields[f"block__{page}__{key}__text_html_ru"] = forms.CharField(
                 required=False,
                 initial=getattr(block, "text_html_ru", "") or "",
                 label=f"{label} (RU)",
-                help_text=RU_HINT,
+                help_text=ru_help,
                 widget=ru_widget,
             )
             if not is_richtext_key(page, key):

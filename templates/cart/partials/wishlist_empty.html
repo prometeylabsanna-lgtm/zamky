@@ -1,6 +1,6 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 <div class="wishlist-empty">
-  <p class="wishlist-empty__title">{% t 'У обраному поки порожньо' %}</p>
-  <p class="wishlist-empty__text">{% t 'Додавайте товари серцем на картках — збережемо їх тут.' %}</p>
-  <a href="{% url 'catalog:catalog' %}" class="btn">{% t 'До каталогу' %}</a>
+  <p class="wishlist-empty__title">{% cms 'wishlist' 'wish_empty_title' 'У обраному поки порожньо' %}</p>
+  <p class="wishlist-empty__text">{% cms 'wishlist' 'wish_empty_text' 'Додавайте товари серцем на картках — збережемо їх тут.' %}</p>
+  <a href="{% url 'catalog:catalog' %}" class="btn">{% cms 'wishlist' 'wish_cta' 'До каталогу' %}</a>
 </div>

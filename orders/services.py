@@ -12,11 +12,14 @@ from catalog.models import Product
 from .models import Order, OrderItem
 from .payments import online_payment_enabled
 
-DELIVERY_PRICES = {
-    Order.DeliveryMethod.NP: Decimal('80'),
-    Order.DeliveryMethod.COURIER: Decimal('150'),
-    Order.DeliveryMethod.PICKUP: Decimal('0'),
-}
+def delivery_prices():
+    from .utils import cms_price
+
+    return {
+        Order.DeliveryMethod.NP: cms_price('ship_np_price', '80'),
+        Order.DeliveryMethod.COURIER: cms_price('ship_courier_price', '150'),
+        Order.DeliveryMethod.PICKUP: cms_price('ship_pickup_price', '0'),
+    }
 
 
 class CheckoutError(Exception):
@@ -87,7 +90,7 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
         raise CheckoutError('Кошик порожній.')
 
     delivery_method = cleaned_data['delivery_method']
-    delivery_price = DELIVERY_PRICES.get(delivery_method, Decimal('0'))
+    delivery_price = delivery_prices().get(delivery_method, Decimal('0'))
     subtotal = sum((item['line_total'] for item in items), Decimal('0'))
     payment_method = cleaned_data['payment_method']
     card_online = payment_method == Order.PaymentMethod.CARD and online_payment_enabled()
@@ -99,23 +102,18 @@ def _create_order_from_cart(request, cleaned_data, idempotency_key):
         status = Order.Status.NEW
         reserved_until = None
 
-    city = (cleaned_data.get('city') or '').strip()
-    address = (cleaned_data.get('address') or '').strip()
-    if city and address:
-        full_address = f'{city}, {address}'
-    else:
-        full_address = city or address
-    full_address = (full_address or '')[:300]
+    city = (cleaned_data.get('city') or '').strip()[:120]
+    address = (cleaned_data.get('address') or '').strip()[:300]
 
     order = Order.objects.create(
         first_name=cleaned_data['first_name'],
         last_name=cleaned_data.get('last_name', ''),
         phone=cleaned_data['phone'],
         email=cleaned_data.get('email', ''),
-        district=cleaned_data.get('district'),
+        city=city,
         delivery_method=delivery_method,
         payment_method=payment_method,
-        address=full_address,
+        address=address,
         np_city_ref=(cleaned_data.get('np_city_ref') or '')[:36],
         np_warehouse_ref=(cleaned_data.get('np_warehouse_ref') or '')[:36],
         np_warehouse_snapshot=(cleaned_data.get('np_warehouse_snapshot') or '')[:300],

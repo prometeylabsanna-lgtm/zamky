@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n_ui static checkout_tags %}
+{% load i18n_ui cms_tags static checkout_tags %}
 
 {% block title %}{{ wait_title }}{% endblock %}
 
@@ -43,15 +43,15 @@
     </div>
     <h2 class="checkout-done__title">{{ wait_title }}</h2>
     {% if cancelled %}
-    <p class="checkout-done__text">{% t 'Час на оплату минув. Товар повернуто в каталог. Оформіть замовлення ще раз, якщо товар ще є в наявності.' %}</p>
+    <p class="checkout-done__text">{% cms 'checkout' 'pay_wait_expired' 'Час на оплату минув. Товар повернуто в каталог. Оформіть замовлення ще раз, якщо товар ще є в наявності.' %}</p>
     {% elif awaiting and not online_enabled and not stub_enabled %}
-    <p class="checkout-done__text">{% t 'Онлайн-оплата тимчасово недоступна. Менеджер звʼяжеться з вами, щоб узгодити оплату.' %}</p>
+    <p class="checkout-done__text">{% cms 'checkout' 'pay_wait_off' 'Онлайн-оплата тимчасово недоступна. Менеджер звʼяжеться з вами, щоб узгодити оплату.' %}</p>
     {% else %}
-    <p class="checkout-done__text">{% t 'Оплатіть замовлення карткою протягом 30 хвилин. Якщо оплату не підтвердять, товар повернеться в каталог.' %}</p>
+    <p class="checkout-done__text">{% cms 'checkout' 'pay_wait_pending' 'Оплатіть замовлення карткою протягом 30 хвилин. Якщо оплату не підтвердять, товар повернеться в каталог.' %}</p>
     {% endif %}
     <div class="checkout-done__meta">
-      <span>{% t 'Номер' %}: <strong>{{ order.number }}</strong></span>
-      <span>{% t 'Сума' %}: <strong>{{ order.total|uah }}</strong></span>
+      <span>{% cms 'checkout' 'pay_wait_number' 'Номер' %}: <strong>{{ order.number }}</strong></span>
+      <span>{% cms 'checkout' 'pay_wait_sum' 'Сума' %}: <strong>{{ order.total|uah }}</strong></span>
     </div>
     <div class="checkout-pay-actions">
       {% if stub_enabled %}
@@ -60,7 +60,7 @@
         <button type="submit" class="checkout-pay-stub">{% t 'Оплатити (тест)' %}</button>
       </form>
       {% endif %}
-      <a href="{% url 'catalog:catalog' %}" class="btn">{% t 'До каталогу' %}</a>
+      <a href="{% url 'catalog:catalog' %}" class="btn">{% cms 'checkout' 'pay_wait_catalog' 'До каталогу' %}</a>
     </div>
   </div>
 </div>

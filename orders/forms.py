@@ -6,7 +6,7 @@ from django.utils.translation import get_language
 from config.validators import clean_person_name, clean_ua_phone
 from pages.i18n_lib import tr, tr_lazy
 
-from .models import DeliveryDistrict, Order
+from .models import Order
 
 logger = logging.getLogger(__name__)
 
@@ -73,13 +73,6 @@ class CheckoutForm(forms.Form):
             }
         ),
     )
-    district = forms.ModelChoiceField(
-        label=tr_lazy('Район'),
-        queryset=DeliveryDistrict.objects.filter(is_active=True),
-        required=False,
-        empty_label=tr_lazy('Київ — усе місто'),
-        widget=forms.HiddenInput(),
-    )
     delivery_method = forms.ChoiceField(
         label=tr_lazy('Доставка'),
         choices=Order.DeliveryMethod.choices,
@@ -129,7 +122,6 @@ class CheckoutForm(forms.Form):
         self.fields['comment'].widget.attrs['placeholder'] = tr(
             'Наприклад, зручний час для дзвінка'
         )
-        self.fields['district'].empty_label = tr('Київ — усе місто')
         self.fields['delivery_method'].choices = [
             (v, tr(lbl)) for v, lbl in Order.DeliveryMethod.choices
         ]

@@ -179,7 +179,6 @@ class CheckoutTests(TestCase):
                 'phone': '0670000000',
                 'email': '',
                 'city': '',
-                'district': None,
                 'delivery_method': 'pickup',
                 'payment_method': 'cod',
                 'address': '',
@@ -241,13 +240,28 @@ class CheckoutTests(TestCase):
         denied = other.get(reverse('orders:success', args=[order.number]))
         self.assertEqual(denied.status_code, 404)
 
-    def test_district_open_redirect_blocked(self):
+    def test_checkout_keeps_city_apart_from_address(self):
+        self._add_to_cart(1)
+        key = 'idem-city-split'
+        session = self.client.session
+        session['checkout_idempotency'] = key
+        session.save()
         response = self.client.post(
-            reverse('orders:set_district'),
-            {'slug': '', 'next': 'https://evil.example/phish'},
+            reverse('orders:checkout') + '?step=checkout',
+            {
+                'first_name': 'Олег',
+                'phone': '0670000003',
+                'delivery_method': 'courier',
+                'payment_method': 'cod',
+                'city': 'Львів',
+                'address': 'вул. Тестова 1',
+                'idempotency_key': key,
+            },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertNotIn('evil.example', response['Location'])
+        order = Order.objects.get(idempotency_key=key)
+        self.assertEqual(order.city, 'Львів')
+        self.assertEqual(order.address, 'вул. Тестова 1')
 
     def test_quick_order_blocks_oos(self):
         self.product.stock = 0

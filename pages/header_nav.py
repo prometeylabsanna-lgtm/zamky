@@ -78,6 +78,8 @@ DEFAULT_HEADER_NAV: tuple[dict[str, object], ...] = (
         "name_ru": "Акции",
         "url": "/ua/info/promos/",
         "sort_order": 7,
+        "in_header": True,
+        "in_mobile": True,
     },
     {
         "key": "install",
@@ -85,6 +87,62 @@ DEFAULT_HEADER_NAV: tuple[dict[str, object], ...] = (
         "name_ru": "Установка",
         "url": "/ua/info/install/",
         "sort_order": 8,
+        "in_header": True,
+        "in_mobile": True,
+    },
+    {
+        "key": "wishlist",
+        "name": "Обране",
+        "name_ru": "Избранное",
+        "url": "/ua/cart/wishlist/",
+        "sort_order": 9,
+        "in_header": False,
+        "in_mobile": True,
+    },
+    {
+        "key": "delivery",
+        "name": "Доставка та оплата",
+        "name_ru": "Доставка и оплата",
+        "url": "/ua/info/delivery/",
+        "sort_order": 10,
+        "in_header": False,
+        "in_mobile": True,
+    },
+    {
+        "key": "warranty",
+        "name": "Гарантія",
+        "name_ru": "Гарантия",
+        "url": "/ua/info/warranty/",
+        "sort_order": 11,
+        "in_header": False,
+        "in_mobile": True,
+    },
+    {
+        "key": "blog",
+        "name": "Корисне для вибору",
+        "name_ru": "Полезное для выбора",
+        "url": "/ua/info/blog/",
+        "sort_order": 12,
+        "in_header": False,
+        "in_mobile": True,
+    },
+    {
+        "key": "offer",
+        "name": "Публічна оферта",
+        "name_ru": "Публичная оферта",
+        "url": "/ua/info/offer/",
+        "sort_order": 13,
+        "in_header": False,
+        "in_mobile": True,
+    },
+    {
+        "key": "privacy",
+        "name": "Політика конфіденційності",
+        "name_ru": "Политика конфиденциальности",
+        "url": "/ua/info/privacy/",
+        "sort_order": 14,
+        "in_header": False,
+        "in_mobile": True,
     },
 )
 
@@ -113,9 +171,45 @@ def nav_style(url: str, key: str = "") -> str:
     return "link"
 
 
-def _write_header_link(item: dict[str, object]) -> HeaderNavLink:
+def _place_columns_ready() -> bool:
+    from django.db import connection
+
+    table = HeaderNavLink._meta.db_table
+    with connection.cursor() as cursor:
+        names = {
+            col.name
+            for col in connection.introspection.get_table_description(cursor, table)
+        }
+    return "in_header" in names and "in_mobile" in names
+
+
+def _raw_insert_link(item: dict[str, object]) -> None:
+    from django.db import connection
+
     url = _nav_url(item)
-    obj, _created = HeaderNavLink.objects.update_or_create(
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"SELECT id FROM {HeaderNavLink._meta.db_table} WHERE key = %s",
+            [item["key"]],
+        )
+        if cursor.fetchone():
+            return
+        cursor.execute(
+            f"""
+            INSERT INTO {HeaderNavLink._meta.db_table}
+                (key, name, name_ru, url, sort_order, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            [item["key"], item["name"], item["name_ru"], url, item["sort_order"], True],
+        )
+
+
+def _create_header_link(item: dict[str, object]) -> bool:
+    if not _place_columns_ready():
+        _raw_insert_link(item)
+        return False
+    url = _nav_url(item)
+    _obj, created = HeaderNavLink.objects.get_or_create(
         key=item["key"],
         defaults={
             "name": item["name"],
@@ -123,30 +217,42 @@ def _write_header_link(item: dict[str, object]) -> HeaderNavLink:
             "url": url,
             "sort_order": item["sort_order"],
             "is_active": True,
+            "in_header": bool(item.get("in_header", True)),
+            "in_mobile": bool(item.get("in_mobile", False)),
         },
     )
-    return obj
+    return created
 
 
 def sync_default_header_nav() -> int:
     keep = {item["key"] for item in DEFAULT_HEADER_NAV}
+    if not _place_columns_ready():
+        for item in DEFAULT_HEADER_NAV:
+            _raw_insert_link(item)
+        return len(DEFAULT_HEADER_NAV)
     for item in DEFAULT_HEADER_NAV:
-        _write_header_link(item)
+        _create_header_link(item)
     HeaderNavLink.objects.exclude(key__in=keep).delete()
     return len(DEFAULT_HEADER_NAV)
 
 
 def ensure_default_header_nav() -> int:
-    if HeaderNavLink.objects.exists():
-        return 0
-    return sync_default_header_nav()
+    created = 0
+    for item in DEFAULT_HEADER_NAV:
+        if _create_header_link(item):
+            created += 1
+    return created
 
 
-def get_header_nav_links(lang: str = "ua") -> list[dict[str, str]]:
+def get_header_nav_links(lang: str = "ua", *, mobile: bool = False) -> list[dict[str, str]]:
     ensure_default_header_nav()
     code = "ru" if lang == "ru" else "ua"
     rows: list[dict[str, str]] = []
     qs = HeaderNavLink.objects.filter(is_active=True).order_by("sort_order", "pk")
+    if mobile:
+        qs = qs.filter(in_mobile=True)
+    else:
+        qs = qs.filter(in_header=True)
     for item in qs:
         rows.append(
             {

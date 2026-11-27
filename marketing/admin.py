@@ -46,9 +46,26 @@ class FeedCategoryMappingInline(TabularInline):
     verbose_name_plural = "Мапінг категорій → Google product category (необовʼязково)"
 
 
+_FEED_TYPE_SHORT = {
+    "google": "Google",
+    "facebook": "Meta",
+    "prom": "Prom",
+}
+
+
 @admin.register(ProductFeed)
 class ProductFeedAdmin(ModelAdmin):
-    list_display = ("name", "feed_type", "is_enabled", "public_url", "last_included", "excluded_display", "warnings_display", "last_generated_at")
+    list_display = (
+        "name_col",
+        "feed_type_short",
+        "enabled_display",
+        "public_url",
+        "included_display",
+        "excluded_display",
+        "warnings_display",
+        "generated_display",
+    )
+    list_display_links = ("name_col",)
     list_filter = ("feed_type", "is_enabled")
     search_fields = ("name", "slug")
     filter_horizontal = ("categories",)
@@ -71,22 +88,50 @@ class ProductFeedAdmin(ModelAdmin):
         ),
     )
 
-    @admin.display(description="Публічний URL")
+    @admin.display(description="Назва", ordering="name")
+    def name_col(self, obj):
+        return obj.name
+
+    @admin.display(description="Тип")
+    def feed_type_short(self, obj):
+        return _FEED_TYPE_SHORT.get(obj.feed_type, obj.feed_type)
+
+    @admin.display(description="Увімк.", boolean=True)
+    def enabled_display(self, obj):
+        return obj.is_enabled
+
+    @admin.display(description="URL")
     def public_url(self, obj):
         if not obj or not obj.pk:
             return "—"
         path = obj.public_path + ("?token=…" if obj.access_token else "")
-        state = "" if obj.is_enabled else " (вимкнено → 404)"
-        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>{}', obj.public_path, path, state)
+        note = "" if obj.is_enabled else " · 404"
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener" title="{}">{}</a>{}',
+            obj.public_path,
+            path,
+            obj.public_path,
+            note,
+        )
 
-    @admin.display(description="Виключено")
+    @admin.display(description="У фіді")
+    def included_display(self, obj):
+        return obj.last_included
+
+    @admin.display(description="Викл.")
     def excluded_display(self, obj):
         return obj.last_excluded
 
-    @admin.display(description="Попередження")
+    @admin.display(description="Попер.")
     def warnings_display(self, obj):
         total = sum((obj.last_warnings or {}).values())
         return total or "—"
+
+    @admin.display(description="Генерація", ordering="last_generated_at")
+    def generated_display(self, obj):
+        if not obj.last_generated_at:
+            return "—"
+        return timezone.localtime(obj.last_generated_at).strftime("%d.%m.%Y %H:%M")
 
     @admin.display(description="Статистика останньої генерації")
     def stats(self, obj):

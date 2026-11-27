@@ -7,7 +7,6 @@ from django.utils.translation import get_language
 from django.views.generic import DetailView, ListView, TemplateView
 
 from cart.services import WishlistService
-from orders.models import DeliveryDistrict
 from pages.forms_extra import PhotoPickForm
 from pages.i18n_lib import plural_goods, tr
 from pages.models_extra import BlogPost
@@ -73,24 +72,15 @@ class HomeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        cats = Category.objects.filter(is_active=True, parent__isnull=True).order_by(
+        cats = Category.objects.filter(
+            is_active=True, show_on_home=True, parent__isnull=True
+        ).order_by(
             'sort_order', 'name'
         )
         popular = get_home_popular()
         hits = popular['hits']
         news = popular['news']
         sales = popular['sales']
-
-        district = None
-        is_city = False
-        slug = self.kwargs.get('district_slug')
-        city_slug = self.kwargs.get('city_slug')
-        if slug:
-            district = DeliveryDistrict.objects.filter(slug=slug, is_active=True).first()
-            if district:
-                self.request.session['district_slug'] = district.slug
-        elif city_slug == 'kyiv' or self.request.path.rstrip('/').endswith('/kyiv'):
-            is_city = True
 
         from pages.home_cms import build_home_cms
 
@@ -130,20 +120,9 @@ class HomeView(TemplateView):
                 'blog_posts': blog_posts,
                 'photo_pick_form': _form_with_key(self.request, PhotoPickForm, 'photo_pick'),
                 'picker_options': picker_options,
-                'district': district,
-                'is_city': is_city,
-                'other_districts': DeliveryDistrict.objects.filter(is_active=True).exclude(
-                    pk=getattr(district, 'pk', None)
-                ),
             }
         )
         ctx.update(cms)
-        if district:
-            ctx["show_district"] = True
-            ctx["district_others_title"] = district.others_heading(lang)
-        else:
-            ctx["show_district"] = False
-            ctx["district_others_title"] = ""
         return ctx
 
 
@@ -330,12 +309,16 @@ class CatalogView(ClampPageMixin, ListView):
             )
 
         sort = self.request.GET.get('sort', 'default')
+        from pages.cms_content import get_block_text
+        from pages.i18n_lib import site_lang_code
+
+        lang = site_lang_code()
         sorts = [
-            ('default', tr('За популярністю')),
-            ('cheap', tr('Спочатку дешевші')),
-            ('expensive', tr('Спочатку дорожчі')),
-            ('rating', tr('За рейтингом')),
-            ('new', tr('Спочатку новинки')),
+            ('default', get_block_text('catalog', 'sort_popular', lang=lang)),
+            ('cheap', get_block_text('catalog', 'sort_cheap', lang=lang)),
+            ('expensive', get_block_text('catalog', 'sort_expensive', lang=lang)),
+            ('rating', get_block_text('catalog', 'sort_rating', lang=lang)),
+            ('new', get_block_text('catalog', 'sort_new', lang=lang)),
         ]
         total = ctx['page_obj'].paginator.count
         shown = min(ctx['page_obj'].end_index(), total) if total else 0
@@ -430,10 +413,9 @@ class ProductDetailView(DetailView):
 
     def get_queryset(self):
         return Product.objects.filter(is_active=True).select_related(
-            'family', 'category', 'category__parent'
+            'category', 'category__parent'
         ).prefetch_related(
             Prefetch('images', queryset=ProductImage.objects.order_by('sort_order', 'id')),
-            'family__color_swatches',
             Prefetch(
                 'attributes',
                 queryset=AttributeValue.objects.select_related('attribute', 'attribute__group'),

@@ -70,7 +70,7 @@ class HomePopularCmsTests(TestCase):
         page = self.client.get(self._admin())
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, "Вкладка «Хіти»")
-        self.assertContains(page, "Вкладка «Новинки»")
+        self.assertContains(page, "Заголовок «Новинки»")
         self.assertContains(page, "Вкладка «Знижки»")
         self.assertContains(page, "Hit Lock")
         self.assertContains(page, "Додати товар")
@@ -115,7 +115,7 @@ class HomePopularCmsTests(TestCase):
             page = self.client.get("/ua/")
         body = page.content.decode()
         hits_chunk = body[
-            body.index('data-pop-panel="hits"') : body.index('data-pop-panel="news"')
+            body.index('data-pop-panel="hits"') : body.index('data-pop-panel="sales"')
         ]
         self.assertLess(hits_chunk.index("Other Lock"), hits_chunk.index("Hit Lock"))
         self.assertNotIn("New Lock", hits_chunk)

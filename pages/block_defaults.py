@@ -29,7 +29,7 @@ BLOCK_LABELS: dict[tuple[str, str], str] = {
     ("home", "popular_section_visible"): "Показувати популярні",
     ("home", "popular_title"): "Заголовок популярних",
     ("home", "popular_tab_hits"): "Вкладка «Хіти»",
-    ("home", "popular_tab_news"): "Вкладка «Новинки»",
+    ("home", "popular_tab_news"): "Заголовок «Новинки»",
     ("home", "popular_tab_sales"): "Вкладка «Знижки»",
     ("home", "blog_section_visible"): "Показувати блог",
     ("home", "blog_title"): "Заголовок блогу",
@@ -149,11 +149,15 @@ URL_KEYS: set[tuple[str, str]] = set()
 # Інфосторінки: структуровані поля (картки / таблиці / кроки).
 from pages import block_defaults_info_1 as _info1  # noqa: E402
 from pages import block_defaults_info_2 as _info2  # noqa: E402,F401
+from pages import block_defaults_shop as _shop  # noqa: E402
 
 BLOCK_LABELS.update(_info1.LABELS)
+BLOCK_LABELS.update(_shop.LABELS)
 BLOCK_DEFAULTS.update(_info1.DEFAULTS)
+BLOCK_DEFAULTS.update(_shop.DEFAULTS)
 INLINE_KEYS.update(_info1.INLINE)
 MULTILINE_KEYS.update(_info1.MULTILINE)
+MULTILINE_KEYS.update(_shop.MULTILINE)
 RICHTEXT_KEYS.update(_info1.RICHTEXT)
 
 

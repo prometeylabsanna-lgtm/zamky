@@ -9,7 +9,6 @@ from pages.admin_mixins import DefaultActiveTrueFilterMixin, TopDropdownFiltersM
 from pages.admin_site_content_widgets import CmsTinyMCEWidget
 from pages.legal_body import sanitize_legal_html
 
-from . import admin_family  # noqa: F401
 from .admin_category_nav import (
     CategoryAdminForm,
     CategoryTreeMixin,
@@ -372,6 +371,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
                     'reviews_count',
                     'warranty_months',
                     'color_code',
+                    'color_label',
                     'created_at',
                     'updated_at',
                 ),
@@ -436,7 +436,7 @@ class ProductAdmin(DefaultActiveTrueFilterMixin, TopDropdownFiltersMixin, ModelA
             opts = dict(opts)
             fields = tuple(opts.get('fields', ()))
             if obj is not None and not product_needs_core_color(obj):
-                fields = tuple(name for name in fields if name != 'color_code')
+                fields = tuple(name for name in fields if name not in {'color_code', 'color_label'})
             opts['fields'] = fields
             fieldsets.append((title, opts))
         spec_fields = spec_fieldset_fields()

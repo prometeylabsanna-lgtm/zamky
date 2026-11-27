@@ -36,7 +36,7 @@ class HomeCategoryCardForm(forms.ModelForm):
             "home_subtitle",
             "home_subtitle_ru",
             "logo",
-            "is_active",
+            "show_on_home",
         )
         widgets = {
             "name": CmsAdminTextInputWidget(),
@@ -46,7 +46,7 @@ class HomeCategoryCardForm(forms.ModelForm):
             "logo": UnfoldAdminFileFieldWidget(
                 attrs={"accept": "image/png,image/jpeg,image/webp,image/svg+xml,.svg"}
             ),
-            "is_active": UnfoldBooleanWidget(),
+            "show_on_home": UnfoldBooleanWidget(),
         }
 
     def __init__(self, *args, **kwargs):
@@ -60,8 +60,12 @@ class HomeCategoryCardForm(forms.ModelForm):
         self.fields["home_subtitle_ru"].required = False
         self.fields["logo"].label = "Картинка"
         self.fields["logo"].required = False
-        self.fields["is_active"].label = "Показувати на головній"
-        self.fields["is_active"].required = False
+        self.fields["show_on_home"].label = "Показувати на головній"
+        self.fields["show_on_home"].required = False
+        self.fields["show_on_home"].help_text = (
+            "Без галочки картка зникає лише зі стрічки на головній. "
+            "У каталозі категорія лишається, якщо вона активна."
+        )
         from pages.admin_guidelines import IMAGE_HINTS, apply_char_hint
 
         self.fields["home_subtitle"].help_text = "Сірий рядок під назвою на картці головної."
@@ -152,7 +156,7 @@ def home_categories_section_view(request, model_admin=None):
     else:
         section_form = SitePageContentForm(section=section, blocks=blocks)
         if is_new:
-            card_form = HomeCategoryCardForm(initial={"is_active": True})
+            card_form = HomeCategoryCardForm(initial={"show_on_home": True})
         elif cat is not None:
             card_form = HomeCategoryCardForm(instance=cat)
         else:
@@ -176,7 +180,7 @@ def home_categories_section_view(request, model_admin=None):
                 "name": item.name,
                 "url": _section_url(item),
                 "active": cat is not None and item.pk == cat.pk and not is_new,
-                "inactive": not item.is_active,
+                "inactive": not item.show_on_home,
                 "preview": preview,
                 "preview_fallback": fallback,
             }

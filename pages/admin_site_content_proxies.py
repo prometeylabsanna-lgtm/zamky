@@ -58,6 +58,15 @@ _SECTION_MODELS = (
     (cms_proxies.BlogAskSettings, "blog", "ask"),
     (cms_proxies.SiteInfoConsultSettings, "site", "infoconsult"),
     (cms_proxies.CatalogChromeSettings, "catalog", "chrome"),
+    (cms_proxies.CatalogSortSettings, "catalog", "sort"),
+    (cms_proxies.ProductChromeSettings, "product", "chrome"),
+    (cms_proxies.CartChromeSettings, "cart", "chrome"),
+    (cms_proxies.WishlistChromeSettings, "wishlist", "chrome"),
+    (cms_proxies.CheckoutChromeSettings, "checkout", "chrome"),
+    (cms_proxies.SiteCookieSettings, "site", "cookie"),
+    (cms_proxies.SitePhotoSettings, "site", "photo"),
+    (cms_proxies.SiteCallbackSettings, "site", "callback"),
+    (cms_proxies.BlogLabelsSettings, "blog", "labels"),
 )
 
 

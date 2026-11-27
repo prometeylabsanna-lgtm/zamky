@@ -57,7 +57,6 @@ SURFACES: dict[str, dict] = {
         "section": "blog",
         "list_source": "BlogPost",
     },
-    "home.district": {"mode": "listitem", "model": "DeliveryDistrict"},
     "info.about": {"mode": "siteblock", "page": "about", "section": "body"},
     "info.about.form": {"mode": "siteblock", "page": "about", "section": "form"},
     "info.delivery": {"mode": "siteblock", "page": "delivery", "section": "body"},

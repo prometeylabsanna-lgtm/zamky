@@ -8,6 +8,17 @@ from pages.slug_utils import ensure_unique_slug, should_rebuild_slug, slug_has_n
 from .filter_sort import apply_auto_sort_order
 
 
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        from catalog.db_compat import missing_category_columns
+
+        qs = super().get_queryset()
+        missing = missing_category_columns()
+        if missing:
+            qs = qs.defer(*missing)
+        return qs
+
+
 class Category(models.Model):
     name = models.CharField('Назва', max_length=200)
     name_ru = models.CharField('Назва (RU)', max_length=200, blank=True, default='')
@@ -64,8 +75,10 @@ class Category(models.Model):
         default='',
     )
     sort_order = models.PositiveIntegerField('Порядок', default=0)
+    objects = CategoryManager()
     is_active = models.BooleanField('Активна', default=True)
     show_in_menu = models.BooleanField('Показувати в меню', default=True)
+    show_on_home = models.BooleanField('Показувати на головній', default=True)
 
     class Meta:
         verbose_name = 'Категорія'
@@ -87,7 +100,33 @@ class Category(models.Model):
         apply_auto_sort_order(
             self, Category.objects.filter(parent_id=self.parent_id)
         )
-        super().save(*args, **kwargs)
+        from catalog.db_compat import missing_category_columns
+
+        missing = missing_category_columns()
+        toggled = []
+        if missing:
+            update_fields = kwargs.get('update_fields')
+            if update_fields is not None:
+                kept = [name for name in update_fields if name not in missing]
+                if not kept:
+                    return
+                kwargs['update_fields'] = kept
+            elif self.pk:
+                kwargs['update_fields'] = [
+                    field.attname
+                    for field in self._meta.local_concrete_fields
+                    if not field.primary_key and field.name not in missing
+                ]
+            else:
+                for name in missing:
+                    field = self._meta.get_field(name)
+                    toggled.append((field, field.generated))
+                    field.generated = True
+        try:
+            super().save(*args, **kwargs)
+        finally:
+            for field, previous in toggled:
+                field.generated = previous
 
     def get_absolute_url(self):
         return reverse('catalog:category', kwargs={'slug': self.slug})
@@ -210,64 +249,12 @@ class AttributeValue(models.Model):
         super().save(*args, **kwargs)
 
 
-class ProductFamily(models.Model):
-    name = models.CharField('Назва', max_length=200)
-    slug = models.SlugField('Слаг', max_length=220, unique=True)
-    brand = models.CharField('Бренд', max_length=100, blank=True)
-    description = models.TextField('Опис', blank=True)
-    short_description = models.TextField('Короткий опис', blank=True)
-
-    class Meta:
-        verbose_name = 'Сімʼя товарів'
-        verbose_name_plural = 'Сімʼї товарів'
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = ensure_unique_slug(
-                ProductFamily, self.name, instance_pk=self.pk, fallback='family'
-            )
-        super().save(*args, **kwargs)
-
-
 COLOR_CHOICES = (
     ('G', 'Латунь'),
     ('N', 'Нікель'),
     ('B', 'Чорний'),
 )
 COLOR_LABELS = dict(COLOR_CHOICES)
-
-
-class FamilyColorSwatch(models.Model):
-    family = models.ForeignKey(
-        ProductFamily,
-        related_name='color_swatches',
-        on_delete=models.CASCADE,
-        verbose_name='Сімʼя',
-    )
-    color_code = models.CharField(
-        'Колір серцевини',
-        max_length=8,
-        choices=COLOR_CHOICES,
-    )
-    image = models.ImageField(
-        'Плашка',
-        upload_to='families/swatches/',
-        blank=True,
-        help_text='Фото кнопки кольору на сторінці товару. Порожньо — суцільний колір.',
-    )
-
-    class Meta:
-        verbose_name = 'Плашка кольору'
-        verbose_name_plural = 'Плашки кольорів'
-        unique_together = [('family', 'color_code')]
-        ordering = ['id']
-
-    def __str__(self):
-        return f'{self.family}: {self.get_color_code_display()}'
 
 
 class Product(models.Model):
@@ -277,14 +264,6 @@ class Product(models.Model):
         on_delete=models.PROTECT,
         verbose_name='Категорія',
         help_text='Категорію з товарами видалити не можна — спочатку перенесіть товари.',
-    )
-    family = models.ForeignKey(
-        ProductFamily,
-        verbose_name='Сімʼя',
-        null=True,
-        blank=True,
-        related_name='variants',
-        on_delete=models.SET_NULL,
     )
     name = models.CharField('Назва', max_length=300)
     slug = models.SlugField('Слаг', max_length=320, unique=True)
@@ -364,7 +343,7 @@ class Product(models.Model):
                 fallback='product',
             )
         code = (self.color_code or '').strip()
-        if code:
+        if code and not (self.color_label or '').strip():
             mapped = COLOR_LABELS.get(code)
             if mapped:
                 self.color_label = mapped
@@ -381,25 +360,27 @@ class Product(models.Model):
             return 'low'
         return 'in'
 
+    def _shop_text(self, key: str) -> str:
+        from pages.cms_content import get_block_text
+        from pages.i18n_lib import site_lang_code
+
+        return get_block_text('product', key, lang=site_lang_code())
+
     @property
     def stock_label(self):
-        from pages.i18n_lib import tr
-
-        return {
-            'in': tr('В наявності'),
-            'low': tr('Закінчується'),
-            'out': tr('Немає в наявності'),
-        }[self.stock_status]
+        return self._shop_text({
+            'in': 'stock_in',
+            'low': 'stock_low',
+            'out': 'stock_out',
+        }[self.stock_status])
 
     @property
     def stock_note(self):
-        from pages.i18n_lib import tr
-
         if self.stock_status == 'out':
-            return tr('Повідомимо про надходження')
+            return self._shop_text('stock_note_out')
         if self.stock_status == 'low':
-            return tr('Залишилось {n} шт.').format(n=self.stock)
-        return tr('Відправимо сьогодні')
+            return self._shop_text('stock_note_low').replace('{n}', str(self.stock))
+        return self._shop_text('stock_note_in')
 
     @property
     def primary_image(self):

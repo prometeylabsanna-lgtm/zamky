@@ -27,7 +27,16 @@ class AdminUkrainianLocaleMiddleware:
 
     def __call__(self, request):
         prefix = '/' + settings.ADMIN_URL.strip('/')
-        if request.path == prefix or request.path.startswith(prefix + '/'):
+        path = request.path or ''
+        is_admin = path == prefix or path.startswith(prefix + '/')
+        parts = [part for part in path.split('/') if part]
+        is_admin_alias = (
+            len(parts) >= 2 and parts[0] in {'ua', 'ru', 'uk'} and parts[1] == 'admin'
+        )
+        if is_admin:
             translation.activate('uk')
             request.LANGUAGE_CODE = 'uk'
-        return self.get_response(request)
+        response = self.get_response(request)
+        if is_admin or is_admin_alias:
+            response['X-Robots-Tag'] = 'noindex, nofollow'
+        return response

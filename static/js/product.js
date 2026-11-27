@@ -262,10 +262,18 @@
     }
   }
 
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
   function openQuick() {
     var v = current();
     var box = qs('[data-quick-root]');
     if (!box || !v) return;
+    var submitLabel = box.getAttribute('data-quick-submit') || 'Замовити';
+    var note = box.getAttribute('data-quick-note') || '';
     box.innerHTML =
       '<form class="pdp-quick__form" data-quick-form data-validate-form hx-post="' +
       v.quick_url +
@@ -280,12 +288,10 @@
       state.qty +
       '" data-quick-qty>' +
       '<button type="submit" class="pdp-quick__submit">' +
-      (window.t ? window.t('Замовити') : 'Замовити') +
+      esc(submitLabel) +
       '</button></form>' +
       '<p class="pdp-quick__note">' +
-      (window.t
-        ? window.t('Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.')
-        : 'Менеджер передзвонить протягом 15 хвилин і уточнить деталі замовлення.') +
+      esc(note) +
       '</p>';
     if (window.htmx) htmx.process(box);
   }

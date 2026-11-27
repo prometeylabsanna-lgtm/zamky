@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load i18n_ui static checkout_tags %}
+{% load i18n_ui cms_tags static checkout_tags %}
 
-{% block title %}{% if step == 'done' %}Дякуємо!{% else %}Оформлення замовлення{% endif %}{% endblock %}
+{% block title %}{% if step == 'done' %}{% cms 'checkout' 'chk_thanks' 'Дякуємо!' %}{% else %}{% cms 'checkout' 'chk_title' 'Оформлення замовлення' %}{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/checkout.css' %}?v={{ asset_v }}">
@@ -51,14 +51,14 @@
     <div class="checkout-done__icon" aria-hidden="true">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
     </div>
-    <h2 class="checkout-done__title">Замовлення {{ order.number }} прийнято</h2>
-    <p class="checkout-done__text">Дякуємо, {{ order.first_name }}! Менеджер зателефонує на номер {{ order.phone }} протягом 15 хвилин, щоб підтвердити деталі.</p>
+    <h2 class="checkout-done__title">{{ done_title }}</h2>
+    <p class="checkout-done__text">{{ done_text }}</p>
     <div class="checkout-done__meta">
-      <span>Сума: <strong>{{ order.total|uah }}</strong></span>
-      <span>Доставка: <strong>{{ order.get_delivery_method_display }}</strong></span>
-      <span>Оплата: <strong>{{ order.get_payment_method_display }}</strong></span>
+      <span>{% cms 'checkout' 'chk_sum' 'Сума' %}: <strong>{{ order.total|uah }}</strong></span>
+      <span>{% cms 'checkout' 'chk_done_ship' 'Доставка' %}: <strong>{{ order_delivery_title }}</strong></span>
+      <span>{% cms 'checkout' 'chk_done_pay' 'Оплата' %}: <strong>{{ order_payment_title }}</strong></span>
     </div>
-    <a href="{% url 'catalog:home' %}" class="btn">{% t 'На головну' %}</a>
+    <a href="{% url 'catalog:home' %}" class="btn">{% cms 'checkout' 'chk_home' 'На головну' %}</a>
   </div>
 
   {% elif is_empty %}
@@ -66,9 +66,9 @@
     <div class="checkout-empty__icon" aria-hidden="true">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18l-1.7 8.4a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 10z"></path><path d="M8 10l3-6M16 10l-3-6"></path><path d="M9 13.5v3M12 13.5v3M15 13.5v3"></path></svg>
     </div>
-    <h2 class="checkout-empty__title">{% t 'Кошик порожній' %}</h2>
-    <p class="checkout-empty__text">{% t 'Оберіть замок або серцевину в каталозі — товари з’являться тут.' %}</p>
-    <a href="{% url 'catalog:catalog' %}" class="btn">{% t 'Перейти до каталогу' %}</a>
+    <h2 class="checkout-empty__title">{% cms 'checkout' 'chk_empty_title' 'Кошик порожній' %}</h2>
+    <p class="checkout-empty__text">{% cms 'checkout' 'chk_empty_text' 'Оберіть замок або серцевину в каталозі — товари з’являться тут.' %}</p>
+    <a href="{% url 'catalog:catalog' %}" class="btn">{% cms 'checkout' 'chk_to_catalog' 'Перейти до каталогу' %}</a>
   </div>
 
   {% else %}
@@ -88,10 +88,10 @@
 
         <section class="checkout-card">
           <div class="checkout-card__head">
-            <h2 class="checkout-card__title"><span class="checkout-card__n">1</span>{% t 'Товари у замовленні' %}</h2>
-            <button type="button" class="checkout-edit" data-open-cart aria-label="{% t 'Редагувати кошик' %}">
+            <h2 class="checkout-card__title"><span class="checkout-card__n">1</span>{% cms 'checkout' 'chk_items' 'Товари у замовленні' %}</h2>
+            <button type="button" class="checkout-edit" data-open-cart aria-label="{% cms 'checkout' 'chk_edit' 'Редагувати кошик' %}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path><path d="M13.5 6.5l4 4"></path></svg>
-              <span class="checkout-edit__label">{% t 'Редагувати кошик' %}</span>
+              <span class="checkout-edit__label">{% cms 'checkout' 'chk_edit' 'Редагувати кошик' %}</span>
             </button>
           </div>
           <div id="checkout-items" class="checkout-items">
@@ -100,18 +100,18 @@
         </section>
 
         <section class="checkout-card">
-          <h2 class="checkout-card__title"><span class="checkout-card__n">2</span>{% t 'Контактні дані' %}</h2>
+          <h2 class="checkout-card__title"><span class="checkout-card__n">2</span>{% cms 'checkout' 'chk_contacts' 'Контактні дані' %}</h2>
           <div class="checkout-fields">
             <label class="field{% if form.first_name.errors %} is-invalid{% endif %}">
-              <span>{% t 'Ім’я*' %}</span>{{ form.first_name }}
+              <span>{% cms 'checkout' 'chk_name' 'Ім’я*' %}</span>{{ form.first_name }}
               <span class="field__err" data-field-error>{{ form.first_name.errors.0 }}</span>
             </label>
             <label class="field{% if form.last_name.errors %} is-invalid{% endif %}">
-              <span>{% t 'Прізвище' %}</span>{{ form.last_name }}
+              <span>{% cms 'checkout' 'chk_lastname' 'Прізвище' %}</span>{{ form.last_name }}
               <span class="field__err" data-field-error>{{ form.last_name.errors.0 }}</span>
             </label>
             <label class="field{% if form.phone.errors %} is-invalid{% endif %}">
-              <span>{% t 'Телефон*' %}</span>{{ form.phone }}
+              <span>{% cms 'checkout' 'chk_phone' 'Телефон*' %}</span>{{ form.phone }}
               <span class="field__err" data-field-error>{{ form.phone.errors.0 }}</span>
             </label>
             <label class="field{% if form.email.errors %} is-invalid{% endif %}">
@@ -122,7 +122,7 @@
         </section>
 
         <section class="checkout-card" data-choice-group>
-          <h2 class="checkout-card__title"><span class="checkout-card__n">3</span>{% t 'Доставка' %}</h2>
+          <h2 class="checkout-card__title"><span class="checkout-card__n">3</span>{% cms 'checkout' 'chk_delivery' 'Доставка' %}</h2>
           <div class="checkout-choices">
             {% for opt in delivery_options %}
             <button type="button"
@@ -143,7 +143,7 @@
           </div>
           <div class="checkout-fields checkout-addr{% if delivery_method == 'pickup' %} is-hidden{% endif %}" data-checkout-addr>
             <label class="field{% if form.city.errors %} is-invalid{% endif %}">
-              <span>{% t 'Місто*' %}</span>
+              <span>{% cms 'checkout' 'chk_city' 'Місто*' %}</span>
               <span class="np-ac" data-np-box="city">
                 {{ form.city }}
                 <ul class="np-ac__list" id="np-city-list" role="listbox" hidden></ul>
@@ -161,12 +161,12 @@
           </div>
           <div class="checkout-pickup{% if delivery_method == 'pickup' %} is-visible{% endif %}" data-checkout-pickup>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 15 12 21 12 21z"></path><circle cx="12" cy="10" r="2.3"></circle></svg>
-            <span>Київ, магазин IRON CUT. Пн–Сб 9:00–19:00. Замовлення буде готове протягом 2 годин — ми надішлемо SMS.</span>
+            <span>{% if site_settings.address %}{{ site_settings.address }}. {% endif %}{% if contact_hours %}{{ contact_hours }}. {% endif %}{% cms 'checkout' 'chk_pickup_note' 'Замовлення буде готове протягом 2 годин — ми надішлемо SMS.' %}</span>
           </div>
         </section>
 
         <section class="checkout-card" data-choice-group>
-          <h2 class="checkout-card__title"><span class="checkout-card__n">4</span>{% t 'Оплата' %}</h2>
+          <h2 class="checkout-card__title"><span class="checkout-card__n">4</span>{% cms 'checkout' 'chk_pay' 'Оплата' %}</h2>
           <div class="checkout-choices">
             {% for opt in payment_options %}
             <button type="button"
@@ -182,7 +182,7 @@
             </button>
             {% endfor %}
           </div>
-          <label class="field checkout-comment"><span>{% t 'Коментар до замовлення' %}</span>{{ form.comment }}</label>
+          <label class="field checkout-comment"><span>{% cms 'checkout' 'chk_comment' 'Коментар до замовлення' %}</span>{{ form.comment }}</label>
         </section>
 
         <button type="button" class="checkout-back" data-open-cart>
@@ -194,18 +194,18 @@
 
     <aside class="checkout-aside">
       <div class="checkout-summary">
-        <h2 class="checkout-summary__title">{% t 'Ваше замовлення' %}</h2>
+        <h2 class="checkout-summary__title">{% cms 'checkout' 'chk_summary' 'Ваше замовлення' %}</h2>
         <dl class="checkout-summary__rows">
           <div class="checkout-summary__row">
             <dt>Товари ({{ cart_qty_total }})</dt>
             <dd id="summary-subtotal-old">{{ cart_subtotal_old|uah }}</dd>
           </div>
           <div class="checkout-summary__row">
-            <dt>{% t 'Знижка' %}</dt>
+            <dt>{% cms 'checkout' 'chk_discount' 'Знижка' %}</dt>
             <dd id="summary-savings" class="is-save">−{{ cart_savings|uah }}</dd>
           </div>
           <div class="checkout-summary__row">
-            <dt>{% t 'Доставка' %}</dt>
+            <dt>{% cms 'checkout' 'chk_ship' 'Доставка' %}</dt>
             <dd id="summary-delivery"{% if delivery_price == 0 %} class="is-ship-free"{% endif %}>
               {% if delivery_price == 0 %}Безкоштовно{% else %}{{ delivery_price|uah }}{% endif %}
             </dd>
@@ -214,11 +214,11 @@
         <span id="summary-subtotal" class="visually-hidden">{{ cart_subtotal|uah }}</span>
         <div class="checkout-summary__rule" aria-hidden="true"></div>
         <div class="checkout-summary__total">
-          <span class="checkout-summary__total-label">{% t 'Разом' %}</span>
+          <span class="checkout-summary__total-label">{% cms 'checkout' 'chk_total' 'Разом' %}</span>
           <span id="summary-total" class="checkout-summary__total-value">{{ order_total|uah }}</span>
         </div>
-        <button type="submit" form="checkout" class="checkout-summary__submit">{% t 'Підтвердити замовлення' %}</button>
-        <p class="checkout-summary__legal">Натискаючи кнопку, ви погоджуєтесь з умовами договору оферти та політикою конфіденційності.</p>
+        <button type="submit" form="checkout" class="checkout-summary__submit">{% cms 'checkout' 'chk_submit' 'Підтвердити замовлення' %}</button>
+        <p class="checkout-summary__legal">{% cms 'checkout' 'chk_legal' 'Натискаючи кнопку, ви погоджуєтесь з умовами договору оферти та політикою конфіденційності.' %}</p>
       </div>
       <div class="checkout-trust">
         <span>

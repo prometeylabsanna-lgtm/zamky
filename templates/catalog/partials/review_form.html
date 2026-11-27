@@ -1,15 +1,15 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 <form id="review-form" class="pdp-review-form" method="post" novalidate
   action="{% url 'catalog:product_review' product.slug %}"
   hx-post="{% url 'catalog:product_review' product.slug %}" hx-target="this" hx-swap="outerHTML"
   {% if not review_form.is_bound %}hidden{% endif %} data-review-form>
   {% csrf_token %}
-  <p class="pdp-review-form__title">{% t 'Ваш відгук' %}</p>
+  <p class="pdp-review-form__title">{% cms 'product' 'review_title' 'Ваш відгук' %}</p>
   {% if review_form.non_field_errors %}
   <p class="pdp-review-form__err" role="alert">{{ review_form.non_field_errors.0 }}</p>
   {% endif %}
   <fieldset class="pdp-review-form__rating">
-    <legend>{% t 'Оцінка' %}</legend>
+    <legend>{% cms 'product' 'review_rating' 'Оцінка' %}</legend>
     <div class="pdp-rate">
       {% for v in "54321" %}
       <input type="radio" id="review-rate-{{ v }}" name="rating" value="{{ v }}"{% if review_form.rating.value|stringformat:"s" == v %} checked{% endif %}>
@@ -19,18 +19,18 @@
     {% if review_form.rating.errors %}<p class="pdp-review-form__err">{{ review_form.rating.errors.0 }}</p>{% endif %}
   </fieldset>
   <label class="field pdp-review-form__field">
-    <span>{% t 'Імʼя' %}*</span>
-    <input type="text" name="author_name" maxlength="120" autocomplete="name" required value="{{ review_form.author_name.value|default:'' }}" placeholder="{% t 'Олександр' %}">
+    <span>{% cms 'product' 'review_name' 'Імʼя' %}*</span>
+    <input type="text" name="author_name" maxlength="120" autocomplete="name" required value="{{ review_form.author_name.value|default:'' }}" placeholder="{% cms 'product' 'review_name_ph' 'Олександр' %}">
     {% if review_form.author_name.errors %}<span class="pdp-review-form__err">{{ review_form.author_name.errors.0 }}</span>{% endif %}
   </label>
   <label class="field pdp-review-form__field">
-    <span>{% t 'Відгук' %}*</span>
-    <textarea name="text" rows="4" maxlength="3000" required placeholder="{% t 'Що сподобалось, як встановили, чи все підійшло?' %}">{{ review_form.text.value|default:'' }}</textarea>
+    <span>{% cms 'product' 'review_text' 'Відгук' %}*</span>
+    <textarea name="text" rows="4" maxlength="3000" required placeholder="{% cms 'product' 'review_text_ph' 'Що сподобалось, як встановили, чи все підійшло?' %}">{{ review_form.text.value|default:'' }}</textarea>
     {% if review_form.text.errors %}<span class="pdp-review-form__err">{{ review_form.text.errors.0 }}</span>{% endif %}
   </label>
   <div class="pdp-review-form__hp" aria-hidden="true">
     <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
   </div>
-  <p class="pdp-review-form__note">{% t 'Відгук зʼявиться на сайті після перевірки модератором.' %}</p>
-  <button type="submit" class="pdp-review-form__submit">{% t 'Надіслати відгук' %}</button>
+  <p class="pdp-review-form__note">{% cms 'product' 'review_note' 'Відгук зʼявиться на сайті після перевірки модератором.' %}</p>
+  <button type="submit" class="pdp-review-form__submit">{% cms 'product' 'review_submit' 'Надіслати відгук' %}</button>
 </form>

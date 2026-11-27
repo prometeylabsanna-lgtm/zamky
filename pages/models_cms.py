@@ -45,6 +45,7 @@ class SiteSettings(models.Model):
     )
     instagram_url = models.URLField("Instagram", blank=True, default="")
     telegram_url = models.URLField("Telegram", blank=True, default="")
+    viber_url = models.URLField("Viber", blank=True, default="")
     facebook_url = models.URLField("Facebook", blank=True, default="")
     logo = models.ImageField("Логотип", upload_to="brand/", blank=True, null=True)
     favicon = models.ImageField("Favicon", upload_to="brand/", blank=True, null=True)
@@ -182,7 +183,7 @@ class HeroSlide(models.Model):
         max_length=60,
         blank=True,
         default="",
-        help_text="Порожньо = «Перейти до каталогу».",
+        help_text="Порожнє — кнопка не показується.",
     )
     cta_primary_label_ru = models.CharField(
         "Кнопка 1: текст (RU)", max_length=60, blank=True, default=""
@@ -200,7 +201,7 @@ class HeroSlide(models.Model):
         max_length=60,
         blank=True,
         default="",
-        help_text="Порожньо = «Підібрати замок за 2 хв».",
+        help_text="Порожнє — друга кнопка не показується.",
     )
     cta_secondary_label_ru = models.CharField(
         "Кнопка 2: текст (RU)", max_length=60, blank=True, default=""

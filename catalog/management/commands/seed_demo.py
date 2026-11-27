@@ -1,4 +1,3 @@
-import json
 import shutil
 from decimal import Decimal
 from pathlib import Path
@@ -17,11 +16,8 @@ from catalog.models import (
     Category,
     Product,
     ProductAttribute,
-    ProductFamily,
     ProductImage,
 )
-from orders.models import DeliveryDistrict
-
 ABARO_DESC = (
     "Циліндр ABARO B100 — механізм секретності для врізних замків вхідних і міжкімнатних дверей. "
     "Корпус виготовлений з латуні, підходить для більшості замків з європрофілем.\n\n"
@@ -80,44 +76,17 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        self.stdout.write('Seeding districts...')
-        self._seed_districts()
         self.stdout.write('Seeding catalog...')
         self._seed_catalog()
         self.stdout.write('Seeding picker...')
         self._seed_picker()
         self.stdout.write(self.style.SUCCESS('Demo data ready.'))
 
-    def _seed_districts(self):
-        path = settings.DISTRICTS_JSON
-        data = json.loads(path.read_text(encoding='utf-8'))
-        for i, d in enumerate(data.get('districts', [])):
-            DeliveryDistrict.objects.update_or_create(
-                slug=d['slug'],
-                defaults={
-                    'name': d['name'],
-                    'short': d.get('short', d['name']),
-                    'name_locative': d.get('name_locative', ''),
-                    'delivery_note': d.get('delivery', ''),
-                    'areas': d.get('areas', []),
-                    'h1': d.get('h1')
-                    or f"Замки для дверей — купити в {d.get('name_locative') or d['name']}",
-                    'seo_text': d.get('seo_text')
-                    or (
-                        f"Доставляємо замки та серцевини у {d.get('name_locative') or d['name']}. "
-                        f"{d.get('delivery', '')}. Райони: {', '.join(d.get('areas', []))}."
-                    ),
-                    'is_active': True,
-                    'sort_order': i + 1,
-                },
-            )
-
     def _clear_catalog(self):
         """Wipe у правильному порядку: Product.category = PROTECT."""
         ProductAttribute.objects.all().delete()
         ProductImage.objects.all().delete()
         Product.objects.all().delete()
-        ProductFamily.objects.all().delete()
         Category.objects.all().delete()
         AttributeValue.objects.all().delete()
         Attribute.objects.all().delete()
@@ -336,7 +305,7 @@ class Command(BaseCommand):
             )
 
     def _seed_cylinders(self, categories, attrs, av, img_dir):
-        """Циліндри як у E-com/Catalog.dc.html (+ повна сімʼя ABARO для PDP)."""
+        """Циліндри як у E-com/Catalog.dc.html."""
         from catalog.category_tree import resolve_leaf_category
 
         brands = [
@@ -352,13 +321,6 @@ class Command(BaseCommand):
             {'id': 'half', 'label': 'Половинчасті циліндри', 'short': 'половинчастий'},
         ]
         type_root = categories['Циліндри']
-        family = ProductFamily.objects.create(
-            name='ABARO B100',
-            slug='abaro-b100',
-            brand='ABARO',
-            description=ABARO_DESC,
-            short_description='Циліндровий механізм для дверей із комплектом ключів.',
-        )
         created = 0
         for bi, B in enumerate(brands):
             for si, S in enumerate(SIZES):
@@ -397,7 +359,6 @@ class Command(BaseCommand):
                         ).first()
                     product = Product.objects.create(
                         category=leaf_cat or root_cat,
-                        family=family if B['b'] == 'ABARO' else None,
                         name=name,
                         slug=slug_seed(sku.lower(), 'product'),
                         sku=sku,
@@ -417,13 +378,9 @@ class Command(BaseCommand):
                         size_mm=S['len'],
                         size_a=S['a'],
                         size_b=S['b'],
-                        short_description=(
-                            family.short_description
-                            if B['b'] == 'ABARO'
-                            else 'Циліндровий механізм для дверей із комплектом ключів.'
-                        ),
+                        short_description='Циліндровий механізм для дверей із комплектом ключів.',
                         description=(
-                            family.description
+                            ABARO_DESC
                             if B['b'] == 'ABARO'
                             else (
                                 'Надійна серцевина для міжкімнатних і вхідних дверей. '

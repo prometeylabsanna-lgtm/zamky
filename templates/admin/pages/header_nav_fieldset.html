@@ -3,7 +3,7 @@
   <legend class="text-font-important-light dark:text-font-important-dark">Кнопки навігації</legend>
   {{ header_nav_formset.management_form }}
   <p class="site-content-editor__hint">
-    Ряд кнопок під пошуком: назва, посилання, порядок і видимість.
+    Ряд кнопок: назва, посилання і порядок. «Під пошуком» — великий екран. «У меню телефону» — список у меню телефону.
     Посилання — шлях на сайті (/catalog/), якір або повне посилання з https://.
   </p>
 
@@ -34,6 +34,8 @@
             <label for="{{ form.sort_order.id_for_label }}">{{ form.sort_order.label }}</label>
             {{ form.sort_order }}
           </div>
+          <label class="hdr-nav-admin__check">{{ form.in_header }} <span>{{ form.in_header.label }}</span></label>
+          <label class="hdr-nav-admin__check">{{ form.in_mobile }} <span>{{ form.in_mobile.label }}</span></label>
           <label class="hdr-nav-admin__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
           {% if form.DELETE %}<label class="hdr-nav-admin__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
         </div>
@@ -65,6 +67,8 @@
             <label for="{{ form.sort_order.id_for_label }}">{{ form.sort_order.label }}</label>
             {{ form.sort_order }}
           </div>
+          <label class="hdr-nav-admin__check">{{ form.in_header }} <span>{{ form.in_header.label }}</span></label>
+          <label class="hdr-nav-admin__check">{{ form.in_mobile }} <span>{{ form.in_mobile.label }}</span></label>
           <label class="hdr-nav-admin__check">{{ form.is_active }} <span>{{ form.is_active.label }}</span></label>
           {% if form.DELETE %}<label class="hdr-nav-admin__check">{{ form.DELETE }} <span>{{ form.DELETE.label }}</span></label>{% endif %}
         </div>

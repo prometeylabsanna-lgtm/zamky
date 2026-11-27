@@ -1,4 +1,4 @@
-{% load i18n_ui static %}
+{% load i18n_ui cms_tags static %}
 <a href="{{ product.get_absolute_url }}" class="product-card{% if compact %} product-card--compact{% endif %}{% if home_card %} product-card--home{% endif %}">
   <div class="product-card__img{% if product.stock_status == 'out' %} is-out{% endif %}">
     {% with img=product.primary_image %}
@@ -30,7 +30,7 @@
   <div class="product-card__foot">
     <div class="product-card__prices">
       {% if product.stock_status == 'out' %}
-        <div class="product-card__old">{% t 'Очікується' %}</div>
+        <div class="product-card__old">{% cms 'product' 'card_wait' 'Очікується' %}</div>
       {% elif product.old_price %}
         <div class="product-card__old">{{ product.old_price_display }}</div>
       {% endif %}

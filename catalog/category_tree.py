@@ -186,8 +186,6 @@ def product_needs_core_color(product):
         return False
     if (getattr(product, 'color_code', None) or '').strip():
         return True
-    if getattr(product, 'family_id', None):
-        return True
     category = getattr(product, 'category', None)
     if category is None:
         return False

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static i18n_ui cms_tags %}
 
-{% block title %}{{ post.title }} — {% t 'Замки' %}{% endblock %}
+{% block title %}{{ post.title }} — {{ site_settings.site_name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/info.css' %}?v={{ asset_v }}">
@@ -31,7 +31,7 @@
       <div class="blog-prose">{{ post.body|safe }}</div>
       {% if more_posts %}
       <section class="blog-page__more" aria-labelledby="blog-more-title">
-        <h2 class="blog-page__more-h" id="blog-more-title">{% t 'Інші статті' %}</h2>
+        <h2 class="blog-page__more-h" id="blog-more-title">{% cms 'blog' 'blog_more' 'Інші статті' %}</h2>
         <ul class="blog-cards">
           {% for post in more_posts %}
           <li>{% include 'pages/partials/blog_card.html' %}</li>

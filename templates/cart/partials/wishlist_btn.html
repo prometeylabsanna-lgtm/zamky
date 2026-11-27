@@ -1,4 +1,4 @@
-{% load i18n_ui %}
+{% load i18n_ui cms_tags %}
 <button
   id="wishlist-btn-{{ product_id }}"
   type="button"
@@ -8,7 +8,7 @@
   hx-swap="outerHTML"
   data-wishlist-btn>
   <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if in_wishlist %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"></path></svg>
-  <span>{% if in_wishlist %}{% t 'В обраному' %}{% else %}{% t 'В обране' %}{% endif %}</span>
+  <span>{% if in_wishlist %}{% cms 'product' 'wish_in' 'В обраному' %}{% else %}{% cms 'product' 'wish_add' 'В обране' %}{% endif %}</span>
 </button>
 {% if swap_oob %}
 {% include 'cart/partials/wishlist_badges_oob.html' with wishlist_count=wishlist_count %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load i18n_ui static %}
+{% load i18n_ui cms_tags static %}
 
 {% block title %}{{ product.name|tr }}{% endblock %}
 
@@ -15,9 +15,9 @@
   data-stock="{{ product.stock }}">
   <script type="application/json" id="pdp-variants">{{ variants_json|safe }}</script>
   <nav class="breadcrumbs" aria-label="Breadcrumbs">
-    <a href="{% url 'catalog:home' %}">{% t 'Головна' %}</a>
+    <a href="{% url 'catalog:home' %}">{% cms 'product' 'crumb_home' 'Головна' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
-    <a href="{% url 'catalog:catalog' %}">{% t 'Каталог товарів' %}</a>
+    <a href="{% url 'catalog:catalog' %}">{% cms 'product' 'crumb_catalog' 'Каталог товарів' %}</a>
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"></path></svg>
     <span data-crumb-title>{{ product.name|tr }}</span>
   </nav>
@@ -29,10 +29,10 @@
       <section class="pdp-tabs" data-pdp-tabs aria-label="{% t 'Інформація про товар' %}">
         <div class="pdp-tabs__bar" role="tablist">
           {% if description_html %}
-          <button type="button" class="pdp-tabs__tab is-active" role="tab" id="pdp-tab-desc" aria-controls="pdp-panel-desc" aria-selected="true" data-pdp-tab="desc">{% t 'Опис' %}</button>
+          <button type="button" class="pdp-tabs__tab is-active" role="tab" id="pdp-tab-desc" aria-controls="pdp-panel-desc" aria-selected="true" data-pdp-tab="desc">{% cms 'product' 'tab_desc' 'Опис' %}</button>
           {% endif %}
-          <button type="button" class="pdp-tabs__tab{% if not description_html %} is-active{% endif %}" role="tab" id="pdp-tab-specs" aria-controls="pdp-panel-specs" aria-selected="{% if description_html %}false{% else %}true{% endif %}" data-pdp-tab="specs">{% t 'Характеристики' %}</button>
-          <button type="button" class="pdp-tabs__tab" role="tab" id="pdp-tab-reviews" aria-controls="reviews" aria-selected="false" data-pdp-tab="reviews">{% t 'Відгуки' %}{% if review_stats.count %} ({{ review_stats.count }}){% endif %}</button>
+          <button type="button" class="pdp-tabs__tab{% if not description_html %} is-active{% endif %}" role="tab" id="pdp-tab-specs" aria-controls="pdp-panel-specs" aria-selected="{% if description_html %}false{% else %}true{% endif %}" data-pdp-tab="specs">{% cms 'product' 'tab_specs' 'Характеристики' %}</button>
+          <button type="button" class="pdp-tabs__tab" role="tab" id="pdp-tab-reviews" aria-controls="reviews" aria-selected="false" data-pdp-tab="reviews">{% cms 'product' 'tab_reviews' 'Відгуки' %}{% if review_stats.count %} ({{ review_stats.count }}){% endif %}</button>
         </div>
         {% if description_html %}
         <div class="pdp-tabs__panel pdp-desc" role="tabpanel" id="pdp-panel-desc" aria-labelledby="pdp-tab-desc" data-pdp-panel="desc">
@@ -64,15 +64,15 @@
             {% endfor %}
           </div>
           {% if reviews|length > reviews_visible %}
-          <button type="button" class="pdp-reviews__more" data-reviews-more>{% t 'Показати ще' %}</button>
+          <button type="button" class="pdp-reviews__more" data-reviews-more>{% cms 'product' 'review_more' 'Показати ще' %}</button>
           {% endif %}
           {% else %}
-          <p class="pdp-reviews__empty">{% t 'Поки що немає відгуків про цей товар. Будьте першим!' %}</p>
+          <p class="pdp-reviews__empty">{% cms 'product' 'review_empty' 'Поки що немає відгуків про цей товар. Будьте першим!' %}</p>
           {% endif %}
           {% if review_sent %}
           {% include 'catalog/partials/review_thanks.html' %}
           {% else %}
-          <button type="button" class="pdp-reviews__btn" data-review-open aria-controls="review-form" aria-expanded="false">{% t 'Залишити відгук' %}</button>
+          <button type="button" class="pdp-reviews__btn" data-review-open aria-controls="review-form" aria-expanded="false">{% cms 'product' 'review_open' 'Залишити відгук' %}</button>
           {% include 'catalog/partials/review_form.html' %}
           {% endif %}
         </div>

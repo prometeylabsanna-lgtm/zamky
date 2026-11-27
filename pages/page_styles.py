@@ -13,8 +13,6 @@ _HEX_RE = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 # (namespace, url_name) → PageStyle.page
 _URL_PAGE_MAP: dict[tuple[str | None, str | None], str] = {
     ("catalog", "home"): SiteBlock.Page.HOME,
-    ("catalog", "city"): SiteBlock.Page.HOME,
-    ("catalog", "district"): SiteBlock.Page.HOME,
     ("catalog", "catalog"): SiteBlock.Page.CATALOG,
     ("catalog", "category"): SiteBlock.Page.CATALOG,
     ("catalog", "product"): SiteBlock.Page.PRODUCT,

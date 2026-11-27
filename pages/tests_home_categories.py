@@ -71,7 +71,7 @@ class HomeCategoriesCmsTests(TestCase):
                 "name_ru": "",
                 "home_subtitle": "Підпис нової",
                 "home_subtitle_ru": "",
-                "is_active": "on",
+                "show_on_home": "on",
             },
             follow=True,
         )
@@ -82,3 +82,30 @@ class HomeCategoriesCmsTests(TestCase):
         self.assertContains(home, "Нова картка")
         self.assertContains(home, "Підпис нової")
         self.assertContains(home, created.get_absolute_url())
+
+    def test_home_flag_does_not_hide_catalog(self):
+        change = reverse("admin:pages_homecategoriessettings_change", args=[1])
+        response = self.client.post(
+            f"{change}?cat={self.cat.pk}",
+            {
+                "section_visible": "on",
+                "style_background": PageStyle.DEFAULT_BACKGROUND,
+                "style_text": PageStyle.DEFAULT_TEXT,
+                "style_accent": PageStyle.DEFAULT_ACCENT,
+                "name": self.cat.name,
+                "name_ru": "",
+                "home_subtitle": self.cat.home_subtitle,
+                "home_subtitle_ru": "",
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.cat.refresh_from_db()
+        self.assertTrue(self.cat.is_active)
+        self.assertFalse(self.cat.show_on_home)
+        home = self.client.get("/ua/").content.decode()
+        start = home.index('class="home-categories"')
+        block = home[start:home.index("</section>", start)]
+        self.assertNotIn(self.cat.name, block)
+        catalog = self.client.get(self.cat.get_absolute_url())
+        self.assertEqual(catalog.status_code, 200)

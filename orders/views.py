@@ -9,13 +9,12 @@ from django.views.generic import FormView
 
 from cart.services import CartService
 from catalog.models import Product
-from config.redirects import safe_next_url
 from pages.i18n_lib import tr
 
 from .forms import CheckoutForm
-from .models import DeliveryDistrict, Order, QuickOrder
-from .services import CheckoutError, DELIVERY_PRICES, create_order_from_cart
-from .utils import delivery_meta, format_uah, payment_meta
+from .models import Order, QuickOrder
+from .services import CheckoutError, create_order_from_cart, delivery_prices
+from .utils import cms_checkout, delivery_meta, format_uah, payment_meta
 
 
 def build_checkout_steps(step):
@@ -39,29 +38,6 @@ def build_checkout_steps(step):
             n = str(i + 1)
         steps.append({'label': label, 'n': n, 'state': state})
     return steps
-
-
-class SetDistrictView(View):
-    def post(self, request):
-        slug = request.POST.get('slug', '').strip()
-        if slug:
-            district = DeliveryDistrict.objects.filter(slug=slug, is_active=True).first()
-            if district:
-                request.session['district_slug'] = district.slug
-            else:
-                request.session.pop('district_slug', None)
-        else:
-            request.session.pop('district_slug', None)
-        next_url = safe_next_url(
-            request,
-            request.POST.get('next') or request.META.get('HTTP_REFERER'),
-            fallback='/',
-        )
-        if request.headers.get('HX-Request') == 'true':
-            response = render(request, 'partials/district_label.html', {})
-            response['HX-Redirect'] = next_url
-            return response
-        return redirect(next_url)
 
 
 class CheckoutView(FormView):
@@ -94,11 +70,6 @@ class CheckoutView(FormView):
         initial = super().get_initial()
         initial['idempotency_key'] = self.request.session.get('checkout_idempotency') or uuid.uuid4().hex
         self.request.session['checkout_idempotency'] = initial['idempotency_key']
-        slug = self.request.session.get('district_slug')
-        if slug:
-            district = DeliveryDistrict.objects.filter(slug=slug, is_active=True).first()
-            if district:
-                initial['district'] = district.pk
         initial.setdefault('payment_method', Order.PaymentMethod.CARD)
         initial.setdefault('delivery_method', Order.DeliveryMethod.NP)
         return initial
@@ -144,7 +115,8 @@ class CheckoutView(FormView):
             or self.request.GET.get('delivery')
             or Order.DeliveryMethod.NP
         )
-        delivery_price = DELIVERY_PRICES.get(delivery_method, DELIVERY_PRICES[Order.DeliveryMethod.NP])
+        prices = delivery_prices()
+        delivery_price = prices.get(delivery_method, prices[Order.DeliveryMethod.NP])
         dmeta_all = delivery_meta()
         meta = dmeta_all.get(delivery_method, dmeta_all['np'])
         pmeta_all = payment_meta()
@@ -158,19 +130,20 @@ class CheckoutView(FormView):
         if not items and step != 'done':
             step = 'checkout'
 
+        free_label = cms_checkout('ship_free')
         delivery_options = []
         for value, title in Order.DeliveryMethod.choices:
             dmeta = dmeta_all.get(value, {})
-            price = DELIVERY_PRICES.get(value, Decimal('0'))
+            price = dmeta.get('price', prices.get(value, Decimal('0')))
             delivery_options.append(
                 {
                     'value': value,
-                    'title': tr(title),
+                    'title': dmeta.get('title') or tr(title),
                     'note': dmeta.get('note', ''),
                     'addr_label': dmeta.get('addr_label', ''),
                     'addr_ph': dmeta.get('addr_ph', ''),
                     'price': price,
-                    'price_label': tr('Безкоштовно') if price == 0 else format_uah(price),
+                    'price_label': free_label if price == 0 else format_uah(price),
                     'free': price == 0,
                     'active': delivery_method == value,
                 }
@@ -187,13 +160,26 @@ class CheckoutView(FormView):
             payment_options.append(
                 {
                     'value': value,
-                    'title': tr(title),
+                    'title': pmeta_all.get(value, {}).get('title') or tr(title),
                     'note': pmeta_all.get(value, {}).get('note', ''),
                     'active': payment_value == value,
                 }
             )
         payment_order = {'card': 0, 'cod': 1, 'invoice': 2}
         payment_options.sort(key=lambda x: payment_order.get(x['value'], 99))
+        done_title = ''
+        done_text = ''
+        order_delivery_title = ''
+        order_payment_title = ''
+        if order is not None:
+            done_title = cms_checkout('chk_done_title').replace('{number}', order.number)
+            done_text = (
+                cms_checkout('chk_done_text')
+                .replace('{name}', order.first_name)
+                .replace('{phone}', order.phone)
+            )
+            order_delivery_title = dmeta_all.get(order.delivery_method, {}).get('title', '')
+            order_payment_title = pmeta_all.get(order.payment_method, {}).get('title', '')
 
         ctx.update(
             {
@@ -208,9 +194,13 @@ class CheckoutView(FormView):
                 'step': step if items or step == 'done' else 'checkout',
                 'is_empty': not items and step != 'done',
                 'order': order,
+                'done_title': done_title,
+                'done_text': done_text,
+                'order_delivery_title': order_delivery_title,
+                'order_payment_title': order_payment_title,
                 'delivery_choices': Order.DeliveryMethod.choices,
                 'payment_choices': Order.PaymentMethod.choices,
-                'delivery_prices': DELIVERY_PRICES,
+                'delivery_prices': prices,
                 'delivery_options': delivery_options,
                 'payment_options': payment_options,
                 'checkout_steps': build_checkout_steps(step),

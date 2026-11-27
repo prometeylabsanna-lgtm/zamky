@@ -1,9 +1,11 @@
 from django.contrib import admin
+from django.http import HttpResponse
 from unfold.admin import ModelAdmin, TabularInline
 
 from pages.admin_mixins import TopDropdownFiltersMixin
 
-from .models import DeliveryDistrict, Order, OrderItem, QuickOrder
+from .ads_csv import orders_ads_csv
+from .models import Order, OrderItem, QuickOrder
 
 
 class OrderItemInline(TabularInline):
@@ -16,64 +18,14 @@ class OrderItemInline(TabularInline):
     verbose_name_plural = 'Позиції'
 
 
-@admin.register(DeliveryDistrict)
-class DeliveryDistrictAdmin(TopDropdownFiltersMixin, ModelAdmin):
-    list_display = ('name', 'slug', 'short', 'delivery_note', 'is_active', 'sort_order')
-    list_filter = ('is_active',)
-    search_fields = ('name', 'slug', 'short')
-    readonly_fields = ('slug',)
-    fieldsets = (
-        (
-            'Основне',
-            {
-                'fields': (
-                    'name',
-                    'slug',
-                    'short',
-                    'name_locative',
-                    'delivery_note',
-                    'areas',
-                    'is_active',
-                    'sort_order',
-                ),
-            },
-        ),
-        (
-            'Сторінка району',
-            {
-                'fields': ('h1', 'seo_text', 'others_title', 'others_title_ru'),
-                'description': (
-                    'Блок унизу сторінки району: SEO-текст і заголовок списку '
-                    'інших районів.'
-                ),
-            },
-        ),
-    )
+def export_orders_ads_csv(modeladmin, request, queryset):
+    body = orders_ads_csv(queryset)
+    response = HttpResponse(body, content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="orders-ads.csv"'
+    return response
 
-    class Media:
-        js = ('js/admin/char_hint.js',)
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change=change, **kwargs)
-        locative = form.base_fields.get('name_locative')
-        if locative is not None:
-            locative.help_text = (
-                'Наприклад «Оболонському» — у фразах «доставка в … районі».'
-            )
-        h1 = form.base_fields.get('h1')
-        if h1 is not None:
-            h1.help_text = 'Великий заголовок сторінки району. Порожнє — назва району.'
-        from pages.admin_guidelines import apply_form_char_hints
-
-        apply_form_char_hints(form)
-        return form
-
-    def get_changeform_initial_data(self, request):
-        from catalog.filter_sort import next_sort_order
-
-        initial = super().get_changeform_initial_data(request)
-        initial['sort_order'] = next_sort_order(DeliveryDistrict.objects.all())
-        return initial
+export_orders_ads_csv.short_description = 'Експорт CSV для реклами'
 
 
 @admin.register(QuickOrder)
@@ -91,13 +43,26 @@ class OrderAdmin(TopDropdownFiltersMixin, ModelAdmin):
         'status',
         'first_name',
         'phone',
+        'city',
+        'address',
         'total',
         'delivery_method',
         'payment_method',
         'created_at',
     )
     list_filter = ('status', 'delivery_method', 'payment_method', 'created_at')
-    search_fields = ('number', 'first_name', 'last_name', 'phone', 'email', 'idempotency_key')
+    search_fields = (
+        'number',
+        'first_name',
+        'last_name',
+        'phone',
+        'email',
+        'city',
+        'address',
+        'idempotency_key',
+    )
+    actions = (export_orders_ads_csv,)
+    actions_on_top = True
     readonly_fields = (
         'number',
         'idempotency_key',
@@ -126,7 +91,7 @@ class OrderAdmin(TopDropdownFiltersMixin, ModelAdmin):
             {
                 'fields': (
                     'delivery_method',
-                    'district',
+                    'city',
                     'address',
                     'np_city_ref',
                     'np_warehouse_ref',

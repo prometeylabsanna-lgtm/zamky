@@ -62,7 +62,6 @@ class PaymentCheckoutTests(TestCase):
             'phone': '0670000000',
             'email': '',
             'city': '',
-            'district': None,
             'delivery_method': 'pickup',
             'payment_method': payment_method,
             'address': '',

@@ -21,6 +21,8 @@ class HeaderNavLink(models.Model):
     )
     sort_order = models.PositiveIntegerField("Порядок", default=0)
     is_active = models.BooleanField("Показувати", default=True)
+    in_header = models.BooleanField("Під пошуком", default=True)
+    in_mobile = models.BooleanField("У меню телефону", default=False)
 
     class Meta:
         verbose_name = "Кнопка шапки"

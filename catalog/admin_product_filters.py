@@ -178,7 +178,7 @@ def _parse_ab(text):
 class ProductAdminForm(forms.ModelForm):
     class Meta:
         model = Product
-        exclude = ('family',)
+        fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -199,10 +199,19 @@ class ProductAdminForm(forms.ModelForm):
             self.fields.pop('color_code')
         elif color is not None:
             color.help_text = (
-                'Лише для циліндрів. Кружечки на сторінці товару та в кошику.'
+                'Кружечок на сторінці товару. Назву можна задати окремо.'
             )
             color.widget.attrs['data-cylinder-ids'] = ','.join(
                 str(pk) for pk in sorted(cylinder_category_ids())
+            )
+        label = self.fields.get('color_label')
+        if label is not None and 'color_code' not in self.fields:
+            self.fields.pop('color_label')
+        elif label is not None:
+            label.label = 'Назва кольору'
+            label.help_text = (
+                'Як покупець бачить колір. Порожнє — «Латунь», «Нікель» або «Чорний» '
+                'відповідно до вибраного варіанту.'
             )
         rating = self.fields.get('rating')
         if rating is not None:

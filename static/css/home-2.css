@@ -344,6 +344,37 @@
   margin-top: 44px;
 }
 
+.home-carousel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.home-carousel__arrows {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.home-carousel__arrows .home-icon-btn {
+  width: 44px;
+  height: 44px;
+}
+
+.home-news .home-popular__track {
+  margin-top: 14px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-popular__track,
+  .home-blog__scroll {
+    scroll-behavior: auto;
+  }
+}
+
 .home-blog__scroll {
   display: flex;
   align-items: flex-start;

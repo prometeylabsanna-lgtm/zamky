@@ -88,8 +88,31 @@ html.dark .zamky-changelist-toolbar {
 
 .zamky-changelist-toolbar #toolbar > form > div {
   width: 100%;
+  height: 42px;
   min-height: 42px;
   box-sizing: border-box;
+}
+
+/* Без верхніх фільтрів підпис-розпірка не потрібна: пошук і «Фільтри» в один ряд */
+.zamky-changelist-toolbar:not(:has(.zamky-filter)) {
+  align-items: center;
+}
+
+.zamky-changelist-toolbar:not(:has(.zamky-filter)) #toolbar::before {
+  content: none;
+  display: none;
+  min-height: 0;
+}
+
+.zamky-changelist-toolbar .filter-open-button {
+  align-self: flex-end;
+  height: 42px;
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+.zamky-changelist-toolbar:not(:has(.zamky-filter)) .filter-open-button {
+  align-self: center;
 }
 
 .zamky-filters-row {
@@ -189,6 +212,77 @@ html.dark .zamky-filter__label {
 
 .zamky-filter__inner--date {
   min-width: min(100%, 18rem);
+}
+
+/* Товарні фіди: вузькі колонки, без горизонтального скролу */
+.app-marketing.model-productfeed #changelist .overflow-x-auto {
+  overflow-x: clip;
+}
+
+.app-marketing.model-productfeed #result_list {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.app-marketing.model-productfeed #result_list th,
+.app-marketing.model-productfeed #result_list td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-marketing.model-productfeed #result_list th.action-checkbox-column,
+.app-marketing.model-productfeed #result_list td.action-checkbox {
+  width: 2.5rem;
+  min-width: 2.5rem;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.app-marketing.model-productfeed #result_list .column-feed_type_short,
+.app-marketing.model-productfeed #result_list .field-feed_type_short {
+  width: 5rem;
+}
+
+.app-marketing.model-productfeed #result_list .column-enabled_display,
+.app-marketing.model-productfeed #result_list .field-enabled_display {
+  width: 4.5rem;
+}
+
+.app-marketing.model-productfeed #result_list .column-public_url,
+.app-marketing.model-productfeed #result_list .field-public_url {
+  width: 22%;
+}
+
+.app-marketing.model-productfeed #result_list .column-included_display,
+.app-marketing.model-productfeed #result_list .field-included_display,
+.app-marketing.model-productfeed #result_list .column-excluded_display,
+.app-marketing.model-productfeed #result_list .field-excluded_display,
+.app-marketing.model-productfeed #result_list .column-warnings_display,
+.app-marketing.model-productfeed #result_list .field-warnings_display {
+  width: 4.25rem;
+}
+
+.app-marketing.model-productfeed #result_list .column-generated_display,
+.app-marketing.model-productfeed #result_list .field-generated_display {
+  width: 8.25rem;
+}
+
+.app-marketing.model-productfeed #result_list th .flex,
+.app-marketing.model-productfeed #result_list th .text {
+  min-width: 0;
+}
+
+.app-marketing.model-productfeed #result_list th .text a,
+.app-marketing.model-productfeed #result_list th .text span,
+.app-marketing.model-productfeed #result_list tbody th a,
+.app-marketing.model-productfeed #result_list td a {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Товари: без горизонтального скролу таблиці */

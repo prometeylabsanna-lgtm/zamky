@@ -10,6 +10,7 @@ _review_ready = None
 def reset_schema_cache():
     global _review_ready
     _review_ready = None
+    _category_ready_dbs.clear()
 
 
 def table_exists(name: str) -> bool:
@@ -54,6 +55,43 @@ def missing_product_columns():
     except Exception:
         return frozenset()
     return frozenset(name for name in _OPTIONAL if name not in cols)
+
+
+_category_ready_dbs = set()
+
+
+def missing_category_columns():
+    """Колонки моделі, яких ще немає в таблиці (старі data-міграції)."""
+    db_name = str(connection.settings_dict.get("NAME") or "")
+    if db_name in _category_ready_dbs:
+        return frozenset()
+    from django.apps import apps
+
+    if not apps.ready:
+        return frozenset()
+    from catalog.models import Category
+
+    table = Category._meta.db_table
+    if not table_exists(table):
+        return frozenset()
+    try:
+        with connection.cursor() as cursor:
+            cols = {
+                col.name
+                for col in connection.introspection.get_table_description(
+                    cursor, table
+                )
+            }
+    except Exception:
+        return frozenset()
+    missing = frozenset(
+        field.name
+        for field in Category._meta.local_concrete_fields
+        if not field.primary_key and field.column not in cols
+    )
+    if not missing:
+        _category_ready_dbs.add(db_name)
+    return missing
 
 
 def product_qs():

@@ -176,7 +176,7 @@ def _ancestors(cat_id: int, cats) -> list[Category]:
 def base_queryset():
     return (
         Product.objects.filter(is_active=True)
-        .select_related("category", "family")
+        .select_related("category")
         .prefetch_related(
             Prefetch("images", queryset=ProductImage.objects.order_by("sort_order", "id")),
             Prefetch(
@@ -229,7 +229,7 @@ def collect_items(feed: ProductFeed, base_url: str) -> FeedResult:
                 if c.pk in mapping:
                     gpc = mapping[c.pk]
                     break
-            brand = (p.brand or (p.family.brand if p.family_id and p.family else "") or "").strip()
+            brand = (p.brand or "").strip()
             gtin = (getattr(p, "gtin", "") or "").strip()
             if not GTIN_RE.match(gtin):
                 gtin = ""

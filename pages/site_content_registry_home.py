@@ -11,8 +11,30 @@ CONTENT_SECTIONS_HOME: tuple[ContentSection, ...] = (
         preview_url="/ua/",
         description="Слайди банера (фото + alt + посилання).",
         visibility_key="hero_section_visible",
-        blocks=_b("home", "hero_section_visible"),
-        field_groups=(FieldGroup("Видимість", ("hero_section_visible",)),),
+        blocks=_b(
+            "home",
+            "hero_section_visible",
+            "hero_badge_1",
+            "hero_badge_2",
+            "hero_feature_1",
+            "hero_feature_2",
+            "hero_feature_3",
+            "hero_feature_4",
+        ),
+        field_groups=(
+            FieldGroup("Видимість", ("hero_section_visible",)),
+            FieldGroup(
+                "Плашки і рядки справа",
+                (
+                    "hero_badge_1",
+                    "hero_badge_2",
+                    "hero_feature_1",
+                    "hero_feature_2",
+                    "hero_feature_3",
+                    "hero_feature_4",
+                ),
+            ),
+        ),
         has_hero_slides=True,
     ),
     ContentSection(

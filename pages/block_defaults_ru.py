@@ -82,6 +82,10 @@ BLOCK_DEFAULTS_RU[("blog", "blog_ask_text")] = (
 )
 BLOCK_DEFAULTS_RU[("blog", "blog_ask_cta")] = "Заказать звонок"
 
+from pages.block_defaults_shop import RU as _SHOP_RU  # noqa: E402
+
+BLOCK_DEFAULTS_RU.update(_SHOP_RU)
+
 
 def get_block_default_ru(page: str, key: str) -> str:
     return BLOCK_DEFAULTS_RU.get((page, key), "")

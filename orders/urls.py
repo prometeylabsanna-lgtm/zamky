@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import CheckoutView, OrderSuccessView, QuickOrderView, SetDistrictView
+from .views import CheckoutView, OrderSuccessView, QuickOrderView
 from .views_payment import PaymentReturnView, PaymentStubPayView, PaymentWaitView
 
 app_name = 'orders'
@@ -19,6 +19,5 @@ urlpatterns = [
         name='pay_stub',
     ),
     path('order/<slug:number>/', OrderSuccessView.as_view(), name='success'),
-    path('district/', SetDistrictView.as_view(), name='set_district'),
     path('orders/quick/<int:pk>/', QuickOrderView.as_view(), name='quick'),
 ]

@@ -5,62 +5,6 @@ from django.db import models
 from django.utils import timezone
 
 
-class DeliveryDistrict(models.Model):
-    slug = models.SlugField('Слаг', max_length=120, unique=True)
-    name = models.CharField('Назва', max_length=200)
-    short = models.CharField('Коротка', max_length=100)
-    name_locative = models.CharField('Місцевий відмінок', max_length=200, blank=True)
-    delivery_note = models.CharField('Доставка', max_length=200, blank=True)
-    areas = models.JSONField('Мікрорайони', default=list, blank=True)
-    h1 = models.CharField('H1', max_length=300, blank=True)
-    seo_text = models.TextField('SEO текст', blank=True)
-    others_title = models.CharField(
-        'Заголовок інших районів',
-        max_length=200,
-        default='Інші райони Києва',
-        help_text='Напис над списком інших районів на сторінці цього району.',
-    )
-    others_title_ru = models.CharField(
-        'Заголовок інших районів (RU)',
-        max_length=200,
-        blank=True,
-        default='Другие районы Киева',
-    )
-    is_active = models.BooleanField('Активний', default=True)
-    sort_order = models.PositiveIntegerField('Порядок', default=0)
-
-    class Meta:
-        verbose_name = 'Район доставки'
-        verbose_name_plural = 'Райони доставки'
-        ordering = ['sort_order', 'name']
-
-    def __str__(self):
-        return self.name
-
-    def others_heading(self, lang: str = 'ua') -> str:
-        if lang == 'ru':
-            ru = (self.others_title_ru or '').strip()
-            if ru:
-                return ru
-        ua = (self.others_title or '').strip()
-        return ua or 'Інші райони Києва'
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            from pages.slug_utils import ensure_unique_slug
-
-            self.slug = ensure_unique_slug(
-                DeliveryDistrict,
-                self.name or self.short,
-                instance_pk=self.pk,
-                fallback='district',
-            )
-        from catalog.filter_sort import apply_auto_sort_order
-
-        apply_auto_sort_order(self, DeliveryDistrict.objects.all())
-        super().save(*args, **kwargs)
-
-
 class Order(models.Model):
     class Status(models.TextChoices):
         NEW = 'new', 'Нове'
@@ -92,14 +36,7 @@ class Order(models.Model):
     last_name = models.CharField('Прізвище', max_length=100, blank=True)
     phone = models.CharField('Телефон', max_length=32)
     email = models.EmailField('Email', blank=True)
-    district = models.ForeignKey(
-        DeliveryDistrict,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        verbose_name='Район',
-        related_name='orders',
-    )
+    city = models.CharField('Місто', max_length=120, blank=True, default='')
     delivery_method = models.CharField(
         'Доставка',
         max_length=20,
